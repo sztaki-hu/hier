@@ -1,0 +1,9 @@
+*.pyc
+**.png
+**.ply
+**.jpg
+logs/*
+logs1/*
+demos/*
+dev/*
+rltrain.egg-info/*
