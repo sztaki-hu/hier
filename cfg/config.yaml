@@ -1,5 +1,5 @@
 general:
-  exp_name: Bela_0226
+  exp_name: D_RLBench_4_0127_rlbench
   logdir: logs
   demodir: demos
   seed: 12
@@ -8,10 +8,10 @@ general:
 hardware:
   gpu: 0 
   cpu_min: 1
-  cpu_max: 9
+  cpu_max: 16
 
 environment:
-  name: simsim
+  name: rlbench
   task: stack_blocks
   headless: True
   camera: False
@@ -37,19 +37,19 @@ buffer:
 
 demo:
     demo_use: True  
-    demo_buffer_size: 5000
+    demo_buffer_size: 500
     demo_ratio: 0.1   
     demo_create: False
-    demo_name: demo_stack_blocks_A_5000
+    demo_name: demo_4_D_500
 
 sampler:
-  env_num: 3
+  env_num: 6
   start_steps: 200
   max_ep_len: 5
 
 trainer:
   steps_per_epoch: 2000
-  epochs: 40
+  epochs: 10
   batch_size: 128
   update_after: 1000
   update_every: 100
