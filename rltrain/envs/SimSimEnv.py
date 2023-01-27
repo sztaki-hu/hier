@@ -17,10 +17,6 @@ class SimSimEnv:
     
     def reset(self):
         self.target_position = np.random.uniform(low=self.boundary_min, high=self.boundary_max, size=(self.obs_dim))
-        self.target_position[2] = 0.25
-        self.target_position[3] = 0.0
-        #self.target_position = np.array([0.2,0.15,0.9])
-        #self.target_position = np.array([0.2])
         return self.target_position
     
     def step(self,a):
