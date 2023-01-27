@@ -51,10 +51,10 @@ class Logger:
     def tb_save_train_data_v2(self,loss_q,loss_pi,env_error_num,t,actual_time,update_iter):
         self.tb_writer_add_scalar("train/loss_q", loss_q, update_iter)
         self.tb_writer_add_scalar("train/loss_p", loss_pi, update_iter)
-        env_error_num_percentage = (env_error_num / t) * 100
-        self.tb_writer_add_scalar("train/env_error_%", env_error_num_percentage, update_iter) 
+        env_error_num_percentage = (env_error_num / float(t))
+        self.tb_writer_add_scalar("train/env_error_ratio", env_error_num_percentage, update_iter) 
         rel_time = 1000 * (actual_time / float(t))
-        self.tb_writer_add_scalar("train/time (time (sec) of 1000 transactions)", rel_time, t)
+        self.tb_writer_add_scalar("train/time_sec_1000_transitions", rel_time, t)
     
     def tb_save_train_data(self,loss_q,loss_pi,sum_ep_len,sum_ep_ret,episode_iter,env_error_num,t,log_loss_iter):
         self.tb_writer_add_scalar("train/loss_q", loss_q, log_loss_iter)
