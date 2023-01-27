@@ -59,7 +59,7 @@ def main():
             demo_p = Process(target=demo.create_demos, args=[])
             demo_p.start()
             demo_p.join()
-        return -1       
+            return -1       
         demo_buffer = demo.load_demos()
     else:
         demo_buffer = None
