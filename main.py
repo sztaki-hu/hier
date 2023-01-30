@@ -4,6 +4,7 @@ import numpy as np
 import torch
 from tqdm import tqdm
 import time
+import argparse
 
 import multiprocessing as mp
 from multiprocessing import Process, Value, Manager
@@ -32,9 +33,14 @@ import torch
 
 def main():
 
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--configfile", default="/cfg/config.yaml" ,help="Path of the config file")
+    # Example: python3 main.py --configfile /cfg/alma.yaml
+    args = parser.parse_args()
+
     # Init logger ###############################################x
     current_dir = dirname(abspath(__file__))
-    config_path = current_dir + "/cfg/config.yaml"
+    config_path = current_dir + args.configfile
     #config_path = current_dir + "/cfg/config_test.yaml"
     logger = Logger(current_dir = current_dir, config_path = config_path)
     config = logger.get_config()
