@@ -187,7 +187,7 @@ class Trainer:
 
                 log_text = "AVG test return: " + str(epoch) + ". epoch ("+ str(t+1) + " transitions) : " + str(avg_test_return)
                 tqdm.write(log_text) 
-                self.logger.tb_writer_add_scalar("test/average_return", avg_test_return, epoch)
+                self.logger.tb_writer_add_scalar("test/average_return", avg_test_return, t)
         
                 #self.logger.save_model(self.agent.ac.pi.state_dict(),epoch)
 
