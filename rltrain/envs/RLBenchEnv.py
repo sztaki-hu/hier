@@ -14,7 +14,7 @@ from rlbench.backend.observation import Observation
 #from rlbench.backend.task import Task
 from pyquaternion import Quaternion
 
-ACTION_SPACE_LIST = ["xyz","pick_and_place_2d"]
+ACTION_SPACE_LIST = ["xyz","pick_and_place_2d","pick_and_place_3d"]
 
 class RLBenchEnv:
     def __init__(self,config):
@@ -26,7 +26,8 @@ class RLBenchEnv:
         self.obs_dim = config['environment']['obs_dim']
         self.action_space = config['agent']['action_space']
 
-        self.z = 0.765
+        #self.desk_z = 0.765
+        #self.tower_z = 0.765
 
         assert self.action_space in ACTION_SPACE_LIST
 
@@ -77,6 +78,7 @@ class RLBenchEnv:
             except:
                 print("Could not reset the environment. Repeat reset.")
                 time.sleep(1)
+        #o = self.task_env.reset()
         o = self.get_obs()
         return o 
     
@@ -86,7 +88,10 @@ class RLBenchEnv:
             o, r, d, info = self.task_env.step(a)    
         elif self.action_space == "pick_and_place_2d":
             poses = self.model2robot_pick_and_place_2d(a_model)
-            o, r, d, info = self.execute_path(poses)   
+            o, r, d, info = self.execute_path(poses)  
+        elif self.action_space == "pick_and_place_3d":
+            poses = self.model2robot_pick_and_place_3d(a_model)
+            o, r, d, info = self.execute_path(poses)    
         r = 100 * r
         o = self.get_obs()
         if self.reward_shaping_use:
@@ -100,17 +105,29 @@ class RLBenchEnv:
     def get_obs(self):
         if self.action_space == "xyz":
             return self.task_env._scene.task._target_place.get_position()[:self.obs_dim]
-        elif self.action_space == "pick_and_place_2d":
-            obj = self.task_env._scene.task._graspable_objects[0].get_position()[:2]
-            trgt = self.task_env._scene.task._target_place.get_position()[:2]
-            return np.concatenate([obj,trgt])
+        elif self.action_space == "pick_and_place_3d":
+            obs = [item.get_position() for item in self.task_env._scene.task._observation]
+            obs = np.hstack(obs)
+            return obs
+
+            # obj = self.task_env._scene.task._graspable_objects[0].get_position()[:2]
+            # trgt = self.task_env._scene.task._target_place.get_position()[:2]
+            # return np.concatenate([obj,trgt])
     
     def model2robot_pick_and_place_2d(self,a):
         xy1 = a[:2]
         xy2 = a[2:]
-        xyz1 = np.concatenate([xy1,np.array([self.z])])
-        xyz2 = np.concatenate([xy2,np.array([self.z])])
+        xyz1 = np.concatenate([xy1,np.array([self.desk_z])])
+        xyz2 = np.concatenate([xy2,np.array([self.desk_z])])
         return self.pick_and_place_planner(xyz1, self.quat, xyz2, self.quat, h1 = None, d1 = None, h2 = None, d2 = None)
+    
+    def model2robot_pick_and_place_3d(self,a):
+        xyz1 = a[:3]
+        xyz2 = a[3:]
+        z = max(xyz1[2],xyz2[2])
+        d = 0.03 * 1.5
+        h = z + d
+        return self.pick_and_place_planner(xyz1, self.quat, xyz2, self.quat, h1 = h, d1 = None, h2 = h, d2 = None)
 
 
     def model2robot_xyz(self,a_model):
@@ -132,9 +149,8 @@ class RLBenchEnv:
         y = xyz[1]
         z = xyz[2]
 
-        # if d is None: d = 0.003 * 4
-        # if h is None: h = z + d
-        h = 0.8
+        if d is None: d = 0.03 * 2
+        if h is None: h = z + d
 
         poses = []
         if grasp == False and drop == True:
@@ -149,11 +165,12 @@ class RLBenchEnv:
 
     def pick_and_place_planner(self,xyz1, quat1, xyz2, quat2, h1 = None, d1 = None, h2 = None, d2 = None):
 
-        pose_ref = [np.array([0.25,0,0.8,self.quat[0],self.quat[1],self.quat[2],self.quat[3],1])]
+        #pose_ref = [np.array([0.25,0,self.tower_z,self.quat[0],self.quat[1],self.quat[2],self.quat[3],1])]
         poses1 = self.grasp_release_planner(xyz1, quat1, grasp = True, drop = False, h = h1 , d = d1)
         poses2 = self.grasp_release_planner(xyz2, quat2, grasp = False, drop = False, h = h2 , d = d2)
 
-        return pose_ref + poses1 + poses2
+        #return pose_ref + poses1 + poses2
+        return poses1 + poses2
 
     def pick_and_drop_planner(self,xyz1, quat1, xyz2, quat2, h1 = None, d1 = None, h2 = None, d2 = None):
 

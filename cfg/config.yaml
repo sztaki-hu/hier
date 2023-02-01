@@ -1,5 +1,5 @@
 general:
-  exp_name: D_RLBench_4_0127_rlbench
+  exp_name: test
   logdir: logs
   demodir: demos
   seed: 12
@@ -8,29 +8,29 @@ general:
 hardware:
   gpu: 0 
   cpu_min: 1
-  cpu_max: 16
+  cpu_max: 9
 
 environment:
   name: rlbench
   task: stack_blocks
   headless: True
   camera: False
-  obs_dim: 4
-  act_dim: 4
+  obs_dim: 27
+  act_dim: 6
   reward:
     reward_shaping_use: False
     reward_shaping_type: mse
 
 agent:
   type: sac
-  action_space: pick_and_place_2d
+  action_space: pick_and_place_3d
   gamma: 0.9 
   polyak: 0.995
   lr: 0.001
   alpha: 0.2
   hidden_sizes: [32,32]
-  boundary_min: [0.1,-0.3,0.1,-0.3]
-  boundary_max: [0.35,0.3,0.35,0.3]
+  boundary_min: [0.1,-0.3,0.76,0.1,-0.3,0.76]
+  boundary_max: [0.35,0.3,0.86,0.35,0.3,0.86]
 
 buffer:
   replay_buffer_size: 5000
@@ -40,20 +40,20 @@ demo:
     demo_buffer_size: 500
     demo_ratio: 0.1   
     demo_create: False
-    demo_name: demo_4_D_500
+    demo_name: demo_pick_and_place_3d_A
 
 sampler:
   env_num: 6
   start_steps: 200
-  max_ep_len: 5
+  max_ep_len: 8
 
 trainer:
   steps_per_epoch: 2000
   epochs: 10
   batch_size: 128
   update_after: 1000
-  update_every: 100
-  update_factor: 1
+  update_every: 10
+  update_factor: 100
 
 tester:
   num_test_episodes: 20
