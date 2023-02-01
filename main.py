@@ -23,6 +23,7 @@ from rltrain.envs.builder import make_env
 from rltrain.runners.sampler_trainer_tester import SamplerTrainerTester
 from rltrain.runners.sampler import Sampler
 from rltrain.runners.trainer import Trainer
+from rltrain.runners.tester import Tester
 from rltrain.agents.core import SquashedGaussianMLPActor
 
 import datetime
@@ -34,7 +35,7 @@ import torch
 def main():
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--configfile", default="/cfg/config.yaml" ,help="Path of the config file")
+    parser.add_argument("--configfile", default="/cfg/config_reach.yaml" ,help="Path of the config file")
     # Example: python3 main.py --configfile /cfg/alma.yaml
     args = parser.parse_args()
 
@@ -90,6 +91,7 @@ def main():
 
         BaseManager.register('ReplayBuffer', ReplayBuffer)
         BaseManager.register('Agent', Agent)
+        BaseManager.register('Logger', Logger)
         manager = BaseManager()
         manager.start()
         replay_buffer = manager.ReplayBuffer(
@@ -97,6 +99,7 @@ def main():
             act_dim=int(config['environment']['act_dim']), 
             size=int(config['buffer']['replay_buffer_size']))
         agent = manager.Agent(device,config)
+        logger = manager.Logger(current_dir = current_dir, config_path = config_path)
 
         sampler = Sampler(agent,demo_buffer,config)
         trainer = Trainer(device,demo_buffer,logger,config)
@@ -104,6 +107,9 @@ def main():
         end_flag = Value(c_bool, True)  
         pause_flag = Value(c_bool, True)
         env_error_num = Value('i',0)
+        # test_result = Value('d',0)
+        # test_result_updated = Value(c_bool, False)
+        test_results_queue = mp.Queue()
         #print(end_flag.value)
         
         processes = []
@@ -113,7 +119,14 @@ def main():
             p.start()
             processes.append(p)
         
-        trainer.start(agent,replay_buffer,pause_flag,env_error_num)
+        agent_tester = Agent(device,config)
+        tester = Tester(agent_tester,logger,config)
+
+        p = Process(target=tester.start, args=[test_results_queue])
+        p.start()
+        processes.append(p)
+
+        trainer.start(agent,replay_buffer,pause_flag,env_error_num,test_results_queue)
 
         pause_flag.value = False
         end_flag.value = False

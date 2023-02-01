@@ -19,7 +19,7 @@ import torch
 if __name__ == '__main__':
     # Init logger
     current_dir = dirname(abspath(__file__))
-    config_path = current_dir + "/logs/stack_blocks_sac_Ciril_0126/config.yaml"
+    config_path = current_dir + "/logs/stack_blocks_sac_A30_simsim/config.yaml"
     logger = Logger(current_dir = current_dir, config_path = config_path)
     config = logger.get_config()
 
@@ -44,7 +44,7 @@ if __name__ == '__main__':
     tester = Tester(agent,logger,config)
 
     # Test Agent
-    tester.display_agent("model_6",5)
+    tester.display_agent("model_10")
 
 
     

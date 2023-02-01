@@ -98,9 +98,7 @@ class Trainer:
         """ 
 
     
-    def start(self,agent,replay_buffer,pause_flag,env_error_num):
-
-        self.tester = Tester(agent,self.logger,self.config)
+    def start(self,agent,replay_buffer,pause_flag,env_error_num,test_results_queue):
 
         print(agent)
 
@@ -108,6 +106,7 @@ class Trainer:
         t = 0
         ptr_old = 0
         epoch = 1
+        epoch_test = 1
         update_iter = 1
         update_iter_every_log = 0
         total_steps = self.steps_per_epoch * self.epochs
@@ -173,7 +172,6 @@ class Trainer:
                 pause_flag.value = False
                 update_iter += 1    
 
-
             if t >= epoch * self.steps_per_epoch: 
 
                 epoch_real = (t+1) // self.steps_per_epoch
@@ -182,24 +180,21 @@ class Trainer:
                 epoch = epoch_real  
 
                 pause_flag.value = True
-                
-                avg_test_return = self.tester.start(epoch)
-
-                log_text = "AVG test return: " + str(epoch) + ". epoch ("+ str(t+1) + " transitions) : " + str(avg_test_return)
-                tqdm.write(log_text) 
-                self.logger.tb_writer_add_scalar("test/average_return", avg_test_return, t)
-        
-                #self.logger.save_model(self.agent.ac.pi.state_dict(),epoch)
 
                 agent.save_model(self.logger.get_model_save_path(epoch))
-
-                # torch.save(self.agent.ac.pi.state_dict(), model_path)
 
                 pause_flag.value = False
 
                 epoch += 1
+
+            if test_results_queue.empty() == False:
+                avg_test_return = test_results_queue.get()
                           
-                
+                test_t = epoch_test * self.steps_per_epoch           
+                log_text = "AVG test return: " + str(epoch_test) + ". epoch ("+ str(test_t) + " transitions) : " + str(avg_test_return)
+                tqdm.write(log_text) 
+
+                epoch_test += 1
 
             #pbar.update(1)
             pbar.n = t #check this

@@ -26,6 +26,9 @@ class Tester:
         self.max_ep_len = config['sampler']['max_ep_len']  
 
         self.act_dim = config['environment']['act_dim']
+
+        self.epochs = config['trainer']['epochs'] 
+        self.steps_per_epoch = config['trainer']['steps_per_epoch'] 
     
     def eval_range(self,epoch):
         if self.act_dim != 1: return
@@ -39,11 +42,11 @@ class Tester:
         data = np.vstack((inputs_np, outputs_np)).T
         self.logger.save_eval_range(data, epoch)
     
-    def display_agent(self,model_name, num):
+    def display_agent(self,model_name):
         path = self.logger.get_model_path(model_name)
         self.agent.load_weights(path)
 
-        avg_return = self.start(verbose = True)
+        avg_return = self.test(verbose = True)
 
         print("########################################")
         print("avg return: " + str(avg_return))
@@ -57,15 +60,40 @@ class Tester:
         self.logger.tb_writer_add_scalar("test/average_return", avg_test_return, t)
         
         #self.logger.save_model(self.agent.ac.pi.state_dict(),epoch)
+    
+    def start(self,test_results_queue):
+        
+        epoch = 1
+        while epoch <= self.epochs:
 
-    def start(self, epoch = None, verbose = False):
+            model_name = self.logger.new_model_to_test(epoch)
+
+            if model_name != None:
+                path = self.logger.get_model_path(model_name)
+                self.agent.load_weights(path)
+
+                avg_test_return = self.test(epoch)
+                test_results_queue.put(avg_test_return)
+
+                t = epoch * self.steps_per_epoch 
+                self.logger.tb_writer_add_scalar("test/average_return", avg_test_return, t)
+
+                epoch += 1
+            
+            time.sleep(1.0)
+
+
+        
+
+    def test(self, epoch = None, verbose = False):
 
         avg_return = -1
 
         self.env = make_env(self.config)
 
         sum_return = 0
-        for j in tqdm(range(self.num_test_episodes), desc ="Testing: ", leave=False):
+        #for j in tqdm(range(self.num_test_episodes), desc ="Testing: ", leave=False):
+        for j in range(self.num_test_episodes):
             o, d, ep_ret, ep_len = self.env.reset(), False, 0, 0
             while not(d or (ep_len == self.max_ep_len)):
                 # Take deterministic actions at test time 

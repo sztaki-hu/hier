@@ -24,6 +24,17 @@ class Logger:
         self.save_yaml(os.path.join(self.current_dir, self.logdir,self.logname,"config.yaml"),self.config)
         self.writer = SummaryWriter(log_dir = os.path.join(self.current_dir,self.logdir,self.logname,"runs"))
     
+    def new_model_to_test(self,epoch):
+        models = self.list_model_dir()
+        for model in models:
+            model_num = int(model[6:])    
+            if model_num == epoch:
+                return model
+        return None
+
+    def list_model_dir(self):
+        return os.listdir(os.path.join(self.current_dir,self.logdir, self.logname,"model_backup"))
+
     def get_model_path(self,name):
         return os.path.join(self.current_dir,self.logdir, self.logname,"model_backup",name)
 
