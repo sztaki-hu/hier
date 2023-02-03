@@ -1,5 +1,5 @@
 general:
-  exp_name: test_000001
+  exp_name: 0203_A
   logdir: logs
   demodir: demos
   seed: 12
@@ -8,7 +8,7 @@ general:
 hardware:
   gpu: 0 
   cpu_min: 1
-  cpu_max: 9
+  cpu_max: 16
 
 environment:
   name: rlbench
@@ -41,23 +41,23 @@ buffer:
 
 demo:
     demo_use: True  
-    demo_buffer_size: 5
+    demo_buffer_size: 500
     demo_ratio: 0.1   
     demo_create: False
-    demo_name: demo_pick_and_place_3d_test
+    demo_name: demo_pick_and_place_3d_0203
 
 sampler:
   env_num: 6
   start_steps: 200
-  max_ep_len: 8
+  max_ep_len: 5
 
 trainer:
   steps_per_epoch: 2000
-  epochs: 10
+  epochs: 20
   batch_size: 128
   update_after: 1000
-  update_every: 10
-  update_factor: 100
+  update_every: 100
+  update_factor: 1
 
 tester:
   num_test_episodes: 20
