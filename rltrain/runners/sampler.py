@@ -36,8 +36,21 @@ class Sampler:
             max_ep_len (int): Maximum length of trajectory / episode / rollout.
 
         """
+    
+    def reset_env(self,sample2train):
+        while True:
+            try:
+                o = self.env.reset_once()
+                break
+            except:
+                data = {'code': 1, 'description':'Could not reset the environment. Repeat reset.'}
+                sample2train.put(data)
+                time.sleep(1)
+        
+        return o
 
-    def start(self,id,replay_buffer,end_flag,pause_flag,env_error_num):
+
+    def start(self,id,replay_buffer,end_flag,pause_flag,env_error_num,sample2train):
 
         torch.manual_seed(self.seed*id)
         np.random.seed(self.seed*id)
@@ -47,7 +60,7 @@ class Sampler:
         # Prepare for interaction with environment
         total_steps = 4
 
-        o, ep_ret, ep_len = self.env.reset(), 0, 0
+        o, ep_ret, ep_len = self.reset_env(sample2train), 0, 0
 
         # Main loop: collect experience in env and update/log each epoch
         #env_error_num = 0
@@ -73,10 +86,12 @@ class Sampler:
             try:
                 o2, r, d, info = self.env.step(a)
             except:
-                tqdm.write("Error in simulation, thus reseting the environment")
-                tqdm.write("a: " + str(a)) 
+                data = {'code': 2, 'description': 'Error in environment in step function, thus reseting the environment' + str(a)}
+                sample2train.put(data)
+                # tqdm.write("Error in simulation, thus reseting the environment")
+                # tqdm.write("a: " + str(a)) 
                 env_error_num.value += 1
-                o, ep_ret, ep_len = self.env.reset(), 0, 0   
+                o, ep_ret, ep_len = self.reset_env(sample2train), 0, 0   
                 continue
         
             ep_ret += r
@@ -96,7 +111,7 @@ class Sampler:
 
             # End of trajectory handling
             if d or (ep_len == self.max_ep_len):             
-                o, ep_ret, ep_len = self.env.reset(), 0, 0               
+                o, ep_ret, ep_len = self.reset_env(sample2train), 0, 0               
           
             t += 1           
             #pbar.update(1)   

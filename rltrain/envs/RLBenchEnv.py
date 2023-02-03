@@ -69,16 +69,21 @@ class RLBenchEnv:
     def shuttdown(self):
         self.reset()
         self.env.shutdown()
+    
+    def reset_once(self):
+        o = self.task_env.reset()
+        o = self.get_obs()
+        return o
 
     def reset(self):
-        # while True:
-        #     try:
-        #         o = self.task_env.reset()
-        #         break
-        #     except:
-        #         print("Could not reset the environment. Repeat reset.")
-        #         time.sleep(1)
-        o = self.task_env.reset()
+        while True:
+            try:
+                o = self.task_env.reset()
+                break
+            except:
+                print("Could not reset the environment. Repeat reset.")
+                time.sleep(1)
+        #o = self.task_env.reset()
         o = self.get_obs()
         return o 
     

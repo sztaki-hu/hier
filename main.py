@@ -72,8 +72,6 @@ def main():
         demo_buffer = demo.load_demos()
     else:
         demo_buffer = None
-    
-    assert False
 
     env_num = int(config['sampler']['env_num'])
     if  env_num == 1: # 1 process #################
@@ -111,26 +109,25 @@ def main():
         end_flag = Value(c_bool, True)  
         pause_flag = Value(c_bool, True)
         env_error_num = Value('i',0)
-        # test_result = Value('d',0)
-        # test_result_updated = Value(c_bool, False)
-        test_results_queue = mp.Queue()
+        test2train = mp.Queue()
+        sample2train = mp.Queue()
         #print(end_flag.value)
         
         processes = []
 
         for i in range(env_num):
-            p = Process(target=sampler.start, args=[i+1,replay_buffer,end_flag,pause_flag,env_error_num])
+            p = Process(target=sampler.start, args=[i+1,replay_buffer,end_flag,pause_flag,env_error_num,sample2train])
             p.start()
             processes.append(p)
         
         agent_tester = Agent(device,config)
         tester = Tester(agent_tester,logger,config)
 
-        p = Process(target=tester.start, args=[test_results_queue])
+        p = Process(target=tester.start, args=[test2train])
         p.start()
         processes.append(p)
 
-        trainer.start(agent,replay_buffer,pause_flag,env_error_num,test_results_queue)
+        trainer.start(agent,replay_buffer,pause_flag,env_error_num,test2train,sample2train)
 
         pause_flag.value = False
         end_flag.value = False

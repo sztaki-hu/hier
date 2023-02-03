@@ -61,7 +61,7 @@ class Tester:
         
         #self.logger.save_model(self.agent.ac.pi.state_dict(),epoch)
     
-    def start(self,test_results_queue):
+    def start(self,test2train):
         
         epoch = 1
         while epoch <= self.epochs:
@@ -73,7 +73,7 @@ class Tester:
                 self.agent.load_weights(path)
 
                 avg_test_return = self.test(epoch)
-                test_results_queue.put(avg_test_return)
+                test2train.put(avg_test_return)
 
                 t = epoch * self.steps_per_epoch 
                 self.logger.tb_writer_add_scalar("test/average_return", avg_test_return, t)

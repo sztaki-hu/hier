@@ -98,7 +98,7 @@ class Trainer:
         """ 
 
     
-    def start(self,agent,replay_buffer,pause_flag,env_error_num,test_results_queue):
+    def start(self,agent,replay_buffer,pause_flag,env_error_num,test2train,sample2train):
 
         print(agent)
 
@@ -187,14 +187,18 @@ class Trainer:
 
                 epoch += 1
 
-            if test_results_queue.empty() == False:
-                avg_test_return = test_results_queue.get()
+            if test2train.empty() == False:
+                avg_test_return = test2train.get()
                           
                 test_t = epoch_test * self.steps_per_epoch           
                 log_text = "AVG test return: " + str(epoch_test) + ". epoch ("+ str(test_t) + " transitions) : " + str(avg_test_return)
                 tqdm.write(log_text) 
 
                 epoch_test += 1
+            
+            if sample2train.empty() == False:
+                data = sample2train.get()                
+                tqdm.write("Error Code: " + str(data['code']) + " Description: " + str(data['description']))
 
             #pbar.update(1)
             pbar.n = t #check this
