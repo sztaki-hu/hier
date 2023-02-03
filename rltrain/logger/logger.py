@@ -15,7 +15,7 @@ class Logger:
         self.config = self.load_yaml(self.config_path)
 
         self.logdir = self.config['general']['logdir']
-        self.logname = self.config['environment']['task'] + "_" + self.config['agent']['type']  + "_" + self.config['general']['exp_name']
+        self.logname = self.config['environment']['task']['name'] + "_" + self.config['agent']['type']  + "_" + self.config['general']['exp_name']
 
         self.demodir = self.config['general']['demodir']
 
@@ -23,6 +23,13 @@ class Logger:
         self.create_folder(os.path.join(self.current_dir, self.logdir, self.logname,"plots_raw_data"))
         self.save_yaml(os.path.join(self.current_dir, self.logdir,self.logname,"config.yaml"),self.config)
         self.writer = SummaryWriter(log_dir = os.path.join(self.current_dir,self.logdir,self.logname,"runs"))
+
+        cfg_rlbench = {'path' : config_path}
+        self.save_yaml(os.path.join(self.current_dir, "cfg_rlbench" ,"config.yaml"),cfg_rlbench)
+
+        cfg_rlbench_2 = self.load_yaml(os.path.join(self.current_dir, "cfg_rlbench" ,"config.yaml"))
+        # print(cfg_rlbench_2)
+        # print(cfg_rlbench_2['path'])
     
     def new_model_to_test(self,epoch):
         models = self.list_model_dir()

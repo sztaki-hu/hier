@@ -64,13 +64,14 @@ class Demo:
             o = self.env.reset()
             episode_transitions = []
             ret = 0
-            for i in range(3):
+            for i in range(int(self.config['environment']['task']['params'][0])):
                 block_index_x = i * 3
                 block_index_y = i * 3 + 1
                 block_index_z = i * 3 + 2
-                target_index_x = 8 * 3
-                target_index_y = 8 * 3 + 1
-                target_index_z = 8 * 3 + 2
+                target_index_x = 4 * 3
+                target_index_y = 4 * 3 + 1
+                target_index_z = 4 * 3 + 2
+                #print(o)
                 a = o[[block_index_x,block_index_y,block_index_z,target_index_x,target_index_y,target_index_z]]
                 a[5] += 0.01 + 0.03 * i
                 try:

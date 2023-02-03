@@ -35,7 +35,7 @@ import torch
 def main():
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--configfile", default="/cfg/config_reach.yaml" ,help="Path of the config file")
+    parser.add_argument("--configfile", default="/cfg/config.yaml" ,help="Path of the config file")
     # Example: python3 main.py --configfile /cfg/alma.yaml
     args = parser.parse_args()
 
@@ -45,6 +45,8 @@ def main():
     #config_path = current_dir + "/cfg/config_test.yaml"
     logger = Logger(current_dir = current_dir, config_path = config_path)
     config = logger.get_config()
+
+    #print(config['environment']['task']['params'])
     
     # Init CUDA and torch and np ##################################
     init_cuda(config['hardware']['gpu'],config['hardware']['cpu_min'],config['hardware']['cpu_max'])
@@ -70,6 +72,8 @@ def main():
         demo_buffer = demo.load_demos()
     else:
         demo_buffer = None
+    
+    assert False
 
     env_num = int(config['sampler']['env_num'])
     if  env_num == 1: # 1 process #################

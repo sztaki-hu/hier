@@ -1,5 +1,5 @@
 general:
-  exp_name: test
+  exp_name: list_test_03
   logdir: logs
   demodir: demos
   seed: 12
@@ -12,10 +12,14 @@ hardware:
 
 environment:
   name: rlbench
-  task: stack_blocks
-  headless: True
+  task: 
+    name: stack_blocks
+    params: 
+      - 1
+      - 3
+  headless: False
   camera: False
-  obs_dim: 27
+  obs_dim: 24
   act_dim: 6
   reward:
     reward_shaping_use: False
@@ -37,10 +41,10 @@ buffer:
 
 demo:
     demo_use: True  
-    demo_buffer_size: 500
+    demo_buffer_size: 5
     demo_ratio: 0.1   
-    demo_create: False
-    demo_name: demo_pick_and_place_3d_A
+    demo_create: True
+    demo_name: demo_pick_and_place_3d_test
 
 sampler:
   env_num: 6

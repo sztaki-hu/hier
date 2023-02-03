@@ -61,7 +61,7 @@ class RLBenchEnv:
 
         self.env.launch()
 
-        self.task_env = self.env.get_task(self.env._string_to_task(self.config['environment']['task']+'.py'))
+        self.task_env = self.env.get_task(self.env._string_to_task(self.config['environment']['task']['name']+'.py'))
 
         self.reset()
         
@@ -71,14 +71,14 @@ class RLBenchEnv:
         self.env.shutdown()
 
     def reset(self):
-        while True:
-            try:
-                o = self.task_env.reset()
-                break
-            except:
-                print("Could not reset the environment. Repeat reset.")
-                time.sleep(1)
-        #o = self.task_env.reset()
+        # while True:
+        #     try:
+        #         o = self.task_env.reset()
+        #         break
+        #     except:
+        #         print("Could not reset the environment. Repeat reset.")
+        #         time.sleep(1)
+        o = self.task_env.reset()
         o = self.get_obs()
         return o 
     
