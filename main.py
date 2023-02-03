@@ -137,6 +137,12 @@ def main():
             p.join()
         print("Processes terminated")
 
+        while sample2train.empty() == False:
+            print(sample2train.get())
+        
+        while test2train.empty() == False:
+            print(test2train.get())
+
 
 if __name__ == '__main__':
     main()

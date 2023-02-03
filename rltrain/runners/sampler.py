@@ -43,7 +43,7 @@ class Sampler:
                 o = self.env.reset_once()
                 break
             except:
-                data = {'code': 1, 'description':'Could not reset the environment. Repeat reset.'}
+                data = {'code': -1, 'description':'Could not reset the environment. Repeat reset.'}
                 sample2train.put(data)
                 time.sleep(1)
         
@@ -86,7 +86,7 @@ class Sampler:
             try:
                 o2, r, d, info = self.env.step(a)
             except:
-                data = {'code': 2, 'description': 'Error in environment in step function, thus reseting the environment' + str(a)}
+                data = {'code': -2, 'description': 'Error in environment in step function, thus reseting the environment' + str(a)}
                 sample2train.put(data)
                 # tqdm.write("Error in simulation, thus reseting the environment")
                 # tqdm.write("a: " + str(a)) 

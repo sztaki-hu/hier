@@ -25,6 +25,7 @@ class Logger:
         self.writer = SummaryWriter(log_dir = os.path.join(self.current_dir,self.logdir,self.logname,"runs"))
 
         cfg_rlbench = {'path' : config_path}
+        self.create_folder(os.path.join(self.current_dir, "cfg_rlbench"))
         self.save_yaml(os.path.join(self.current_dir, "cfg_rlbench" ,"config.yaml"),cfg_rlbench)
 
         cfg_rlbench_2 = self.load_yaml(os.path.join(self.current_dir, "cfg_rlbench" ,"config.yaml"))

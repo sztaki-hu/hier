@@ -106,7 +106,6 @@ class Trainer:
         t = 0
         ptr_old = 0
         epoch = 1
-        epoch_test = 1
         update_iter = 1
         update_iter_every_log = 0
         total_steps = self.steps_per_epoch * self.epochs
@@ -188,17 +187,23 @@ class Trainer:
                 epoch += 1
 
             if test2train.empty() == False:
-                avg_test_return = test2train.get()
+                data = test2train.get()
+                if data['code'] < 0:
+                    tqdm.write("Error Code: " + str(data['code']) + " Description: " + str(data['description']))
+                else:
+                    if data['code'] == 1:
+                        avg_test_return = data['value']
+                        epoch_test = data['epoch']
                           
-                test_t = epoch_test * self.steps_per_epoch           
-                log_text = "AVG test return: " + str(epoch_test) + ". epoch ("+ str(test_t) + " transitions) : " + str(avg_test_return)
-                tqdm.write(log_text) 
-
-                epoch_test += 1
+                        test_t = epoch_test * self.steps_per_epoch           
+                        log_text = "AVG test return: " + str(epoch_test) + ". epoch ("+ str(test_t) + " transitions) : " + str(avg_test_return)
+                        tqdm.write(log_text) 
+                
             
             if sample2train.empty() == False:
-                data = sample2train.get()                
-                tqdm.write("Error Code: " + str(data['code']) + " Description: " + str(data['description']))
+                data = sample2train.get()
+                if data['code'] < 0:                 
+                    tqdm.write("Error Code: " + str(data['code']) + " Description: " + str(data['description']))
 
             #pbar.update(1)
             pbar.n = t #check this

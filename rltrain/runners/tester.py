@@ -63,6 +63,9 @@ class Tester:
     
     def start(self,test2train):
         
+        self.env = make_env(self.config)
+        self.test2train = test2train
+
         epoch = 1
         while epoch <= self.epochs:
 
@@ -72,8 +75,9 @@ class Tester:
                 path = self.logger.get_model_path(model_name)
                 self.agent.load_weights(path)
 
-                avg_test_return = self.test(epoch)
-                test2train.put(avg_test_return)
+                avg_test_return = self.test_v2()
+                data = {'code': 1, 'value': avg_test_return, 'epoch': epoch, 'description':'Average test result'}
+                test2train.put(data)
 
                 t = epoch * self.steps_per_epoch 
                 self.logger.tb_writer_add_scalar("test/average_return", avg_test_return, t)
@@ -81,9 +85,33 @@ class Tester:
                 epoch += 1
             
             time.sleep(1.0)
-
-
         
+        self.env.shuttdown() 
+    
+    def test_v2(self):
+        
+        avg_return = -1
+
+        sum_return = 0
+        #for j in tqdm(range(self.num_test_episodes), desc ="Testing: ", leave=False):
+        for j in range(self.num_test_episodes):
+            o, d, ep_ret, ep_len = self.env.reset(), False, 0, 0
+            while not(d or (ep_len == self.max_ep_len)):
+                # Take deterministic actions at test time 
+                try:
+                    a = self.agent.get_action(o, True)
+                    #print(a)
+                    o, r, d, _ = self.env.step(a)
+                    ep_ret += r
+                    ep_len += 1
+                except:
+                    data = {'code': -3, 'description':'Error in simulation (test time), thus reseting the environment'}
+                    self.test2train.put(data)
+                    break               
+            sum_return += ep_ret
+        avg_return = sum_return / float(self.num_test_episodes)
+
+        return avg_return
 
     def test(self, epoch = None, verbose = False):
 
