@@ -18,9 +18,10 @@ import torch
 
 if __name__ == '__main__':
     # Init logger
+    trainid = 0
     current_dir = dirname(abspath(__file__))
-    config_path = current_dir + "/logs/stack_blocks_sac_A30_simsim/config.yaml"
-    logger = Logger(current_dir = current_dir, config_path = config_path)
+    config_path = current_dir + "/logs/stack_blocks_sac_0206_A/"+ str(trainid) +"/config.yaml"
+    logger = Logger(current_dir = current_dir, config_path = config_path, trainid = trainid)
     config = logger.get_config()
 
     # Init CUDA
@@ -44,7 +45,7 @@ if __name__ == '__main__':
     tester = Tester(agent,logger,config)
 
     # Test Agent
-    tester.display_agent("model_10")
+    tester.display_agent("model_2")
 
 
     
