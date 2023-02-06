@@ -8,29 +8,31 @@ from torch.utils.tensorboard import SummaryWriter
 
 class Logger:
     # init method or constructor
-    def __init__(self, current_dir,config_path):
+    def __init__(self, current_dir,config_path, trainid, light_mode = False):
         self.current_dir = current_dir
         self.config_path = config_path
+        self.trainid = str(trainid)
 
         self.config = self.load_yaml(self.config_path)
 
         self.logdir = self.config['general']['logdir']
-        self.logname = self.config['environment']['task']['name'] + "_" + self.config['agent']['type']  + "_" + self.config['general']['exp_name']
+        self.logname = self.config['general']['exp_name'] + "_" + self.config['environment']['task']['name'] + "_" + self.config['agent']['type'] 
 
         self.demodir = self.config['general']['demodir']
 
-        self.create_folder(os.path.join(self.current_dir,self.logdir, self.logname,"model_backup"))
-        self.create_folder(os.path.join(self.current_dir, self.logdir, self.logname,"plots_raw_data"))
-        self.save_yaml(os.path.join(self.current_dir, self.logdir,self.logname,"config.yaml"),self.config)
-        self.writer = SummaryWriter(log_dir = os.path.join(self.current_dir,self.logdir,self.logname,"runs"))
+        if light_mode == False:
+            self.create_folder(os.path.join(self.current_dir,self.logdir, self.logname,self.trainid,"model_backup"))
+            #self.create_folder(os.path.join(self.current_dir, self.logdir, self.logname,self.trainid,"plots_raw_data"))
+            self.save_yaml(os.path.join(self.current_dir, self.logdir,self.logname,self.trainid,"config.yaml"),self.config)
+            self.writer = SummaryWriter(log_dir = os.path.join(self.current_dir,self.logdir,self.logname,self.trainid,"runs"))
 
-        cfg_rlbench = {'path' : config_path}
-        self.create_folder(os.path.join(self.current_dir, "cfg_rlbench"))
-        self.save_yaml(os.path.join(self.current_dir, "cfg_rlbench" ,"config.yaml"),cfg_rlbench)
+            cfg_rlbench = {'path' : config_path}
+            self.create_folder(os.path.join(self.current_dir, "cfg_rlbench"))
+            self.save_yaml(os.path.join(self.current_dir, "cfg_rlbench" ,"config.yaml"),cfg_rlbench)
 
-        cfg_rlbench_2 = self.load_yaml(os.path.join(self.current_dir, "cfg_rlbench" ,"config.yaml"))
-        # print(cfg_rlbench_2)
-        # print(cfg_rlbench_2['path'])
+            # cfg_rlbench_2 = self.load_yaml(os.path.join(self.current_dir, "cfg_rlbench" ,"config.yaml"))
+            # print(cfg_rlbench_2)
+            # print(cfg_rlbench_2['path'])
     
     def new_model_to_test(self,epoch):
         models = self.list_model_dir()
@@ -41,10 +43,10 @@ class Logger:
         return None
 
     def list_model_dir(self):
-        return os.listdir(os.path.join(self.current_dir,self.logdir, self.logname,"model_backup"))
+        return os.listdir(os.path.join(self.current_dir,self.logdir, self.logname,self.trainid,"model_backup"))
 
     def get_model_path(self,name):
-        return os.path.join(self.current_dir,self.logdir, self.logname,"model_backup",name)
+        return os.path.join(self.current_dir,self.logdir, self.logname,self.trainid,"model_backup",name)
 
     def get_config(self):
         return self.config
@@ -53,19 +55,25 @@ class Logger:
         self.writer.add_scalar(name, value, iter)
 
     def save_model(self,model,epoch):
-        model_path = os.path.join(self.current_dir, self.logdir, self.logname,"model_backup","model_" + str(epoch))
+        model_path = os.path.join(self.current_dir, self.logdir, self.logname,self.trainid,"model_backup","model_" + str(epoch))
         torch.save(model, model_path)
     
     def get_model_save_path(self,epoch):
-        return os.path.join(self.current_dir, self.logdir, self.logname,"model_backup","model_" + str(epoch))
+        return os.path.join(self.current_dir, self.logdir, self.logname,self.trainid,"model_backup","model_" + str(epoch))
         
-    
+    def demo_exists(self,name):
+        return os.path.isfile(os.path.join(self.current_dir, self.demodir, name + ".yaml"))
+
     def save_demos(self,name,demos):
         self.create_folder(os.path.join(self.current_dir, self.demodir))
         self.save_yaml(os.path.join(self.current_dir, self.demodir, name + ".yaml"), demos)
     
     def load_demos(self,name):
         return self.load_yaml(os.path.join(self.current_dir,self.demodir,name + ".yaml"))
+    
+    def remove_old_demo(self,name):
+        os.remove(os.path.join(self.current_dir,self.demodir,name + ".yaml"))
+         
     
     def tb_save_train_data_v2(self,loss_q,loss_pi,env_error_num,t,actual_time,update_iter):
         self.tb_writer_add_scalar("train/loss_q", loss_q, update_iter)
@@ -91,7 +99,7 @@ class Logger:
 
     def save_eval_range(self,data,epoch):
         name = self.logname + "_plot_range_" + str(epoch)
-        dir = os.path.join(self.current_dir, self.logdir, self.logname,"plots_raw_data")
+        dir = os.path.join(self.current_dir, self.logdir, self.logname,self.trainid,"plots_raw_data")
 
         with open(os.path.join(dir,name + ".npy" ),'wb') as f:
             np.save(f, data)    

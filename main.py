@@ -2,14 +2,12 @@ from os.path import dirname, abspath
 
 import numpy as np
 import torch
-from tqdm import tqdm
 import time
 import argparse
 
 import multiprocessing as mp
-from multiprocessing import Process, Value, Manager
+from multiprocessing import Process, Value
 from multiprocessing.managers import BaseManager
-from multiprocessing.managers import SyncManager, MakeProxyType, public_methods
 from ctypes import c_bool
 import torch.nn as nn
 
@@ -24,7 +22,6 @@ from rltrain.runners.sampler_trainer_tester import SamplerTrainerTester
 from rltrain.runners.sampler import Sampler
 from rltrain.runners.trainer import Trainer
 from rltrain.runners.tester import Tester
-from rltrain.agents.core import SquashedGaussianMLPActor
 
 import datetime
 timestamp = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
@@ -36,20 +33,21 @@ def main():
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--configfile", default="/cfg/config.yaml" ,help="Path of the config file")
-    # Example: python3 main.py --configfile /cfg/alma.yaml
+    parser.add_argument("--trainid", type=int, default=0 ,help="Train ID")
+    # Example: python3 main.py --configfile /cfg/alma.yaml 0
     args = parser.parse_args()
 
     # Init logger ###############################################x
     current_dir = dirname(abspath(__file__))
     config_path = current_dir + args.configfile
     #config_path = current_dir + "/cfg/config_test.yaml"
-    logger = Logger(current_dir = current_dir, config_path = config_path)
+    logger = Logger(current_dir = current_dir, config_path = config_path, trainid = args.trainid, light_mode = True)
     config = logger.get_config()
 
     #print(config['environment']['task']['params'])
     
     # Init CUDA and torch and np ##################################
-    init_cuda(config['hardware']['gpu'],config['hardware']['cpu_min'],config['hardware']['cpu_max'])
+    init_cuda(config['hardware']['gpu'][args.trainid],config['hardware']['cpu_min'][args.trainid],config['hardware']['cpu_max'][args.trainid])
 
     print_torch_info()
 
@@ -61,15 +59,14 @@ def main():
     torch.manual_seed(config['general']['seed'])
     np.random.seed(config['general']['seed'])
 
-    # Init Demo Buffer ################################################
+    # Demo Buffer ###########################################################
     if config['demo']['demo_use']:
-        demo = Demo(logger,config)  
-        if demo.demo_create:
-            demo_p = Process(target=demo.create_demos, args=[])
-            demo_p.start()
-            demo_p.join()
-            return -1       
+        demo = Demo(logger,config)
+        print("Waiting for demos...")  
+        while demo.demo_exists() == False:
+            time.sleep(1.0)     
         demo_buffer = demo.load_demos()
+        print("Demos are loaded")  
     else:
         demo_buffer = None
 
@@ -86,7 +83,7 @@ def main():
         finally:
             env.shuttdown()
 
-    else:  # Multi-process ##############################################
+    else:  # Multi-process ####################################################
 
         mp.set_start_method('spawn')
         #torch.multiprocessing.set_start_method('spawn')
@@ -101,7 +98,9 @@ def main():
             act_dim=int(config['environment']['act_dim']), 
             size=int(config['buffer']['replay_buffer_size']))
         agent = manager.Agent(device,config)
-        logger = manager.Logger(current_dir = current_dir, config_path = config_path)
+        logger = manager.Logger(current_dir = current_dir, config_path = config_path, trainid = args.trainid)
+
+        # Training ##############################################################
 
         sampler = Sampler(agent,demo_buffer,config)
         trainer = Trainer(device,demo_buffer,logger,config)
@@ -128,6 +127,8 @@ def main():
         processes.append(p)
 
         trainer.start(agent,replay_buffer,pause_flag,env_error_num,test2train,sample2train)
+
+        # Stop Training #############################################################
 
         pause_flag.value = False
         end_flag.value = False

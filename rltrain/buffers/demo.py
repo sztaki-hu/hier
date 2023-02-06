@@ -89,14 +89,23 @@ class Demo:
             else:
                 unsuccessful_num += 1   
                 tqdm.write("The demonstration is not successful, thus it is not added " + str(unsuccessful_num))    
-        self.logger.save_demos(self.demo_name,  self.demo_buffer)
-
+        
         self.env.shuttdown()
+
+        self.logger.save_demos(self.demo_name,  self.demo_buffer)
 
         # batch = self.demo_buffer.sample_batch(self.batch_size) 
         # print(batch)
         # print(self.demo_buffer.ptr)
     
+    def clean_up_old_demo(self):
+        if self.demo_exists():
+            self.logger.remove_old_demo(self.demo_name)
+            print("Old demo removed")
+            
+
+    def demo_exists(self):
+        return self.logger.demo_exists(self.demo_name)
 
     def load_demos(self):
         return self.logger.load_demos(self.demo_name)
