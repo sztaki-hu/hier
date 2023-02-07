@@ -21,6 +21,10 @@ class Demo:
         self.action_space = config['agent']['action_space']
         self.batch_size = config['trainer']['batch_size'] 
 
+        self.target_blocks_num = int(self.config['environment']['task']['params'][0])
+        self.distractor_blocks_num = int(self.config['environment']['task']['params'][1])
+        self.tower_height = int(self.config['environment']['task']['params'][2])
+
         self.demo_buffer = ReplayBuffer(obs_dim=self.obs_dim, act_dim=self.act_dim, size=self.demo_num)
 
     def create_demos(self):  
@@ -60,19 +64,37 @@ class Demo:
         self.env = make_env(self.config)
         unsuccessful_num = 0
 
+        assert self.target_blocks_num >= self.tower_height
+
         for _ in tqdm(range(self.demo_num), desc ="Loading demos: ", colour="green"):  
             o = self.env.reset()
             episode_transitions = []
             ret = 0
-            for i in range(int(self.config['environment']['task']['params'][0])):
-                block_index_x = i * 3
-                block_index_y = i * 3 + 1
-                block_index_z = i * 3 + 2
-                target_index_x = 4 * 3
-                target_index_y = 4 * 3 + 1
-                target_index_z = 4 * 3 + 2
-                #print(o)
-                a = o[[block_index_x,block_index_y,block_index_z,target_index_x,target_index_y,target_index_z]]
+
+            print(".............................")
+            print(o.shape)
+            print(o)
+
+            target_index =  (0, 1, 2)
+            target = o[[target_index]][0]
+
+            blocks = []
+            dists = []
+            for j in range(1,self.target_blocks_num+1):
+                block_index =  (j * 3, j * 3 + 1, j * 3 + 2)
+                block = o[[block_index]][0]
+                dists.append(np.sum(np.square(target - block)))
+                blocks.append(block)                
+            
+            blocks_arranged = []
+            for _ in range(self.target_blocks_num):
+                index = np.argmin(dists)
+                blocks_arranged.append(blocks[index])
+                dists[index] = float('inf')
+
+            for i in range(self.tower_height):
+                
+                a = np.hstack((blocks_arranged[i],target)) 
                 a[5] += 0.01 + 0.03 * i
                 try:
                     o2, r, d, info = self.env.step(a)

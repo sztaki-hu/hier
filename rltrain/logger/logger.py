@@ -20,19 +20,23 @@ class Logger:
 
         self.demodir = self.config['general']['demodir']
 
+        cfg_rlbench = {'path' : config_path}
+        self.create_folder(os.path.join(self.current_dir, "cfg_rlbench"))
+        self.save_yaml(os.path.join(self.current_dir, "cfg_rlbench" ,"config.yaml"),cfg_rlbench)
+
+        # cfg_rlbench_2 = self.load_yaml(os.path.join(self.current_dir, "cfg_rlbench" ,"config.yaml"))
+        # print(cfg_rlbench_2)
+        # print(cfg_rlbench_2['path'])
+
         if light_mode == False:
             self.create_folder(os.path.join(self.current_dir,self.logdir, self.logname,self.trainid,"model_backup"))
             #self.create_folder(os.path.join(self.current_dir, self.logdir, self.logname,self.trainid,"plots_raw_data"))
             self.save_yaml(os.path.join(self.current_dir, self.logdir,self.logname,self.trainid,"config.yaml"),self.config)
             self.writer = SummaryWriter(log_dir = os.path.join(self.current_dir,self.logdir,self.logname,self.trainid,"runs"))
 
-            cfg_rlbench = {'path' : config_path}
-            self.create_folder(os.path.join(self.current_dir, "cfg_rlbench"))
-            self.save_yaml(os.path.join(self.current_dir, "cfg_rlbench" ,"config.yaml"),cfg_rlbench)
+            
 
-            # cfg_rlbench_2 = self.load_yaml(os.path.join(self.current_dir, "cfg_rlbench" ,"config.yaml"))
-            # print(cfg_rlbench_2)
-            # print(cfg_rlbench_2['path'])
+           
     
     def new_model_to_test(self,epoch):
         models = self.list_model_dir()

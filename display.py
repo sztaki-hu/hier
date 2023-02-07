@@ -46,13 +46,13 @@ if __name__ == '__main__':
     tester = Tester(agent,logger,config)
 
     # Test Agent
-    tester.display_agent("model_8",5)
+    tester.display_agent("model_3",5)
 
     # Test Agent all models
-    models = logger.list_model_dir()
-    models = sorted(models)
-    for model in models:
-        tester.display_agent(model,3)
+    # models = logger.list_model_dir()
+    # models = sorted(models)
+    # for model in models:
+    #     tester.display_agent(model,3)
 
 
     

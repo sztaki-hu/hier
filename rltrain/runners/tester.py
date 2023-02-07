@@ -169,7 +169,7 @@ class Tester:
                     break               
             sum_return += ep_ret          
             tqdm.write("------------------------")
-            tqdm.write("Obs: " + str(o) + " | Act: " + str(a))
+            #tqdm.write("Obs: " + str(o) + " | Act: " + str(a))
             tqdm.write("Ep Ret: " + str(ep_ret) + " | Ep Len: " + str(ep_len))
         avg_return = sum_return / float(self.num_test_episodes)
         
