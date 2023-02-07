@@ -72,15 +72,15 @@ class Demo:
             ret = 0
 
             target_index =  (0, 1, 2)
-            target = o[[target_index]][0]
+            target = o[[target_index[0],target_index[1],target_index[2]]]
 
             blocks = []
             dists = []
             for j in range(1,self.target_blocks_num+1):
                 block_index =  (j * 3, j * 3 + 1, j * 3 + 2)
-                block = o[[block_index]][0]
+                block = o[[block_index[0],block_index[1],block_index[2]]]
                 dists.append(np.sum(np.square(target - block)))
-                blocks.append(block)                
+                blocks.append(block)         
             
             blocks_arranged = []
             for _ in range(self.target_blocks_num):
