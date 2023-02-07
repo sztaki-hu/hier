@@ -71,10 +71,6 @@ class Demo:
             episode_transitions = []
             ret = 0
 
-            print(".............................")
-            print(o.shape)
-            print(o)
-
             target_index =  (0, 1, 2)
             target = o[[target_index]][0]
 
