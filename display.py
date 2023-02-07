@@ -20,12 +20,13 @@ if __name__ == '__main__':
     # Init logger
     trainid = 0
     current_dir = dirname(abspath(__file__))
-    config_path = current_dir + "/logs/stack_blocks_sac_0206_A/"+ str(trainid) +"/config.yaml"
+    config_path = current_dir + "/logs_compute/0206_C_stack_blocks_sac/"+ str(trainid) +"/config.yaml"
     logger = Logger(current_dir = current_dir, config_path = config_path, trainid = trainid)
     config = logger.get_config()
 
     # Init CUDA
-    init_cuda(config['hardware']['gpu'],config['hardware']['cpu_min'],config['hardware']['cpu_max'])
+    hw_train_id = 0
+    init_cuda(config['hardware']['gpu'][hw_train_id],config['hardware']['cpu_min'][hw_train_id],config['hardware']['cpu_max'][hw_train_id])
 
     print_torch_info()
 
@@ -45,7 +46,13 @@ if __name__ == '__main__':
     tester = Tester(agent,logger,config)
 
     # Test Agent
-    tester.display_agent("model_2")
+    tester.display_agent("model_8",5)
+
+    # Test Agent all models
+    models = logger.list_model_dir()
+    models = sorted(models)
+    for model in models:
+        tester.display_agent(model,3)
 
 
     

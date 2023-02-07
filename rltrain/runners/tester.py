@@ -42,15 +42,6 @@ class Tester:
         data = np.vstack((inputs_np, outputs_np)).T
         self.logger.save_eval_range(data, epoch)
     
-    def display_agent(self,model_name):
-        path = self.logger.get_model_path(model_name)
-        self.agent.load_weights(path)
-
-        avg_return = self.test(verbose = True)
-
-        print("########################################")
-        print("avg return: " + str(avg_return))
-    
     def get_avg_return(self):
         return self.avg_return
     
@@ -142,6 +133,45 @@ class Tester:
         avg_return = sum_return / float(self.num_test_episodes)
         if epoch is not None:
             self.eval_range(epoch)
+        
+        self.env.shuttdown() 
+
+        return avg_return
+    
+    def display_agent(self,model_name,num_display_episode):
+        path = self.logger.get_model_path(model_name)
+        self.agent.load_weights(path)
+
+        avg_return = self.display_test(num_display_episode)
+
+        print("########################################")
+        print("avg return: " + str(avg_return))
+
+    def display_test(self, num_display_episode):
+
+        avg_return = -1
+
+        self.env = make_env(self.config)
+
+        sum_return = 0
+        for j in tqdm(range(num_display_episode), desc ="Testing: ", leave=False):
+            o, d, ep_ret, ep_len = self.env.reset(), False, 0, 0
+            while not(d or (ep_len == self.max_ep_len)):
+                # Take deterministic actions at test time 
+                try:
+                    a = self.agent.get_action(o, True)
+                    #print(a)
+                    o, r, d, _ = self.env.step(a)
+                    ep_ret += r
+                    ep_len += 1
+                except:
+                    tqdm.write("Error in simulation (test time), thus reseting the environment")
+                    break               
+            sum_return += ep_ret          
+            tqdm.write("------------------------")
+            tqdm.write("Obs: " + str(o) + " | Act: " + str(a))
+            tqdm.write("Ep Ret: " + str(ep_ret) + " | Ep Len: " + str(ep_len))
+        avg_return = sum_return / float(self.num_test_episodes)
         
         self.env.shuttdown() 
 

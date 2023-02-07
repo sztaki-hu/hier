@@ -72,8 +72,7 @@ class Logger:
         return self.load_yaml(os.path.join(self.current_dir,self.demodir,name + ".yaml"))
     
     def remove_old_demo(self,name):
-        os.remove(os.path.join(self.current_dir,self.demodir,name + ".yaml"))
-         
+        os.remove(os.path.join(self.current_dir,self.demodir,name + ".yaml")) 
     
     def tb_save_train_data_v2(self,loss_q,loss_pi,env_error_num,t,actual_time,update_iter):
         self.tb_writer_add_scalar("train/loss_q", loss_q, update_iter)
