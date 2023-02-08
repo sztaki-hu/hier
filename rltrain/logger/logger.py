@@ -22,6 +22,9 @@ class Logger:
 
         cfg_rlbench = {'path' : config_path}
         self.create_folder(os.path.join(self.current_dir, "cfg_rlbench"))
+
+        self.compute_and_replace_auto_values()
+
         self.save_yaml(os.path.join(self.current_dir, "cfg_rlbench" ,"config.yaml"),cfg_rlbench)
 
         # cfg_rlbench_2 = self.load_yaml(os.path.join(self.current_dir, "cfg_rlbench" ,"config.yaml"))
@@ -35,9 +38,28 @@ class Logger:
             self.writer = SummaryWriter(log_dir = os.path.join(self.current_dir,self.logdir,self.logname,self.trainid,"runs"))
 
             
+    def compute_and_replace_auto_values(self):
+        self.task_name = self.config['environment']['task']['name']
+        self.task_params = self.config['environment']['task']['params']
+        self.action_space = self.config['agent']['action_space']
 
-           
-    
+        if self.config['environment']['obs_dim'] == "auto":
+            if self.task_name == "stack_blocks":
+                self.config['environment']['obs_dim'] = 3 + self.task_params[0] * 3 + self.task_params[1] * 3
+            else:
+                print("[ERROR] Obs dim could not be computed")
+                assert False
+            print("Obs dim is computed: " + str(self.config['environment']['obs_dim']))
+        if self.config['environment']['act_dim'] == "auto":
+            if self.action_space == "pick_and_place_3d":
+                self.config['environment']['act_dim'] = 6
+            else:
+                print("[ERROR] Act dim could not be computed")
+                assert False
+            print("Act dim is computed: " + str(self.config['environment']['act_dim']))
+
+
+
     def new_model_to_test(self,epoch):
         models = self.list_model_dir()
         for model in models:

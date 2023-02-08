@@ -25,6 +25,8 @@ class RLBenchEnv:
         self.quat = self.quat / np.linalg.norm(self.quat)
         self.obs_dim = config['environment']['obs_dim']
         self.action_space = config['agent']['action_space']
+        self.task_name = self.config['environment']['task']['name']
+        self.task_params = self.config['environment']['task']['params']
 
         #self.desk_z = 0.765
         #self.tower_z = 0.765
@@ -61,7 +63,7 @@ class RLBenchEnv:
 
         self.env.launch()
 
-        self.task_env = self.env.get_task(self.env._string_to_task(self.config['environment']['task']['name']+'.py'))
+        self.task_env = self.env.get_task(self.env._string_to_task(self.task_name +'.py'))
 
         self.reset()
         
@@ -91,8 +93,8 @@ class RLBenchEnv:
         if self.action_space == "xyz":
             a = self.model2robot_xyz(a_model)
             o, r, d, info = self.task_env.step(a)    
-        elif self.action_space == "pick_and_place_2d":
-            poses = self.model2robot_pick_and_place_2d(a_model)
+        # elif self.action_space == "pick_and_place_2d":
+        #     poses = self.model2robot_pick_and_place_2d(a_model)
             o, r, d, info = self.execute_path(poses)  
         elif self.action_space == "pick_and_place_3d":
             poses = self.model2robot_pick_and_place_3d(a_model)
