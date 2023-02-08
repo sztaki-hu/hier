@@ -98,7 +98,7 @@ class Trainer:
         """ 
 
     
-    def start(self,agent,replay_buffer,pause_flag,env_error_num,test2train,sample2train):
+    def start(self,agent,replay_buffer,pause_flag,test2train,sample2train):
 
         print(agent)
 
@@ -108,6 +108,8 @@ class Trainer:
         update_iter = 1
         update_iter_every_log = 0
         total_steps = self.steps_per_epoch * self.epochs
+        env_error_num = 0
+        out_of_bounds_num = 0
 
         first_update = self.update_every * math.ceil(self.update_after / self.update_every)
         self.save_freq = int(((total_steps - first_update) * self.update_factor) / self.num_log_loss_points)
@@ -140,9 +142,8 @@ class Trainer:
                         #tqdm.write(str(batch))
                         loss_q, loss_pi = agent.update(data=batch)
                         if update_iter_every_log % self.save_freq == 0:
-                            env_error_num_value = env_error_num.value
                             actual_time = time.time() - time0
-                            self.logger.tb_save_train_data_v2(loss_q,loss_pi,env_error_num_value,t,actual_time,update_iter_every_log)
+                            self.logger.tb_save_train_data_v2(loss_q,loss_pi,env_error_num,out_of_bounds_num,t,actual_time,update_iter_every_log)
                 else:
                     for j in tqdm(range(int(self.update_every * self.update_factor)), desc ="Updating weights: ", leave=False):
                         update_iter_every_log += 1
@@ -155,9 +156,8 @@ class Trainer:
                                     done=torch.cat((replay_batch['done'], demo_batch['done']), 0))  
                         loss_q, loss_pi = agent.update(data=batch)
                         if update_iter_every_log % self.save_freq == 0:
-                            env_error_num_value = env_error_num.value
                             actual_time = time.time() - time0
-                            self.logger.tb_save_train_data_v2(loss_q,loss_pi,env_error_num_value,t,actual_time,update_iter_every_log)    
+                            self.logger.tb_save_train_data_v2(loss_q,loss_pi,env_error_num,out_of_bounds_num,t,actual_time,update_iter_every_log)    
 
                 pause_flag.value = False
                 update_iter += 1    
@@ -195,6 +195,10 @@ class Trainer:
                 data = sample2train.get()
                 if data['code'] < 0:                 
                     tqdm.write("Error Code: " + str(data['code']) + " Description: " + str(data['description']))
+                    if int(data['code']) == -2:
+                        env_error_num += 1 
+                    if int(data['code']) == -11:
+                        out_of_bounds_num += 1 
 
             #pbar.update(1)
             pbar.n = t #check this

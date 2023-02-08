@@ -50,7 +50,7 @@ class Sampler:
         return o
 
 
-    def start(self,id,replay_buffer,end_flag,pause_flag,env_error_num,sample2train):
+    def start(self,id,replay_buffer,end_flag,pause_flag,sample2train):
 
         torch.manual_seed(self.seed*id)
         np.random.seed(self.seed*id)
@@ -82,16 +82,19 @@ class Sampler:
                 a = self.agent.get_random_action()
 
             # Step the env
-            #tqdm.write("Action: "+str(a))
             try:
                 o2, r, d, info = self.env.step(a)
             except:
                 data = {'code': -2, 'description': 'Error in environment in step function, thus reseting the environment' + str(a)}
                 sample2train.put(data)
-                # tqdm.write("Error in simulation, thus reseting the environment")
-                # tqdm.write("a: " + str(a)) 
-                env_error_num.value += 1
                 o, ep_ret, ep_len = self.reset_env(sample2train), 0, 0   
+                continue
+            
+            
+            if bool(info):               
+                if info['code'] < 0:
+                    o, ep_ret, ep_len = self.reset_env(sample2train), 0, 0
+                sample2train.put(info)
                 continue
         
             ep_ret += r

@@ -27,6 +27,10 @@ class RLBenchEnv:
         self.action_space = config['agent']['action_space']
         self.task_name = self.config['environment']['task']['name']
         self.task_params = self.config['environment']['task']['params']
+        self.target_blocks_num = self.task_params[0]
+        self.act_dim = config['environment']['act_dim']
+        self.boundary_min = np.array(config['agent']['boundary_min'])[:self.act_dim]
+        self.boundary_max = np.array(config['agent']['boundary_max'])[:self.act_dim]
 
         #self.desk_z = 0.765
         #self.tower_z = 0.765
@@ -101,6 +105,9 @@ class RLBenchEnv:
             o, r, d, info = self.execute_path(poses)    
         r = 100 * r
         o = self.get_obs()
+        if self.out_of_bound_check(o):
+            d = 1
+            info = {'code': -11, 'description': 'Block is out of bounds ' + str(o)}
         if self.reward_shaping_use:
             if self.reward_shaping_type == 'mse':
                 r = self.reward_shaping_mse(a)
@@ -201,3 +208,16 @@ class RLBenchEnv:
         for pos in poses:
             observation, reward, done, info = self.task_env.step(pos)
         return observation, reward, done, info
+    
+    def out_of_bound_check(self,o):
+        if self.task_name == "stack_blocks":
+            for j in range(1,self.target_blocks_num+1):
+                block_index =  (j * 3, j * 3 + 1, j * 3 + 2)
+                block = o[[block_index[0],block_index[1],block_index[2]]]
+                if np.any(np.greater(block,self.boundary_max[:3])):
+                    return True
+                if np.any(np.less(block,self.boundary_min[:3])):
+                    return True
+        return False
+                 
+
