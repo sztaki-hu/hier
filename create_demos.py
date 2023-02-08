@@ -49,12 +49,17 @@ def main():
     # Init Demo Buffer ################################################
     if config['demo']['demo_use']:
         demo = Demo(logger,config)
-        demo.clean_up_old_demo()  
         if demo.demo_create:
+            demo.clean_up_old_demo()
             demo.create_demos()
             # demo_p = Process(target=demo.create_demos, args=[])
             # demo_p.start()
-            # demo_p.join()           
+            # demo_p.join()  
+        else:
+            demoBuffer = demo.load_demos()
+            batch = demoBuffer.sample_batch(batch_size=10)
+            print(batch)
+                     
 
 if __name__ == '__main__':
     main()
