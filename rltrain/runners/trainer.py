@@ -104,7 +104,6 @@ class Trainer:
 
         # Start Training
         t = 0
-        ptr_old = 0
         epoch = 1
         update_iter = 1
         update_iter_every_log = 0
@@ -119,15 +118,7 @@ class Trainer:
         time0 = time.time()
         pause_flag.value = False
         while t < total_steps:
-            ptr_now = replay_buffer.get_ptr()
-            diff = ptr_now - ptr_old
-            if diff >= 0:
-                t += diff
-            else:
-                t += self.replay_size - ptr_old + ptr_now
-            ptr_old = ptr_now
-            # tqdm.write("t " + str(t))
-            # tqdm.write("ptr_now " + str(ptr_now))
+            t = replay_buffer.get_t()
 
             if (t > self.update_after) and (t >= update_iter * self.update_every):
                 #tqdm.write("UPDATE " + str(update_iter))

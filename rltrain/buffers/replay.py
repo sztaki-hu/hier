@@ -15,6 +15,7 @@ class ReplayBuffer:
         self.rew_buf = np.zeros(size, dtype=np.float32)
         self.done_buf = np.zeros(size, dtype=np.float32)
         self.ptr, self.size, self.max_size = 0, 0, size
+        self.t = 0
 
     def store(self, obs, act, rew, next_obs, done):
         self.obs_buf[self.ptr] = obs
@@ -24,6 +25,7 @@ class ReplayBuffer:
         self.done_buf[self.ptr] = done
         self.ptr = (self.ptr+1) % self.max_size
         self.size = min(self.size+1, self.max_size)
+        self.t += 1
 
     def sample_batch(self, batch_size=32):
         idxs = np.random.randint(0, self.size, size=batch_size)
@@ -43,5 +45,8 @@ class ReplayBuffer:
                      done=self.done_buf[idxs])
         return {k: torch.as_tensor(v, dtype=torch.float32) for k,v in batch.items()}
     
+    def get_t(self):
+        return self.t
+
     def get_ptr(self):
         return self.ptr
