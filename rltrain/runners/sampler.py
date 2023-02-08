@@ -88,15 +88,15 @@ class Sampler:
                 data = {'code': -2, 'description': 'Error in environment in step function, thus reseting the environment' + str(a)}
                 sample2train.put(data)
                 o, ep_ret, ep_len = self.reset_env(sample2train), 0, 0   
-                continue
+                continue     
             
-            
-            if bool(info):               
-                if info['code'] < 0:
-                    o, ep_ret, ep_len = self.reset_env(sample2train), 0, 0
-                sample2train.put(info)
-                continue
-        
+            if bool(info): 
+                if 'code' in info: 
+                    sample2train.put(info)             
+                    if info['code'] < 0:
+                        o, ep_ret, ep_len = self.reset_env(sample2train), 0, 0
+                        continue
+
             ep_ret += r
             ep_len += 1
 
