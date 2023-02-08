@@ -143,7 +143,7 @@ class Trainer:
 
 
                 if self.demo_use == False:
-                    for j in tqdm(range(self.update_every * self.update_factor), desc ="Updating weights: ", leave=False):
+                    for j in tqdm(range(int(self.update_every * self.update_factor)), desc ="Updating weights: ", leave=False):
                         update_iter_every_log += 1
                         batch = replay_buffer.sample_batch(self.batch_size)    
                         #tqdm.write(str(batch))
@@ -153,7 +153,7 @@ class Trainer:
                             actual_time = time.time() - time0
                             self.logger.tb_save_train_data_v2(loss_q,loss_pi,env_error_num_value,t,actual_time,update_iter_every_log)
                 else:
-                    for j in tqdm(range(self.update_every * self.update_factor), desc ="Updating weights: ", leave=False):
+                    for j in tqdm(range(int(self.update_every * self.update_factor)), desc ="Updating weights: ", leave=False):
                         update_iter_every_log += 1
                         replay_batch = replay_buffer.sample_batch(self.replay_batch_size)
                         demo_batch = self.demo_buffer.sample_batch(self.demo_batch_size) 
