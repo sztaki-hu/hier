@@ -25,6 +25,7 @@ class Logger:
         if os.path.isfile(log_file_path):
             os.remove(log_file_path) 
         
+        self.create_folder(os.path.join(self.current_dir,self.logdir, self.logname,self.trainid))
         logging.basicConfig(filename=log_file_path,level=logging.DEBUG)
         self.pylogger = logging.getLogger('mylogger')
 
