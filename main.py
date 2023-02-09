@@ -43,16 +43,14 @@ def main():
     #config_path = current_dir + "/cfg/config_test.yaml"
     logger = Logger(current_dir = current_dir, config_path = config_path, trainid = args.trainid, light_mode = True)
     config = logger.get_config()
-
-    #print(config['environment']['task']['params'])
     
     # Init CUDA and torch and np ##################################
     init_cuda(config['hardware']['gpu'][args.trainid],config['hardware']['cpu_min'][args.trainid],config['hardware']['cpu_max'][args.trainid])
 
-    print_torch_info()
+    print_torch_info(logger)
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    print(device)
+    logger.print_logfile(device)
 
     torch.set_num_threads(torch.get_num_threads())
 
@@ -62,13 +60,15 @@ def main():
     # Demo Buffer ###########################################################
     if config['demo']['demo_use']:
         demo = Demo(logger,config)
-        print("Waiting for demos...")  
+        logger.print_logfile("Waiting for demos...")  
         while demo.demo_exists() == False:
             time.sleep(1.0)     
         demo_buffer = demo.load_demos()
-        print("Demos are loaded")  
+        logger.print_logfile("Demos are loaded")  
     else:
         demo_buffer = None
+    
+    
 
     env_num = int(config['sampler']['env_num'])
     if  env_num == 1: # 1 process #################
@@ -111,7 +111,6 @@ def main():
         pause_flag = Value(c_bool, True)
         test2train = mp.Queue()
         sample2train = mp.Queue()
-        #print(end_flag.value)
         
         processes = []
 
@@ -134,16 +133,16 @@ def main():
         pause_flag.value = False
         end_flag.value = False
 
-        print("Wait for processes to terminate")
+        logger.print_logfile("Wait for processes to terminate")
         for p in processes:
             p.join()
-        print("Processes terminated")
+        logger.print_logfile("Processes terminated")
 
         while sample2train.empty() == False:
-            print(sample2train.get())
+            logger.print_logfile(sample2train.get())
         
         while test2train.empty() == False:
-            print(test2train.get())
+            logger.print_logfile(test2train.get())
 
 
 if __name__ == '__main__':

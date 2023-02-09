@@ -44,8 +44,6 @@ class SquashedGaussianMLPActor(nn.Module):
         log_std = torch.clamp(log_std, LOG_STD_MIN, LOG_STD_MAX)
         std = torch.exp(log_std)
 
-        #print(std)
-
         # Pre-squash distribution and sample
         pi_distribution = Normal(mu, std)
         if deterministic:
@@ -86,10 +84,6 @@ class MLPActorCritic(nn.Module):
     def __init__(self, obs_dim, act_dim, act_offset, act_limit, hidden_sizes=(256,256),
                  activation=nn.ReLU):
         super().__init__()
-
-        print("#######################")
-        print(hidden_sizes)
-        print(type(hidden_sizes))
 
         # build policy and value functions
         self.pi = SquashedGaussianMLPActor(obs_dim, act_dim, hidden_sizes, activation, act_offset, act_limit)

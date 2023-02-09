@@ -1,4 +1,5 @@
 import os
+import logging
 import numpy as np
 import torch
 import yaml
@@ -19,6 +20,13 @@ class Logger:
         self.logname = self.config['general']['exp_name'] + "_" + self.config['environment']['task']['name'] + "_" + self.config['agent']['type'] 
 
         self.demodir = self.config['general']['demodir']
+        
+        log_file_path = os.path.join(self.current_dir,self.logdir, self.logname,self.trainid,'logs.log')
+        if os.path.isfile(log_file_path):
+            os.remove(log_file_path) 
+        
+        logging.basicConfig(filename=log_file_path,level=logging.DEBUG)
+        self.pylogger = logging.getLogger('mylogger')
 
         cfg_rlbench = {'path' : config_path}
         self.create_folder(os.path.join(self.current_dir, "cfg_rlbench"))
@@ -31,12 +39,14 @@ class Logger:
         # print(cfg_rlbench_2)
         # print(cfg_rlbench_2['path'])
 
+        self.create_folder(os.path.join(self.current_dir,self.logdir, self.logname,self.trainid)) 
+
         if light_mode == False:
             self.create_folder(os.path.join(self.current_dir,self.logdir, self.logname,self.trainid,"model_backup"))
             #self.create_folder(os.path.join(self.current_dir, self.logdir, self.logname,self.trainid,"plots_raw_data"))
             self.save_yaml(os.path.join(self.current_dir, self.logdir,self.logname,self.trainid,"config.yaml"),self.config)
             self.writer = SummaryWriter(log_dir = os.path.join(self.current_dir,self.logdir,self.logname,self.trainid,"runs"))
-
+           
             
     def compute_and_replace_auto_values(self):
         self.task_name = self.config['environment']['task']['name']
@@ -47,18 +57,30 @@ class Logger:
             if self.task_name == "stack_blocks":
                 self.config['environment']['obs_dim'] = 3 + self.task_params[0] * 3 + self.task_params[1] * 3
             else:
-                print("[ERROR] Obs dim could not be computed")
+                self.print_logfile("Obs dim could not be computed","error")
                 assert False
-            print("Obs dim is computed: " + str(self.config['environment']['obs_dim']))
+            self.print_logfile("Obs dim is computed: " + str(self.config['environment']['obs_dim']))
         if self.config['environment']['act_dim'] == "auto":
             if self.action_space == "pick_and_place_3d":
                 self.config['environment']['act_dim'] = 6
             else:
-                print("[ERROR] Act dim could not be computed")
+                self.print_logfile("Act dim could not be computed","error")
                 assert False
-            print("Act dim is computed: " + str(self.config['environment']['act_dim']))
+            self.print_logfile("Act dim is computed: " + str(self.config['environment']['act_dim']))
 
-
+    def print_logfile(self,message,level = "info", terminal = True):
+        if terminal:
+            print("["+level+"]: " + str(message))
+        if level == "debug":
+            self.pylogger.debug(str(message))
+        elif level == "warning":
+            self.pylogger.warning(str(message))
+        elif level == "error":
+            self.pylogger.error(str(message))
+        else:
+            self.pylogger.info(str(message))
+        
+  
 
     def new_model_to_test(self,epoch):
         models = self.list_model_dir()

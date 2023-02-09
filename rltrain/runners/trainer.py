@@ -100,8 +100,6 @@ class Trainer:
     
     def start(self,agent,replay_buffer,pause_flag,test2train,sample2train):
 
-        print(agent)
-
         # Start Training
         t = 0
         epoch = 1
@@ -123,7 +121,6 @@ class Trainer:
             t = replay_buffer.get_t()
 
             if (t > self.update_after) and (t >= update_iter * self.update_every):
-                #tqdm.write("UPDATE " + str(update_iter))
 
                 if self.mode_sync:
                     pause_flag.value = True
@@ -131,7 +128,9 @@ class Trainer:
                 update_iter_actual = (t+1) // self.update_every
                 if update_iter != update_iter_actual:
                     if update_iter != 1:
-                        tqdm.write("! Update is missed ("+ str(update_iter) + " --> " + str(update_iter_actual) + ") as the sampler is too fast")   
+                        message = "Update is missed ("+ str(update_iter) + " --> " + str(update_iter_actual) + ") as the sampler is too fast"
+                        tqdm.write("[warning]: " + message)  
+                        self.logger.print_logfile(message,level = "warning", terminal = False)
                 update_iter = update_iter_actual
 
 
@@ -139,7 +138,6 @@ class Trainer:
                     for j in tqdm(range(int(self.update_every * self.update_factor)), desc ="Updating weights: ", leave=False):
                         update_iter_every_log += 1
                         batch = replay_buffer.sample_batch(self.batch_size)    
-                        #tqdm.write(str(batch))
                         loss_q, loss_pi = agent.update(data=batch)
                         if update_iter_every_log % self.save_freq == 0:
                             actual_time = time.time() - time0
@@ -166,7 +164,9 @@ class Trainer:
 
                 epoch_real = (t+1) // self.steps_per_epoch
                 if epoch != epoch_real:
-                    tqdm.write("! Test is missed at the end of an epoch ("+ str(epoch) + " --> " + str(epoch_real) + ") as the sampler is too fast")   
+                    message = "Test is missed at the end of an epoch ("+ str(epoch) + " --> " + str(epoch_real) + ") as the sampler is too fast"
+                    tqdm.write("[warning]: " + message)  
+                    self.logger.print_logfile(message,level = "warning", terminal = False)   
                 epoch = epoch_real  
 
                 pause_flag.value = True
@@ -180,21 +180,26 @@ class Trainer:
             if test2train.empty() == False:
                 data = test2train.get()
                 if data['code'] < 0:
-                    tqdm.write("Error Code: " + str(data['code']) + " Description: " + str(data['description']))
+                    message = "Code: " + str(data['code']) + " Description: " + str(data['description'])
+                    tqdm.write("[warning]: " + message)  
+                    self.logger.print_logfile(message,level = "warning", terminal = False)  
                 else:
                     if data['code'] == 1:
                         avg_test_return = data['value']
                         epoch_test = data['epoch']
                           
                         test_t = epoch_test * self.steps_per_epoch           
-                        log_text = "AVG test return: " + str(epoch_test) + ". epoch ("+ str(test_t) + " transitions) : " + str(avg_test_return)
-                        tqdm.write(log_text) 
+                        message = "AVG test return: " + str(epoch_test) + ". epoch ("+ str(test_t) + " transitions) : " + str(avg_test_return)
+                        tqdm.write("[info]: " + message)  
+                        self.logger.print_logfile(message,level = "info", terminal = False)  
                 
             
             if sample2train.empty() == False:
                 data = sample2train.get()
                 if data['code'] < 0:                 
-                    tqdm.write("Error Code: " + str(data['code']) + " Description: " + str(data['description']))
+                    message = "Code: " + str(data['code']) + " Description: " + str(data['description'])
+                    #tqdm.write("[warning]: " + message)  
+                    self.logger.print_logfile(message,level = "warning", terminal = False)  
                     if int(data['code']) == -2:
                         env_error_num += 1 
                     if int(data['code']) == -11:

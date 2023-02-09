@@ -77,7 +77,6 @@ class Sampler:
             while pause_flag.value:
                 time.sleep(0.1)
 
-            #print(str(id) + " - " + str(t))
             # Until start_steps have elapsed, randomly sample actions
             # from a uniform distribution for better exploration. Afterwards, 
             # use the learned policy. 
