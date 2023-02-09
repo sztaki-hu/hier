@@ -36,7 +36,7 @@ def main():
     # Init CUDA and torch and np ##################################
     init_cuda(config['hardware']['gpu'][args.trainid],config['hardware']['cpu_min'][args.trainid],config['hardware']['cpu_max'][args.trainid])
 
-    print_torch_info()
+    print_torch_info(logger)
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print(device)
