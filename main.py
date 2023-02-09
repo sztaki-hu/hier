@@ -72,6 +72,8 @@ def main():
 
     env_num = int(config['sampler']['env_num'])
     if  env_num == 1: # 1 process #################
+
+        logger = Logger(current_dir = current_dir, config_path = config_path, trainid = args.trainid, light_mode = False)
        
         env = make_env(config)
 
