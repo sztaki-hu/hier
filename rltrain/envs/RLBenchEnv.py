@@ -31,6 +31,7 @@ class RLBenchEnv:
         self.act_dim = config['environment']['act_dim']
         self.boundary_min = np.array(config['agent']['boundary_min'])[:self.act_dim]
         self.boundary_max = np.array(config['agent']['boundary_max'])[:self.act_dim]
+        self.grasp_speedup = config['environment']['grasp_speedup']
 
         #self.desk_z = 0.765
         #self.tower_z = 0.765
@@ -102,7 +103,10 @@ class RLBenchEnv:
             o, r, d, info = self.execute_path(poses)  
         elif self.action_space == "pick_and_place_3d":
             poses = self.model2robot_pick_and_place_3d(a_model)
-            o, r, d, info = self.execute_path(poses)    
+            if self.grasp_speedup:
+                o, r, d, info = self.execute_path_grasp_speedup(poses)   
+            else:
+                o, r, d, info = self.execute_path(poses)  
         r = 100 * r
         o = self.get_obs()
         if self.out_of_bound_check(o):
@@ -204,6 +208,17 @@ class RLBenchEnv:
 
         return poses
 
+    def execute_path_grasp_speedup(self,poses):
+        for i in range(len(poses)):
+            observation, reward, done, info = self.task_env.step(poses[i])
+            if i == 3:
+                if len(self.task_env._robot.gripper.get_grasped_objects()) == 0:
+                    open_gripper_pose = poses[i]
+                    open_gripper_pose[7] = 1
+                    observation, reward, done, info = self.task_env.step(open_gripper_pose)
+                    break
+        return observation, reward, done, info
+    
     def execute_path(self,poses):
         for pos in poses:
             observation, reward, done, info = self.task_env.step(pos)
