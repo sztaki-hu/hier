@@ -86,13 +86,29 @@ class RLBenchEnv:
         while True:
             try:
                 o = self.task_env.reset()
-                break
+                if self.init_state_valid():
+                    break
+                else:
+                    print("Init state is not valid. Repeat reset.")
             except:
                 print("Could not reset the environment. Repeat reset.")
                 time.sleep(1)
         #o = self.task_env.reset()
         o = self.get_obs()
         return o 
+    
+    def init_state_valid(self):
+        if self.task_name == "stack_blocks":
+            o = self.get_obs()
+            target_index =  (0, 1, 2)
+            target = o[[target_index[0],target_index[1],target_index[2]]]
+            for j in range(1,self.target_blocks_num+1):
+                block_index =  (j * 3, j * 3 + 1, j * 3 + 2)
+                block = o[[block_index[0],block_index[1],block_index[2]]]
+                if np.allclose(block, target, rtol=0.0, atol=0.02, equal_nan=False):
+                    return False
+        return True
+                
     
     def step(self,a_model):
         if self.action_space == "xyz":

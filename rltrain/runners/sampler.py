@@ -41,9 +41,14 @@ class Sampler:
         while True:
             try:
                 o = self.env.reset_once()
-                break
+                if self.env.init_state_valid():
+                    break
+                else:
+                    data = {'code': -21, 'description':'Init state is not valid. Repeat env reset.'}
+                    sample2train.put(data)
+                    time.sleep(0.1)
             except:
-                data = {'code': -1, 'description':'Could not reset the environment. Repeat reset.'}
+                data = {'code': -1, 'description':'Could not reset the environment. Repeat env reset.'}
                 sample2train.put(data)
                 time.sleep(1)
         
