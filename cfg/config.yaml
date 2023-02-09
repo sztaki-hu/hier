@@ -1,14 +1,14 @@
 general:
-  exp_name: 0203_A
+  exp_name: 0208_B
   logdir: logs
   demodir: demos
   seed: 12
   sync: False
 
 hardware:
-  gpu: 0 
-  cpu_min: 1
-  cpu_max: 16
+  gpu: [0,1,2] 
+  cpu_min: [1,9,17]
+  cpu_max: [8,16,24]
 
 environment:
   name: rlbench
@@ -16,11 +16,12 @@ environment:
     name: stack_blocks
     params: 
       - 1
-      - 4
+      - 0
+      - 1
   headless: True
   camera: False
-  obs_dim: 27
-  act_dim: 6
+  obs_dim: auto
+  act_dim: auto
   reward:
     reward_shaping_use: False
     reward_shaping_type: mse
@@ -43,8 +44,8 @@ demo:
     demo_use: True  
     demo_buffer_size: 500
     demo_ratio: 0.1   
-    demo_create: False
-    demo_name: demo_pick_and_place_3d_0203
+    demo_create: True
+    demo_name: demo_0207_B
 
 sampler:
   env_num: 6
@@ -53,11 +54,11 @@ sampler:
 
 trainer:
   steps_per_epoch: 2000
-  epochs: 20
+  epochs: 10
   batch_size: 128
   update_after: 1000
   update_every: 100
-  update_factor: 1
+  update_factor: 10
 
 tester:
   num_test_episodes: 20
