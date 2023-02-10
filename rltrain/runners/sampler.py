@@ -72,6 +72,7 @@ class Sampler:
         #env_error_num = 0
 
         #pbar = tqdm(total = total_steps, desc =str(id) + ". sampler: ", colour="green")
+        ep_transitions = []
         t = 0
         while end_flag.value:
 
@@ -92,6 +93,7 @@ class Sampler:
             except:
                 data = {'code': -2, 'description': 'Error in environment in step function, thus reseting the environment' + str(a)}
                 sample2train.put(data)
+                ep_transitions = []
                 o, ep_ret, ep_len = self.reset_env(sample2train), 0, 0   
                 continue     
             
@@ -99,6 +101,7 @@ class Sampler:
                 if 'code' in info: 
                     sample2train.put(info)             
                     if info['code'] < 0:
+                        ep_transitions = []
                         o, ep_ret, ep_len = self.reset_env(sample2train), 0, 0
                         continue
 
@@ -111,18 +114,30 @@ class Sampler:
             d = False if ep_len==self.max_ep_len else d
 
             # Store experience to replay buffer
-            replay_buffer.store(o, a, r, o2, d)
+            ep_transitions.append((o, a, r, o2, d))
 
             # Super critical, easy to overlook step: make sure to update 
             # most recent observation!
             o = o2
 
             # End of trajectory handling
-            if d or (ep_len == self.max_ep_len):    
+            if d or (ep_len == self.max_ep_len):   
                 data = {'code': 11, 'value': ep_ret,'description': '-'}
                 sample2train.put(data)
                 data = {'code': 12, 'value': ep_len,'description': '-'}
                 sample2train.put(data)
+                # print(ep_transitions)
+                for transition in ep_transitions:
+                    # print("-------------------")
+                    # print(transition)
+                    o, a, r, o2, d = transition
+                    # print("o" + str(o))
+                    # print("a" + str(a))
+                    # print("r" + str(r))
+                    # print("o2" + str(o2))
+                    # print("d" + str(d))
+                    replay_buffer.store(o, a, r, o2, d)
+                ep_transitions = []
                 o, ep_ret, ep_len = self.reset_env(sample2train), 0, 0               
           
             t += 1           
