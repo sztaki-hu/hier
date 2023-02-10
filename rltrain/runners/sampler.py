@@ -22,8 +22,9 @@ class Sampler:
         self.seed = config['general']['seed']        
         self.start_steps = config['sampler']['start_steps'] 
         self.max_ep_len = config['sampler']['max_ep_len'] 
+
         """
-        Trainer
+        Sampler
 
         Args:
             env : RLBench task-environment
@@ -117,7 +118,11 @@ class Sampler:
             o = o2
 
             # End of trajectory handling
-            if d or (ep_len == self.max_ep_len):             
+            if d or (ep_len == self.max_ep_len):    
+                data = {'code': 11, 'value': ep_ret,'description': '-'}
+                sample2train.put(data)
+                data = {'code': 12, 'value': ep_len,'description': '-'}
+                sample2train.put(data)
                 o, ep_ret, ep_len = self.reset_env(sample2train), 0, 0               
           
             t += 1           

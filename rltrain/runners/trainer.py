@@ -3,6 +3,7 @@ import math
 import numpy as np
 import torch
 import time
+import collections
 
 from tqdm import tqdm
 
@@ -49,9 +50,8 @@ class Trainer:
             self.demo_batch_size = int(self.batch_size * self.demo_ratio)
             self.replay_batch_size = self.batch_size - self.demo_batch_size
         
-        self.processes = []
-
-        
+        self.return_buffer  = collections.deque(maxlen=20)
+        self.episode_len_buffer  = collections.deque(maxlen=20)
 
         """
         Trainer
@@ -141,7 +141,9 @@ class Trainer:
                         loss_q, loss_pi = agent.update(data=batch)
                         if update_iter_every_log % self.save_freq == 0:
                             actual_time = time.time() - time0
-                            self.logger.tb_save_train_data_v2(loss_q,loss_pi,env_error_num,out_of_bounds_num,t,actual_time,update_iter_every_log)
+                            train_ret = np.mean(self.return_buffer)
+                            train_ep_len = np.mean(self.episode_len_buffer)
+                            self.logger.tb_save_train_data_v2(loss_q,loss_pi,train_ret,train_ep_len,env_error_num,out_of_bounds_num,t,actual_time,update_iter_every_log)
                 else:
                     for j in tqdm(range(int(self.update_every * self.update_factor)), desc ="Updating weights: ", leave=False):
                         update_iter_every_log += 1
@@ -155,7 +157,9 @@ class Trainer:
                         loss_q, loss_pi = agent.update(data=batch)
                         if update_iter_every_log % self.save_freq == 0:
                             actual_time = time.time() - time0
-                            self.logger.tb_save_train_data_v2(loss_q,loss_pi,env_error_num,out_of_bounds_num,t,actual_time,update_iter_every_log)    
+                            train_ret = np.mean(self.return_buffer)
+                            train_ep_len = np.mean(self.episode_len_buffer)
+                            self.logger.tb_save_train_data_v2(loss_q,loss_pi,train_ret,train_ep_len,env_error_num,out_of_bounds_num,t,actual_time,update_iter_every_log)    
 
                 pause_flag.value = False
                 update_iter += 1    
@@ -204,13 +208,16 @@ class Trainer:
                         env_error_num += 1 
                     if int(data['code']) == -11:
                         out_of_bounds_num += 1 
+                elif data['code'] == 11:
+                    self.return_buffer.append(float(data['value']))
+                elif data['code'] == 12:  
+                    self.episode_len_buffer.append(int(data['value']))
+
 
             #pbar.update(1)
             pbar.n = t #check this
             pbar.refresh() #check this
         pbar.close()
 
-        # for p in self.processes:
-        #     p.join()
             
                

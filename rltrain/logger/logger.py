@@ -123,9 +123,11 @@ class Logger:
     def remove_old_demo(self,name):
         os.remove(os.path.join(self.current_dir,self.demodir,name + ".yaml")) 
     
-    def tb_save_train_data_v2(self,loss_q,loss_pi,env_error_num,out_of_bounds_num,t,actual_time,update_iter):
+    def tb_save_train_data_v2(self,loss_q,loss_pi,train_ret,train_ep_len,env_error_num,out_of_bounds_num,t,actual_time,update_iter):
         self.tb_writer_add_scalar("train/loss_q", loss_q, update_iter)
         self.tb_writer_add_scalar("train/loss_p", loss_pi, update_iter)
+        self.tb_writer_add_scalar("train/train_ret", train_ret, t)
+        self.tb_writer_add_scalar("train/train_ep_len", train_ep_len, t)
         env_error_num_ratio = (env_error_num / float(t))
         self.tb_writer_add_scalar("train/env_error_ratio", env_error_num_ratio, update_iter)
         out_of_bounds_ratio = (out_of_bounds_num / float(t))
