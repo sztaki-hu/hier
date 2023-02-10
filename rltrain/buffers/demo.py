@@ -1,5 +1,6 @@
 import numpy as np
 import torch
+import time
 from tqdm import tqdm
 
 from rltrain.buffers.replay import ReplayBuffer
@@ -16,6 +17,7 @@ class Demo:
         self.demo_ratio = config['demo']['demo_ratio'] 
         self.demo_name = config['demo']['demo_name'] 
         self.demo_create = config['demo']['demo_create']
+        self.demo_block_order = config['demo']['demo_block_order']
         self.obs_dim = config['environment']['obs_dim']
         self.act_dim = config['environment']['act_dim']
         self.action_space = config['agent']['action_space']
@@ -58,6 +60,7 @@ class Demo:
         # batch = self.demo_buffer.sample_batch(self.batch_size) 
         # print(batch)
         # print(self.demo_buffer.ptr)
+        
     
     def create_demos_pick_and_place_3d(self):  
 
@@ -67,30 +70,46 @@ class Demo:
         assert self.target_blocks_num >= self.tower_height
 
         for _ in tqdm(range(self.demo_num), desc ="Loading demos: ", colour="green"):  
-            o = self.env.reset()
+            while True:
+                try:
+                    o = self.env.reset_once()
+                    if self.env.init_state_valid():
+                        break
+                    else:
+                        tqdm.write('Init state is not valid. Repeat env reset.')
+                        time.sleep(0.1)
+                except:
+                    tqdm.write('Could not reset the environment. Repeat env reset.')
+                    time.sleep(1)
+
             episode_transitions = []
             ret = 0
 
             target_index =  (0, 1, 2)
             target = o[[target_index[0],target_index[1],target_index[2]]]
 
-            blocks = []
+            blocks_init = []
             dists = []
             for j in range(1,self.target_blocks_num+1):
                 block_index =  (j * 3, j * 3 + 1, j * 3 + 2)
                 block = o[[block_index[0],block_index[1],block_index[2]]]
                 dists.append(np.sum(np.square(target - block)))
-                blocks.append(block)         
+                blocks_init.append(block)         
             
-            blocks_arranged = []
-            for _ in range(self.target_blocks_num):
-                index = np.argmin(dists)
-                blocks_arranged.append(blocks[index])
-                dists[index] = float('inf')
-
+            if self.demo_block_order == "dist_based":
+                blocks = []
+                for _ in range(self.target_blocks_num):
+                    index = np.argmin(dists)
+                    blocks.append(blocks_init[index])
+                    dists[index] = float('inf')
+            elif self.demo_block_order == "random":
+                print("Not implemented yet")
+            elif self.demo_block_order == "as_init":
+                blocks = blocks_init
+            
             for i in range(self.tower_height):
                 
-                a = np.hstack((blocks_arranged[i],target)) 
+                a = np.hstack((blocks[i],target)) 
                 a[5] += 0.01 + 0.03 * i
                 try:
                     o2, r, d, info = self.env.step(a)
