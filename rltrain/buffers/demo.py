@@ -18,11 +18,15 @@ class Demo:
         self.demo_name = config['demo']['demo_name'] 
         self.demo_create = config['demo']['demo_create']
         self.demo_block_order = config['demo']['demo_block_order']
+
         self.obs_dim = config['environment']['obs_dim']
         self.act_dim = config['environment']['act_dim']
         self.action_space = config['agent']['action_space']
+        self.gamma = config['agent']['gamma'] 
+        self.n_step = config['agent']['n_step'] 
         self.batch_size = config['trainer']['batch_size'] 
 
+        self.task_name = self.config['environment']['task']['name']
         self.target_blocks_num = int(self.config['environment']['task']['params'][0])
         self.distractor_blocks_num = int(self.config['environment']['task']['params'][1])
         self.tower_height = int(self.config['environment']['task']['params'][2])
@@ -36,7 +40,8 @@ class Demo:
         # elif self.action_space == "pick_and_place_2d":
         #     self.create_demos_pick_and_place_2d()
         elif self.action_space == "pick_and_place_3d":
-            self.create_demos_pick_and_place_3d()
+            if self.task_name == "stack_blocks":
+                self.create_demos_stack_blocks_pick_and_place_3d()
 
     def create_demos_xyz(self):  
 
@@ -62,7 +67,7 @@ class Demo:
         # print(self.demo_buffer.ptr)
         
     
-    def create_demos_pick_and_place_3d(self):  
+    def create_demos_stack_blocks_pick_and_place_3d(self):  
 
         self.env = make_env(self.config)
         unsuccessful_num = 0
@@ -82,7 +87,7 @@ class Demo:
                     tqdm.write('Could not reset the environment. Repeat env reset.')
                     time.sleep(1)
 
-            episode_transitions = []
+            ep_transitions = []
             ret = 0
 
             target_index =  (0, 1, 2)
@@ -113,7 +118,7 @@ class Demo:
                 a[5] += 0.01 + 0.03 * i
                 try:
                     o2, r, d, info = self.env.step(a)
-                    episode_transitions.append((o, a, r, o2, d))
+                    ep_transitions.append((o, a, r, o2, d))
                     o = o2
                     ret += r
                 except:
@@ -121,8 +126,21 @@ class Demo:
                     ret = -1
                     break
             if ret > 0:
-                for t in episode_transitions:
-                    self.demo_buffer.store(t[0],t[1],t[2],t[3],t[4])
+                for i in range(len(ep_transitions)):
+                    o, a, r, o2, d = ep_transitions[i]
+                    r_nstep = 0
+                    d_nstep = 0
+                    for j in range(self.n_step):
+                        #if i + j < len(transitions):
+                        if d_nstep == 0 and i + j < len(ep_transitions):
+                            r_nstep += ep_transitions[i+j][2] * self.gamma**j
+                            obs_nstep = ep_transitions[i+j][3]
+                            d_nstep = ep_transitions[i+j][4]
+                        else:
+                            break
+                    n_nstep = j
+                    self.demo_buffer.store(o, a, r, o2, d, r_nstep, obs_nstep, d_nstep, n_nstep)
+
             else:
                 unsuccessful_num += 1   
                 tqdm.write("The demonstration is not successful, thus it is not added " + str(unsuccessful_num))    

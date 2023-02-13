@@ -22,6 +22,8 @@ class Sampler:
         self.seed = config['general']['seed']        
         self.start_steps = config['sampler']['start_steps'] 
         self.max_ep_len = config['sampler']['max_ep_len'] 
+        self.gamma = config['agent']['gamma'] 
+        self.n_step = config['agent']['n_step'] 
 
         """
         Sampler
@@ -126,17 +128,21 @@ class Sampler:
                 sample2train.put(data)
                 data = {'code': 12, 'value': ep_len,'description': '-'}
                 sample2train.put(data)
-                # print(ep_transitions)
-                for transition in ep_transitions:
-                    # print("-------------------")
-                    # print(transition)
-                    o, a, r, o2, d = transition
-                    # print("o" + str(o))
-                    # print("a" + str(a))
-                    # print("r" + str(r))
-                    # print("o2" + str(o2))
-                    # print("d" + str(d))
-                    replay_buffer.store(o, a, r, o2, d)
+
+                for i in range(len(ep_transitions)):
+                    o, a, r, o2, d = ep_transitions[i]
+                    r_nstep = 0
+                    d_nstep = 0
+                    for j in range(self.n_step):
+                        if d_nstep == 0 and i + j < len(ep_transitions):
+                            r_nstep += ep_transitions[i+j][2] * self.gamma**j
+                            obs_nstep = ep_transitions[i+j][3]
+                            d_nstep = ep_transitions[i+j][4]
+                        else:
+                            break
+                    n_nstep = j
+                    replay_buffer.store(o, a, r, o2, d, r_nstep, obs_nstep, d_nstep, n_nstep)
+                
                 ep_transitions = []
                 o, ep_ret, ep_len = self.reset_env(sample2train), 0, 0               
           

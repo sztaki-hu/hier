@@ -153,7 +153,11 @@ class Trainer:
                                     obs2=torch.cat((replay_batch['obs2'], demo_batch['obs2']), 0),
                                     act=torch.cat((replay_batch['act'], demo_batch['act']), 0),
                                     rew=torch.cat((replay_batch['rew'], demo_batch['rew']), 0),
-                                    done=torch.cat((replay_batch['done'], demo_batch['done']), 0))  
+                                    done=torch.cat((replay_batch['done'], demo_batch['done']), 0),
+                                    rew_nstep=torch.cat((replay_batch['rew_nstep'], demo_batch['rew_nstep']), 0),
+                                    obs_nstep=torch.cat((replay_batch['obs_nstep'], demo_batch['obs_nstep']), 0),                                   
+                                    done_nstep=torch.cat((replay_batch['done_nstep'], demo_batch['done_nstep']), 0),
+                                    n_nstep=torch.cat((replay_batch['n_nstep'], demo_batch['n_nstep']), 0))  
                         loss_q, loss_pi = agent.update(data=batch)
                         if update_iter_every_log % self.save_freq == 0:
                             actual_time = time.time() - time0

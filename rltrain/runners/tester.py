@@ -106,7 +106,6 @@ class Tester:
 
             o, d, ep_ret, ep_len = self.reset_env(), False, 0, 0
 
-
             while not(d or (ep_len == self.max_ep_len)):
                 # Take deterministic actions at test time 
                 try:

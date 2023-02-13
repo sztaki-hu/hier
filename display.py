@@ -18,9 +18,9 @@ import torch
 
 if __name__ == '__main__':
     # Init logger
-    trainid = 0
+    trainid = 1
     current_dir = dirname(abspath(__file__))
-    config_path = current_dir + "/logs_compute/0206_C_stack_blocks_sac/"+ str(trainid) +"/config.yaml"
+    config_path = current_dir + "/logs/0209_B_stack_blocks_sac/"+ str(trainid) +"/config.yaml"
     logger = Logger(current_dir = current_dir, config_path = config_path, trainid = trainid)
     config = logger.get_config()
 
@@ -28,7 +28,7 @@ if __name__ == '__main__':
     hw_train_id = 0
     init_cuda(config['hardware']['gpu'][hw_train_id],config['hardware']['cpu_min'][hw_train_id],config['hardware']['cpu_max'][hw_train_id])
 
-    print_torch_info()
+    print_torch_info(logger)
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print(device)
