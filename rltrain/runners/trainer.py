@@ -136,6 +136,12 @@ class Trainer:
 
                 if self.demo_use == False:
                     for j in tqdm(range(int(self.update_every * self.update_factor)), desc ="Updating weights: ", leave=False):
+                        if replay_buffer.get_t() > (update_iter + 0.9) * self.update_every:
+                            message = "Update is lagging behind sampling, thus stopped at " + str(j+1) + " instead of " + str(self.update_every * self.update_factor)
+                            tqdm.write("[warning]: " + message)  
+                            self.logger.print_logfile(message,level = "warning", terminal = False)
+                            break
+
                         update_iter_every_log += 1
                         batch = replay_buffer.sample_batch(self.batch_size)    
                         loss_q, loss_pi = agent.update(data=batch)
@@ -146,6 +152,11 @@ class Trainer:
                             self.logger.tb_save_train_data_v2(loss_q,loss_pi,train_ret,train_ep_len,env_error_num,out_of_bounds_num,t,actual_time,update_iter_every_log)
                 else:
                     for j in tqdm(range(int(self.update_every * self.update_factor)), desc ="Updating weights: ", leave=False):
+                        if replay_buffer.get_t() > (update_iter + 0.9) * self.update_every:
+                            message = "Update is lagging behind sampling, thus stopped at " + str(j+1) + " instead of " + str(self.update_every * self.update_factor)
+                            tqdm.write("[warning]: " + message)  
+                            self.logger.print_logfile(message,level = "warning", terminal = False)
+                            break
                         update_iter_every_log += 1
                         replay_batch = replay_buffer.sample_batch(self.replay_batch_size)
                         demo_batch = self.demo_buffer.sample_batch(self.demo_batch_size) 
