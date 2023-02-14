@@ -182,7 +182,21 @@ class Tester:
 
         sum_return = 0
         for j in tqdm(range(num_display_episode), desc ="Testing: ", leave=False):
-            o, d, ep_ret, ep_len = self.reset_env(), False, 0, 0
+
+            while True:
+                try:
+                    o = self.env.reset_once()
+                    if self.env.init_state_valid():
+                        break
+                    else:
+                        tqdm.write('Init state is not valid. Repeat env reset.')
+                        time.sleep(0.1)
+                except:
+                    tqdm.write('Could not reset the environment. Repeat env reset.')
+                    time.sleep(1)
+            
+            d, ep_ret, ep_len = False, 0, 0
+
             while not(d or (ep_len == self.max_ep_len)):
                 # Take deterministic actions at test time 
                 try:
