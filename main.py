@@ -69,7 +69,6 @@ def main():
         demo_buffer = None
     
     
-
     env_num = int(config['sampler']['env_num'])
     if  env_num == 1: # 1 process #################
 
@@ -122,9 +121,9 @@ def main():
         agent_tester = Agent(device,config)
         tester = Tester(agent_tester,logger,config)
 
-        p = Process(target=tester.start, args=[test2train])
-        p.start()
-        processes.append(p)
+        tester_p = Process(target=tester.start, args=[test2train])
+        tester_p.start()
+        #processes.append(p)
 
         trainer.start(agent,replay_buffer,pause_flag,test2train,sample2train)
 
@@ -133,10 +132,14 @@ def main():
         pause_flag.value = False
         end_flag.value = False
 
-        logger.print_logfile("Wait for processes to terminate")
+        logger.print_logfile("Waiting for samplers to terminate")
         for p in processes:
             p.join()
-        logger.print_logfile("Processes terminated")
+        logger.print_logfile("Samplers terminated")
+
+        logger.print_logfile("Waiting for the tester to terminate")
+        tester_p.join()
+        logger.print_logfile("Tester terminated")
 
         while sample2train.empty() == False:
             logger.print_logfile(sample2train.get())

@@ -64,7 +64,15 @@ class Tester:
 
             if model_name != None:
                 path = self.logger.get_model_path(model_name)
-                self.agent.load_weights(path)
+                
+                while True:
+                    try:
+                        self.agent.load_weights(path)
+                        break
+                    except:
+                        data = {'code': -31, 'description':'Tester could not open weight file'}
+                        test2train.put(data)
+                        time.sleep(1.0)
 
                 avg_test_return = self.test_v2()
                 data = {'code': 1, 'value': avg_test_return, 'epoch': epoch, 'description':'Average test result'}
