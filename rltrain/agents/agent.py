@@ -158,7 +158,7 @@ class Agent:
             q2_pi_targ = self.ac_targ.q2(o_nstep, a_nstep)
             q_pi_targ = torch.min(q1_pi_targ, q2_pi_targ)
 
-            backup = r_nstep + self.gamma**n_nstep * (1 - d_nstep) * (q_pi_targ - self.alpha * logp_a_nstep)
+            backup = r_nstep + self.gamma**(n_nstep+1) * (1 - d_nstep) * (q_pi_targ - self.alpha * logp_a_nstep)
 
         # MSE loss against Bellman backup
         loss_q1 = ((q1 - backup)**2).mean()
