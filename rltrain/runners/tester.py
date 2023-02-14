@@ -110,14 +110,14 @@ class Tester:
                 # Take deterministic actions at test time 
                 try:
                     a = self.agent.get_action(o, True)
-                    #print(a)
                     o, r, d, _ = self.env.step(a)
-                    ep_ret += r
-                    ep_len += 1
                 except:
                     data = {'code': -3, 'description':'Error in simulation (test time), thus reseting the environment'}
                     self.test2train.put(data)
-                    break               
+                    break   
+                ep_ret += r
+                ep_len += 1    
+
             sum_return += ep_ret
         avg_return = sum_return / float(self.num_test_episodes)
 
@@ -174,23 +174,22 @@ class Tester:
 
         sum_return = 0
         for j in tqdm(range(num_display_episode), desc ="Testing: ", leave=False):
-            o, d, ep_ret, ep_len = self.env.reset(), False, 0, 0
+            o, d, ep_ret, ep_len = self.reset_env(), False, 0, 0
             while not(d or (ep_len == self.max_ep_len)):
                 # Take deterministic actions at test time 
                 try:
                     a = self.agent.get_action(o, True)
-                    #print(a)
                     o, r, d, _ = self.env.step(a)
-                    ep_ret += r
-                    ep_len += 1
                 except:
                     tqdm.write("Error in simulation (test time), thus reseting the environment")
-                    break               
+                    break     
+                ep_ret += r
+                ep_len += 1          
             sum_return += ep_ret          
             tqdm.write("------------------------")
             #tqdm.write("Obs: " + str(o) + " | Act: " + str(a))
             tqdm.write("Ep Ret: " + str(ep_ret) + " | Ep Len: " + str(ep_len))
-        avg_return = sum_return / float(self.num_test_episodes)
+        avg_return = sum_return / float(num_display_episode)
         
         self.env.shuttdown() 
 
