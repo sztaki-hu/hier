@@ -131,9 +131,10 @@ class Sampler:
 
                 for i in range(len(ep_transitions)):
                     o, a, r, o2, d = ep_transitions[i]
-                    r_nstep = 0
-                    d_nstep = 0
-                    for j in range(self.n_step):
+                    r_nstep = ep_transitions[i][2]
+                    obs_nstep = ep_transitions[i][3]
+                    d_nstep = ep_transitions[i][4]
+                    for j in range(1,self.n_step):
                         if d_nstep == 0 and i + j < len(ep_transitions):
                             r_nstep += ep_transitions[i+j][2] * self.gamma**j
                             obs_nstep = ep_transitions[i+j][3]
