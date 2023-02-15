@@ -65,6 +65,20 @@ class ReplayBuffer:
                      n_nstep=self.n_nstep_buf[idxs])
         return {k: torch.as_tensor(v, dtype=torch.float32) for k,v in batch.items()}
     
+    def get_first(self, num):
+        max_sample = min(int(num),self.size)
+        idxs = np.arange(max_sample, dtype=int)
+        batch = dict(obs=self.obs_buf[idxs],
+                     obs2=self.obs2_buf[idxs],
+                     act=self.act_buf[idxs],
+                     rew=self.rew_buf[idxs],
+                     done=self.done_buf[idxs],
+                     rew_nstep=self.rew_nstep_buff[idxs],
+                     obs_nstep=self.obs_nstep_buff[idxs],
+                     done_nstep=self.done_nstep_buf[idxs],
+                     n_nstep=self.n_nstep_buf[idxs])
+        return {k: torch.as_tensor(v, dtype=torch.float32) for k,v in batch.items()}
+    
     def get_t(self):
         return self.t
 

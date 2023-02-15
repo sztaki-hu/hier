@@ -18,6 +18,7 @@ class Demo:
         self.demo_name = config['demo']['demo_name'] 
         self.demo_create = config['demo']['demo_create']
         self.demo_block_order = config['demo']['demo_block_order']
+        self.demo_change_nstep = config['demo']['demo_change_nstep']  
 
         self.obs_dim = config['environment']['obs_dim']
         self.act_dim = config['environment']['act_dim']
@@ -164,4 +165,41 @@ class Demo:
         return self.logger.demo_exists(self.demo_name)
 
     def load_demos(self):
-        return self.logger.load_demos(self.demo_name)
+        if self.demo_change_nstep == False:
+            return self.logger.load_demos(self.demo_name)
+        else:
+            return self.load_and_change_nstep()
+
+    def update_transition_nstep(self,ep_transitions):
+         for i in range(len(ep_transitions)):
+            o, a, r, o2, d = ep_transitions[i]
+            r_nstep = ep_transitions[i][2]
+            obs_nstep = ep_transitions[i][3]
+            d_nstep = ep_transitions[i][4]
+            j = 0
+            for j in range(1,self.n_step):
+                if d_nstep == 0 and i + j < len(ep_transitions):
+                    r_nstep += ep_transitions[i+j][2] * self.gamma**j
+                    obs_nstep = ep_transitions[i+j][3]
+                    d_nstep = ep_transitions[i+j][4]
+                else:
+                    break
+            n_nstep = j
+            self.demo_buffer.store(o, a, r, o2, d, r_nstep, obs_nstep, d_nstep, n_nstep)
+
+    def load_and_change_nstep(self):
+
+        base_demo_buffer = self.logger.load_demos(self.demo_name)
+        data = base_demo_buffer.get_all()
+
+        o, a, r, o2, d = data['obs'], data['act'], data['rew'], data['obs2'], data['done']
+        r_nstep, o_nstep, d_nstep,n_nstep = data['rew_nstep'], data['obs_nstep'], data['done_nstep'], data['n_nstep']
+
+        ep_transitions = []
+        for i in tqdm(range(d.shape[0]), desc ="Demo changing nstep: ", colour="yellow"):  
+            ep_transitions.append((o[i], a[i], r[i], o2[i], d[i]))
+            if d[i] == 1:
+                self.update_transition_nstep(ep_transitions)
+                ep_transitions = []
+        
+        return self.demo_buffer

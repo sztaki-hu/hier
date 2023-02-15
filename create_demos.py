@@ -57,7 +57,7 @@ def main():
             # demo_p.join()  
         else:
             demoBuffer = demo.load_demos()
-            batch = demoBuffer.sample_batch(batch_size=10)
+            batch = demoBuffer.get_first(10)
             print(batch)
                      
 
