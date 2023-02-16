@@ -60,7 +60,8 @@ class Tester:
         epoch = 1
         while epoch <= self.epochs:
 
-            model_name = self.logger.new_model_to_test(epoch)
+            model_name = self.logger.get_model_epoch(epoch)
+            
 
             if model_name != None:
                 path = self.logger.get_model_path(model_name)

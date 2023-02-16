@@ -188,11 +188,11 @@ class Trainer:
                     self.logger.print_logfile(message,level = "warning", terminal = False)   
                 epoch = epoch_real  
 
-                pause_flag.value = True
-
                 agent.save_model(self.logger.get_model_save_path(epoch))
 
-                pause_flag.value = False
+                ## To be implemented #####################
+                #self.logger.save_replay_buffer(replay_buffer, epoch)
+                ####################################
 
                 epoch += 1
 

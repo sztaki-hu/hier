@@ -32,16 +32,18 @@ import torch
 def main():
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--configfile", default="/cfg/config.yaml" ,help="Path of the config file")
+    parser.add_argument("--configfile", default="cfg/config.yaml" ,help="Path of the config file")
+    #parser.add_argument("--configfile", default="logs/0216_A_test_stack_blocks_sac" ,help="Path of the config file")
     parser.add_argument("--trainid", type=int, default=0 ,help="Train ID")
+    parser.add_argument("--restart", type=bool, default=False ,help="Set true if you want to restart a training")
+    parser.add_argument("--restart_epoch", type=int, default=5 ,help="The epoch number from where you want to restart the training.")
     # Example: python3 main.py --configfile /cfg/alma.yaml 0
     args = parser.parse_args()
 
     # Init logger ###############################################x
     current_dir = dirname(abspath(__file__))
-    config_path = current_dir + args.configfile
-    #config_path = current_dir + "/cfg/config_test.yaml"
-    logger = Logger(current_dir = current_dir, config_path = config_path, trainid = args.trainid, light_mode = True)
+
+    logger = Logger(current_dir = current_dir, main_args = args, light_mode = True)
     config = logger.get_config()
     
     # Init CUDA and torch and np ##################################
@@ -56,6 +58,9 @@ def main():
 
     torch.manual_seed(config['general']['seed'])
     np.random.seed(config['general']['seed'])
+
+    mp.set_start_method('spawn')
+    #torch.multiprocessing.set_start_method('spawn')
 
     # Demo Buffer ###########################################################
     if config['demo']['demo_use']:
@@ -72,7 +77,7 @@ def main():
     env_num = int(config['sampler']['env_num'])
     if  env_num == 1: # 1 process #################
 
-        logger = Logger(current_dir = current_dir, config_path = config_path, trainid = args.trainid, light_mode = False)
+        logger = Logger(current_dir = current_dir, main_args = args, light_mode = False)
        
         env = make_env(config)
 
@@ -86,9 +91,6 @@ def main():
 
     else:  # Multi-process ####################################################
 
-        mp.set_start_method('spawn')
-        #torch.multiprocessing.set_start_method('spawn')
-
         BaseManager.register('ReplayBuffer', ReplayBuffer)
         BaseManager.register('Agent', Agent)
         BaseManager.register('Logger', Logger)
@@ -99,9 +101,17 @@ def main():
             act_dim=int(config['environment']['act_dim']), 
             size=int(config['buffer']['replay_buffer_size']))
         agent = manager.Agent(device,config)
-        logger = manager.Logger(current_dir = current_dir, config_path = config_path, trainid = args.trainid)
+        logger = manager.Logger(current_dir = current_dir, main_args = args, light_mode = False)
 
         # Training ##############################################################
+
+        if args.restart == True: 
+            path = logger.get_model_path_for_restart(dir = "model_backup_restart", epoch = int(args.restart_epoch))
+            agent.load_weights(path)
+
+            ## To be implemented #####################
+            #replay_buffer = logger.load_replay_buffer(int(args.restart_epoch))
+            ####################################
 
         sampler = Sampler(agent,demo_buffer,config)
         trainer = Trainer(device,demo_buffer,logger,config)

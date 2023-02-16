@@ -9,11 +9,19 @@ from torch.utils.tensorboard import SummaryWriter
 
 class Logger:
     # init method or constructor
-    def __init__(self, current_dir,config_path, trainid, light_mode = False):
-        self.current_dir = current_dir
-        self.config_path = config_path
-        self.trainid = str(trainid)
+    def __init__(self, current_dir, main_args, light_mode = False):
 
+        self.current_dir = current_dir
+        self.trainid = str(main_args.trainid)
+
+        if main_args.restart == False:       
+            self.config_path = os.path.join(current_dir,main_args.configfile)
+        else:
+            self.config_path = os.path.join(current_dir,main_args.configfile,self.trainid,"config.yaml")
+        
+        print(current_dir)
+        print(self.config_path)
+        
         self.config = self.load_yaml(self.config_path)
 
         self.logdir = self.config['general']['logdir']
@@ -26,13 +34,15 @@ class Logger:
             os.remove(log_file_path) 
         
         self.create_folder(os.path.join(self.current_dir,self.logdir, self.logname,self.trainid))
+
         logging.basicConfig(filename=log_file_path,level=logging.DEBUG)
         self.pylogger = logging.getLogger('mylogger')
 
-        cfg_rlbench = {'path' : config_path}
+        cfg_rlbench = {'path' : self.config_path}
         self.create_folder(os.path.join(self.current_dir, "cfg_rlbench"))
 
-        self.compute_and_replace_auto_values()
+        if main_args.restart == False: 
+            self.compute_and_replace_auto_values()
 
         self.save_yaml(os.path.join(self.current_dir, "cfg_rlbench" ,"config.yaml"),cfg_rlbench)
 
@@ -43,9 +53,11 @@ class Logger:
         self.create_folder(os.path.join(self.current_dir,self.logdir, self.logname,self.trainid)) 
 
         if light_mode == False:
-            self.create_folder(os.path.join(self.current_dir,self.logdir, self.logname,self.trainid,"model_backup"))
-            #self.create_folder(os.path.join(self.current_dir, self.logdir, self.logname,self.trainid,"plots_raw_data"))
-            self.save_yaml(os.path.join(self.current_dir, self.logdir,self.logname,self.trainid,"config.yaml"),self.config)
+            if main_args.restart == False:
+                self.create_folder(os.path.join(self.current_dir,self.logdir, self.logname,self.trainid,"model_backup"))
+                #self.create_folder(os.path.join(self.current_dir,self.logdir, self.logname,self.trainid,"replay_buffer_backup"))
+                #self.create_folder(os.path.join(self.current_dir, self.logdir, self.logname,self.trainid,"plots_raw_data"))
+                self.save_yaml(os.path.join(self.current_dir, self.logdir,self.logname,self.trainid,"config.yaml"),self.config)
             self.writer = SummaryWriter(log_dir = os.path.join(self.current_dir,self.logdir,self.logname,self.trainid,"runs"))
            
             
@@ -80,22 +92,24 @@ class Logger:
             self.pylogger.error(str(message))
         else:
             self.pylogger.info(str(message))
-        
-  
 
-    def new_model_to_test(self,epoch):
+    def get_model_epoch(self,epoch):
         models = self.list_model_dir()
         for model in models:
             model_num = int(model[6:])    
             if model_num == epoch:
                 return model
-        return None
+        return None       
 
     def list_model_dir(self):
         return os.listdir(os.path.join(self.current_dir,self.logdir, self.logname,self.trainid,"model_backup"))
 
     def get_model_path(self,name):
         return os.path.join(self.current_dir,self.logdir, self.logname,self.trainid,"model_backup",name)
+    
+    def get_model_path_for_restart(self,dir = "model_backup_restart", epoch = 1):
+        name = "model_" + str(epoch)
+        return os.path.join(self.current_dir,self.logdir, self.logname,self.trainid,str(dir),name)
 
     def get_config(self):
         return self.config
@@ -109,6 +123,15 @@ class Logger:
     
     def get_model_save_path(self,epoch):
         return os.path.join(self.current_dir, self.logdir, self.logname,self.trainid,"model_backup","model_" + str(epoch))
+    
+    # def save_replay_buffer(self, replay_buffer, epoch):
+    #     path = os.path.join(self.current_dir, self.logdir, self.logname,self.trainid,"replay_buffer_backup","buffer_" + str(epoch)+".yaml")
+    #     replay_buffer_copy = replay_buffer
+    #     self.save_yaml(path, replay_buffer_copy)
+    
+    # def load_replay_buffer(self,epoch):
+    #     path = os.path.join(self.current_dir, self.logdir, self.logname,self.trainid,"replay_buffer_backup","buffer_" + str(epoch)+".yaml")
+    #     return self.load_yaml(path)
         
     def demo_exists(self,name):
         return os.path.isfile(os.path.join(self.current_dir, self.demodir, name + ".yaml"))
