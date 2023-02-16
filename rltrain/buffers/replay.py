@@ -38,6 +38,24 @@ class ReplayBuffer:
         self.ptr = (self.ptr+1) % self.max_size
         self.size = min(self.size+1, self.max_size)
         self.t += 1
+    
+    def store_episode_nstep(self,ep_transitions,n_step,gamma):
+        for i in range(len(ep_transitions)):
+            o, a, r, o2, d = ep_transitions[i]
+            r_nstep = ep_transitions[i][2]
+            obs_nstep = ep_transitions[i][3]
+            d_nstep = ep_transitions[i][4]
+            j = 0
+            if d_nstep == 0:
+                for j in range(1,n_step):
+                    if i + j < len(ep_transitions):
+                        r_nstep += ep_transitions[i+j][2] * gamma**j
+                        obs_nstep = ep_transitions[i+j][3]
+                        d_nstep = ep_transitions[i+j][4]
+                        if d_nstep == 1:
+                            break
+            n_nstep = j
+            self.store(o, a, r, o2, d, r_nstep, obs_nstep, d_nstep, n_nstep)
 
     def sample_batch(self, batch_size=32):
         idxs = np.random.randint(0, self.size, size=batch_size)

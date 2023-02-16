@@ -129,21 +129,7 @@ class Sampler:
                 data = {'code': 12, 'value': ep_len,'description': '-'}
                 sample2train.put(data)
 
-                for i in range(len(ep_transitions)):
-                    o, a, r, o2, d = ep_transitions[i]
-                    r_nstep = ep_transitions[i][2]
-                    obs_nstep = ep_transitions[i][3]
-                    d_nstep = ep_transitions[i][4]
-                    j = 0
-                    for j in range(1,self.n_step):
-                        if d_nstep == 0 and i + j < len(ep_transitions):
-                            r_nstep += ep_transitions[i+j][2] * self.gamma**j
-                            obs_nstep = ep_transitions[i+j][3]
-                            d_nstep = ep_transitions[i+j][4]
-                        else:
-                            break
-                    n_nstep = j
-                    replay_buffer.store(o, a, r, o2, d, r_nstep, obs_nstep, d_nstep, n_nstep)
+                replay_buffer.store_episode_nstep(ep_transitions,self.n_step,self.gamma)
                 
                 ep_transitions = []
                 o, ep_ret, ep_len = self.reset_env(sample2train), 0, 0               

@@ -127,21 +127,7 @@ class Demo:
                     ret = -1
                     break
             if ret > 0:
-                for i in range(len(ep_transitions)):
-                    o, a, r, o2, d = ep_transitions[i]
-                    r_nstep = ep_transitions[i][2]
-                    obs_nstep = ep_transitions[i][3]
-                    d_nstep = ep_transitions[i][4]
-                    j = 0
-                    for j in range(1,self.n_step):
-                        if d_nstep == 0 and i + j < len(ep_transitions):
-                            r_nstep += ep_transitions[i+j][2] * self.gamma**j
-                            obs_nstep = ep_transitions[i+j][3]
-                            d_nstep = ep_transitions[i+j][4]
-                        else:
-                            break
-                    n_nstep = j
-                    self.demo_buffer.store(o, a, r, o2, d, r_nstep, obs_nstep, d_nstep, n_nstep)
+                self.demo_buffer.store_episode_nstep(ep_transitions,self.n_step,self.gamma)
 
             else:
                 unsuccessful_num += 1   
@@ -170,36 +156,19 @@ class Demo:
         else:
             return self.load_and_change_nstep()
 
-    def update_transition_nstep(self,ep_transitions):
-         for i in range(len(ep_transitions)):
-            o, a, r, o2, d = ep_transitions[i]
-            r_nstep = ep_transitions[i][2]
-            obs_nstep = ep_transitions[i][3]
-            d_nstep = ep_transitions[i][4]
-            j = 0
-            for j in range(1,self.n_step):
-                if d_nstep == 0 and i + j < len(ep_transitions):
-                    r_nstep += ep_transitions[i+j][2] * self.gamma**j
-                    obs_nstep = ep_transitions[i+j][3]
-                    d_nstep = ep_transitions[i+j][4]
-                else:
-                    break
-            n_nstep = j
-            self.demo_buffer.store(o, a, r, o2, d, r_nstep, obs_nstep, d_nstep, n_nstep)
-
     def load_and_change_nstep(self):
 
         base_demo_buffer = self.logger.load_demos(self.demo_name)
         data = base_demo_buffer.get_all()
 
         o, a, r, o2, d = data['obs'], data['act'], data['rew'], data['obs2'], data['done']
-        r_nstep, o_nstep, d_nstep,n_nstep = data['rew_nstep'], data['obs_nstep'], data['done_nstep'], data['n_nstep']
+        #r_nstep, o_nstep, d_nstep,n_nstep = data['rew_nstep'], data['obs_nstep'], data['done_nstep'], data['n_nstep']
 
         ep_transitions = []
-        for i in tqdm(range(d.shape[0]), desc ="Demo changing nstep: ", colour="yellow"):  
+        for i in tqdm(range(d.shape[0]), desc ="Demo changing nstep: ", colour="green"):  
             ep_transitions.append((o[i], a[i], r[i], o2[i], d[i]))
             if d[i] == 1:
-                self.update_transition_nstep(ep_transitions)
+                self.demo_buffer.store_episode_nstep(ep_transitions,self.n_step,self.gamma)
                 ep_transitions = []
         
         return self.demo_buffer
