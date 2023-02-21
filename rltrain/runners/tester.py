@@ -131,7 +131,7 @@ class Tester:
                             if info['code'] == -11:
                                 data = {'code': -11, 'description': '[Test]: Block is out of bounds '}
                                 self.test2train.put(data)  
-                            continue
+                            break
 
                 ep_ret += r
                 ep_len += 1    
