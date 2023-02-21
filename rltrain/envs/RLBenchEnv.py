@@ -19,8 +19,8 @@ ACTION_SPACE_LIST = ["xyz","pick_and_place_2d","pick_and_place_3d"]
 class RLBenchEnv:
     def __init__(self,config):
         self.config = config
-        self.reward_shaping_use = config['environment']['reward']['reward_shaping_use']
         self.reward_shaping_type = config['environment']['reward']['reward_shaping_type']
+        self.reward_completion = config['environment']['reward']['reward_completion']
         self.quat = np.array([0,1,0,0])
         self.quat = self.quat / np.linalg.norm(self.quat)
         self.obs_dim = config['environment']['obs_dim']
@@ -80,6 +80,7 @@ class RLBenchEnv:
     def reset_once(self):
         o = self.task_env.reset()
         o = self.get_obs()
+        self.obs_last = o 
         return o
 
     def reset(self):
@@ -95,6 +96,7 @@ class RLBenchEnv:
                 time.sleep(1)
         #o = self.task_env.reset()
         o = self.get_obs()
+        self.obs_last = o
         return o 
     
     def init_state_valid(self):
@@ -111,6 +113,8 @@ class RLBenchEnv:
                 
     
     def step(self,a_model):
+
+        ## Execute action
         if self.action_space == "xyz":
             a = self.model2robot_xyz(a_model)
             o, r, d, info = self.task_env.step(a)    
@@ -123,18 +127,38 @@ class RLBenchEnv:
                 o, r, d, info = self.execute_path_grasp_speedup(poses)   
             else:
                 o, r, d, info = self.execute_path(poses)  
-        r = 100 * r
+
+        ## Get the observation
         o = self.get_obs()
+
+        ## Check condition
         if self.out_of_bound_check(o):
             d = 1
             info = {'code': -11, 'description': 'Block is out of bounds ' + str(o)}
-        if self.reward_shaping_use:
-            if self.reward_shaping_type == 'mse':
-                r = self.reward_shaping_mse(a)
+            return None, None, None, info
+        
+        ## Reward-shaping       
+        if self.reward_shaping_type == 'sparse':
+            r = self.reward_completion * r
+        if self.reward_shaping_type == 'mse':
+            r = self.reward_shaping_mse(o)
+        if self.reward_shaping_type == 'envchange':
+            bonus = self.reward_shaping_envchange(o)
+            r = (r + bonus) * self.reward_completion 
+
+        ## Save last observation
+        self.obs_last = o
+
         return o, r, d, info
     
     def reward_shaping_mse(self,o):
         return -((o - self.get_obs())**2).sum()
+    
+    def reward_shaping_envchange(self,o):
+        if np.allclose(o, self.obs_last, rtol=0.05, atol=0.0, equal_nan=False):
+            return 0
+        else:
+            return 0.1
 
     def get_obs(self):
         if self.action_space == "xyz":

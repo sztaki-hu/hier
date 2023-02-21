@@ -13,11 +13,13 @@ class Demo:
             
 
         self.demo_use = config['demo']['demo_use']  
-        self.demo_num = int(config['demo']['demo_buffer_size'])  
+        self.demo_buffer_size = int(config['demo']['demo_buffer_size'])  
         self.demo_ratio = config['demo']['demo_ratio'] 
         self.demo_name = config['demo']['demo_name'] 
         self.demo_block_order = config['demo']['demo_block_order']
         self.demo_change_nstep = config['demo']['demo_change_nstep']  
+
+        self.reward_completion = config['environment']['reward']['reward_completion']
 
         self.obs_dim = config['environment']['obs_dim']
         self.act_dim = config['environment']['act_dim']
@@ -31,7 +33,7 @@ class Demo:
         self.distractor_blocks_num = int(self.config['environment']['task']['params'][1])
         self.tower_height = int(self.config['environment']['task']['params'][2])
 
-        self.demo_buffer = ReplayBuffer(obs_dim=self.obs_dim, act_dim=self.act_dim, size=self.demo_num)
+        self.demo_buffer = ReplayBuffer(obs_dim=self.obs_dim, act_dim=self.act_dim, size=self.demo_buffer_size)
 
     def create_demos(self):  
 
@@ -47,7 +49,7 @@ class Demo:
 
         self.env = make_env(self.config)
 
-        for _ in tqdm(range(self.demo_num), desc ="Loading demos: ", colour="green"):  
+        for _ in tqdm(range(self.demo_buffer_size), desc ="Loading demos: ", colour="green"):  
             o = self.env.reset()
             a = o
             try:
@@ -74,10 +76,13 @@ class Demo:
 
         assert self.target_blocks_num >= self.tower_height
 
-        #for _ in tqdm(range(self.demo_num), desc ="Loading demos: ", colour="green"):  
-        pbar = tqdm(total=self.demo_num,colour="green")
+        demo_num = int(self.demo_buffer_size / self.target_blocks_num)
+
+        pbar = tqdm(total=demo_num,colour="green")
         t = 0
-        while t<self.demo_num:
+        while t<demo_num:
+
+            ## Reset Env
             while True:
                 try:
                     o = self.env.reset_once()
@@ -90,9 +95,7 @@ class Demo:
                     tqdm.write('Could not reset the environment. Repeat env reset.')
                     time.sleep(1)
 
-            ep_transitions = []
-            ret = 0
-
+            ## Compute order
             target_index =  (0, 1, 2)
             target = o[[target_index[0],target_index[1],target_index[2]]]
 
@@ -114,11 +117,16 @@ class Demo:
                 print("Not implemented yet")
             elif self.demo_block_order == "as_init":
                 blocks = blocks_init
+
+            ## Execute demo
+            ep_transitions = []
+            ret = 0
             
             for i in range(self.tower_height):
                 
                 a = np.hstack((blocks[i],target)) 
                 a[5] += 0.01 + 0.03 * i
+
                 try:
                     o2, r, d, info = self.env.step(a)
                     ep_transitions.append((o, a, r, o2, d))
@@ -128,7 +136,8 @@ class Demo:
                     tqdm.write("Error in simulation, this demonstration is not added")
                     ret = -1
                     break
-            if ret > 0:
+
+            if ret >= self.reward_completion:
                 self.demo_buffer.store_episode_nstep(ep_transitions,self.n_step,self.gamma)
                 t+=1
                 pbar.update(1)
@@ -138,7 +147,7 @@ class Demo:
                 tqdm.write("The demonstration is not successful, thus it is not added " + str(unsuccessful_num))    
         
         pbar.close()
-
+        
         self.env.shuttdown()
 
         self.logger.save_demos(self.demo_name,  self.demo_buffer)
@@ -169,6 +178,12 @@ class Demo:
 
         o, a, r, o2, d = data['obs'], data['act'], data['rew'], data['obs2'], data['done']
         #r_nstep, o_nstep, d_nstep,n_nstep = data['rew_nstep'], data['obs_nstep'], data['done_nstep'], data['n_nstep']
+
+        o = o.detach().numpy()
+        a = a.detach().numpy()
+        r = r.detach().numpy()
+        o2 = o2.detach().numpy()
+        d = d.detach().numpy()
 
         ep_transitions = []
         for i in tqdm(range(d.shape[0]), desc ="Demo changing nstep: ", colour="green"):  

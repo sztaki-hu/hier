@@ -108,6 +108,7 @@ class Trainer:
         total_steps = self.steps_per_epoch * self.epochs
         env_error_num = 0
         out_of_bounds_num = 0
+        reward_bonus_num = 0
 
         first_update = self.update_every * math.ceil(self.update_after / self.update_every)
         self.save_freq = int(((total_steps - first_update) * self.update_factor) / self.num_log_loss_points)
@@ -149,7 +150,7 @@ class Trainer:
                             actual_time = time.time() - time0
                             train_ret = np.mean(self.return_buffer)
                             train_ep_len = np.mean(self.episode_len_buffer)
-                            self.logger.tb_save_train_data_v2(loss_q,loss_pi,train_ret,train_ep_len,env_error_num,out_of_bounds_num,t,actual_time,update_iter_every_log)
+                            self.logger.tb_save_train_data_v2(loss_q,loss_pi,train_ret,train_ep_len,env_error_num,out_of_bounds_num,reward_bonus_num,t,actual_time,update_iter_every_log)
                 else:
                     for j in tqdm(range(int(self.update_every * self.update_factor)), desc ="Updating weights: ", leave=False):
                         if replay_buffer.get_t() > (update_iter + 0.9) * self.update_every:
@@ -174,7 +175,7 @@ class Trainer:
                             actual_time = time.time() - time0
                             train_ret = np.mean(self.return_buffer)
                             train_ep_len = np.mean(self.episode_len_buffer)
-                            self.logger.tb_save_train_data_v2(loss_q,loss_pi,train_ret,train_ep_len,env_error_num,out_of_bounds_num,t,actual_time,update_iter_every_log)    
+                            self.logger.tb_save_train_data_v2(loss_q,loss_pi,train_ret,train_ep_len,env_error_num,out_of_bounds_num,reward_bonus_num,t,actual_time,update_iter_every_log)    
 
                 pause_flag.value = False
                 update_iter += 1    
@@ -227,6 +228,8 @@ class Trainer:
                     self.return_buffer.append(float(data['value']))
                 elif data['code'] == 12:  
                     self.episode_len_buffer.append(int(data['value']))
+                elif data['code'] == 41:  
+                    reward_bonus_num+=1
 
 
             #pbar.update(1)

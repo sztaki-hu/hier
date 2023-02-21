@@ -50,13 +50,15 @@ def main():
     # Init Demo Buffer ################################################
     
     demo = Demo(logger,config)
-
     demo.clean_up_old_demo()
     demo.create_demos()
 
+    # demo = Demo(logger,config)
     # demoBuffer = demo.load_demos()
+    # #print(demoBuffer.get_t())
     # batch = demoBuffer.get_first(10)
     # print(batch)
+    #print(demoBuffer.get_t())
                      
 
 if __name__ == '__main__':

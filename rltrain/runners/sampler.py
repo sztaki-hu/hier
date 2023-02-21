@@ -106,6 +106,10 @@ class Sampler:
                         ep_transitions = []
                         o, ep_ret, ep_len = self.reset_env(sample2train), 0, 0
                         continue
+            
+            if r == 10:
+                data = {'code': 41, 'description': 'Bonus was used (without task completation)'}
+                sample2train.put(data)
 
             ep_ret += r
             ep_len += 1
