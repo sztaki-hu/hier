@@ -119,11 +119,20 @@ class Tester:
                 # Take deterministic actions at test time 
                 try:
                     a = self.agent.get_action(o, True)
-                    o, r, d, _ = self.env.step(a)
+                    o, r, d, info = self.env.step(a)
                 except:
-                    data = {'code': -3, 'description':'Error in simulation (test time), thus reseting the environment'}
+                    data = {'code': -3, 'description':'[Test]: Error  simulation, thus reseting the environment'}
                     self.test2train.put(data)
                     break   
+
+                if bool(info): 
+                    if 'code' in info:            
+                        if info['code'] < 0:
+                            if info['code'] == -11:
+                                data = {'code': -11, 'description': '[Test]: Block is out of bounds '}
+                                self.test2train.put(data)  
+                            continue
+
                 ep_ret += r
                 ep_len += 1    
 
