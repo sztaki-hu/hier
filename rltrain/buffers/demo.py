@@ -74,7 +74,10 @@ class Demo:
 
         assert self.target_blocks_num >= self.tower_height
 
-        for _ in tqdm(range(self.demo_num), desc ="Loading demos: ", colour="green"):  
+        #for _ in tqdm(range(self.demo_num), desc ="Loading demos: ", colour="green"):  
+        pbar = tqdm(total=self.demo_num,colour="green")
+        t = 0
+        while t<self.demo_num:
             while True:
                 try:
                     o = self.env.reset_once()
@@ -127,11 +130,15 @@ class Demo:
                     break
             if ret > 0:
                 self.demo_buffer.store_episode_nstep(ep_transitions,self.n_step,self.gamma)
+                t+=1
+                pbar.update(1)
 
             else:
                 unsuccessful_num += 1   
                 tqdm.write("The demonstration is not successful, thus it is not added " + str(unsuccessful_num))    
         
+        pbar.close()
+
         self.env.shuttdown()
 
         self.logger.save_demos(self.demo_name,  self.demo_buffer)
