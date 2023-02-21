@@ -19,7 +19,7 @@ class Demo:
         self.demo_block_order = config['demo']['demo_block_order']
         self.demo_change_nstep = config['demo']['demo_change_nstep']  
 
-        self.reward_completion = config['environment']['reward']['reward_completion']
+        self.reward_scalor = config['environment']['reward']['reward_scalor']
 
         self.obs_dim = config['environment']['obs_dim']
         self.act_dim = config['environment']['act_dim']
@@ -137,7 +137,7 @@ class Demo:
                     ret = -1
                     break
 
-            if ret >= self.reward_completion:
+            if ret >= self.reward_scalor:
                 self.demo_buffer.store_episode_nstep(ep_transitions,self.n_step,self.gamma)
                 t+=1
                 pbar.update(1)

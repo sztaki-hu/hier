@@ -75,12 +75,12 @@ class Tester:
                         test2train.put(data)
                         time.sleep(1.0)
 
-                avg_test_return = self.test_v2()
-                data = {'code': 1, 'value': avg_test_return, 'epoch': epoch, 'description':'Average test result'}
+                avg_return, error_in_env, out_of_bounds = self.test_v2()
+                data = {'code': 1, 'value': avg_return, 'error_in_env': error_in_env, 'out_of_bounds':out_of_bounds, 'epoch': epoch, 'description':'Average test result'}
                 test2train.put(data)
 
                 t = epoch * self.steps_per_epoch 
-                self.logger.tb_writer_add_scalar("test/average_return", avg_test_return, t)
+                self.logger.tb_writer_add_scalar("test/average_return", avg_return, t)
 
                 epoch += 1
             
@@ -108,9 +108,11 @@ class Tester:
     def test_v2(self):
         
         avg_return = -1
-
         sum_return = 0
-        #for j in tqdm(range(self.num_test_episodes), desc ="Testing: ", leave=False):
+        
+        error_in_env = 0
+        out_of_bounds = 0
+        
         for j in range(self.num_test_episodes):
 
             o, d, ep_ret, ep_len = self.reset_env(), False, 0, 0
@@ -121,16 +123,18 @@ class Tester:
                     a = self.agent.get_action(o, True)
                     o, r, d, info = self.env.step(a)
                 except:
-                    data = {'code': -3, 'description':'[Test]: Error  simulation, thus reseting the environment'}
-                    self.test2train.put(data)
+                    #data = {'code': -3, 'description':'[Test]: Error  simulation, thus reseting the environment'}
+                    #self.test2train.put(data)
+                    error_in_env+=1
                     break   
 
                 if bool(info): 
                     if 'code' in info:            
                         if info['code'] < 0:
                             if info['code'] == -11:
-                                data = {'code': -11, 'description': '[Test]: Block is out of bounds '}
-                                self.test2train.put(data)  
+                                #data = {'code': -11, 'description': '[Test]: Block is out of bounds'}
+                                #self.test2train.put(data) 
+                                out_of_bounds+=1 
                             break
 
                 ep_ret += r
@@ -138,8 +142,10 @@ class Tester:
 
             sum_return += ep_ret
         avg_return = sum_return / float(self.num_test_episodes)
+        error_in_env = error_in_env / float(self.num_test_episodes)
+        out_of_bounds = out_of_bounds / float(self.num_test_episodes)
 
-        return avg_return
+        return avg_return, error_in_env, out_of_bounds
 
     def test(self, epoch = None, verbose = False):
 
@@ -211,10 +217,18 @@ class Tester:
                 # Take deterministic actions at test time 
                 try:
                     a = self.agent.get_action(o, True)
-                    o, r, d, _ = self.env.step(a)
+                    o, r, d, info = self.env.step(a)
                 except:
-                    tqdm.write("Error in simulation (test time), thus reseting the environment")
-                    break     
+                    tqdm.write('[Test]: Error  simulation, thus reseting the environment')
+                    break    
+
+                if bool(info): 
+                    if 'code' in info:            
+                        if info['code'] < 0:
+                            if info['code'] == -11:
+                                tqdm.write('[Test]: Block is out of bounds')  
+                            break
+
                 ep_ret += r
                 ep_len += 1          
             sum_return += ep_ret          

@@ -20,7 +20,8 @@ class RLBenchEnv:
     def __init__(self,config):
         self.config = config
         self.reward_shaping_type = config['environment']['reward']['reward_shaping_type']
-        self.reward_completion = config['environment']['reward']['reward_completion']
+        self.reward_scalor = config['environment']['reward']['reward_scalor']
+        self.reward_bonus = config['environment']['reward']['reward_bonus']
         self.quat = np.array([0,1,0,0])
         self.quat = self.quat / np.linalg.norm(self.quat)
         self.obs_dim = config['environment']['obs_dim']
@@ -139,12 +140,13 @@ class RLBenchEnv:
         
         ## Reward-shaping       
         if self.reward_shaping_type == 'sparse':
-            r = self.reward_completion * r
+            r = self.reward_scalor * r
         if self.reward_shaping_type == 'mse':
             r = self.reward_shaping_mse(o)
         if self.reward_shaping_type == 'envchange':
             bonus = self.reward_shaping_envchange(o)
-            r = (r + bonus) * self.reward_completion 
+            r = (r + bonus) * self.reward_scalor 
+
 
         ## Save last observation
         self.obs_last = o
@@ -158,7 +160,7 @@ class RLBenchEnv:
         if np.allclose(o, self.obs_last, rtol=0.05, atol=0.0, equal_nan=False):
             return 0
         else:
-            return 0.1
+            return self.reward_bonus
 
     def get_obs(self):
         if self.action_space == "xyz":

@@ -3,6 +3,7 @@ from os.path import dirname, abspath
 
 import numpy as np
 import torch
+import argparse
 import rltrain.agents.core as core
 
 from rltrain.utils.utils import init_cuda, print_torch_info
@@ -17,11 +18,19 @@ timestamp = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
 import torch
 
 if __name__ == '__main__':
-    # Init logger
-    trainid = 1
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--configfile", default="logs/0221_A_stack_blocks_sac/" ,help="Path of the config file")
+    parser.add_argument("--trainid", type=int, default=0 ,help="Train ID")
+    parser.add_argument("--restart", type=bool, default=False ,help="Set true if you want to restart a training")
+    # Example: python3 main.py --configfile /cfg/alma.yaml 0
+    args = parser.parse_args()
+
+    # Init logger 
     current_dir = dirname(abspath(__file__))
-    config_path = current_dir + "/logs/0209_B_stack_blocks_sac/"+ str(trainid) +"/config.yaml"
-    logger = Logger(current_dir = current_dir, config_path = config_path, trainid = trainid)
+    #config_path = current_dir + "/logs/0216_B_stack_blocks_sac/"+ str(trainid) +"/config.yaml"
+    args.restart = True
+    logger = Logger(current_dir = current_dir, main_args = args)
     config = logger.get_config()
 
     # Init CUDA
@@ -46,7 +55,32 @@ if __name__ == '__main__':
     tester = Tester(agent,logger,config)
 
     # Test Agent
-    tester.display_agent("model_3",5)
+    tester.display_agent("model_8",10)
+
+
+    #tester.display_agent("model_45",5)
+    # tester.display_agent("model_20",5)
+    #tester.display_agent("model_30",5)
+    #tester.display_agent("model_40",5)
+    #tester.display_agent("model_50",5)
+    #tester.display_agent("model_57",5)
+
+    #tester.display_agent("model_1",5)
+    #tester.display_agent("model_5",5)
+    #tester.display_agent("model_20",5)
+    #tester.display_agent("model_30",5)
+    #tester.display_agent("model_45",5)
+    #tester.display_agent("model_50",5)
+    #tester.display_agent("model_59",5)
+
+    #tester.display_agent("model_1",5)
+    #tester.display_agent("model_2",5)
+    #tester.display_agent("model_3",5)
+    #tester.display_agent("model_4",5)
+    #tester.display_agent("model_5",5)
+    #tester.display_agent("model_8",5)
+    #tester.display_agent("model_40",5)
+    #tester.display_agent("model_80",5)
 
     # Test Agent all models
     # models = logger.list_model_dir()
