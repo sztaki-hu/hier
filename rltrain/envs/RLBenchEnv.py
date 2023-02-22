@@ -141,12 +141,14 @@ class RLBenchEnv:
         ## Reward-shaping       
         if self.reward_shaping_type == 'sparse':
             r = self.reward_scalor * r
+        if self.reward_shaping_type == 'grasp': 
+            # Change is in the execute_path_grasp_speedup() function.
+            r = self.reward_scalor * r
         if self.reward_shaping_type == 'mse':
             r = self.reward_shaping_mse(o)
         if self.reward_shaping_type == 'envchange':
             bonus = self.reward_shaping_envchange(o)
             r = (r + bonus) * self.reward_scalor 
-        # if self.reward_shaping_type == 'grasp': # Implemeted in the execute_path_grasp_speedup() function.
         # if self.reward_shaping_type == 'subgoal':
         #     if self.task_name == "stack_blocks":
         #         bonus = self.reward_shaping_subgoal_stack_blocks(o)
