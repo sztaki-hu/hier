@@ -34,9 +34,6 @@ class RLBenchEnv:
         self.boundary_max = np.array(config['agent']['boundary_max'])[:self.act_dim]
         self.grasp_speedup = config['environment']['grasp_speedup']
 
-        #self.desk_z = 0.765
-        #self.tower_z = 0.765
-
         assert self.action_space in ACTION_SPACE_LIST
 
         if self.config['environment']['camera'] == True:
@@ -72,6 +69,11 @@ class RLBenchEnv:
         self.task_env = self.env.get_task(self.env._string_to_task(self.task_name +'.py'))
 
         self.reset()
+
+        self.subgoal_level = 0
+        #self.desk_height = 0.765
+        self.block_on_desk_z = 0.765
+        self.block_size = 0.03
         
     
     def shuttdown(self):
@@ -82,6 +84,7 @@ class RLBenchEnv:
         o = self.task_env.reset()
         o = self.get_obs()
         self.obs_last = o 
+        self.subgoal_level = 0
         return o
 
     def reset(self):
@@ -98,6 +101,7 @@ class RLBenchEnv:
         #o = self.task_env.reset()
         o = self.get_obs()
         self.obs_last = o
+        self.subgoal_level = 0
         return o 
     
     def init_state_valid(self):
@@ -149,9 +153,10 @@ class RLBenchEnv:
         if self.reward_shaping_type == 'envchange':
             bonus = self.reward_shaping_envchange(o)
             r = (r + bonus) * self.reward_scalor 
-        # if self.reward_shaping_type == 'subgoal':
-        #     if self.task_name == "stack_blocks":
-        #         bonus = self.reward_shaping_subgoal_stack_blocks(o)
+        if self.reward_shaping_type == 'subgoal':
+            if self.task_name == "stack_blocks":
+                bonus = self.reward_shaping_subgoal_stack_blocks(o)
+                r = (r + bonus) * self.reward_scalor
 
 
         ## Save last observation
@@ -167,6 +172,40 @@ class RLBenchEnv:
             return 0
         else:
             return self.reward_bonus
+    
+    def reward_shaping_subgoal_stack_blocks(self,o):
+         ## Compute order
+
+        print("STARTED")
+
+        target_index =  (0, 1, 2)
+        target = o[[target_index[0],target_index[1],target_index[2]]]
+
+        blocks = []
+        #dists = []
+        for j in range(1,self.target_blocks_num+1):
+            block_index =  (j * 3, j * 3 + 1, j * 3 + 2)
+            block = o[[block_index[0],block_index[1],block_index[2]]]
+            #dists.append(np.sum(np.square(target - block)))
+            blocks.append(block) 
+
+        
+        for i in range(self.subgoal_level+1):
+            subsubgoal_reached = False
+            target[2] = self.block_on_desk_z + i * self.block_size
+            for block in blocks:
+                print(target)
+                print(block)
+                if np.allclose(target, block, rtol=0.00, atol=0.01, equal_nan=False):
+                    subsubgoal_reached = True
+                    break
+            if subsubgoal_reached == False: 
+                return 0
+        
+        self.subgoal_level += 1
+        return self.reward_bonus
+
+        
 
     def get_obs(self):
         if self.action_space == "xyz":
