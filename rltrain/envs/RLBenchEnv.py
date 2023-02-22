@@ -146,6 +146,10 @@ class RLBenchEnv:
         if self.reward_shaping_type == 'envchange':
             bonus = self.reward_shaping_envchange(o)
             r = (r + bonus) * self.reward_scalor 
+        # if self.reward_shaping_type == 'grasp': # Implemeted in the execute_path_grasp_speedup() function.
+        # if self.reward_shaping_type == 'subgoal':
+        #     if self.task_name == "stack_blocks":
+        #         bonus = self.reward_shaping_subgoal_stack_blocks(o)
 
 
         ## Save last observation
@@ -259,6 +263,7 @@ class RLBenchEnv:
                     open_gripper_pose[7] = 1
                     observation, reward, done, info = self.task_env.step(open_gripper_pose)
                     break
+        if self.reward_shaping_type == 'grasp': reward += self.reward_bonus
         return observation, reward, done, info
     
     def execute_path(self,poses):
