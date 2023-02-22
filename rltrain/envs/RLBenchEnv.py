@@ -174,10 +174,7 @@ class RLBenchEnv:
             return self.reward_bonus
     
     def reward_shaping_subgoal_stack_blocks(self,o):
-         ## Compute order
-
-        print("STARTED")
-
+        
         target_index =  (0, 1, 2)
         target = o[[target_index[0],target_index[1],target_index[2]]]
 
@@ -188,14 +185,11 @@ class RLBenchEnv:
             block = o[[block_index[0],block_index[1],block_index[2]]]
             #dists.append(np.sum(np.square(target - block)))
             blocks.append(block) 
-
         
         for i in range(self.subgoal_level+1):
             subsubgoal_reached = False
             target[2] = self.block_on_desk_z + i * self.block_size
             for block in blocks:
-                print(target)
-                print(block)
                 if np.allclose(target, block, rtol=0.00, atol=0.01, equal_nan=False):
                     subsubgoal_reached = True
                     break
