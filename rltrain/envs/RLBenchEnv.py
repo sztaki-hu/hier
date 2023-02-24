@@ -197,7 +197,7 @@ class RLBenchEnv:
                 return 0
         
         self.subgoal_level += 1
-        return self.reward_bonus
+        return self.reward_bonus * self.subgoal_level
 
         
 
