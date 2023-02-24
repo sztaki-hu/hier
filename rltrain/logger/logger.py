@@ -146,7 +146,7 @@ class Logger:
     def remove_old_demo(self,name):
         os.remove(os.path.join(self.current_dir,self.demodir,name + ".yaml")) 
     
-    def tb_save_train_data_v2(self,loss_q,loss_pi,train_ret,train_ep_len,env_error_num,out_of_bounds_num,reward_bonus_num,t,actual_time,update_iter):
+    def tb_save_train_data_v2(self,loss_q,loss_pi,train_ret,train_ep_len,env_error_num,out_of_bounds_num,reward_bonus_num,demo_ratio,t,actual_time,update_iter):
         self.tb_writer_add_scalar("train/loss_q", loss_q, update_iter)
         self.tb_writer_add_scalar("train/loss_p", loss_pi, update_iter)
         self.tb_writer_add_scalar("train/train_ret", train_ret, t)
@@ -159,6 +159,7 @@ class Logger:
         self.tb_writer_add_scalar("train/time_sec_1000_transitions", rel_time, t)
         reward_bonus_ratio = (reward_bonus_num / float(t))
         self.tb_writer_add_scalar("train/reward_bonus_ratio", reward_bonus_ratio, t)
+        self.tb_writer_add_scalar("train/demo_ratio", demo_ratio, t)
     
     def tb_save_train_data(self,loss_q,loss_pi,sum_ep_len,sum_ep_ret,episode_iter,env_error_num,t,log_loss_iter):
         self.tb_writer_add_scalar("train/loss_q", loss_q, log_loss_iter)

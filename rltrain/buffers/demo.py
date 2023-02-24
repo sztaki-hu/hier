@@ -14,7 +14,6 @@ class Demo:
 
         self.demo_use = config['demo']['demo_use']  
         self.demo_buffer_size = int(config['demo']['demo_buffer_size'])  
-        self.demo_ratio = config['demo']['demo_ratio'] 
         self.demo_name = config['demo']['demo_name'] 
         self.demo_block_order = config['demo']['demo_block_order']
         self.demo_change_nstep = config['demo']['demo_change_nstep']  

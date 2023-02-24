@@ -44,11 +44,8 @@ class Trainer:
         self.boundary_max = np.array(config['agent']['boundary_max'])[:self.act_dim]
 
         self.demo_use = config['demo']['demo_use']  
-        self.demo_ratio = config['demo']['demo_ratio']
-
-        if self.demo_use:
-            self.demo_batch_size = int(self.batch_size * self.demo_ratio)
-            self.replay_batch_size = self.batch_size - self.demo_batch_size
+        self.demo_ratio_type = config['demo']['demo_ratio']['type']
+        self.demo_ratio_params = config['demo']['demo_ratio']['params']
         
         self.return_buffer  = collections.deque(maxlen=20)
         self.episode_len_buffer  = collections.deque(maxlen=20)
@@ -96,6 +93,37 @@ class Trainer:
                 the current policy and value function.
 
         """ 
+    
+    def get_batch(self,t,replay_buffer):
+        
+        if self.demo_use == False:
+            return replay_buffer.sample_batch(self.batch_size), 0
+        else:
+            # get demo ratio
+            if self.demo_ratio_type == 'constant':
+                demo_ratio = self.demo_ratio_params[0]
+                demo_batch_size = int(self.batch_size * demo_ratio)
+                replay_batch_size = self.batch_size - demo_batch_size
+                #return replay_batch_size, demo_batch_size
+            if self.demo_ratio_type == 'linear_decay':
+                t_update = t - self.update_after
+                m = 1.0 / self.demo_ratio_params[2]
+                demo_ratio = max(self.demo_ratio_params[0] - t_update * m, self.demo_ratio_params[1])
+                demo_batch_size = int(self.batch_size * demo_ratio)
+                replay_batch_size = self.batch_size - demo_batch_size
+                #return replay_batch_size, demo_batch_size
+
+            replay_batch = replay_buffer.sample_batch(replay_batch_size)
+            demo_batch = self.demo_buffer.sample_batch(demo_batch_size) 
+            return dict(obs=torch.cat((replay_batch['obs'], demo_batch['obs']), 0),
+                        obs2=torch.cat((replay_batch['obs2'], demo_batch['obs2']), 0),
+                        act=torch.cat((replay_batch['act'], demo_batch['act']), 0),
+                        rew=torch.cat((replay_batch['rew'], demo_batch['rew']), 0),
+                        done=torch.cat((replay_batch['done'], demo_batch['done']), 0),
+                        rew_nstep=torch.cat((replay_batch['rew_nstep'], demo_batch['rew_nstep']), 0),
+                        obs_nstep=torch.cat((replay_batch['obs_nstep'], demo_batch['obs_nstep']), 0),                                   
+                        done_nstep=torch.cat((replay_batch['done_nstep'], demo_batch['done_nstep']), 0),
+                        n_nstep=torch.cat((replay_batch['n_nstep'], demo_batch['n_nstep']), 0)), demo_ratio  
 
     
     def start(self,agent,replay_buffer,pause_flag,test2train,sample2train):
@@ -134,48 +162,21 @@ class Trainer:
                         self.logger.print_logfile(message,level = "warning", terminal = False)
                 update_iter = update_iter_actual
 
+                for j in tqdm(range(int(self.update_every * self.update_factor)), desc ="Updating weights: ", leave=False):
+                    if replay_buffer.get_t() > (update_iter + 0.9) * self.update_every:
+                        message = "Update is lagging behind sampling, thus stopped at " + str(j+1) + " instead of " + str(self.update_every * self.update_factor)
+                        tqdm.write("[warning]: " + message)  
+                        self.logger.print_logfile(message,level = "warning", terminal = False)
+                        break
 
-                if self.demo_use == False:
-                    for j in tqdm(range(int(self.update_every * self.update_factor)), desc ="Updating weights: ", leave=False):
-                        if replay_buffer.get_t() > (update_iter + 0.9) * self.update_every:
-                            message = "Update is lagging behind sampling, thus stopped at " + str(j+1) + " instead of " + str(self.update_every * self.update_factor)
-                            tqdm.write("[warning]: " + message)  
-                            self.logger.print_logfile(message,level = "warning", terminal = False)
-                            break
-
-                        update_iter_every_log += 1
-                        batch = replay_buffer.sample_batch(self.batch_size)    
-                        loss_q, loss_pi = agent.update(data=batch)
-                        if update_iter_every_log % self.save_freq == 0:
-                            actual_time = time.time() - time0
-                            train_ret = np.mean(self.return_buffer)
-                            train_ep_len = np.mean(self.episode_len_buffer)
-                            self.logger.tb_save_train_data_v2(loss_q,loss_pi,train_ret,train_ep_len,env_error_num,out_of_bounds_num,reward_bonus_num,t,actual_time,update_iter_every_log)
-                else:
-                    for j in tqdm(range(int(self.update_every * self.update_factor)), desc ="Updating weights: ", leave=False):
-                        if replay_buffer.get_t() > (update_iter + 0.9) * self.update_every:
-                            message = "Update is lagging behind sampling, thus stopped at " + str(j+1) + " instead of " + str(self.update_every * self.update_factor)
-                            tqdm.write("[warning]: " + message)  
-                            self.logger.print_logfile(message,level = "warning", terminal = False)
-                            break
-                        update_iter_every_log += 1
-                        replay_batch = replay_buffer.sample_batch(self.replay_batch_size)
-                        demo_batch = self.demo_buffer.sample_batch(self.demo_batch_size) 
-                        batch = dict(obs=torch.cat((replay_batch['obs'], demo_batch['obs']), 0),
-                                    obs2=torch.cat((replay_batch['obs2'], demo_batch['obs2']), 0),
-                                    act=torch.cat((replay_batch['act'], demo_batch['act']), 0),
-                                    rew=torch.cat((replay_batch['rew'], demo_batch['rew']), 0),
-                                    done=torch.cat((replay_batch['done'], demo_batch['done']), 0),
-                                    rew_nstep=torch.cat((replay_batch['rew_nstep'], demo_batch['rew_nstep']), 0),
-                                    obs_nstep=torch.cat((replay_batch['obs_nstep'], demo_batch['obs_nstep']), 0),                                   
-                                    done_nstep=torch.cat((replay_batch['done_nstep'], demo_batch['done_nstep']), 0),
-                                    n_nstep=torch.cat((replay_batch['n_nstep'], demo_batch['n_nstep']), 0))  
-                        loss_q, loss_pi = agent.update(data=batch)
-                        if update_iter_every_log % self.save_freq == 0:
-                            actual_time = time.time() - time0
-                            train_ret = np.mean(self.return_buffer)
-                            train_ep_len = np.mean(self.episode_len_buffer)
-                            self.logger.tb_save_train_data_v2(loss_q,loss_pi,train_ret,train_ep_len,env_error_num,out_of_bounds_num,reward_bonus_num,t,actual_time,update_iter_every_log)    
+                    update_iter_every_log += 1
+                    batch, demo_ratio = self.get_batch(t,replay_buffer) 
+                    loss_q, loss_pi = agent.update(data=batch)
+                    if update_iter_every_log % self.save_freq == 0:
+                        actual_time = time.time() - time0
+                        train_ret = np.mean(self.return_buffer)
+                        train_ep_len = np.mean(self.episode_len_buffer)
+                        self.logger.tb_save_train_data_v2(loss_q,loss_pi,train_ret,train_ep_len,env_error_num,out_of_bounds_num,reward_bonus_num,demo_ratio,t,actual_time,update_iter_every_log)    
 
                 pause_flag.value = False
                 update_iter += 1    
