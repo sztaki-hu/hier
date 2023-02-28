@@ -62,6 +62,9 @@ class Trainer:
             self.heatmap_bool_pick = np.zeros((self.heatmap_res, self.heatmap_res))
             self.heatmap_bool_place = np.zeros((self.heatmap_res, self.heatmap_res))
 
+        self.pretrain_bool = config['trainer']['pretrain']['bool']
+        self.pretrain_factor = config['trainer']['pretrain']['factor']
+
         """
         Trainer
 
@@ -160,6 +163,14 @@ class Trainer:
         pause_flag.value = False
         while t < total_steps:
             t = replay_buffer.get_t()
+
+            if (t > self.update_after) and (self.pretrain_bool == True):
+                pause_flag.value = True
+                for _ in tqdm(range(int(self.pretrain_factor)), desc ="Updating weights (pretraining): ", leave=False):
+                    batch, demo_ratio = self.get_batch(t,replay_buffer) 
+                    loss_q, loss_pi = agent.update(data=batch)
+                self.pretrain_bool = False
+                pause_flag.value = False
 
             if (t > self.update_after) and (t >= update_iter * self.update_every):
 
