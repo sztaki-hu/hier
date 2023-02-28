@@ -25,6 +25,20 @@ class Sampler:
         self.gamma = config['agent']['gamma'] 
         self.n_step = config['agent']['n_step'] 
 
+        self.heatmap_bool = config['logger']['heatmap']['bool']
+        self.heatmap_res = config['logger']['heatmap']['resolution']
+
+        self.act_dim = config['environment']['act_dim']
+        self.boundary_min = np.array(config['agent']['boundary_min'])[:self.act_dim]
+        self.boundary_max = np.array(config['agent']['boundary_max'])[:self.act_dim]
+
+        if self.heatmap_bool:
+            self.heatmap_bool_pick = np.zeros((self.heatmap_res, self.heatmap_res))
+            self.heatmap_bool_place = np.zeros((self.heatmap_res, self.heatmap_res))
+            self.bins = []
+            for i in range(self.act_dim):
+                self.bins.append(np.linspace(self.boundary_min[i], self.boundary_max[i], num=self.heatmap_res+1, retstep=False))
+
         """
         Sampler
 
@@ -39,6 +53,16 @@ class Sampler:
             max_ep_len (int): Maximum length of trajectory / episode / rollout.
 
         """
+
+    def update_heatmap(self,a):
+        
+        pick_x = np.digitize(a[0], self.bins[0]) - 1
+        pick_y = np.digitize(a[1], self.bins[1]) - 1
+        place_x = np.digitize(a[3], self.bins[3]) - 1
+        place_y = np.digitize(a[4], self.bins[4]) - 1
+
+        self.heatmap_bool_pick[pick_x][pick_y] += 1
+        self.heatmap_bool_place[place_x][place_y] += 1
     
     def reset_env(self,sample2train):
         while True:
@@ -64,9 +88,6 @@ class Sampler:
         np.random.seed(self.seed*id)
 
         self.env = make_env(self.config)
-        
-        # Prepare for interaction with environment
-        total_steps = 4
 
         o, ep_ret, ep_len = self.reset_env(sample2train), 0, 0
 
@@ -122,6 +143,9 @@ class Sampler:
             # Store experience to replay buffer
             ep_transitions.append((o, a, r, o2, d))
 
+            if self.heatmap_bool and id == 1:
+                self.update_heatmap(a)
+
             # Super critical, easy to overlook step: make sure to update 
             # most recent observation!
             o = o2
@@ -132,6 +156,11 @@ class Sampler:
                 sample2train.put(data)
                 data = {'code': 12, 'value': ep_len,'description': '-'}
                 sample2train.put(data)
+                if self.heatmap_bool and id == 1:
+                    data = {'code': 13, 'value':  self.heatmap_bool_pick,'description': '-'}
+                    sample2train.put(data)
+                    data = {'code': 14, 'value':  self.heatmap_bool_place,'description': '-'}
+                    sample2train.put(data)
 
                 replay_buffer.store_episode_nstep(ep_transitions,self.n_step,self.gamma)
                 

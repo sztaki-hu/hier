@@ -59,6 +59,13 @@ class Logger:
                 #self.create_folder(os.path.join(self.current_dir, self.logdir, self.logname,self.trainid,"plots_raw_data"))
                 self.save_yaml(os.path.join(self.current_dir, self.logdir,self.logname,self.trainid,"config.yaml"),self.config)
             self.writer = SummaryWriter(log_dir = os.path.join(self.current_dir,self.logdir,self.logname,self.trainid,"runs"))
+        
+        # self.heatmap_bool = self.config['logger']['heatmap']['bool']
+        # self.heatmap_res = self.config['logger']['heatmap']['resolution']
+
+        # if self.heatmap_bool:
+        #     self.heatmap_bool_pick_old = np.zeros((self.heatmap_res, self.heatmap_res))
+        #     self.heatmap_bool_place_old = np.zeros((self.heatmap_res, self.heatmap_res))
            
             
     def compute_and_replace_auto_values(self):
@@ -116,6 +123,9 @@ class Logger:
     
     def tb_writer_add_scalar(self,name,value,iter):
         self.writer.add_scalar(name, value, iter)
+    
+    def tb_writer_add_image(self,name,img, iter, dataformats='HWC'):
+        self.writer.add_image(name, img, iter, dataformats=dataformats)
 
     def save_model(self,model,epoch):
         model_path = os.path.join(self.current_dir, self.logdir, self.logname,self.trainid,"model_backup","model_" + str(epoch))
@@ -146,7 +156,27 @@ class Logger:
     def remove_old_demo(self,name):
         os.remove(os.path.join(self.current_dir,self.demodir,name + ".yaml")) 
     
-    def tb_save_train_data_v2(self,loss_q,loss_pi,train_ret,train_ep_len,env_error_num,out_of_bounds_num,reward_bonus_num,demo_ratio,t,actual_time,update_iter):
+    # def compose_heatmap_color_image(self,heatmap_raw):
+    #     #sample_num = np.sum(heatmap_raw)
+    #     heatmap_rescaled = cv2.normalize(heatmap_raw, None, 0, 255, cv2.NORM_MINMAX, cv2.CV_8U)
+    #     heatmap_img = cv2.applyColorMap(heatmap_rescaled, cv2.COLORMAP_JET)
+
+        
+    
+    def tb_save_train_data_v2(self,
+                              loss_q,
+                              loss_pi,
+                              train_ret,
+                              train_ep_len,
+                              env_error_num,
+                              out_of_bounds_num,
+                              reward_bonus_num,
+                              demo_ratio,
+                              heatmap_bool_pick,
+                              heatmap_bool_place,
+                              t,
+                              actual_time,
+                              update_iter):
         self.tb_writer_add_scalar("train/loss_q", loss_q, update_iter)
         self.tb_writer_add_scalar("train/loss_p", loss_pi, update_iter)
         self.tb_writer_add_scalar("train/train_ret", train_ret, t)
@@ -160,6 +190,28 @@ class Logger:
         reward_bonus_ratio = (reward_bonus_num / float(t))
         self.tb_writer_add_scalar("train/reward_bonus_ratio", reward_bonus_ratio, t)
         self.tb_writer_add_scalar("train/demo_ratio", demo_ratio, t)
+
+        # heatmap_bool_pick_ratio = heatmap_bool_pick / np.sum(heatmap_bool_pick)
+        # heatmap_bool_place_ratio = heatmap_bool_place / np.sum(heatmap_bool_place)
+
+        # heatmap_bool_pick_diff = heatmap_bool_pick - self.heatmap_bool_pick_old
+        # heatmap_bool_place_diff = heatmap_bool_place - self.heatmap_bool_place_old
+
+        # self.heatmap_bool_pick_old = np.copy(heatmap_bool_pick)
+        # self.heatmap_bool_place_old = np.copy(heatmap_bool_place)
+
+        heatmap_bool_pick_norm = heatmap_bool_pick / np.max(heatmap_bool_pick)
+        heatmap_bool_place_norm = heatmap_bool_place / np.max(heatmap_bool_place)
+
+        # heatmap_bool_pick_diff_norm = heatmap_bool_pick_diff / np.max(heatmap_bool_pick_diff)
+        # heatmap_bool_place_diff_norm = heatmap_bool_place_diff / np.max(heatmap_bool_place_diff)
+
+        self.tb_writer_add_image("sampler/hetmap_pick_all",heatmap_bool_pick_norm, t, dataformats='HW')
+        self.tb_writer_add_image("sampler/hetmap_place_all",heatmap_bool_place_norm, t, dataformats='HW')
+
+        # self.tb_writer_add_image("sampler/hetmap_pick_last",heatmap_bool_pick_diff_norm, t, dataformats='HW')
+        # self.tb_writer_add_image("sampler/hetmap_place_last",heatmap_bool_place_diff_norm, t, dataformats='HW')
+     
     
     def tb_save_train_data(self,loss_q,loss_pi,sum_ep_len,sum_ep_ret,episode_iter,env_error_num,t,log_loss_iter):
         self.tb_writer_add_scalar("train/loss_q", loss_q, log_loss_iter)

@@ -13,9 +13,12 @@ from rltrain.buffers.replay import ReplayBuffer
 from rltrain.agents.agent import Agent
 from rltrain.runners.tester import Tester
 
+DEMO_RATIO_TYPES = ['constant','linear_decay']
+
 class Trainer:
 
     def __init__(self,device,demo_buffer,logger,config):
+
         self.device = device
 
         self.mode_sync = config['general']['sync'] 
@@ -46,9 +49,18 @@ class Trainer:
         self.demo_use = config['demo']['demo_use']  
         self.demo_ratio_type = config['demo']['demo_ratio']['type']
         self.demo_ratio_params = config['demo']['demo_ratio']['params']
+
+        assert self.demo_ratio_type in DEMO_RATIO_TYPES
         
         self.return_buffer  = collections.deque(maxlen=20)
         self.episode_len_buffer  = collections.deque(maxlen=20)
+
+        self.heatmap_bool = config['logger']['heatmap']['bool']
+        self.heatmap_res = config['logger']['heatmap']['resolution']
+
+        if self.heatmap_bool:
+            self.heatmap_bool_pick = np.zeros((self.heatmap_res, self.heatmap_res))
+            self.heatmap_bool_place = np.zeros((self.heatmap_res, self.heatmap_res))
 
         """
         Trainer
@@ -176,7 +188,19 @@ class Trainer:
                         actual_time = time.time() - time0
                         train_ret = np.mean(self.return_buffer)
                         train_ep_len = np.mean(self.episode_len_buffer)
-                        self.logger.tb_save_train_data_v2(loss_q,loss_pi,train_ret,train_ep_len,env_error_num,out_of_bounds_num,reward_bonus_num,demo_ratio,t,actual_time,update_iter_every_log)    
+                        self.logger.tb_save_train_data_v2(loss_q,
+                                                          loss_pi,
+                                                          train_ret,
+                                                          train_ep_len,
+                                                          env_error_num,
+                                                          out_of_bounds_num,
+                                                          reward_bonus_num,
+                                                          demo_ratio,
+                                                          self.heatmap_bool_pick,
+                                                          self.heatmap_bool_place,
+                                                          t,
+                                                          actual_time,
+                                                          update_iter_every_log)    
 
                 pause_flag.value = False
                 update_iter += 1    
@@ -230,7 +254,13 @@ class Trainer:
                 elif data['code'] == 11:
                     self.return_buffer.append(float(data['value']))
                 elif data['code'] == 12:  
-                    self.episode_len_buffer.append(int(data['value']))
+                    self.episode_len_buffer.append(int(data['value']))  
+                elif data['code'] == 13:
+                    if self.heatmap_bool:  
+                        self.heatmap_bool_pick = data['value']
+                elif data['code'] == 14:  
+                    if self.heatmap_bool:
+                        self.heatmap_bool_place = data['value']
                 elif data['code'] == 41:  
                     reward_bonus_num+=1
 
