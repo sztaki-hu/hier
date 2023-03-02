@@ -116,10 +116,10 @@ def main():
         sampler = Sampler(agent,demo_buffer,config)
         trainer = Trainer(device,demo_buffer,logger,config)
         
-        end_flag = Value(c_bool, True)  
+        end_flag = Value(c_bool, False)  
         pause_flag = Value(c_bool, True)
         test2train = mp.Queue()
-        sample2train = mp.Queue()
+        sample2train = mp.Queue(maxsize=100000)
         
         processes = []
 
@@ -133,14 +133,14 @@ def main():
 
         tester_p = Process(target=tester.start, args=[test2train])
         tester_p.start()
-        #processes.append(p)
+     
 
         trainer.start(agent,replay_buffer,pause_flag,test2train,sample2train)
 
         # Stop Training #############################################################
 
         pause_flag.value = False
-        end_flag.value = False
+        end_flag.value = True
 
         logger.print_logfile("Waiting for samplers to terminate")
         for p in processes:

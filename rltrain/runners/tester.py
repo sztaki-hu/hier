@@ -60,29 +60,30 @@ class Tester:
         epoch = 1
         while epoch <= self.epochs:
 
-            model_name = self.logger.get_model_epoch(epoch)
-            
+            for epich_test in range(epoch,self.epochs+1):
 
-            if model_name != None:
-                path = self.logger.get_model_path(model_name)
+                model_name = self.logger.get_model_epoch(epich_test)
                 
-                while True:
-                    try:
-                        self.agent.load_weights(path)
-                        break
-                    except:
-                        data = {'code': -31, 'description':'Tester could not open weight file'}
-                        test2train.put(data)
-                        time.sleep(1.0)
+                if model_name != None:
+                    path = self.logger.get_model_path(model_name)
+                    
+                    while True:
+                        try:
+                            self.agent.load_weights(path)
+                            break
+                        except:
+                            data = {'code': -31, 'description':'Tester could not open weight file'}
+                            test2train.put(data)
+                            time.sleep(1.0)
 
-                avg_return, error_in_env, out_of_bounds = self.test_v2()
-                data = {'code': 1, 'value': avg_return, 'error_in_env': error_in_env, 'out_of_bounds':out_of_bounds, 'epoch': epoch, 'description':'Average test result'}
-                test2train.put(data)
+                    avg_return, error_in_env, out_of_bounds = self.test_v2()
+                    data = {'code': 1, 'value': avg_return, 'error_in_env': error_in_env, 'out_of_bounds':out_of_bounds, 'epoch': epoch, 'description':'Average test result'}
+                    test2train.put(data)
 
-                t = epoch * self.steps_per_epoch 
-                self.logger.tb_writer_add_scalar("test/average_return", avg_return, t)
+                    t = epoch * self.steps_per_epoch 
+                    self.logger.tb_writer_add_scalar("test/average_return", avg_return, t)
 
-                epoch += 1
+                    epoch = epich_test + 1
             
             time.sleep(1.0)
         

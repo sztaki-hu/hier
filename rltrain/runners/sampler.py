@@ -97,7 +97,7 @@ class Sampler:
         #pbar = tqdm(total = total_steps, desc =str(id) + ". sampler: ", colour="green")
         ep_transitions = []
         t = 0
-        while end_flag.value:
+        while end_flag.value == False:
 
             while pause_flag.value:
                 time.sleep(0.1)
@@ -171,5 +171,5 @@ class Sampler:
             #pbar.update(1)   
             #time.sleep(0.1)     
 
-        self.env.shuttdown() 
+        self.env.shuttdown()        
      
