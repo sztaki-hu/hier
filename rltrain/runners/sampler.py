@@ -58,10 +58,10 @@ class Sampler:
 
     def update_heatmap(self,a):
         
-        pick_x = np.digitize(a[0], self.bins[0]) - 1
-        pick_y = np.digitize(a[1], self.bins[1]) - 1
-        place_x = np.digitize(a[3], self.bins[3]) - 1
-        place_y = np.digitize(a[4], self.bins[4]) - 1
+        pick_x = min(max(np.digitize(a[0], self.bins[0]) - 1,0),self.heatmap_res - 1)
+        pick_y = min(max(np.digitize(a[1], self.bins[1]) - 1,0),self.heatmap_res - 1)
+        place_x = min(max(np.digitize(a[3], self.bins[3]) - 1,0),self.heatmap_res - 1)
+        place_y = min(max(np.digitize(a[4], self.bins[4]) - 1,0),self.heatmap_res - 1)
 
         self.heatmap_bool_pick[pick_x][pick_y] += 1
         self.heatmap_bool_place[place_x][place_y] += 1
