@@ -1,6 +1,9 @@
 import numpy as np
 import time
 
+#REWARD_TYPE_LIST = ['sparse','mse','envchange','subgoal']
+REWARD_TYPE_LIST = ['sparse','subgoal']
+
 class SimSimEnv:
     def __init__(self,config):
         self.config = config
@@ -22,6 +25,8 @@ class SimSimEnv:
         #self.desk_height = 0.765
         self.block_on_desk_z = 0.765
         self.block_size = 0.03
+
+        assert self.reward_shaping_type in REWARD_TYPE_LIST
 
         self.reset()
 

@@ -15,6 +15,7 @@ from rlbench.backend.observation import Observation
 from pyquaternion import Quaternion
 
 ACTION_SPACE_LIST = ["xyz","pick_and_place_2d","pick_and_place_3d"]
+REWARD_TYPE_LIST = ['sparse','mse','envchange','subgoal']
 
 class RLBenchEnv:
     def __init__(self,config):
@@ -35,6 +36,7 @@ class RLBenchEnv:
         self.grasp_speedup = config['environment']['grasp_speedup']
 
         assert self.action_space in ACTION_SPACE_LIST
+        assert self.reward_shaping_type in REWARD_TYPE_LIST
 
         if self.config['environment']['camera'] == True:
             cam_config = CameraConfig(rgb=True, depth=True, point_cloud=True, mask=False,image_size=(256, 256),
