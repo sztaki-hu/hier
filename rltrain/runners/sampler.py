@@ -104,7 +104,7 @@ class Sampler:
             while pause_flag.value:
                 time.sleep(0.1)
             
-            while self.mode_sync == True and t_glob >= t_limit:
+            while self.mode_sync == True and t_glob.value >= t_limit.value:
                 time.sleep(0.1)
 
             # Until start_steps have elapsed, randomly sample actions
