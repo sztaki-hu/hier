@@ -118,13 +118,15 @@ def main():
         
         end_flag = Value(c_bool, False)  
         pause_flag = Value(c_bool, True)
+        t_limit = Value('i', 0)
+        t_glob = Value('i', 0)
         test2train = mp.Queue()
         sample2train = mp.Queue(maxsize=100000)
         
         processes = []
 
         for i in range(env_num):
-            p = Process(target=sampler.start, args=[i+1,replay_buffer,end_flag,pause_flag,sample2train])
+            p = Process(target=sampler.start, args=[i+1,replay_buffer,end_flag,pause_flag,sample2train,t_glob,t_limit])
             p.start()
             processes.append(p)
         
@@ -135,7 +137,7 @@ def main():
         tester_p.start()
      
 
-        trainer.start(agent,replay_buffer,pause_flag,test2train,sample2train)
+        trainer.start(agent,replay_buffer,pause_flag,test2train,sample2train,t_glob,t_limit)
 
         # Stop Training #############################################################
 

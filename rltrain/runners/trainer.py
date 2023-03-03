@@ -141,10 +141,9 @@ class Trainer:
                         n_nstep=torch.cat((replay_batch['n_nstep'], demo_batch['n_nstep']), 0)), demo_ratio  
 
     
-    def start(self,agent,replay_buffer,pause_flag,test2train,sample2train):
+    def start(self,agent,replay_buffer,pause_flag,test2train,sample2train,t_glob,t_limit):
 
         # Start Training
-        t = 0
         epoch = 1
         update_iter = 1
         update_iter_every_log = 0
@@ -161,10 +160,13 @@ class Trainer:
         pbar = tqdm(total = total_steps, desc = "Training: ", colour="green")
         time0 = time.time()
         pause_flag.value = False
+        if self.mode_sync == True: t_limit.value = max(self.update_after,self.update_every)
+        t = 0
         while t < total_steps:
             t = replay_buffer.get_t()
+            if self.mode_sync == True: t_glob.value = t
 
-            if (t > self.update_after) and (self.pretrain_bool == True):
+            if (t >= self.update_after) and (self.pretrain_bool == True):
                 pause_flag.value = True
                 for _ in tqdm(range(int(self.pretrain_factor)), desc ="Updating weights (pretraining): ", leave=False):
                     batch, demo_ratio = self.get_batch(t,replay_buffer) 
@@ -172,7 +174,7 @@ class Trainer:
                 self.pretrain_bool = False
                 pause_flag.value = False
 
-            if (t > self.update_after) and (t >= update_iter * self.update_every):
+            if (t >= self.update_after) and (t >= update_iter * self.update_every):
 
                 if self.mode_sync:
                     pause_flag.value = True
@@ -214,7 +216,8 @@ class Trainer:
                                                           update_iter_every_log)    
 
                 pause_flag.value = False
-                update_iter += 1    
+                update_iter += 1
+                if self.mode_sync == True: t_limit.value = update_iter * self.update_every
 
             if t >= epoch * self.steps_per_epoch: 
 
@@ -280,6 +283,8 @@ class Trainer:
             pbar.n = t #check this
             pbar.refresh() #check this
         pbar.close()
+
+        
 
             
                

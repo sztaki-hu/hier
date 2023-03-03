@@ -19,6 +19,8 @@ class Sampler:
         self.demo_buffer = demo_buffer
         self.config = config
 
+        self.mode_sync = config['general']['sync'] 
+
         self.seed = config['general']['seed']        
         self.start_steps = config['sampler']['start_steps'] 
         self.max_ep_len = config['sampler']['max_ep_len'] 
@@ -82,7 +84,7 @@ class Sampler:
         return o
 
 
-    def start(self,id,replay_buffer,end_flag,pause_flag,sample2train):
+    def start(self,id,replay_buffer,end_flag,pause_flag,sample2train,t_glob,t_limit):
 
         torch.manual_seed(self.seed*id)
         np.random.seed(self.seed*id)
@@ -100,6 +102,9 @@ class Sampler:
         while end_flag.value == False:
 
             while pause_flag.value:
+                time.sleep(0.1)
+            
+            while self.mode_sync == True and t_glob >= t_limit:
                 time.sleep(0.1)
 
             # Until start_steps have elapsed, randomly sample actions
