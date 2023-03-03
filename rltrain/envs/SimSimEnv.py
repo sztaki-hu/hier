@@ -60,14 +60,17 @@ class SimSimEnv:
                     self.observation[(i+1)*3:(i+2)*3] = a[3:6]
             o = self.observation.copy()
             # Get reward
-            bonus = self.reward_shaping_subgoal_stack_blocks(o)
             if self.subgoal_level == self.task_params[2]:
                 r = 1
                 d = 1
             else:
                 r = 0
                 d = 0
-            r = (r + bonus) * self.reward_scalor
+            if self.reward_shaping_type == 'sparse':
+                r = r * self.reward_scalor
+            elif self.reward_shaping_type == 'subgoal':
+                bonus = self.reward_shaping_subgoal_stack_blocks(o)          
+                r = (r + bonus) * self.reward_scalor
             
             return o, r, d, None                
         

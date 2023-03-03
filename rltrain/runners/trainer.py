@@ -155,7 +155,7 @@ class Trainer:
         first_update = self.update_every * math.ceil(self.update_after / self.update_every)
         self.save_freq = int(((total_steps - first_update) * self.update_factor) / self.num_log_loss_points)
         self.save_freq = max(self.save_freq,1)
-
+        print("Train Logging frequency: " + str(self.save_freq))
 
         pbar = tqdm(total = total_steps, desc = "Training: ", colour="green")
         time0 = time.time()
