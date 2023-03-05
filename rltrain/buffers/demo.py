@@ -1,10 +1,13 @@
 import numpy as np
-import torch
 import time
+import random
 from tqdm import tqdm
+
 
 from rltrain.buffers.replay import ReplayBuffer
 from rltrain.envs.builder import make_env
+
+DEMO_GENERATE_TYPE_LIST = ['normal','subgoal_attention']
 
 class Demo:
     def __init__(self,logger,config):
@@ -17,6 +20,11 @@ class Demo:
         self.demo_name = config['demo']['demo_name'] 
         self.demo_block_order = config['demo']['demo_block_order']
         self.demo_change_nstep = config['demo']['demo_change_nstep']  
+        self.demo_generate_type = config['demo']['demo_generate_type'] 
+        self.demo_generate_params = config['demo']['demo_generate_params']
+        
+
+        assert self.demo_generate_type in DEMO_GENERATE_TYPE_LIST
 
         self.reward_scalor = config['environment']['reward']['reward_scalor']
 
@@ -75,11 +83,17 @@ class Demo:
 
         assert self.target_blocks_num >= self.tower_height
 
-        demo_num = int(self.demo_buffer_size / self.target_blocks_num)
+        if self.demo_generate_type == 'subgoal_attention':     
+            subgoal_add_th = []    
+            last_th = 0.0
+            for i in range(self.tower_height):
+                subgoal_add_th.append(float(self.demo_generate_params[i])+last_th)
+                last_th = subgoal_add_th[-1]
+            subgoal_ratio = np.zeros(self.tower_height)
 
-        pbar = tqdm(total=demo_num,colour="green")
+        pbar = tqdm(total=int(self.demo_buffer_size),colour="green")
         t = 0
-        while t<demo_num:
+        while t<int(self.demo_buffer_size):
 
             ## Reset Env
             while True:
@@ -137,9 +151,21 @@ class Demo:
                     break
 
             if ret >= self.reward_scalor:
-                self.demo_buffer.store_episode_nstep(ep_transitions,self.n_step,self.gamma)
-                t+=1
-                pbar.update(1)
+                if self.demo_generate_type == 'normal':
+                    self.demo_buffer.store_episode_nstep(ep_transitions,self.n_step,self.gamma)
+                    t+=len(ep_transitions)
+                    pbar.update(len(ep_transitions))
+                elif self.demo_generate_type == 'subgoal_attention':
+                    randnum = random.uniform(0.0, 1.0)
+                    for j in range(self.tower_height):
+                        if randnum < subgoal_add_th[j]:
+                            self.demo_buffer.store_episode_nstep(ep_transitions[j:],self.n_step,self.gamma)
+                            subgoal_ratio[j] += 1
+                            break
+                    increment = len(ep_transitions[j:])
+                    t+=increment
+                    pbar.update(increment)
+                    
 
             else:
                 unsuccessful_num += 1   
@@ -148,6 +174,9 @@ class Demo:
         pbar.close()
         
         self.env.shuttdown()
+
+        subgoal_ratio = subgoal_ratio / np.sum(subgoal_ratio)
+        print("Subgoal ratio: " + str(subgoal_ratio))
 
         self.logger.save_demos(self.demo_name,  self.demo_buffer)
 
