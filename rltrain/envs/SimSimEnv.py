@@ -63,6 +63,7 @@ class SimSimEnv:
                 block = self.observation[(i+1)*3:(i+2)*3]
                 if np.allclose(a[:3], block, rtol=0.0, atol=0.01, equal_nan=False):
                     self.observation[(i+1)*3:(i+2)*3] = a[3:6]
+                    break
             o = self.observation.copy()
             # Get reward
             bonus = self.reward_shaping_subgoal_stack_blocks(o)  

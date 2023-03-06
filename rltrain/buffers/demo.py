@@ -169,7 +169,7 @@ class Demo:
 
             else:
                 unsuccessful_num += 1   
-                tqdm.write("The demonstration is not successful, thus it is not added | Num: " + str(unsuccessful_num) + " | Return: " + str(ret))    
+                tqdm.write("The demonstration is not successful, thus it is not added | Num: " + str(unsuccessful_num) + " | Return: " + str(ret) +  " | Obs: " + str(o))    
         
         pbar.close()
         
