@@ -52,13 +52,15 @@ class Tester:
         
         #self.logger.save_model(self.agent.ac.pi.state_dict(),epoch)
     
-    def start(self,test2train):
+    def start(self,end_flag,test2train):
         
         self.env = make_env(self.config)
         self.test2train = test2train
 
         epoch = 1
         while epoch <= self.epochs:
+
+            trainer_ended = end_flag.value
 
             for epich_test in range(epoch,self.epochs+1):
 
@@ -84,6 +86,9 @@ class Tester:
                     self.logger.tb_writer_add_scalar("test/average_return", avg_return, t)
 
                     epoch = epich_test + 1
+
+            if trainer_ended == True:
+                break
             
             time.sleep(1.0)
         

@@ -20,7 +20,7 @@ import torch
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--configfile", default="logs/0221_A_stack_blocks_sac/" ,help="Path of the config file")
+    parser.add_argument("--configfile", default="logs/0307_test_01_MountainCarContinuous-v0_sac/" ,help="Path of the config file")
     parser.add_argument("--trainid", type=int, default=0 ,help="Train ID")
     parser.add_argument("--restart", type=bool, default=False ,help="Set true if you want to restart a training")
     # Example: python3 main.py --configfile /cfg/alma.yaml 0
@@ -45,7 +45,7 @@ if __name__ == '__main__':
     torch.set_num_threads(torch.get_num_threads())
 
     # Init RLBenchEnv
-    config['environment']['name'] = 'rlbench'
+    if config['environment']['name'] == 'simsim': config['environment']['name'] = 'rlbench' 
     config['environment']['headless'] = False
 
     # Init Agent
@@ -55,32 +55,7 @@ if __name__ == '__main__':
     tester = Tester(agent,logger,config)
 
     # Test Agent
-    tester.display_agent("model_8",10)
-
-
-    #tester.display_agent("model_45",5)
-    # tester.display_agent("model_20",5)
-    #tester.display_agent("model_30",5)
-    #tester.display_agent("model_40",5)
-    #tester.display_agent("model_50",5)
-    #tester.display_agent("model_57",5)
-
-    #tester.display_agent("model_1",5)
-    #tester.display_agent("model_5",5)
-    #tester.display_agent("model_20",5)
-    #tester.display_agent("model_30",5)
-    #tester.display_agent("model_45",5)
-    #tester.display_agent("model_50",5)
-    #tester.display_agent("model_59",5)
-
-    #tester.display_agent("model_1",5)
-    #tester.display_agent("model_2",5)
-    #tester.display_agent("model_3",5)
-    #tester.display_agent("model_4",5)
-    #tester.display_agent("model_5",5)
-    #tester.display_agent("model_8",5)
-    #tester.display_agent("model_40",5)
-    #tester.display_agent("model_80",5)
+    tester.display_agent("model_1",50)
 
     # Test Agent all models
     # models = logger.list_model_dir()

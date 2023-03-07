@@ -133,7 +133,7 @@ def main():
         agent_tester = Agent(device,config)
         tester = Tester(agent_tester,logger,config)
 
-        tester_p = Process(target=tester.start, args=[test2train])
+        tester_p = Process(target=tester.start, args=[end_flag,test2train])
         tester_p.start()
      
 

@@ -58,9 +58,9 @@ class Trainer:
         self.heatmap_bool = config['logger']['heatmap']['bool']
         self.heatmap_res = config['logger']['heatmap']['resolution']
 
-        if self.heatmap_bool:
-            self.heatmap_bool_pick = np.zeros((self.heatmap_res, self.heatmap_res))
-            self.heatmap_bool_place = np.zeros((self.heatmap_res, self.heatmap_res))
+        
+        self.heatmap_bool_pick = np.zeros((self.heatmap_res, self.heatmap_res))
+        self.heatmap_bool_place = np.zeros((self.heatmap_res, self.heatmap_res))
 
         self.pretrain_bool = config['trainer']['pretrain']['bool']
         self.pretrain_factor = config['trainer']['pretrain']['factor']

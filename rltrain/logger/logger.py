@@ -60,7 +60,7 @@ class Logger:
                 self.save_yaml(os.path.join(self.current_dir, self.logdir,self.logname,self.trainid,"config.yaml"),self.config)
             self.writer = SummaryWriter(log_dir = os.path.join(self.current_dir,self.logdir,self.logname,self.trainid,"runs"))
         
-        # self.heatmap_bool = self.config['logger']['heatmap']['bool']
+        self.heatmap_bool = self.config['logger']['heatmap']['bool']
         # self.heatmap_res = self.config['logger']['heatmap']['resolution']
 
         # if self.heatmap_bool:
@@ -76,6 +76,8 @@ class Logger:
         if self.config['environment']['obs_dim'] == "auto":
             if self.task_name == "stack_blocks":
                 self.config['environment']['obs_dim'] = 3 + self.task_params[0] * 3 + self.task_params[1] * 3
+            elif self.task_name == "MountainCarContinuous-v0":
+                self.config['environment']['obs_dim'] = 2
             else:
                 self.print_logfile("Obs dim could not be computed","error")
                 assert False
@@ -83,6 +85,8 @@ class Logger:
         if self.config['environment']['act_dim'] == "auto":
             if self.action_space == "pick_and_place_3d":
                 self.config['environment']['act_dim'] = 6
+            elif self.task_name == "MountainCarContinuous-v0":
+                self.config['environment']['act_dim'] = 1
             else:
                 self.print_logfile("Act dim could not be computed","error")
                 assert False
@@ -191,26 +195,27 @@ class Logger:
         self.tb_writer_add_scalar("train/reward_bonus_ratio", reward_bonus_ratio, t)
         self.tb_writer_add_scalar("train/demo_ratio", demo_ratio, t)
 
-        # heatmap_bool_pick_ratio = heatmap_bool_pick / np.sum(heatmap_bool_pick)
-        # heatmap_bool_place_ratio = heatmap_bool_place / np.sum(heatmap_bool_place)
+        if self.heatmap_bool:
+            # heatmap_bool_pick_ratio = heatmap_bool_pick / np.sum(heatmap_bool_pick)
+            # heatmap_bool_place_ratio = heatmap_bool_place / np.sum(heatmap_bool_place)
 
-        # heatmap_bool_pick_diff = heatmap_bool_pick - self.heatmap_bool_pick_old
-        # heatmap_bool_place_diff = heatmap_bool_place - self.heatmap_bool_place_old
+            # heatmap_bool_pick_diff = heatmap_bool_pick - self.heatmap_bool_pick_old
+            # heatmap_bool_place_diff = heatmap_bool_place - self.heatmap_bool_place_old
 
-        # self.heatmap_bool_pick_old = np.copy(heatmap_bool_pick)
-        # self.heatmap_bool_place_old = np.copy(heatmap_bool_place)
+            # self.heatmap_bool_pick_old = np.copy(heatmap_bool_pick)
+            # self.heatmap_bool_place_old = np.copy(heatmap_bool_place)
 
-        heatmap_bool_pick_norm = heatmap_bool_pick / np.max(heatmap_bool_pick)
-        heatmap_bool_place_norm = heatmap_bool_place / np.max(heatmap_bool_place)
+            heatmap_bool_pick_norm = heatmap_bool_pick / np.max(heatmap_bool_pick)
+            heatmap_bool_place_norm = heatmap_bool_place / np.max(heatmap_bool_place)
 
-        # heatmap_bool_pick_diff_norm = heatmap_bool_pick_diff / np.max(heatmap_bool_pick_diff)
-        # heatmap_bool_place_diff_norm = heatmap_bool_place_diff / np.max(heatmap_bool_place_diff)
+            # heatmap_bool_pick_diff_norm = heatmap_bool_pick_diff / np.max(heatmap_bool_pick_diff)
+            # heatmap_bool_place_diff_norm = heatmap_bool_place_diff / np.max(heatmap_bool_place_diff)
 
-        self.tb_writer_add_image("sampler/hetmap_pick_all",heatmap_bool_pick_norm, t, dataformats='HW')
-        self.tb_writer_add_image("sampler/hetmap_place_all",heatmap_bool_place_norm, t, dataformats='HW')
+            self.tb_writer_add_image("sampler/hetmap_pick_all",heatmap_bool_pick_norm, t, dataformats='HW')
+            self.tb_writer_add_image("sampler/hetmap_place_all",heatmap_bool_place_norm, t, dataformats='HW')
 
-        # self.tb_writer_add_image("sampler/hetmap_pick_last",heatmap_bool_pick_diff_norm, t, dataformats='HW')
-        # self.tb_writer_add_image("sampler/hetmap_place_last",heatmap_bool_place_diff_norm, t, dataformats='HW')
+            # self.tb_writer_add_image("sampler/hetmap_pick_last",heatmap_bool_pick_diff_norm, t, dataformats='HW')
+            # self.tb_writer_add_image("sampler/hetmap_place_last",heatmap_bool_place_diff_norm, t, dataformats='HW')
      
     
     def tb_save_train_data(self,loss_q,loss_pi,sum_ep_len,sum_ep_ret,episode_iter,env_error_num,t,log_loss_iter):
