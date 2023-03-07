@@ -42,8 +42,8 @@ class Gym:
 
     def reset(self):
         o, info = self.env.reset()
-        if np.any(np.isnan(o)):
-            print("nan in reset: " + str(o))
+        if self.task_name == "MountainCarContinuous-v0": # for old gym version (0.21.0)
+            o = np.array([o,0]) 
         return o           
 
     def init_state_valid(self):
@@ -51,14 +51,16 @@ class Gym:
     
     def step(self,action):
 
-        o, r, terminated, truncated, info = self.env.step(action)
-        d = terminated or truncated
+        # New gym version
+        # o, r, terminated, truncated, info = self.env.step(action)
+        # d = terminated or truncated
+
+        # Old gym version (0.21.0)
+        o, r, d, info = self.env.step(action)
 
         if self.reward_shaping_type == 'sparse':
             r = r * self.reward_scalor
 
-        if np.any(np.isnan(o)):
-            print("nan in step: " + str(o))
         return o, r, d, info
     
   
