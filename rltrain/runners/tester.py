@@ -207,9 +207,6 @@ class Tester:
         sum_return = 0
         for j in tqdm(range(num_display_episode), desc ="Testing: ", leave=False):
 
-            if self.env_name == "gym" and self.env_headless == False:
-                self.env.render()
-
             while True:
                 try:
                     o = self.env.reset_once()
@@ -225,6 +222,10 @@ class Tester:
             d, ep_ret, ep_len = False, 0, 0
 
             while not(d or (ep_len == self.max_ep_len)):
+
+                if self.env_name == "gym" and self.env_headless == False:
+                    self.env.render()
+
                 # Take deterministic actions at test time 
                 try:
                     a = self.agent.get_action(o, True)
