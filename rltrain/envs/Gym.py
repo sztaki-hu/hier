@@ -2,7 +2,7 @@ import numpy as np
 import gym
 
 
-REWARD_TYPE_LIST = ['sparse']
+REWARD_TYPE_LIST = ['sparse','energy']
 
 class Gym:
     def __init__(self,config):
@@ -27,7 +27,8 @@ class Gym:
         if self.config['environment']['headless']:
             self.env = gym.make(self.task_name)
         else:
-            self.env = gym.make(self.task_name,render_mode="human")
+            # self.env = gym.make(self.task_name,render_mode="human") new version
+            self.env = gym.make(self.task_name) # old gym version 0.21.0
         self.env._max_episode_steps = self.max_ep_len
 
         self.reset()
@@ -60,8 +61,14 @@ class Gym:
 
         if self.reward_shaping_type == 'sparse':
             r = r * self.reward_scalor
+        elif self.reward_shaping_type == 'energy':
+            energy = 9.81 * abs(o[0]) + 0.5 * o[1]**2 # assuming y is close to abs(x=o[0])
+            r = (r + energy) * self.reward_scalor
 
         return o, r, d, info
+    
+    def render(self): # for old gym version 0.21.0
+        self.env.render()
     
   
                  

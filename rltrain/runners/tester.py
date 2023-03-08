@@ -26,6 +26,7 @@ class Tester:
         self.max_ep_len = config['sampler']['max_ep_len']  
 
         self.act_dim = config['environment']['act_dim']
+        self.env_name = config['environment']['name']
 
         self.epochs = config['trainer']['epochs'] 
         self.steps_per_epoch = config['trainer']['steps_per_epoch'] 
@@ -205,6 +206,9 @@ class Tester:
         sum_return = 0
         for j in tqdm(range(num_display_episode), desc ="Testing: ", leave=False):
 
+            if self.env_name == "gym":
+                self.env.render()
+
             while True:
                 try:
                     o = self.env.reset_once()
@@ -223,6 +227,7 @@ class Tester:
                 # Take deterministic actions at test time 
                 try:
                     a = self.agent.get_action(o, True)
+                    print(a)
                     o, r, d, info = self.env.step(a)
                 except:
                     tqdm.write('[Test]: Error  simulation, thus reseting the environment')
