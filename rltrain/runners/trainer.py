@@ -248,9 +248,10 @@ class Trainer:
                         epoch_test = data['epoch']
                         test_env_error = data['error_in_env']
                         test_out_of_bound = data['out_of_bounds']
+                        avg_episode_len = data['avg_episode_len']
                           
                         test_t = epoch_test * self.steps_per_epoch           
-                        message = "[Test] AVG test return: " + str(epoch_test) + ". epoch ("+ str(test_t) + " transitions) : " + str(avg_test_return) + " | env error rate: " + str(test_env_error) + " | out of bound rate: " +str(test_out_of_bound)
+                        message = "[Test] AVG test return: " + str(epoch_test) + ". epoch ("+ str(test_t) + " transitions) : " + str(avg_test_return) + " | avg episode len: " + str(avg_episode_len) + " | env error rate: " + str(test_env_error) + " | out of bound rate: " +str(test_out_of_bound)
                         tqdm.write("[info]: " + message)  
                         self.logger.print_logfile(message,level = "info", terminal = False)  
                 

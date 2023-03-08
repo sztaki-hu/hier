@@ -80,8 +80,8 @@ class Tester:
                             test2train.put(data)
                             time.sleep(1.0)
 
-                    avg_return, error_in_env, out_of_bounds = self.test_v2()
-                    data = {'code': 1, 'value': avg_return, 'error_in_env': error_in_env, 'out_of_bounds':out_of_bounds, 'epoch': epoch, 'description':'Average test result'}
+                    avg_return, avg_episode_len, error_in_env, out_of_bounds = self.test_v2()
+                    data = {'code': 1, 'value': avg_return, 'error_in_env': error_in_env, 'avg_episode_len': avg_episode_len, 'out_of_bounds':out_of_bounds, 'epoch': epoch, 'description':'Average test result'}
                     test2train.put(data)
 
                     t = epoch * self.steps_per_epoch 
@@ -117,6 +117,7 @@ class Tester:
         
         avg_return = -1
         sum_return = 0
+        sum_episode_len = 0
         
         error_in_env = 0
         out_of_bounds = 0
@@ -147,13 +148,15 @@ class Tester:
 
                 ep_ret += r
                 ep_len += 1    
-
             sum_return += ep_ret
+            sum_episode_len += ep_len        
         avg_return = sum_return / float(self.num_test_episodes)
+        avg_episode_len = sum_episode_len / float(self.num_test_episodes)
         error_in_env = error_in_env / float(self.num_test_episodes)
         out_of_bounds = out_of_bounds / float(self.num_test_episodes)
+        
 
-        return avg_return, error_in_env, out_of_bounds
+        return avg_return, avg_episode_len, error_in_env, out_of_bounds
 
     def test(self, epoch = None, verbose = False):
 
