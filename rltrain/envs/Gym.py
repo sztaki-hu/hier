@@ -63,7 +63,7 @@ class Gym:
             r = r * self.reward_scalor
         elif self.reward_shaping_type == 'energy':
             energy = 9.81 * abs(o[0]) + 0.5 * o[1]**2 # assuming y is close to abs(x=o[0])
-            goal_bonus = self.bonus if r > 0 else 0
+            goal_bonus = self.reward_bonus if r > 0 else 0
             r = r * self.reward_scalor + energy + goal_bonus
 
         return o, r, d, info
