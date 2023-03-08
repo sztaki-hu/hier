@@ -1,6 +1,7 @@
 import numpy as np
 import time
 import random
+import math
 from tqdm import tqdm
 
 
@@ -36,9 +37,14 @@ class Demo:
         self.batch_size = config['trainer']['batch_size'] 
 
         self.task_name = self.config['environment']['task']['name']
-        self.target_blocks_num = int(self.config['environment']['task']['params'][0])
-        self.distractor_blocks_num = int(self.config['environment']['task']['params'][1])
-        self.tower_height = int(self.config['environment']['task']['params'][2])
+        self.task_params = self.config['environment']['task']['params']
+        if len(self.task_params) > 0: self.target_blocks_num = int(self.task_params[0])
+        if len(self.task_params) > 1: self.distractor_blocks_num = int(self.task_params[1])
+        if len(self.task_params) > 2: self.tower_height = int(self.task_params[2])
+
+        self.max_ep_len = int(self.config["sampler"]["max_ep_len"])
+        self.env_name = config['environment']['name']
+        self.env_headless = self.config['environment']['headless']
 
         self.demo_buffer = ReplayBuffer(obs_dim=self.obs_dim, act_dim=self.act_dim, size=self.demo_buffer_size)
 
@@ -51,6 +57,78 @@ class Demo:
         elif self.action_space == "pick_and_place_3d":
             if self.task_name == "stack_blocks":
                 self.create_demos_stack_blocks_pick_and_place_3d()
+        elif self.task_name == "MountainCarContinuous-v0":
+            self.create_demo_MountainCarContinuous()
+
+    def create_demo_MountainCarContinuous(self):
+
+        self.env = make_env(self.config)
+
+        pbar = tqdm(total=int(self.demo_buffer_size),colour="green")
+        t = 0
+        unsuccessful_num = 0
+        while t<int(self.demo_buffer_size):
+
+            ep_transitions = []
+            ret = 0
+
+            ## Reset Env
+            while True:
+
+                try:
+                    o = self.env.reset_once()
+                    if self.env.init_state_valid():
+                        break
+                    else:
+                        tqdm.write('Init state is not valid. Repeat env reset.')
+                        time.sleep(0.1)
+                except:
+                    tqdm.write('Could not reset the environment. Repeat env reset.')
+                    time.sleep(1)
+            
+            a = np.array([1.0])
+            d = 0
+            for _ in range(self.max_ep_len):
+
+                if self.env_name == "gym" and self.env_headless == False:
+                    self.env.render()
+                    #time.sleep(0.1)
+
+                # if math.isclose(o[1], 0, abs_tol = 0.001):
+                #     a[0] = -1.0 if o[0] > 0 else +1.0
+                
+                if o[1] < 0 and a[0] > 0:
+                    a[0] = -1.0
+                elif o[1] > 0 and a[0] < 0:
+                    a[0] = +1.0
+
+                #tqdm.write("a: " + str(a))
+                try:
+                    o2, r, d, info = self.env.step(a)
+                    ep_transitions.append((o, a, r, o2, d))
+                    o = o2
+                    if d == 1:
+                        break
+                except:
+                    tqdm.write("Error in simulation, this demonstration is not added")
+                    d = 0
+                    break
+
+            if d == 1:   
+                self.demo_buffer.store_episode_nstep(ep_transitions,self.n_step,self.gamma)
+                t+=len(ep_transitions)
+                pbar.update(len(ep_transitions))
+                
+            else:
+                unsuccessful_num += 1   
+                tqdm.write("The demonstration is not successful, thus it is not added | Num: " + str(unsuccessful_num) + " | Return: " + str(ret) +  " | Obs: " + str(o))    
+        
+        pbar.close()
+        
+        self.env.shuttdown()
+
+        self.logger.save_demos(self.demo_name,  self.demo_buffer)
+
 
     def create_demos_xyz(self):  
 

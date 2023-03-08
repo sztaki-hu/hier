@@ -27,6 +27,7 @@ class Tester:
 
         self.act_dim = config['environment']['act_dim']
         self.env_name = config['environment']['name']
+        self.env_headless = self.config['environment']['headless']
 
         self.epochs = config['trainer']['epochs'] 
         self.steps_per_epoch = config['trainer']['steps_per_epoch'] 
@@ -206,7 +207,7 @@ class Tester:
         sum_return = 0
         for j in tqdm(range(num_display_episode), desc ="Testing: ", leave=False):
 
-            if self.env_name == "gym":
+            if self.env_name == "gym" and self.env_headless == False:
                 self.env.render()
 
             while True:
