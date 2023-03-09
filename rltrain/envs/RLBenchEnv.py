@@ -166,6 +166,17 @@ class RLBenchEnv:
 
         return o, r, d, info
     
+    def get_max_return(self):
+        if self.task_name == 'stack_blocks':
+            if self.reward_shaping_type == 'sparse':
+                return self.reward_scalor
+            elif self.reward_shaping_type == 'subgoal': 
+                bonus = 0
+                for i in range(1,self.task_params[2]+1):
+                    bonus += self.reward_bonus * i       
+                return (1 + bonus) * self.reward_scalor
+        return None
+    
     def reward_shaping_mse(self,o):
         return -((o - self.get_obs())**2).sum()
     

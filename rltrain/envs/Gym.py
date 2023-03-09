@@ -71,6 +71,9 @@ class Gym:
     def render(self): # for old gym version 0.21.0
         self.env.render()
     
+    def get_max_return(self):
+        return None
+    
   
                  
 

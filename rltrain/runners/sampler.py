@@ -35,8 +35,8 @@ class Sampler:
         self.boundary_max = np.array(config['agent']['boundary_max'])[:self.act_dim]
 
         if self.heatmap_bool:
-            self.heatmap_bool_pick = np.zeros((self.heatmap_res, self.heatmap_res))
-            self.heatmap_bool_place = np.zeros((self.heatmap_res, self.heatmap_res))
+            self.heatmap_pick = np.zeros((self.heatmap_res, self.heatmap_res))
+            self.heatmap_place = np.zeros((self.heatmap_res, self.heatmap_res))
             self.bins = []
             for i in range(self.act_dim):
                 self.bins.append(np.linspace(self.boundary_min[i], self.boundary_max[i], num=self.heatmap_res+1, retstep=False))
@@ -63,8 +63,8 @@ class Sampler:
         place_x = min(max(np.digitize(a[3], self.bins[3]) - 1,0),self.heatmap_res - 1)
         place_y = min(max(np.digitize(a[4], self.bins[4]) - 1,0),self.heatmap_res - 1)
 
-        self.heatmap_bool_pick[pick_x][pick_y] += 1
-        self.heatmap_bool_place[place_x][place_y] += 1
+        self.heatmap_pick[pick_x][pick_y] += 1
+        self.heatmap_place[place_x][place_y] += 1
     
     def reset_env(self,sample2train):
         while True:
@@ -90,8 +90,9 @@ class Sampler:
         np.random.seed(self.seed*id)
 
         self.env = make_env(self.config)
+        max_return = self.env.get_max_return()
 
-        o, ep_ret, ep_len = self.reset_env(sample2train), 0, 0
+        o, ep_ret, ep_len, ep_success = self.reset_env(sample2train), 0, 0, 0
 
         # Main loop: collect experience in env and update/log each epoch
         #env_error_num = 0
@@ -122,7 +123,7 @@ class Sampler:
                 data = {'code': -2, 'description': 'Error in environment in step function, thus reseting the environment' + str(a)}
                 sample2train.put(data)
                 ep_transitions = []
-                o, ep_ret, ep_len = self.reset_env(sample2train), 0, 0   
+                o, ep_ret, ep_len, ep_success = self.reset_env(sample2train), 0, 0, 0   
                 continue     
             
             if bool(info): 
@@ -130,11 +131,11 @@ class Sampler:
                     sample2train.put(info)             
                     if info['code'] < 0:
                         ep_transitions = []
-                        o, ep_ret, ep_len = self.reset_env(sample2train), 0, 0
+                        o, ep_ret, ep_len, ep_success = self.reset_env(sample2train), 0, 0, 0
                         continue
             
-            if r == 10:
-                data = {'code': 41, 'description': 'Bonus was used (without task completation)'}
+            if r > 0 and r < 100:
+                data = {'code': 12, 'description': 'Bonus was used (without task completation)'}
                 sample2train.put(data)
 
             ep_ret += r
@@ -157,15 +158,15 @@ class Sampler:
 
             # End of trajectory handling
             if d or (ep_len == self.max_ep_len):   
-                data = {'code': 11, 'value': ep_ret,'description': '-'}
+                ep_success = ep_ret / float(max_return) if max_return is not None else -1.0
+                if self.heatmap_bool and id == 1: 
+                    heatmap_pick_send = self.heatmap_pick.copy()
+                    heatmap_place_send = self.heatmap_place.copy()
+                else:
+                    heatmap_pick_send = None
+                    heatmap_place_send = None
+                data = {'code': 11, 'ep_ret': ep_ret, 'ep_len': ep_len, 'ep_success': ep_success, 'heatmap_pick': heatmap_pick_send, 'heatmap_place': heatmap_place_send}
                 sample2train.put(data)
-                data = {'code': 12, 'value': ep_len,'description': '-'}
-                sample2train.put(data)
-                if self.heatmap_bool and id == 1:
-                    data = {'code': 13, 'value':  self.heatmap_bool_pick,'description': '-'}
-                    sample2train.put(data)
-                    data = {'code': 14, 'value':  self.heatmap_bool_place,'description': '-'}
-                    sample2train.put(data)
 
                 replay_buffer.store_episode_nstep(ep_transitions,self.n_step,self.gamma)
                 

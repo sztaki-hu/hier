@@ -172,6 +172,7 @@ class Logger:
                               loss_pi,
                               train_ret,
                               train_ep_len,
+                              train_ep_success,
                               env_error_num,
                               out_of_bounds_num,
                               reward_bonus_num,
@@ -185,6 +186,7 @@ class Logger:
         self.tb_writer_add_scalar("train/loss_p", loss_pi, update_iter)
         self.tb_writer_add_scalar("train/train_ret", train_ret, t)
         self.tb_writer_add_scalar("train/train_ep_len", train_ep_len, t)
+        self.tb_writer_add_scalar("train/train_ep_success", train_ep_success, t)
         env_error_num_ratio = (env_error_num / float(t))
         self.tb_writer_add_scalar("train/env_error_ratio", env_error_num_ratio, update_iter)
         out_of_bounds_ratio = (out_of_bounds_num / float(t))

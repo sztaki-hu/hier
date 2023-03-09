@@ -59,6 +59,8 @@ class Tester:
         self.env = make_env(self.config)
         self.test2train = test2train
 
+        max_return = self.env.get_max_return()
+    
         epoch = 1
         while epoch <= self.epochs:
 
@@ -80,12 +82,13 @@ class Tester:
                             test2train.put(data)
                             time.sleep(1.0)
 
-                    avg_return, avg_episode_len, error_in_env, out_of_bounds = self.test_v2()
-                    data = {'code': 1, 'value': avg_return, 'error_in_env': error_in_env, 'avg_episode_len': avg_episode_len, 'out_of_bounds':out_of_bounds, 'epoch': epoch, 'description':'Average test result'}
+                    avg_return, succes_rate, avg_episode_len, error_in_env, out_of_bounds = self.test_v2(max_return)
+                    data = {'code': 1, 'avg_return': avg_return, 'succes_rate': succes_rate,'error_in_env': error_in_env, 'avg_episode_len': avg_episode_len, 'out_of_bounds':out_of_bounds, 'epoch': epoch, 'description':'Average test result'}
                     test2train.put(data)
 
                     t = epoch * self.steps_per_epoch 
                     self.logger.tb_writer_add_scalar("test/average_return", avg_return, t)
+                    if succes_rate is not None: self.logger.tb_writer_add_scalar("test/succes_rate", succes_rate, t)
 
                     epoch = epich_test + 1
 
@@ -113,7 +116,7 @@ class Tester:
         
         return o
     
-    def test_v2(self):
+    def test_v2(self,max_return = None):
         
         avg_return = -1
         sum_return = 0
@@ -154,9 +157,9 @@ class Tester:
         avg_episode_len = sum_episode_len / float(self.num_test_episodes)
         error_in_env = error_in_env / float(self.num_test_episodes)
         out_of_bounds = out_of_bounds / float(self.num_test_episodes)
+        succes_rate = avg_return / float(max_return) if max_return is not None else None
         
-
-        return avg_return, avg_episode_len, error_in_env, out_of_bounds
+        return avg_return, succes_rate, avg_episode_len, error_in_env, out_of_bounds
 
     def test(self, epoch = None, verbose = False):
 

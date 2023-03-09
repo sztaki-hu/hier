@@ -3,6 +3,8 @@ import time
 
 #REWARD_TYPE_LIST = ['sparse','mse','envchange','subgoal']
 REWARD_TYPE_LIST = ['sparse','subgoal']
+TASK_TYPE_LIST = ['stack_blocks']
+ACTION_SPACE_LIST = ['pick_and_place_3d']
 
 class SimSimEnv:
     def __init__(self,config):
@@ -27,6 +29,8 @@ class SimSimEnv:
         self.block_size = 0.03
 
         assert self.reward_shaping_type in REWARD_TYPE_LIST
+        assert self.task_name in TASK_TYPE_LIST
+        assert self.action_space in ACTION_SPACE_LIST
 
         self.reset()
 
@@ -137,5 +141,17 @@ class SimSimEnv:
     
     def get_target(self): #for demos
         return self.observation
+
+    def get_max_return(self):
+        if self.task_name == 'stack_blocks':
+            if self.reward_shaping_type == 'sparse':
+                return self.reward_scalor
+            elif self.reward_shaping_type == 'subgoal': 
+                bonus = 0
+                for i in range(1,self.task_params[2]+1):
+                    bonus += self.reward_bonus * i       
+                return (1 + bonus) * self.reward_scalor
+        return None
+
 
 

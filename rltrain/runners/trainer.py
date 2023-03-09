@@ -54,13 +54,14 @@ class Trainer:
         
         self.return_buffer  = collections.deque(maxlen=20)
         self.episode_len_buffer  = collections.deque(maxlen=20)
+        self.ep_success_buffer  = collections.deque(maxlen=20)
 
         self.heatmap_bool = config['logger']['heatmap']['bool']
         self.heatmap_res = config['logger']['heatmap']['resolution']
 
         
-        self.heatmap_bool_pick = np.zeros((self.heatmap_res, self.heatmap_res))
-        self.heatmap_bool_place = np.zeros((self.heatmap_res, self.heatmap_res))
+        self.heatmap_pick = np.zeros((self.heatmap_res, self.heatmap_res))
+        self.heatmap_place = np.zeros((self.heatmap_res, self.heatmap_res))
 
         self.pretrain_bool = config['trainer']['pretrain']['bool']
         self.pretrain_factor = config['trainer']['pretrain']['factor']
@@ -201,16 +202,18 @@ class Trainer:
                         actual_time = time.time() - time0
                         train_ret = np.mean(self.return_buffer)
                         train_ep_len = np.mean(self.episode_len_buffer)
+                        train_ep_success = np.mean(self.ep_success_buffer)     
                         self.logger.tb_save_train_data_v2(loss_q,
                                                           loss_pi,
                                                           train_ret,
                                                           train_ep_len,
+                                                          train_ep_success,
                                                           env_error_num,
                                                           out_of_bounds_num,
                                                           reward_bonus_num,
                                                           demo_ratio,
-                                                          self.heatmap_bool_pick,
-                                                          self.heatmap_bool_place,
+                                                          self.heatmap_pick,
+                                                          self.heatmap_place,
                                                           t,
                                                           actual_time,
                                                           update_iter_every_log)    
@@ -244,14 +247,15 @@ class Trainer:
                     self.logger.print_logfile(message,level = "warning", terminal = False)  
                 else:
                     if data['code'] == 1:
-                        avg_test_return = data['value']
+                        avg_test_return = data['avg_return']
+                        succes_rate = data['succes_rate']                      
                         epoch_test = data['epoch']
                         test_env_error = data['error_in_env']
                         test_out_of_bound = data['out_of_bounds']
                         avg_episode_len = data['avg_episode_len']
                           
                         test_t = epoch_test * self.steps_per_epoch           
-                        message = "[Test] AVG test return: " + str(epoch_test) + ". epoch ("+ str(test_t) + " transitions) : " + str(avg_test_return) + " | avg episode len: " + str(avg_episode_len) + " | env error rate: " + str(test_env_error) + " | out of bound rate: " +str(test_out_of_bound)
+                        message = "[Test] AVG test return: " + str(epoch_test) + ". epoch ("+ str(test_t) + " transitions) : " + str(avg_test_return) + " | succes_rate: " + str(succes_rate) + " | avg episode len: " + str(avg_episode_len) + " | env error rate: " + str(test_env_error) + " | out of bound rate: " +str(test_out_of_bound)
                         tqdm.write("[info]: " + message)  
                         self.logger.print_logfile(message,level = "info", terminal = False)  
                 
@@ -266,17 +270,18 @@ class Trainer:
                         env_error_num += 1 
                     if int(data['code']) == -11:
                         out_of_bounds_num += 1 
+                
+
                 elif data['code'] == 11:
-                    self.return_buffer.append(float(data['value']))
-                elif data['code'] == 12:  
-                    self.episode_len_buffer.append(int(data['value']))  
-                elif data['code'] == 13:
+                    #print(data)
+                    self.return_buffer.append(float(data['ep_ret']))
+                    self.episode_len_buffer.append(int(data['ep_len']))
+                    self.ep_success_buffer.append(float(data['ep_success']))
                     if self.heatmap_bool:  
-                        self.heatmap_bool_pick = data['value']
-                elif data['code'] == 14:  
-                    if self.heatmap_bool:
-                        self.heatmap_bool_place = data['value']
-                elif data['code'] == 41:  
+                        if data['heatmap_pick'] is not None: self.heatmap_pick = data['heatmap_pick']
+                        if data['heatmap_place'] is not None: self.heatmap_place = data['heatmap_place']
+    
+                elif data['code'] == 12:  
                     reward_bonus_num+=1
 
 
