@@ -24,7 +24,6 @@ class Demo:
         self.demo_generate_type = config['demo']['demo_generate_type'] 
         self.demo_generate_params = config['demo']['demo_generate_params']
         
-
         assert self.demo_generate_type in DEMO_GENERATE_TYPE_LIST
 
         self.reward_scalor = config['environment']['reward']['reward_scalor']
@@ -54,9 +53,9 @@ class Demo:
             self.create_demos_xyz()
         # elif self.action_space == "pick_and_place_2d":
         #     self.create_demos_pick_and_place_2d()
-        elif self.action_space == "pick_and_place_3d":
+        elif (self.action_space == "pick_and_place_2d") or (self.action_space == "pick_and_place_3d"):
             if self.task_name == "stack_blocks":
-                self.create_demos_stack_blocks_pick_and_place_3d()
+                self.create_demos_stack_blocks_pick_and_place()
         elif self.task_name == "MountainCarContinuous-v0":
             self.create_demo_MountainCarContinuous()
 
@@ -103,6 +102,8 @@ class Demo:
                     a[0] = +1.0
 
                 #tqdm.write("a: " + str(a))
+                # o2, r, d, info = self.env.step(a)
+                # o = o2
                 try:
                     o2, r, d, info = self.env.step(a)
                     ep_transitions.append((o, a, r, o2, d))
@@ -154,7 +155,7 @@ class Demo:
         # print(self.demo_buffer.ptr)
         
     
-    def create_demos_stack_blocks_pick_and_place_3d(self):  
+    def create_demos_stack_blocks_pick_and_place(self):  
 
         self.env = make_env(self.config)
         unsuccessful_num = 0
@@ -215,18 +216,26 @@ class Demo:
             
             for i in range(self.tower_height):
                 
-                a = np.hstack((blocks[i],target)) 
-                a[5] += 0.01 + 0.03 * i
+                if self.action_space == "pick_and_place_2d":
+                    a = np.array([blocks[i][0],blocks[i][1],target[0],target[1]])
+                elif self.action_space == "pick_and_place_3d":
+                    a = np.hstack((blocks[i],target)) 
+                    a[5] += 0.01 + 0.03 * i
 
-                try:
-                    o2, r, d, info = self.env.step(a)
-                    ep_transitions.append((o, a, r, o2, d))
-                    o = o2
-                    ret += r
-                except:
-                    tqdm.write("Error in simulation, this demonstration is not added")
-                    ret = -1
-                    break
+                o2, r, d, info = self.env.step(a)
+                ep_transitions.append((o, a, r, o2, d))
+                o = o2
+                ret += r
+
+                # try:
+                #     o2, r, d, info = self.env.step(a)
+                #     ep_transitions.append((o, a, r, o2, d))
+                #     o = o2
+                #     ret += r
+                # except:
+                #     tqdm.write("Error in simulation, this demonstration is not added")
+                #     ret = -1
+                #     break
 
             if ret >= self.reward_scalor:
                 if self.demo_generate_type == 'normal':

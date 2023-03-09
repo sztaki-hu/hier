@@ -82,8 +82,11 @@ class Logger:
                 self.print_logfile("Obs dim could not be computed","error")
                 assert False
             self.print_logfile("Obs dim is computed: " + str(self.config['environment']['obs_dim']))
+
         if self.config['environment']['act_dim'] == "auto":
-            if self.action_space == "pick_and_place_3d":
+            if self.action_space == "pick_and_place_2d":
+                self.config['environment']['act_dim'] = 4
+            elif self.action_space == "pick_and_place_3d":
                 self.config['environment']['act_dim'] = 6
             elif self.task_name == "MountainCarContinuous-v0":
                 self.config['environment']['act_dim'] = 1

@@ -90,6 +90,7 @@ class RLBenchEnv:
         return o
 
     def reset(self):
+
         while True:
             try:
                 o = self.task_env.reset()
@@ -100,6 +101,7 @@ class RLBenchEnv:
             except:
                 print("Could not reset the environment. Repeat reset.")
                 time.sleep(1)
+
         #o = self.task_env.reset()
         o = self.get_obs()
         self.obs_last = o
@@ -125,8 +127,8 @@ class RLBenchEnv:
         if self.action_space == "xyz":
             a = self.model2robot_xyz(a_model)
             o, r, d, info = self.task_env.step(a)    
-        # elif self.action_space == "pick_and_place_2d":
-        #     poses = self.model2robot_pick_and_place_2d(a_model)
+        elif self.action_space == "pick_and_place_2d":
+            poses = self.model2robot_pick_and_place_2d(a_model)
             o, r, d, info = self.execute_path(poses)  
         elif self.action_space == "pick_and_place_3d":
             poses = self.model2robot_pick_and_place_3d(a_model)
@@ -160,6 +162,7 @@ class RLBenchEnv:
                 bonus = self.reward_shaping_subgoal_stack_blocks(o)
                 r = (r + bonus) * self.reward_scalor
 
+        bonus = self.reward_shaping_subgoal_stack_blocks(o)
 
         ## Save last observation
         self.obs_last = o
@@ -217,7 +220,7 @@ class RLBenchEnv:
     def get_obs(self):
         if self.action_space == "xyz":
             return self.task_env._scene.task._target_place.get_position()[:self.obs_dim]
-        elif self.action_space == "pick_and_place_3d":
+        elif self.task_name == "stack_blocks":
             obs = [item.get_position() for item in self.task_env._scene.task._observation]
             obs = np.hstack(obs)
             return obs
@@ -229,8 +232,8 @@ class RLBenchEnv:
     def model2robot_pick_and_place_2d(self,a):
         xy1 = a[:2]
         xy2 = a[2:]
-        xyz1 = np.concatenate([xy1,np.array([self.desk_z])])
-        xyz2 = np.concatenate([xy2,np.array([self.desk_z])])
+        xyz1 = np.concatenate([xy1,np.array([self.block_on_desk_z])])
+        xyz2 = np.concatenate([xy2,np.array([self.block_on_desk_z + self.subgoal_level * self.block_size])])
         return self.pick_and_place_planner(xyz1, self.quat, xyz2, self.quat, h1 = None, d1 = None, h2 = None, d2 = None)
     
     def model2robot_pick_and_place_3d(self,a):

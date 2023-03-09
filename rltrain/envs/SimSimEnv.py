@@ -4,7 +4,7 @@ import time
 #REWARD_TYPE_LIST = ['sparse','mse','envchange','subgoal']
 REWARD_TYPE_LIST = ['sparse','subgoal']
 TASK_TYPE_LIST = ['stack_blocks']
-ACTION_SPACE_LIST = ['pick_and_place_3d']
+ACTION_SPACE_LIST = ['pick_and_place_2d','pick_and_place_3d']
 
 class SimSimEnv:
     def __init__(self,config):
@@ -60,7 +60,16 @@ class SimSimEnv:
             return self.observation
     
     def step(self,a):
-        if self.action_space == "pick_and_place_3d":
+        if self.action_space == "pick_and_place_2d":
+            # Movement of the block
+            r = 0
+            for i in range(self.task_params[0] + self.task_params[1]):
+                block = self.observation[(i+1)*3:(i+2)*3]
+                if np.allclose(a[:2], block[:2], rtol=0.0, atol=0.01, equal_nan=False):
+                    self.observation[(i+1)*3:(i+2)*3] = np.array([a[2],a[3],self.block_on_desk_z + self.subgoal_level * self.block_size])
+                    break
+            o = self.observation.copy()
+        elif self.action_space == "pick_and_place_3d":
             # Movement of the block
             r = 0
             for i in range(self.task_params[0] + self.task_params[1]):
@@ -69,34 +78,35 @@ class SimSimEnv:
                     self.observation[(i+1)*3:(i+2)*3] = a[3:6]
                     break
             o = self.observation.copy()
-            # Get reward
-            bonus = self.reward_shaping_subgoal_stack_blocks(o)  
-            if self.subgoal_level == self.task_params[2]:
-                r = 1
-                d = 1
-            else:
-                r = 0
-                d = 0            
-            if self.reward_shaping_type == 'sparse':
-                r = r * self.reward_scalor
-            elif self.reward_shaping_type == 'subgoal':        
-                r = (r + bonus) * self.reward_scalor
-            
-            return o, r, d, None                
-        
+        # Get reward
+        bonus = self.reward_shaping_subgoal_stack_blocks(o)  
+        if self.subgoal_level == self.task_params[2]:
+            r = 1
+            d = 1
         else:
-            d = np.allclose(a[:self.obs_dim], self.observation, rtol=0.0, atol=0.02, equal_nan=False)
-            r = float(d) * 100
-            info = None
-            if self.reward_shaping_use:
-                if self.reward_shaping_type == 'mse':
-                    r = self.reward_shaping_mse(o)
-            # avg = (self.boundary_min[0] + self.boundary_max[0]) / 2.0
-            # range = abs((self.boundary_max[0] - self.boundary_min[0]))
-            # o = (o - avg) / range
-            o = self.observation
-            time.sleep(0.05)
-            return o, r, d, info
+            r = 0
+            d = 0            
+        if self.reward_shaping_type == 'sparse':
+            r = r * self.reward_scalor
+        elif self.reward_shaping_type == 'subgoal':        
+            r = (r + bonus) * self.reward_scalor
+        
+        return o, r, d, None                  
+        
+        # else:
+        #     d = np.allclose(a[:self.obs_dim], self.observation, rtol=0.0, atol=0.02, equal_nan=False)
+        #     r = float(d) * 100
+        #     info = None
+        #     if self.reward_shaping_use:
+        #         if self.reward_shaping_type == 'mse':
+        #             r = self.reward_shaping_mse(o)
+        #     # avg = (self.boundary_min[0] + self.boundary_max[0]) / 2.0
+        #     # range = abs((self.boundary_max[0] - self.boundary_min[0]))
+        #     # o = (o - avg) / range
+        #     o = self.observation
+        #     time.sleep(0.05)
+        #     return o, r, d, info
+
 
     def reward_shaping_subgoal_stack_blocks(self,o):
         
