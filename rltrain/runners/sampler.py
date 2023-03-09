@@ -57,11 +57,17 @@ class Sampler:
         """
 
     def update_heatmap(self,a):
-        
-        pick_x = min(max(np.digitize(a[0], self.bins[0]) - 1,0),self.heatmap_res - 1)
-        pick_y = min(max(np.digitize(a[1], self.bins[1]) - 1,0),self.heatmap_res - 1)
-        place_x = min(max(np.digitize(a[3], self.bins[3]) - 1,0),self.heatmap_res - 1)
-        place_y = min(max(np.digitize(a[4], self.bins[4]) - 1,0),self.heatmap_res - 1)
+
+        if self.act_dim == 6:
+            pick_x = min(max(np.digitize(a[0], self.bins[0]) - 1,0),self.heatmap_res - 1)
+            pick_y = min(max(np.digitize(a[1], self.bins[1]) - 1,0),self.heatmap_res - 1)
+            place_x = min(max(np.digitize(a[3], self.bins[3]) - 1,0),self.heatmap_res - 1)
+            place_y = min(max(np.digitize(a[4], self.bins[4]) - 1,0),self.heatmap_res - 1)
+        elif self.act_dim == 4:
+            pick_x = min(max(np.digitize(a[0], self.bins[0]) - 1,0),self.heatmap_res - 1)
+            pick_y = min(max(np.digitize(a[1], self.bins[1]) - 1,0),self.heatmap_res - 1)
+            place_x = min(max(np.digitize(a[2], self.bins[2]) - 1,0),self.heatmap_res - 1)
+            place_y = min(max(np.digitize(a[3], self.bins[3]) - 1,0),self.heatmap_res - 1)
 
         self.heatmap_pick[pick_x][pick_y] += 1
         self.heatmap_place[place_x][place_y] += 1
