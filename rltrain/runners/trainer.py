@@ -316,6 +316,9 @@ class Trainer:
                         time.sleep(0.1)
 
                     fb_th = self.get_fallback_th(checkpoint_test_return)
+
+                    t_log = epoch * self.steps_per_epoch 
+                    self.logger.tb_writer_add_scalar("test/fb_diff", avg_test_return - checkpoint_test_return, t_log)
                     
                     if avg_test_return > fb_th :
                         best_model_path = model_path
@@ -335,9 +338,9 @@ class Trainer:
                         tqdm.write("[info]: " + message)  
                         self.logger.print_logfile(message,level = "info", terminal = False) 
                     
-                    t = epoch * self.steps_per_epoch 
-                    self.logger.tb_writer_add_scalar("test/checkpoint_test_return", checkpoint_test_return, t)
-                    self.logger.tb_writer_add_scalar("test/fallback_safety", fb_active, t)
+                    
+                    self.logger.tb_writer_add_scalar("test/checkpoint_test_return", checkpoint_test_return, t_log)
+                    self.logger.tb_writer_add_scalar("test/fallback_safety", fb_active, t_log)
 
                 ## To be implemented #####################
                 #self.logger.save_replay_buffer(replay_buffer, epoch)
