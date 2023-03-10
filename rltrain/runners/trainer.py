@@ -39,6 +39,10 @@ class Trainer:
         self.update_every = config['trainer']['update_every'] 
         self.update_factor = config['trainer']['update_factor'] 
 
+        self.fallback_safety = config['trainer']['fallback_safety']['fb_bool'] 
+        self.fb_th_type = config['trainer']['fallback_safety']['fb_th_type']
+        self.fb_th_value = config['trainer']['fallback_safety']['fb_th_value'] 
+
         self.num_log_loss_points = config['logger']['num_log_loss_points'] 
 
         self.obs_dim = config['environment']['obs_dim']
@@ -109,6 +113,69 @@ class Trainer:
                 the current policy and value function.
 
         """ 
+
+    def get_fallback_th(self,checkpoint_test_return):
+        if self.fb_th_type == "absolute":
+            return checkpoint_test_return - self.fb_th_value
+        elif self.fb_th_type == "relative":
+            return checkpoint_test_return * self.fb_th_value
+    
+    def handle_messages(self,test2train,sample2train):
+
+        msg = None
+        avg_test_return = None
+
+        if test2train.empty() == False:
+            data = test2train.get()
+            if data['code'] < 0:
+                message = "Code: " + str(data['code']) + " Description: " + str(data['description'])
+                tqdm.write("[warning]: " + message)  
+                self.logger.print_logfile(message,level = "warning", terminal = False)  
+                
+            else:
+                if data['code'] == 1:
+                    avg_test_return = data['avg_return']
+                    succes_rate = data['succes_rate']                      
+                    epoch_test = data['epoch']
+                    test_env_error = data['error_in_env']
+                    test_out_of_bound = data['out_of_bounds']
+                    avg_episode_len = data['avg_episode_len']
+                        
+                    test_t = epoch_test * self.steps_per_epoch           
+                    message = "[Test] AVG test return: " + str(epoch_test) + ". epoch ("+ str(test_t) + " transitions) : " + str(avg_test_return) + " | succes_rate: " + str(succes_rate) + " | avg episode len: " + str(avg_episode_len) + " | env error rate: " + str(test_env_error) + " | out of bound rate: " +str(test_out_of_bound)
+                    tqdm.write("[info]: " + message)  
+                    self.logger.print_logfile(message,level = "info", terminal = False)  
+            msg = ('test',data['code'],avg_test_return)
+                
+            
+        elif sample2train.empty() == False:
+            data = sample2train.get()
+            if data['code'] < 0:                 
+                message = "Code: " + str(data['code']) + " Description: " + str(data['description'])
+                #tqdm.write("[warning]: " + message)  
+                self.logger.print_logfile(message,level = "warning", terminal = False)  
+                if int(data['code']) == -2:
+                    self.env_error_num += 1 
+                if int(data['code']) == -11:
+                    self.out_of_bounds_num += 1 
+            
+
+            elif data['code'] == 11:
+                #print(data)
+                self.return_buffer.append(float(data['ep_ret']))
+                self.episode_len_buffer.append(int(data['ep_len']))
+                self.ep_success_buffer.append(float(data['ep_success']))
+                if self.heatmap_bool:  
+                    if data['heatmap_pick'] is not None: self.heatmap_pick = data['heatmap_pick']
+                    if data['heatmap_place'] is not None: self.heatmap_place = data['heatmap_place']
+
+            elif data['code'] == 12:  
+                self.reward_bonus_num+=1
+            
+            msg = ('sample',data['code'],None)
+        
+        return msg
+
     
     def get_batch(self,t,replay_buffer):
         
@@ -149,9 +216,10 @@ class Trainer:
         update_iter = 1
         update_iter_every_log = 0
         total_steps = self.steps_per_epoch * self.epochs
-        env_error_num = 0
-        out_of_bounds_num = 0
-        reward_bonus_num = 0
+        self.env_error_num = 0
+        self.out_of_bounds_num = 0
+        self.reward_bonus_num = 0
+        checkpoint_test_return = -math.inf
 
         first_update = self.update_every * math.ceil(self.update_after / self.update_every)
         self.save_freq = int(((total_steps - first_update) * self.update_factor) / self.num_log_loss_points)
@@ -208,9 +276,9 @@ class Trainer:
                                                           train_ret,
                                                           train_ep_len,
                                                           train_ep_success,
-                                                          env_error_num,
-                                                          out_of_bounds_num,
-                                                          reward_bonus_num,
+                                                          self.env_error_num,
+                                                          self.out_of_bounds_num,
+                                                          self.reward_bonus_num,
                                                           demo_ratio,
                                                           self.heatmap_pick,
                                                           self.heatmap_place,
@@ -224,6 +292,9 @@ class Trainer:
 
             if t >= epoch * self.steps_per_epoch: 
 
+                if self.fallback_safety:
+                    pause_flag.value = True
+
                 epoch_real = (t+1) // self.steps_per_epoch
                 if epoch != epoch_real:
                     message = "Test is missed at the end of an epoch ("+ str(epoch) + " --> " + str(epoch_real) + ") as the sampler is too fast"
@@ -231,59 +302,52 @@ class Trainer:
                     self.logger.print_logfile(message,level = "warning", terminal = False)   
                 epoch = epoch_real  
 
-                agent.save_model(self.logger.get_model_save_path(epoch))
+                model_path = self.logger.get_model_save_path(epoch)
+                agent.save_model(model_path)
+
+                if self.fallback_safety:
+                    while True:
+                        msg = self.handle_messages(test2train,sample2train)
+                        if msg is not None:
+                            if len(msg) == 3:
+                                if msg[0] == "test" and msg[1] == 1 and msg[2] is not None:
+                                    avg_test_return = msg[2]
+                                    break
+                        time.sleep(0.1)
+
+                    fb_th = self.get_fallback_th(checkpoint_test_return)
+                    
+                    if avg_test_return > fb_th :
+                        best_model_path = model_path
+                        fb_active = 0
+
+                        message = "Epoch: " + str(epoch) + " | No significant fallback | Avg Return: " + str(avg_test_return) + " | Checkpoint avg return: " + str(checkpoint_test_return) + " | th: " + str(fb_th)
+                        tqdm.write("[info]: " + message)  
+                        self.logger.print_logfile(message,level = "info", terminal = False) 
+
+                        checkpoint_test_return = avg_test_return
+
+                    else:
+                        agent.load_weights(best_model_path)
+                        fb_active = 1
+
+                        message = "Epoch: "+ str(epoch) + " | Significant fallback --> Fallback safety is activated | Avg Return: " + str(avg_test_return) + " | Checkpoint avg return: " + str(checkpoint_test_return) + " | th: " + str(fb_th)
+                        tqdm.write("[info]: " + message)  
+                        self.logger.print_logfile(message,level = "info", terminal = False) 
+                    
+                    t = epoch * self.steps_per_epoch 
+                    self.logger.tb_writer_add_scalar("test/checkpoint_test_return", checkpoint_test_return, t)
+                    self.logger.tb_writer_add_scalar("test/fallback_safety", fb_active, t)
 
                 ## To be implemented #####################
                 #self.logger.save_replay_buffer(replay_buffer, epoch)
                 ####################################
 
+                pause_flag.value = False
                 epoch += 1
-
-            if test2train.empty() == False:
-                data = test2train.get()
-                if data['code'] < 0:
-                    message = "Code: " + str(data['code']) + " Description: " + str(data['description'])
-                    tqdm.write("[warning]: " + message)  
-                    self.logger.print_logfile(message,level = "warning", terminal = False)  
-                else:
-                    if data['code'] == 1:
-                        avg_test_return = data['avg_return']
-                        succes_rate = data['succes_rate']                      
-                        epoch_test = data['epoch']
-                        test_env_error = data['error_in_env']
-                        test_out_of_bound = data['out_of_bounds']
-                        avg_episode_len = data['avg_episode_len']
-                          
-                        test_t = epoch_test * self.steps_per_epoch           
-                        message = "[Test] AVG test return: " + str(epoch_test) + ". epoch ("+ str(test_t) + " transitions) : " + str(avg_test_return) + " | succes_rate: " + str(succes_rate) + " | avg episode len: " + str(avg_episode_len) + " | env error rate: " + str(test_env_error) + " | out of bound rate: " +str(test_out_of_bound)
-                        tqdm.write("[info]: " + message)  
-                        self.logger.print_logfile(message,level = "info", terminal = False)  
-                
             
-            if sample2train.empty() == False:
-                data = sample2train.get()
-                if data['code'] < 0:                 
-                    message = "Code: " + str(data['code']) + " Description: " + str(data['description'])
-                    #tqdm.write("[warning]: " + message)  
-                    self.logger.print_logfile(message,level = "warning", terminal = False)  
-                    if int(data['code']) == -2:
-                        env_error_num += 1 
-                    if int(data['code']) == -11:
-                        out_of_bounds_num += 1 
-                
-
-                elif data['code'] == 11:
-                    #print(data)
-                    self.return_buffer.append(float(data['ep_ret']))
-                    self.episode_len_buffer.append(int(data['ep_len']))
-                    self.ep_success_buffer.append(float(data['ep_success']))
-                    if self.heatmap_bool:  
-                        if data['heatmap_pick'] is not None: self.heatmap_pick = data['heatmap_pick']
-                        if data['heatmap_place'] is not None: self.heatmap_place = data['heatmap_place']
-    
-                elif data['code'] == 12:  
-                    reward_bonus_num+=1
-
+            # Handle messages
+            self.handle_messages(test2train,sample2train)
 
             #pbar.update(1)
             pbar.n = t #check this
