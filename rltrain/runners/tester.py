@@ -31,6 +31,8 @@ class Tester:
 
         self.epochs = config['trainer']['epochs'] 
         self.steps_per_epoch = config['trainer']['steps_per_epoch'] 
+
+        self.agent_num = int(config['agent']['agent_num'])
     
     def eval_range(self,epoch):
         if self.act_dim != 1: return
@@ -54,23 +56,34 @@ class Tester:
         
         #self.logger.save_model(self.agent.ac.pi.state_dict(),epoch)
     
+    def np2dict(self,data_np):
+        data = {}
+        for agent_id in range(data_np.shape[0]):
+            data["agent_" + str(agent_id)]= data_np[agent_id]        
+        return data
+    
     def start(self,end_flag,test2train):
         
         self.env = make_env(self.config)
         self.test2train = test2train
 
         max_return = self.env.get_max_return()
+
+        avg_return_np = np.zeros(self.agent_num)
+        succes_rate_np = np.zeros(self.agent_num)
     
+        epochs = np.zeros(self.agent_num)
         epoch = 1
         while epoch <= self.epochs:
-
             trainer_ended = end_flag.value
 
-            for epich_test in range(epoch,self.epochs+1):
-
-                model_name = self.logger.get_model_epoch(epich_test)
+            for agent_id in range(self.agent_num):
+            
+                if epoch == epochs[agent_id] + 1:
+                    model_name = self.logger.get_model_epoch(epoch,agent_id)
                 
                 if model_name != None:
+
                     path = self.logger.get_model_path(model_name)
                     
                     while True:
@@ -78,19 +91,23 @@ class Tester:
                             self.agent.load_weights(path)
                             break
                         except:
-                            data = {'code': -31, 'description':'Tester could not open weight file'}
+                            data = {'code': -31, 'agent_id': agent_id, 'description':'Tester could not open weight file'}
                             test2train.put(data)
                             time.sleep(1.0)
 
                     avg_return, succes_rate, avg_episode_len, error_in_env, out_of_bounds = self.test_v2(max_return)
-                    data = {'code': 1, 'avg_return': avg_return, 'succes_rate': succes_rate,'error_in_env': error_in_env, 'avg_episode_len': avg_episode_len, 'out_of_bounds':out_of_bounds, 'epoch': epoch, 'description':'Average test result'}
+                    avg_return_np[agent_id] = avg_return
+                    succes_rate_np[agent_id] = succes_rate
+                    data = {'code': 1, 'agent_id': agent_id, 'avg_return': avg_return, 'succes_rate': succes_rate,'error_in_env': error_in_env, 'avg_episode_len': avg_episode_len, 'out_of_bounds':out_of_bounds, 'epoch': epoch, 'description':'Average test result'}
                     test2train.put(data)
 
-                    t = epoch * self.steps_per_epoch 
-                    self.logger.tb_writer_add_scalar("test/average_return", avg_return, t)
-                    if succes_rate is not None: self.logger.tb_writer_add_scalar("test/succes_rate", succes_rate, t)
+                    epochs[agent_id] += 1
 
-                    epoch = epich_test + 1
+            if np.all(epochs == epoch):
+                t = epoch * self.steps_per_epoch 
+                self.logger.tb_writer_add_scalars("test/average_return_np", self.np2dict(avg_return_np), t) 
+                if succes_rate is not None: self.logger.tb_writer_add_scalars("test/succes_rate_np", self.np2dict(succes_rate_np), t)
+                epoch += 1
 
             if trainer_ended == True:
                 break

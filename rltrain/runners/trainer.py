@@ -56,9 +56,15 @@ class Trainer:
 
         assert self.demo_ratio_type in DEMO_RATIO_TYPES
         
-        self.return_buffer  = collections.deque(maxlen=20)
-        self.episode_len_buffer  = collections.deque(maxlen=20)
-        self.ep_success_buffer  = collections.deque(maxlen=20)
+        agent_num = int(config['agent']['agent_num'])         
+        self.return_buffer_list = []
+        self.episode_len_buffer_list = []
+        self.ep_success_buffer_list = []
+        for _ in range(agent_num):
+            self.return_buffer_list.append(collections.deque(maxlen=20))
+            self.episode_len_buffer_list.append(collections.deque(maxlen=20))
+            self.ep_success_buffer_list.append(collections.deque(maxlen=20))
+
 
         self.heatmap_bool = config['logger']['heatmap']['bool']
         self.heatmap_res = config['logger']['heatmap']['resolution']
@@ -124,6 +130,7 @@ class Trainer:
 
         msg = None
         avg_test_return = None
+        agent_id = None
 
         if test2train.empty() == False:
             data = test2train.get()
@@ -140,12 +147,13 @@ class Trainer:
                     test_env_error = data['error_in_env']
                     test_out_of_bound = data['out_of_bounds']
                     avg_episode_len = data['avg_episode_len']
+                    agent_id = data['agent_id']
                         
                     test_t = epoch_test * self.steps_per_epoch           
-                    message = "[Test] AVG test return: " + str(epoch_test) + ". epoch ("+ str(test_t) + " transitions) : " + str(avg_test_return) + " | succes_rate: " + str(succes_rate) + " | avg episode len: " + str(avg_episode_len) + " | env error rate: " + str(test_env_error) + " | out of bound rate: " +str(test_out_of_bound)
+                    message = "[Test] AVG test return: " + str(epoch_test) + ". epoch ("+ str(test_t) + " transitions) | Agent id:" + str(agent_id) + " | Avg return: " + str(avg_test_return) + " | succes_rate: " + str(succes_rate) + " | avg episode len: " + str(avg_episode_len) + " | env error rate: " + str(test_env_error) + " | out of bound rate: " +str(test_out_of_bound)
                     tqdm.write("[info]: " + message)  
                     self.logger.print_logfile(message,level = "info", terminal = False)  
-            msg = ('test',data['code'],avg_test_return)
+            msg = ('test',data['code'],avg_test_return,agent_id)
                 
             
         elif sample2train.empty() == False:
@@ -162,9 +170,10 @@ class Trainer:
 
             elif data['code'] == 11:
                 #print(data)
-                self.return_buffer.append(float(data['ep_ret']))
-                self.episode_len_buffer.append(int(data['ep_len']))
-                self.ep_success_buffer.append(float(data['ep_success']))
+                agent_id = data['agent_id']
+                self.return_buffer_list[agent_id].append(float(data['ep_ret']))
+                self.episode_len_buffer_list[agent_id].append(int(data['ep_len']))
+                self.ep_success_buffer_list[agent_id].append(float(data['ep_success']))
                 if self.heatmap_bool:  
                     if data['heatmap_pick'] is not None: self.heatmap_pick = data['heatmap_pick']
                     if data['heatmap_place'] is not None: self.heatmap_place = data['heatmap_place']
@@ -208,8 +217,7 @@ class Trainer:
                         done_nstep=torch.cat((replay_batch['done_nstep'], demo_batch['done_nstep']), 0),
                         n_nstep=torch.cat((replay_batch['n_nstep'], demo_batch['n_nstep']), 0)), demo_ratio  
 
-    
-    def start(self,agent,replay_buffer,pause_flag,test2train,sample2train,t_glob,t_limit):
+    def start(self,agents,replay_buffer,pause_flag,test2train,sample2train,t_glob,t_limit):
 
         # Start Training
         epoch = 1
@@ -220,6 +228,14 @@ class Trainer:
         self.out_of_bounds_num = 0
         self.reward_bonus_num = 0
         checkpoint_test_return = -math.inf
+
+        agent_num = len(agents)
+        loss_q_np = np.zeros(agent_num)
+        loss_pi_np = np.zeros(agent_num)
+        train_ret_np = np.zeros(agent_num)
+        train_ret_np = np.zeros(agent_num)
+        train_ep_len_np = np.zeros(agent_num)
+        train_ep_success_np = np.zeros(agent_num)
 
         first_update = self.update_every * math.ceil(self.update_after / self.update_every)
         self.save_freq = int(((total_steps - first_update) * self.update_factor) / self.num_log_loss_points)
@@ -239,7 +255,9 @@ class Trainer:
                 pause_flag.value = True
                 for _ in tqdm(range(int(self.pretrain_factor)), desc ="Updating weights (pretraining): ", leave=False):
                     batch, demo_ratio = self.get_batch(t,replay_buffer) 
-                    loss_q, loss_pi = agent.update(data=batch)
+                    
+                    for agent_id in range(agent_num):
+                        loss_q_np[agent_id], loss_pi_np[agent_id] = agents[agent_id].update(data=batch)
                 self.pretrain_bool = False
                 pause_flag.value = False
 
@@ -265,17 +283,21 @@ class Trainer:
 
                     update_iter_every_log += 1
                     batch, demo_ratio = self.get_batch(t,replay_buffer) 
-                    loss_q, loss_pi = agent.update(data=batch)
+                    for agent_id in range(agent_num):
+                        loss_q_np[agent_id], loss_pi_np[agent_id] = agents[agent_id].update(data=batch)
+
                     if update_iter_every_log % self.save_freq == 0:
                         actual_time = time.time() - time0
-                        train_ret = np.mean(self.return_buffer)
-                        train_ep_len = np.mean(self.episode_len_buffer)
-                        train_ep_success = np.mean(self.ep_success_buffer)     
-                        self.logger.tb_save_train_data_v2(loss_q,
-                                                          loss_pi,
-                                                          train_ret,
-                                                          train_ep_len,
-                                                          train_ep_success,
+ 
+                        for agent_id in range(agent_num):                          
+                            train_ret_np[agent_id] = np.mean(self.return_buffer_list[agent_id])
+                            train_ep_len_np[agent_id] = np.mean(self.episode_len_buffer_list[agent_id])
+                            train_ep_success_np[agent_id] = np.mean(self.ep_success_buffer_list[agent_id])     
+                        self.logger.tb_save_train_data_v3(loss_q_np,
+                                                          loss_pi_np,
+                                                          train_ret_np,
+                                                          train_ep_len_np,
+                                                          train_ep_success_np,
                                                           self.env_error_num,
                                                           self.out_of_bounds_num,
                                                           self.reward_bonus_num,
@@ -292,7 +314,7 @@ class Trainer:
 
             if t >= epoch * self.steps_per_epoch: 
 
-                if self.fallback_safety:
+                if agent_num > 1 or self.fallback_safety:
                     pause_flag.value = True
 
                 epoch_real = (t+1) // self.steps_per_epoch
@@ -300,47 +322,76 @@ class Trainer:
                     message = "Test is missed at the end of an epoch ("+ str(epoch) + " --> " + str(epoch_real) + ") as the sampler is too fast"
                     tqdm.write("[warning]: " + message)  
                     self.logger.print_logfile(message,level = "warning", terminal = False)   
-                epoch = epoch_real  
+                epoch = epoch_real                 
 
-                model_path = self.logger.get_model_save_path(epoch)
-                agent.save_model(model_path)
-
-                if self.fallback_safety:
-                    while True:
-                        msg = self.handle_messages(test2train,sample2train)
-                        if msg is not None:
-                            if len(msg) == 3:
-                                if msg[0] == "test" and msg[1] == 1 and msg[2] is not None:
-                                    avg_test_return = msg[2]
+                model_paths = []
+                for agent_id in range(agent_num):
+                    model_paths.append(self.logger.get_model_save_path(epoch, agent_id))
+                    agents[agent_id].save_model(model_paths[-1])
+                
+                
+                avg_test_return_np = np.zeros(agent_num)
+                avg_test_return_np_bool = np.zeros(agent_num)
+                while True:
+                    msg = self.handle_messages(test2train,sample2train)
+                    if msg is not None:
+                        if len(msg) == 4:
+                            if msg[0] == "test" and msg[1] == 1 and msg[2] is not None and msg[3] is not None:
+                                avg_test_return_np[int(msg[3])] = msg[2]
+                                avg_test_return_np_bool[int(msg[3])] = 1.0
+                                if np.all(avg_test_return_np_bool == 1.0):
                                     break
-                        time.sleep(0.1)
+                    time.sleep(0.1)
+                
+                message = "Epoch: " + str(epoch) + " | Checkpoint avg return: " + str(checkpoint_test_return)
+                tqdm.write("[info]: " + message)  
+                self.logger.print_logfile(message,level = "info", terminal = False) 
+
+                for agent_id in range(agent_num):
+                    message = "Epoch: " + str(epoch) + " | Agent " + str(agent_id) +" avg return: " + str(avg_test_return_np[agent_id])
+                    tqdm.write("[info]: " + message)  
+                    self.logger.print_logfile(message,level = "info", terminal = False) 
+
+                best_agent_id = np.argmax(avg_test_return_np)
+
+                t_log = epoch * self.steps_per_epoch 
+
+                if self.fallback_safety == True:
 
                     fb_th = self.get_fallback_th(checkpoint_test_return)
-
-                    t_log = epoch * self.steps_per_epoch 
-                    self.logger.tb_writer_add_scalar("test/fb_diff", avg_test_return - checkpoint_test_return, t_log)
                     
-                    if avg_test_return > fb_th :
-                        best_model_path = model_path
+                    message = "Epoch: " + str(epoch) + " | Best Agent: " + str(agent_id) + " (avg return: " + str(avg_test_return_np[agent_id]) + ") Checkpoint avg return: " + str(checkpoint_test_return) + " | Fb th: " + str(fb_th)
+                    tqdm.write("[info]: " + message)  
+                    self.logger.print_logfile(message,level = "info", terminal = False) 
+
+
+                    if avg_test_return_np[best_agent_id] > fb_th:
+                        message = "Epoch: " + str(epoch) + " | No Fallback "
+                        tqdm.write("[info]: " + message)  
+                        self.logger.print_logfile(message,level = "info", terminal = False) 
+                        
+                        best_model_path = model_paths[best_agent_id]
                         fb_active = 0
-
-                        message = "Epoch: " + str(epoch) + " | No significant fallback | Avg Return: " + str(avg_test_return) + " | Checkpoint avg return: " + str(checkpoint_test_return) + " | th: " + str(fb_th)
-                        tqdm.write("[info]: " + message)  
-                        self.logger.print_logfile(message,level = "info", terminal = False) 
-
-                        checkpoint_test_return = avg_test_return
-
+                        checkpoint_test_return = avg_test_return_np[best_agent_id]
                     else:
-                        agent.load_weights(best_model_path)
-                        fb_active = 1
-
-                        message = "Epoch: "+ str(epoch) + " | Significant fallback --> Fallback safety is activated | Avg Return: " + str(avg_test_return) + " | Checkpoint avg return: " + str(checkpoint_test_return) + " | th: " + str(fb_th)
+                        message = "Epoch: " + str(epoch) + " | Fallback Safety Activated"
                         tqdm.write("[info]: " + message)  
                         self.logger.print_logfile(message,level = "info", terminal = False) 
+
+                        fb_active = 1
                     
-                    
-                    self.logger.tb_writer_add_scalar("test/checkpoint_test_return", checkpoint_test_return, t_log)
                     self.logger.tb_writer_add_scalar("test/fallback_safety", fb_active, t_log)
+                
+                else:
+                    best_model_path = model_paths[best_agent_id]
+                    checkpoint_test_return = avg_test_return_np[best_agent_id]
+                
+                for agent_id in range(agent_num):
+                    agents[agent_id].load_weights(best_model_path)
+                    
+
+                self.logger.tb_writer_add_scalar("test/checkpoint_test_return", checkpoint_test_return, t_log)
+                
 
                 ## To be implemented #####################
                 #self.logger.save_replay_buffer(replay_buffer, epoch)
@@ -356,6 +407,8 @@ class Trainer:
             pbar.n = t #check this
             pbar.refresh() #check this
         pbar.close()
+
+
 
         
 

@@ -74,90 +74,70 @@ def main():
         demo_buffer = None
     
     
-    env_num = int(config['sampler']['env_num'])
-    if  env_num == 1: # 1 process #################
+    sampler_num = int(config['sampler']['sampler_num'])
+    agent_num = int(config['agent']['agent_num'])
 
-        logger = Logger(current_dir = current_dir, main_args = args, light_mode = False)
-       
-        env = make_env(config)
+    BaseManager.register('ReplayBuffer', ReplayBuffer)
+    BaseManager.register('Logger', Logger)
+    BaseManager.register('Agent', Agent)
+      
+    manager = BaseManager()
+    manager.start()
+    replay_buffer = manager.ReplayBuffer(
+        obs_dim=int(config['environment']['obs_dim']), 
+        act_dim=int(config['environment']['act_dim']), 
+        size=int(config['buffer']['replay_buffer_size']))
+    logger = manager.Logger(current_dir = current_dir, main_args = args, light_mode = False)
 
-        sampler_trainer_tester = SamplerTrainerTester(device,env,demo_buffer,logger,config)
+    agents = []
+    for _ in range(agent_num):
+        agents.append(manager.Agent(device,config))
 
-        try:
-            # Start Training
-            sampler_trainer_tester.start()
-        finally:
-            env.shuttdown()
-
-    else:  # Multi-process ####################################################
-
-        BaseManager.register('ReplayBuffer', ReplayBuffer)
-        BaseManager.register('Agent', Agent)
-        BaseManager.register('Logger', Logger)
-        manager = BaseManager()
-        manager.start()
-        replay_buffer = manager.ReplayBuffer(
-            obs_dim=int(config['environment']['obs_dim']), 
-            act_dim=int(config['environment']['act_dim']), 
-            size=int(config['buffer']['replay_buffer_size']))
-        agent = manager.Agent(device,config)
-        logger = manager.Logger(current_dir = current_dir, main_args = args, light_mode = False)
-
-        # Training ##############################################################
-
-        if args.restart == True: 
-            path = logger.get_model_path_for_restart(dir = "model_backup_restart", epoch = int(args.restart_epoch))
-            agent.load_weights(path)
-
-            ## To be implemented #####################
-            #replay_buffer = logger.load_replay_buffer(int(args.restart_epoch))
-            ####################################
-
-        sampler = Sampler(agent,demo_buffer,config)
-        trainer = Trainer(device,demo_buffer,logger,config)
+    sampler = Sampler(demo_buffer,config)
+    trainer = Trainer(device,demo_buffer,logger,config)
         
-        end_flag = Value(c_bool, False)  
-        pause_flag = Value(c_bool, True)
-        t_limit = Value('i', 0)
-        t_glob = Value('i', 0)
-        test2train = mp.Queue()
-        sample2train = mp.Queue(maxsize=100000)
-        
-        processes = []
+    end_flag = Value(c_bool, False)  
+    pause_flag = Value(c_bool, True)
+    t_limit = Value('i', 0)
+    t_glob = Value('i', 0)
+    test2train = mp.Queue()
+    sample2train = mp.Queue(maxsize=100000)
 
-        for i in range(env_num):
-            p = Process(target=sampler.start, args=[i+1,replay_buffer,end_flag,pause_flag,sample2train,t_glob,t_limit])
+    processes = []
+
+    for agent_id in range(agent_num):
+        for sampler_id in range(sampler_num):
+            p = Process(target=sampler.start, args=[agent_id,agents[agent_id],sampler_id,replay_buffer,end_flag,pause_flag,sample2train,t_glob,t_limit])
             p.start()
             processes.append(p)
-        
-        agent_tester = Agent(device,config)
-        tester = Tester(agent_tester,logger,config)
+    
+    agent_tester = Agent(device,config)
+    tester = Tester(agent_tester,logger,config)
 
-        tester_p = Process(target=tester.start, args=[end_flag,test2train])
-        tester_p.start()
-     
+    tester_p = Process(target=tester.start, args=[end_flag,test2train])
+    tester_p.start()
 
-        trainer.start(agent,replay_buffer,pause_flag,test2train,sample2train,t_glob,t_limit)
+    trainer.start(agents,replay_buffer,pause_flag,test2train,sample2train,t_glob,t_limit)
 
-        # Stop Training #############################################################
+    # Stop Training #############################################################
 
-        pause_flag.value = False
-        end_flag.value = True
+    pause_flag.value = False
+    end_flag.value = True
 
-        logger.print_logfile("Waiting for samplers to terminate")
-        for p in processes:
-            p.join()
-        logger.print_logfile("Samplers terminated")
+    logger.print_logfile("Waiting for samplers to terminate")
+    for p in processes:
+        p.join()
+    logger.print_logfile("Samplers terminated")
 
-        logger.print_logfile("Waiting for the tester to terminate")
-        tester_p.join()
-        logger.print_logfile("Tester terminated")
+    logger.print_logfile("Waiting for the tester to terminate")
+    tester_p.join()
+    logger.print_logfile("Tester terminated")
 
-        while sample2train.empty() == False:
-            logger.print_logfile(sample2train.get())
-        
-        while test2train.empty() == False:
-            logger.print_logfile(test2train.get())
+    while sample2train.empty() == False:
+        logger.print_logfile(sample2train.get())
+    
+    while test2train.empty() == False:
+        logger.print_logfile(test2train.get())
 
 
 if __name__ == '__main__':

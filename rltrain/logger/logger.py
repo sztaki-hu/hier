@@ -52,22 +52,19 @@ class Logger:
 
         self.create_folder(os.path.join(self.current_dir,self.logdir, self.logname,self.trainid)) 
 
+        self.heatmap_bool = self.config['logger']['heatmap']['bool']
+        self.agent_num = int(self.config['agent']['agent_num'])
+        if self.agent_num > 1: assert self.config['general']['sync'] == True
+
         if light_mode == False:
-            if main_args.restart == False:
-                self.create_folder(os.path.join(self.current_dir,self.logdir, self.logname,self.trainid,"model_backup"))
+            if main_args.restart == False:     
+                for agent_id in range(self.agent_num):
+                    self.create_folder(os.path.join(self.current_dir,self.logdir, self.logname,self.trainid,"model_backup",str(agent_id)))
                 #self.create_folder(os.path.join(self.current_dir,self.logdir, self.logname,self.trainid,"replay_buffer_backup"))
                 #self.create_folder(os.path.join(self.current_dir, self.logdir, self.logname,self.trainid,"plots_raw_data"))
                 self.save_yaml(os.path.join(self.current_dir, self.logdir,self.logname,self.trainid,"config.yaml"),self.config)
             self.writer = SummaryWriter(log_dir = os.path.join(self.current_dir,self.logdir,self.logname,self.trainid,"runs"))
-        
-        self.heatmap_bool = self.config['logger']['heatmap']['bool']
-        # self.heatmap_res = self.config['logger']['heatmap']['resolution']
-
-        # if self.heatmap_bool:
-        #     self.heatmap_bool_pick_old = np.zeros((self.heatmap_res, self.heatmap_res))
-        #     self.heatmap_bool_place_old = np.zeros((self.heatmap_res, self.heatmap_res))
-           
-            
+          
     def compute_and_replace_auto_values(self):
         self.task_name = self.config['environment']['task']['name']
         self.task_params = self.config['environment']['task']['params']
@@ -107,23 +104,23 @@ class Logger:
         else:
             self.pylogger.info(str(message))
 
-    def get_model_epoch(self,epoch):
-        models = self.list_model_dir()
+    def get_model_epoch(self,epoch,agent_id = 0):
+        models = self.list_model_dir(agent_id)
         for model in models:
             model_num = int(model[6:])    
             if model_num == epoch:
                 return model
         return None       
 
-    def list_model_dir(self):
-        return os.listdir(os.path.join(self.current_dir,self.logdir, self.logname,self.trainid,"model_backup"))
+    def list_model_dir(self, agent_id = 0):
+        return os.listdir(os.path.join(self.current_dir,self.logdir, self.logname,self.trainid,"model_backup",str(agent_id)))
 
-    def get_model_path(self,name):
-        return os.path.join(self.current_dir,self.logdir, self.logname,self.trainid,"model_backup",name)
+    def get_model_path(self,name, agent_id = 0):
+        return os.path.join(self.current_dir,self.logdir, self.logname,self.trainid,"model_backup",str(agent_id),name)
     
-    def get_model_path_for_restart(self,dir = "model_backup_restart", epoch = 1):
+    def get_model_path_for_restart(self,dir = "model_backup_restart", epoch = 1, agent_id = 0):
         name = "model_" + str(epoch)
-        return os.path.join(self.current_dir,self.logdir, self.logname,self.trainid,str(dir),name)
+        return os.path.join(self.current_dir,self.logdir, self.logname,self.trainid,str(dir),str(agent_id),name)
 
     def get_config(self):
         return self.config
@@ -131,15 +128,19 @@ class Logger:
     def tb_writer_add_scalar(self,name,value,iter):
         self.writer.add_scalar(name, value, iter)
     
+    def tb_writer_add_scalars(self,name,value,iter):
+        self.writer.add_scalars(name, value, iter)
+    
     def tb_writer_add_image(self,name,img, iter, dataformats='HWC'):
         self.writer.add_image(name, img, iter, dataformats=dataformats)
 
-    def save_model(self,model,epoch):
-        model_path = os.path.join(self.current_dir, self.logdir, self.logname,self.trainid,"model_backup","model_" + str(epoch))
+    def save_model(self,model,epoch,agent_id = 0):
+        model_path = os.path.join(self.current_dir, self.logdir, self.logname,self.trainid,"model_backup",str(agent_id),"model_" + str(epoch))
         torch.save(model, model_path)
     
-    def get_model_save_path(self,epoch):
-        return os.path.join(self.current_dir, self.logdir, self.logname,self.trainid,"model_backup","model_" + str(epoch))
+    def get_model_save_path(self,epoch,agent_id = 0):
+        return os.path.join(self.current_dir, self.logdir, self.logname,self.trainid,"model_backup",str(agent_id),"model_" + str(epoch))
+
     
     # def save_replay_buffer(self, replay_buffer, epoch):
     #     path = os.path.join(self.current_dir, self.logdir, self.logname,self.trainid,"replay_buffer_backup","buffer_" + str(epoch)+".yaml")
@@ -221,6 +222,51 @@ class Logger:
 
             # self.tb_writer_add_image("sampler/hetmap_pick_last",heatmap_bool_pick_diff_norm, t, dataformats='HW')
             # self.tb_writer_add_image("sampler/hetmap_place_last",heatmap_bool_place_diff_norm, t, dataformats='HW')
+    
+    def np2dict(self,data_np):
+        data = {}
+        for agent_id in range(data_np.shape[0]):
+            data["agent_" + str(agent_id)]= data_np[agent_id]        
+        return data
+
+    def tb_save_train_data_v3(self,
+                              loss_q_np,
+                              loss_pi_np,
+                              train_ret_np,
+                              train_ep_len_np,
+                              train_ep_success_np,
+                              env_error_num,
+                              out_of_bounds_num,
+                              reward_bonus_num,
+                              demo_ratio,
+                              heatmap_pick,
+                              heatmap_place,
+                              t,
+                              actual_time,
+                              update_iter):
+        self.writer.add_scalars('train/loss_q_np', self.np2dict(loss_q_np), update_iter)
+        self.writer.add_scalars("train/loss_p_np", self.np2dict(loss_pi_np), update_iter)
+        self.writer.add_scalars("train/train_ret_np", self.np2dict(train_ret_np), t)
+        self.writer.add_scalars("train/train_ep_len_np", self.np2dict(train_ep_len_np), t)
+        self.writer.add_scalars("train/train_ep_success", self.np2dict(train_ep_success_np), t)
+        env_error_num_ratio = (env_error_num / float(t))
+        self.tb_writer_add_scalar("train/env_error_ratio", env_error_num_ratio, update_iter)
+        out_of_bounds_ratio = (out_of_bounds_num / float(t))
+        self.tb_writer_add_scalar("train/out_of_bounds_ratio", out_of_bounds_ratio, update_iter) 
+        rel_time = 1000 * (actual_time / float(t))
+        self.tb_writer_add_scalar("train/time_sec_1000_transitions", rel_time, t)
+        reward_bonus_ratio = (reward_bonus_num / float(t))
+        self.tb_writer_add_scalar("train/reward_bonus_ratio", reward_bonus_ratio, t)
+        self.tb_writer_add_scalar("train/demo_ratio", demo_ratio, t)
+
+        if self.heatmap_bool:
+
+            heatmap_pick_norm = heatmap_pick / np.max(heatmap_pick)
+            heatmap_place_norm = heatmap_place / np.max(heatmap_place)
+
+            self.tb_writer_add_image("sampler/hetmap_pick_all",heatmap_pick_norm, t, dataformats='HW')
+            self.tb_writer_add_image("sampler/hetmap_place_all",heatmap_place_norm, t, dataformats='HW')
+
      
     
     def tb_save_train_data(self,loss_q,loss_pi,sum_ep_len,sum_ep_ret,episode_iter,env_error_num,t,log_loss_iter):

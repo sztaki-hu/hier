@@ -13,16 +13,21 @@ from rltrain.envs.builder import make_env
 
 class Sampler:
 
-    def __init__(self,agent,demo_buffer,config):
+    def __init__(self,demo_buffer,config):
         #self.env = env
-        self.agent = agent
+        #self.agent = agent
         self.demo_buffer = demo_buffer
         self.config = config
 
         self.mode_sync = config['general']['sync'] 
 
         self.seed = config['general']['seed']        
-        self.start_steps = config['sampler']['start_steps'] 
+
+        self.sampler_num = config['sampler']['sampler_num']
+        self.agent_num = config['agent']['agent_num']
+
+        self.start_steps = config['sampler']['start_steps'] / float(self.agent_num*self.sampler_num)
+
         self.max_ep_len = config['sampler']['max_ep_len'] 
         self.gamma = config['agent']['gamma'] 
         self.n_step = config['agent']['n_step'] 
@@ -72,33 +77,35 @@ class Sampler:
         self.heatmap_pick[pick_x][pick_y] += 1
         self.heatmap_place[place_x][place_y] += 1
     
-    def reset_env(self,sample2train):
+    def reset_env(self,sample2train,agent_id):
         while True:
             try:
                 o = self.env.reset_once()
                 if self.env.init_state_valid():
                     break
                 else:
-                    data = {'code': -21, 'description':'Init state is not valid. Repeat env reset.'}
+                    data = {'code': -21, 'agent_id':agent_id, 'description':'Init state is not valid. Repeat env reset.'}
                     sample2train.put(data)
                     time.sleep(0.1)
             except:
-                data = {'code': -1, 'description':'Could not reset the environment. Repeat env reset.'}
+                data = {'code': -1, 'agent_id':agent_id, 'description':'Could not reset the environment. Repeat env reset.'}
                 sample2train.put(data)
                 time.sleep(1)
         
         return o
 
 
-    def start(self,id,replay_buffer,end_flag,pause_flag,sample2train,t_glob,t_limit):
+    def start(self,agent_id,agent,sampler_id,replay_buffer,end_flag,pause_flag,sample2train,t_glob,t_limit):
 
-        torch.manual_seed(self.seed*id)
-        np.random.seed(self.seed*id)
+        self.agent = agent
+
+        torch.manual_seed(self.seed*(sampler_id+1)*(agent_id+1))
+        np.random.seed(self.seed*(sampler_id+1)*(agent_id+1))
 
         self.env = make_env(self.config)
         max_return = self.env.get_max_return()
 
-        o, ep_ret, ep_len, ep_success = self.reset_env(sample2train), 0, 0, 0
+        o, ep_ret, ep_len, ep_success = self.reset_env(sample2train,agent_id), 0, 0, 0
 
         # Main loop: collect experience in env and update/log each epoch
         #env_error_num = 0
@@ -126,10 +133,10 @@ class Sampler:
             try:
                 o2, r, d, info = self.env.step(a)
             except:
-                data = {'code': -2, 'description': 'Error in environment in step function, thus reseting the environment' + str(a)}
+                data = {'code': -2, 'agent_id': agent_id, 'description': 'Error in environment in step function, thus reseting the environment' + str(a)}
                 sample2train.put(data)
                 ep_transitions = []
-                o, ep_ret, ep_len, ep_success = self.reset_env(sample2train), 0, 0, 0   
+                o, ep_ret, ep_len, ep_success = self.reset_env(sample2train,agent_id), 0, 0, 0   
                 continue     
             
             if bool(info): 
@@ -137,11 +144,11 @@ class Sampler:
                     sample2train.put(info)             
                     if info['code'] < 0:
                         ep_transitions = []
-                        o, ep_ret, ep_len, ep_success = self.reset_env(sample2train), 0, 0, 0
+                        o, ep_ret, ep_len, ep_success = self.reset_env(sample2train,agent_id), 0, 0, 0
                         continue
             
             if r > 0 and r < 100:
-                data = {'code': 12, 'description': 'Bonus was used (without task completation)'}
+                data = {'code': 12, 'agent_id':agent_id, 'description': 'Bonus was used (without task completation)'}
                 sample2train.put(data)
 
             ep_ret += r
@@ -155,7 +162,7 @@ class Sampler:
             # Store experience to replay buffer
             ep_transitions.append((o, a, r, o2, d))
 
-            if self.heatmap_bool and id == 1:
+            if self.heatmap_bool and sampler_id == 1 and agent_id == 0:
                 self.update_heatmap(a)
 
             # Super critical, easy to overlook step: make sure to update 
@@ -165,19 +172,19 @@ class Sampler:
             # End of trajectory handling
             if d or (ep_len == self.max_ep_len):   
                 ep_success = ep_ret / float(max_return) if max_return is not None else -1.0
-                if self.heatmap_bool and id == 1: 
+                if self.heatmap_bool and sampler_id == 1 and agent_id == 0: 
                     heatmap_pick_send = self.heatmap_pick.copy()
                     heatmap_place_send = self.heatmap_place.copy()
                 else:
                     heatmap_pick_send = None
                     heatmap_place_send = None
-                data = {'code': 11, 'ep_ret': ep_ret, 'ep_len': ep_len, 'ep_success': ep_success, 'heatmap_pick': heatmap_pick_send, 'heatmap_place': heatmap_place_send}
+                data = {'code': 11, 'agent_id':agent_id, 'ep_ret': ep_ret, 'ep_len': ep_len, 'ep_success': ep_success, 'heatmap_pick': heatmap_pick_send, 'heatmap_place': heatmap_place_send}
                 sample2train.put(data)
 
                 replay_buffer.store_episode_nstep(ep_transitions,self.n_step,self.gamma)
                 
                 ep_transitions = []
-                o, ep_ret, ep_len = self.reset_env(sample2train), 0, 0               
+                o, ep_ret, ep_len = self.reset_env(sample2train,agent_id), 0, 0               
           
             t += 1           
             #pbar.update(1)   
