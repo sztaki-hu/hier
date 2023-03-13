@@ -1,67 +1,93 @@
 general:
-  exp_name: 0208_B
+  exp_name: 0313_A
   logdir: logs
   demodir: demos
   seed: 12
-  sync: False
+  sync: True
 
 hardware:
   gpu: [0,1,2] 
-  cpu_min: [1,9,17]
-  cpu_max: [8,16,24]
+  cpu_min: [1,17,17]
+  cpu_max: [16,32,24]
 
 environment:
-  name: rlbench
+  name: simsim
   task: 
     name: stack_blocks
     params: 
-      - 1
-      - 0
-      - 1
+      - 3
+      - 3
+      - 3
+      - 1.0
   headless: True
   camera: False
   obs_dim: auto
   act_dim: auto
+  grasp_speedup: True
   reward:
-    reward_shaping_use: False
-    reward_shaping_type: mse
+    reward_scalor: 100
+    reward_bonus: 0.1
+    reward_shaping_type: subgoal
 
 agent:
+  agent_num: 3
   type: sac
-  action_space: pick_and_place_3d
+  n_step: 1
+  action_space: pick_and_place_2d
   gamma: 0.9 
   polyak: 0.995
   lr: 0.001
   alpha: 0.2
-  hidden_sizes: [32,32]
-  boundary_min: [0.1,-0.3,0.76,0.1,-0.3,0.76]
-  boundary_max: [0.35,0.3,0.86,0.35,0.3,0.86]
+  hidden_sizes: [64,64]
+  boundary_min: [0.1,-0.3,0.1,-0.3]
+  boundary_max: [0.35,0.3,0.35,0.3]
 
 buffer:
-  replay_buffer_size: 5000
+  replay_buffer_size: 20000
 
 demo:
     demo_use: True  
-    demo_buffer_size: 500
-    demo_ratio: 0.1   
-    demo_create: True
-    demo_name: demo_0207_B
+    demo_buffer_size: 20000
+    demo_ratio:
+      type: constant
+      params:
+        - 0.1
+        - 0.1
+        - 40000  
+    demo_change_nstep: True
+    demo_name: demo_0313_A
+    demo_block_order: as_init
+    demo_generate_type: subgoal_attention
+    demo_generate_params:
+      - 0.1
+      - 0.2
+      - 0.7
 
 sampler:
-  env_num: 6
-  start_steps: 200
+  sampler_num: 2
+  start_steps: 20000
   max_ep_len: 5
 
 trainer:
-  steps_per_epoch: 2000
-  epochs: 10
+  steps_per_epoch: 20000
+  epochs: 40
   batch_size: 128
-  update_after: 1000
+  update_after: 20000
   update_every: 100
-  update_factor: 10
+  update_factor: 1
+  pretrain:
+    bool: True
+    factor: 10000
+  fallback_safety: 
+    fb_bool: True
+    fb_th_type: absolute
+    fb_th_value: 15
 
 tester:
   num_test_episodes: 20
 
 logger:
   num_log_loss_points: 500
+  heatmap:
+    bool: True
+    resolution: 9
