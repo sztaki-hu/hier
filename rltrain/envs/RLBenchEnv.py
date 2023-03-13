@@ -324,13 +324,22 @@ class RLBenchEnv:
     
     def out_of_bound_check(self,o):
         if self.task_name == "stack_blocks":
-            for j in range(1,self.target_blocks_num+1):
-                block_index =  (j * 3, j * 3 + 1, j * 3 + 2)
-                block = o[[block_index[0],block_index[1],block_index[2]]]
-                if np.any(np.greater(block,self.boundary_max[:3])):
-                    return True
-                if np.any(np.less(block,self.boundary_min[:3])):
-                    return True
+            if self.action_space == "pick_and_place_3d":
+                for j in range(1,self.target_blocks_num+1):
+                    block_index =  (j * 3, j * 3 + 1, j * 3 + 2)
+                    block = o[[block_index[0],block_index[1],block_index[2]]]
+                    if np.any(np.greater(block,self.boundary_max[:3])):
+                        return True
+                    if np.any(np.less(block,self.boundary_min[:3])):
+                        return True
+            elif self.action_space == "pick_and_place_2d":
+                for j in range(1,self.target_blocks_num+1):
+                    block_index =  (j * 3, j * 3 + 1, j * 3 + 2)
+                    block = o[[block_index[0],block_index[1],block_index[2]]]
+                    if np.any(np.greater(block[:2],self.boundary_max[:2])):
+                        return True
+                    if np.any(np.less(block[:2],self.boundary_min[:2])):
+                        return True
         return False
                  
 
