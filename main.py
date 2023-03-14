@@ -90,8 +90,8 @@ def main():
     logger = manager.Logger(current_dir = current_dir, main_args = args, light_mode = False)
 
     agents = []
-    for _ in range(agent_num):
-        agents.append(manager.Agent(device,config))
+    for agent_id in range(agent_num):
+        agents.append(manager.Agent(agent_id,device,config))
 
     sampler = Sampler(demo_buffer,config)
     trainer = Trainer(device,demo_buffer,logger,config)
@@ -111,7 +111,7 @@ def main():
             p.start()
             processes.append(p)
     
-    agent_tester = Agent(device,config)
+    agent_tester = Agent(0,device,config)
     tester = Tester(agent_tester,logger,config)
 
     tester_p = Process(target=tester.start, args=[end_flag,test2train])

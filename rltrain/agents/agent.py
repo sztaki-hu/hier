@@ -7,7 +7,7 @@ import itertools
 import rltrain.agents.core as core
 
 class Agent:
-    def __init__(self,device,config):
+    def __init__(self,agent_id,device,config):
 
         self.device = device
         self.actor_critic=core.MLPActorCritic
@@ -15,7 +15,7 @@ class Agent:
         self.gamma = config['agent']['gamma'] 
         self.n_step = config['agent']['n_step'] 
         self.polyak = config['agent']['polyak'] 
-        self.lr = config['agent']['lr'] 
+        self.lr = config['agent']['lr'][agent_id]
         self.alpha = config['agent']['alpha'] 
         self.obs_dim = config['environment']['obs_dim']
         self.act_dim = config['environment']['act_dim']

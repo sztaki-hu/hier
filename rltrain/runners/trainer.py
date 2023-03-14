@@ -37,7 +37,8 @@ class Trainer:
         
         self.update_after = config['trainer']['update_after'] 
         self.update_every = config['trainer']['update_every'] 
-        self.update_factor = config['trainer']['update_factor'] 
+        self.update_factor_np = np.array(config['trainer']['update_factor'])
+        self.update_factor_max = np.max(self.update_factor_np)
 
         self.fallback_safety = config['trainer']['fallback_safety']['fb_bool'] 
         self.fb_th_type = config['trainer']['fallback_safety']['fb_th_type']
@@ -238,7 +239,7 @@ class Trainer:
         train_ep_success_np = np.zeros(agent_num)
 
         first_update = self.update_every * math.ceil(self.update_after / self.update_every)
-        self.save_freq = int(((total_steps - first_update) * self.update_factor) / self.num_log_loss_points)
+        self.save_freq = int(((total_steps - first_update) * self.update_factor_max) / self.num_log_loss_points)
         self.save_freq = max(self.save_freq,1)
         print("Train Logging frequency: " + str(self.save_freq))
 
@@ -274,17 +275,18 @@ class Trainer:
                         self.logger.print_logfile(message,level = "warning", terminal = False)
                 update_iter = update_iter_actual
 
-                for j in tqdm(range(int(self.update_every * self.update_factor)), desc ="Updating weights: ", leave=False):
-                    if replay_buffer.get_t() > (update_iter + 0.9) * self.update_every:
-                        message = "Update is lagging behind sampling, thus stopped at " + str(j+1) + " instead of " + str(self.update_every * self.update_factor)
+                for j in tqdm(range(int(self.update_every * self.update_factor_max)), desc ="Updating weights: ", leave=False):
+                    if replay_buffer.get_t() > (update_iter + 0.9) * self.update_factor_max:
+                        message = "Update is lagging behind sampling, thus stopped at " + str(j+1) + " instead of " + str(self.update_every * self.update_factor_max)
                         tqdm.write("[warning]: " + message)  
                         self.logger.print_logfile(message,level = "warning", terminal = False)
                         break
 
-                    update_iter_every_log += 1
-                    batch, demo_ratio = self.get_batch(t,replay_buffer) 
+                    update_iter_every_log += 1                   
                     for agent_id in range(agent_num):
-                        loss_q_np[agent_id], loss_pi_np[agent_id] = agents[agent_id].update(data=batch)
+                        if j <= (self.update_factor_np[agent_id] * self.update_every):
+                            batch, demo_ratio = self.get_batch(t,replay_buffer)
+                            loss_q_np[agent_id], loss_pi_np[agent_id] = agents[agent_id].update(data=batch)
 
                     if update_iter_every_log % self.save_freq == 0:
                         actual_time = time.time() - time0
