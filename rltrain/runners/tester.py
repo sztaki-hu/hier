@@ -88,7 +88,7 @@ class Tester:
                     
                     while True:
                         try:
-                            self.agent.load_weights(path)
+                            self.agent.load_weights(path,mode="pi",eval=True)
                             break
                         except:
                             data = {'code': -31, 'agent_id': agent_id, 'description':'Tester could not open weight file'}
@@ -105,8 +105,8 @@ class Tester:
 
             if np.all(epochs == epoch):
                 t = epoch * self.steps_per_epoch 
-                self.logger.tb_writer_add_scalars("test/average_return_np", self.np2dict(avg_return_np), t) 
-                if succes_rate is not None: self.logger.tb_writer_add_scalars("test/succes_rate_np", self.np2dict(succes_rate_np), t)
+                self.logger.tb_writer_add_scalars("test/average_return", self.np2dict(avg_return_np), t) 
+                if succes_rate is not None: self.logger.tb_writer_add_scalars("test/succes_rate", self.np2dict(succes_rate_np), t)
                 epoch += 1
 
             if trainer_ended == True:
@@ -214,7 +214,7 @@ class Tester:
     
     def display_agent(self,model_name,num_display_episode):
         path = self.logger.get_model_path(model_name)
-        self.agent.load_weights(path)
+        self.agent.load_weights(path,mode="pi",eval=True)
 
         avg_return = self.display_test(num_display_episode)
 

@@ -106,10 +106,13 @@ class Logger:
 
     def get_model_epoch(self,epoch,agent_id = 0):
         models = self.list_model_dir(agent_id)
+        
         for model in models:
-            model_num = int(model[6:])    
-            if model_num == epoch:
-                return model
+            end_ptr = model.find('_pi',6)
+            if end_ptr > 6:
+                model_num = int(model[6:end_ptr])    
+                if model_num == epoch:
+                    return model[:end_ptr]
         return None       
 
     def list_model_dir(self, agent_id = 0):

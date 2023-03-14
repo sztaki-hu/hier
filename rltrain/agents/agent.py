@@ -124,11 +124,6 @@ class Agent:
             alpha (float): Entropy regularization coefficient. (Equivalent to 
                 inverse of reward scale in the original SAC paper.)
         """
-    
-    def load_weights(self,path):
-        self.ac.pi.load_state_dict(torch.load(path))
-        self.ac.pi.to(self.device)
-        self.ac.pi.eval()
 
     # Set up function for computing SAC Q-losses
     def compute_loss_q(self, data):
@@ -238,8 +233,39 @@ class Agent:
     def get_random_action(self):
         return np.random.uniform(low=self.boundary_min, high=self.boundary_max, size=(self.act_dim))
     
-    def save_model(self,model_path):
-        torch.save(self.ac.pi.state_dict(), model_path)
+    def load_weights(self,path,mode="all",eval=True):
+        if mode == "all":
+            self.ac.pi.load_state_dict(torch.load(path+"_pi"))
+            self.ac.pi.to(self.device)
+            if eval: self.ac.pi.eval()
+
+            self.ac.q1.load_state_dict(torch.load(path+"_q1"))
+            self.ac.q1.to(self.device)
+            if eval: self.ac.q1.eval()
+
+            self.ac.q2.load_state_dict(torch.load(path+"_q2"))
+            self.ac.q2.to(self.device)
+            if eval: self.ac.q2.eval()
+
+            self.ac_targ = deepcopy(self.ac)
+
+        elif mode == "pi":
+            self.ac.pi.load_state_dict(torch.load(path+"_pi"))
+            self.ac.pi.to(self.device)
+            if eval: self.ac.pi.eval()
+    
+    def save_model(self,model_path,mode="all"):
+        if mode == "all":
+            torch.save(self.ac.pi.state_dict(), model_path+"_pi")
+            torch.save(self.ac.q1.state_dict(), model_path+"_q1")
+            torch.save(self.ac.q2.state_dict(), model_path+"_q2")
+        elif mode == "pi":
+            torch.save(self.ac.pi.state_dict(), model_path+"_pi")
+        elif mode == "q":
+            torch.save(self.ac.q1.state_dict(), model_path+"_q1")
+            torch.save(self.ac.q2.state_dict(), model_path+"_q2")
+        
+
 
     
     
