@@ -98,7 +98,7 @@ def main():
         
     end_flag = Value(c_bool, False)  
     pause_flag = Value(c_bool, True)
-    t_limit = Value('i', 0)
+    t_limit = Value('i', -int(config['trainer']['update_after']))
     t_glob = Value('i', 0)
     test2train = mp.Queue()
     sample2train = mp.Queue(maxsize=100000)

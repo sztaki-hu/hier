@@ -199,7 +199,7 @@ class Trainer:
                 replay_batch_size = self.batch_size - demo_batch_size
                 #return replay_batch_size, demo_batch_size
             if self.demo_ratio_type == 'linear_decay':
-                t_update = t - self.update_after
+                t_update = t
                 m = 1.0 / self.demo_ratio_params[2]
                 demo_ratio = max(self.demo_ratio_params[0] - t_update * m, self.demo_ratio_params[1])
                 demo_batch_size = int(self.batch_size * demo_ratio)
@@ -243,26 +243,26 @@ class Trainer:
         self.save_freq = max(self.save_freq,1)
         print("Train Logging frequency: " + str(self.save_freq))
 
-        pbar = tqdm(total = total_steps, desc = "Training: ", colour="green")
+        pbar = tqdm(total = int(total_steps + self.update_after), desc = "Training: ", colour="green")
         time0 = time.time()
         pause_flag.value = False
-        if self.mode_sync == True: t_limit.value = max(self.update_after,self.update_every)
+        if self.mode_sync == True: t_limit.value = 0
         t = 0
         while t < total_steps:
-            t = replay_buffer.get_t()
+            t = replay_buffer.get_t() - self.update_after
             if self.mode_sync == True: t_glob.value = t
 
-            if (t >= self.update_after) and (self.pretrain_bool == True):
+            if (t >= 0) and (self.pretrain_bool == True):
                 pause_flag.value = True
                 for _ in tqdm(range(int(self.pretrain_factor)), desc ="Updating weights (pretraining): ", leave=False):
-                    batch, demo_ratio = self.get_batch(t,replay_buffer) 
-                    
                     for agent_id in range(agent_num):
+                        batch, demo_ratio = self.get_batch(t,replay_buffer)
                         loss_q_np[agent_id], loss_pi_np[agent_id] = agents[agent_id].update(data=batch)
                 self.pretrain_bool = False
+                if self.mode_sync == True: t_limit.value = update_iter * self.update_every
                 pause_flag.value = False
 
-            if (t >= self.update_after) and (t >= update_iter * self.update_every):
+            if (t >= 0) and (t >= update_iter * self.update_every):
 
                 if self.mode_sync:
                     pause_flag.value = True
@@ -276,12 +276,6 @@ class Trainer:
                 update_iter = update_iter_actual
 
                 for j in tqdm(range(int(self.update_every * self.update_factor_max)), desc ="Updating weights: ", leave=False):
-                    if replay_buffer.get_t() > (update_iter + 0.9) * self.update_factor_max:
-                        message = "Update is lagging behind sampling, thus stopped at " + str(j+1) + " instead of " + str(self.update_every * self.update_factor_max)
-                        tqdm.write("[warning]: " + message)  
-                        self.logger.print_logfile(message,level = "warning", terminal = False)
-                        break
-
                     update_iter_every_log += 1                   
                     for agent_id in range(agent_num):
                         if j <= (self.update_factor_np[agent_id] * self.update_every):
@@ -408,7 +402,7 @@ class Trainer:
             self.handle_messages(test2train,sample2train)
 
             #pbar.update(1)
-            pbar.n = t #check this
+            pbar.n = t + self.update_after #check this
             pbar.refresh() #check this
         pbar.close()
 
