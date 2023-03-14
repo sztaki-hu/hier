@@ -244,10 +244,10 @@ class Logger:
                               t,
                               actual_time,
                               update_iter):
-        self.writer.add_scalars('train/loss_q_np', self.np2dict(loss_q_np), update_iter)
-        self.writer.add_scalars("train/loss_p_np", self.np2dict(loss_pi_np), update_iter)
-        self.writer.add_scalars("train/train_ret_np", self.np2dict(train_ret_np), t)
-        self.writer.add_scalars("train/train_ep_len_np", self.np2dict(train_ep_len_np), t)
+        self.writer.add_scalars('train/loss_q', self.np2dict(loss_q_np), update_iter)
+        self.writer.add_scalars("train/loss_p", self.np2dict(loss_pi_np), update_iter)
+        self.writer.add_scalars("train/train_ret", self.np2dict(train_ret_np), t)
+        self.writer.add_scalars("train/train_ep_len", self.np2dict(train_ep_len_np), t)
         self.writer.add_scalars("train/train_ep_success", self.np2dict(train_ep_success_np), t)
         env_error_num_ratio = (env_error_num / float(t))
         self.tb_writer_add_scalar("train/env_error_ratio", env_error_num_ratio, update_iter)
