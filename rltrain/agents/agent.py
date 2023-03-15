@@ -64,6 +64,11 @@ class Agent:
         self.pi_optimizer = Adam(self.ac.pi.parameters(), lr=self.lr)
         self.q_optimizer = Adam(self.q_params, lr=self.lr)
 
+        # # Print optimizer's state_dict
+        # print("Optimizer's state_dict:")
+        # for var_name in self.pi_optimizer.state_dict():
+        #     print(var_name, "\t", self.pi_optimizer.state_dict()[var_name])
+
         """
         Soft Actor-Critic (SAC)
 
@@ -235,10 +240,12 @@ class Agent:
     
     def load_weights(self,path,mode="all",eval=True):
         if mode == "all":
+            # policy network
             self.ac.pi.load_state_dict(torch.load(path+"_pi"))
             self.ac.pi.to(self.device)
             if eval: self.ac.pi.eval()
 
+            # Q networks
             self.ac.q1.load_state_dict(torch.load(path+"_q1"))
             self.ac.q1.to(self.device)
             if eval: self.ac.q1.eval()
@@ -247,7 +254,28 @@ class Agent:
             self.ac.q2.to(self.device)
             if eval: self.ac.q2.eval()
 
+            # Target networks
             self.ac_targ = deepcopy(self.ac)
+
+            self.ac_targ.q1.load_state_dict(torch.load(path+"_targ_q1"))
+            self.ac_targ.q1.to(self.device)
+            if eval: self.ac_targ.q1.eval()
+
+            self.ac_targ.q2.load_state_dict(torch.load(path+"_targ_q2"))
+            self.ac_targ.q2.to(self.device)
+            if eval: self.ac_targ.q2.eval()
+
+            for p in self.ac_targ.parameters():
+                p.requires_grad = False
+            
+             # Optimizers
+            self.pi_optimizer.load_state_dict(torch.load(path+"_pi_optim"))
+            for g in self.pi_optimizer.param_groups:
+                g['lr'] = self.lr
+
+            self.q_optimizer.load_state_dict(torch.load(path+"_q_optim"))
+            for g in self.q_optimizer.param_groups:
+                g['lr'] = self.lr
 
         elif mode == "pi":
             self.ac.pi.load_state_dict(torch.load(path+"_pi"))
@@ -258,7 +286,11 @@ class Agent:
         if mode == "all":
             torch.save(self.ac.pi.state_dict(), model_path+"_pi")
             torch.save(self.ac.q1.state_dict(), model_path+"_q1")
-            torch.save(self.ac.q2.state_dict(), model_path+"_q2")
+            torch.save(self.ac.q2.state_dict(), model_path+"_q2")           
+            torch.save(self.ac_targ.q1.state_dict(), model_path+"_targ_q1")
+            torch.save(self.ac_targ.q2.state_dict(), model_path+"_targ_q2")
+            torch.save(self.pi_optimizer.state_dict(), model_path+"_pi_optim")
+            torch.save(self.q_optimizer.state_dict(), model_path+"_q_optim")
         elif mode == "pi":
             torch.save(self.ac.pi.state_dict(), model_path+"_pi")
         elif mode == "q":
