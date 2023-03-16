@@ -318,16 +318,16 @@ class Trainer:
                     message = "Test is missed at the end of an epoch ("+ str(epoch) + " --> " + str(epoch_real) + ") as the sampler is too fast"
                     tqdm.write("[warning]: " + message)  
                     self.logger.print_logfile(message,level = "warning", terminal = False)   
-                epoch = epoch_real                 
+                epoch = epoch_real    
 
                 model_paths = []
                 for agent_id in range(agent_num):
                     model_paths.append(self.logger.get_model_save_path(epoch, agent_id))
                     agents[agent_id].save_model(model_paths[-1])
                 
-                
                 avg_test_return_np = np.zeros(agent_num)
-                avg_test_return_np_bool = np.zeros(agent_num)
+                avg_test_return_np_bool = np.zeros(agent_num)   
+                
                 while True:
                     msg = self.handle_messages(test2train,sample2train)
                     if msg is not None:
@@ -356,7 +356,7 @@ class Trainer:
 
                     fb_th = self.get_fallback_th(checkpoint_test_return)
                     
-                    message = "Epoch: " + str(epoch) + " | Best Agent: " + str(agent_id) + " (avg return: " + str(avg_test_return_np[agent_id]) + ") Checkpoint avg return: " + str(checkpoint_test_return) + " | Fb th: " + str(fb_th)
+                    message = "Epoch: " + str(epoch) + " | Best Agent: " + str(best_agent_id) + " (avg return: " + str(avg_test_return_np[best_agent_id]) + ") Checkpoint avg return: " + str(checkpoint_test_return) + " | Fb th: " + str(fb_th)
                     tqdm.write("[info]: " + message)  
                     self.logger.print_logfile(message,level = "info", terminal = False) 
 
