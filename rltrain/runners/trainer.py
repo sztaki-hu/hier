@@ -382,10 +382,12 @@ class Trainer:
                     best_model_path = model_paths[best_agent_id]
                     checkpoint_test_return = avg_test_return_np[best_agent_id]
                 
-                if self.fallback_safety == True or agent_num>1:
+                if agent_num>1:
                     for agent_id in range(agent_num):
                         agents[agent_id].load_weights(best_model_path,mode="all",eval=False)
-                    
+                elif self.fallback_safety == True:
+                    if fb_active == 1:
+                        agents[0].load_weights(best_model_path,mode="all",eval=False)
 
                 self.logger.tb_writer_add_scalar("test_glob/checkpoint_test_return", checkpoint_test_return, t_log)
                 
