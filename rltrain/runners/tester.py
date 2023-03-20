@@ -105,8 +105,9 @@ class Tester:
 
             if np.all(epochs == epoch):
                 t = epoch * self.steps_per_epoch 
-                self.logger.tb_writer_add_scalars("test/average_return", self.np2dict(avg_return_np), t) 
-                if succes_rate is not None: self.logger.tb_writer_add_scalars("test/succes_rate", self.np2dict(succes_rate_np), t)
+                for i in range(self.agent_num):
+                    self.logger.tb_writer_add_scalar("test/test_ret_"+str(i), avg_return_np[i], t) 
+                    if succes_rate is not None: self.logger.tb_writer_add_scalar("test/test_success_"+str(i), succes_rate_np[i], t)
                 epoch += 1
 
             if trainer_ended == True:

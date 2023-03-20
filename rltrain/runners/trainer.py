@@ -360,7 +360,7 @@ class Trainer:
                     tqdm.write("[info]: " + message)  
                     self.logger.print_logfile(message,level = "info", terminal = False) 
 
-                    self.logger.tb_writer_add_scalar("test/fallback_diff", avg_test_return_np[best_agent_id] - fb_th, t_log)
+                    self.logger.tb_writer_add_scalar("test_glob/fallback_diff", avg_test_return_np[best_agent_id] - fb_th, t_log)
 
                     if avg_test_return_np[best_agent_id] > fb_th:
                         message = "Epoch: " + str(epoch) + " | No Fallback "
@@ -377,7 +377,7 @@ class Trainer:
 
                         fb_active = 1
                     
-                    self.logger.tb_writer_add_scalar("test/fallback_safety", fb_active, t_log)              
+                    self.logger.tb_writer_add_scalar("test_glob/fallback_safety", fb_active, t_log)              
                 else:
                     best_model_path = model_paths[best_agent_id]
                     checkpoint_test_return = avg_test_return_np[best_agent_id]
@@ -387,7 +387,7 @@ class Trainer:
                         agents[agent_id].load_weights(best_model_path,mode="all",eval=False)
                     
 
-                self.logger.tb_writer_add_scalar("test/checkpoint_test_return", checkpoint_test_return, t_log)
+                self.logger.tb_writer_add_scalar("test_glob/checkpoint_test_return", checkpoint_test_return, t_log)
                 
 
                 ## To be implemented #####################

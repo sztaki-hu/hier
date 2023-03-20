@@ -63,7 +63,40 @@ class Logger:
                 #self.create_folder(os.path.join(self.current_dir,self.logdir, self.logname,self.trainid,"replay_buffer_backup"))
                 #self.create_folder(os.path.join(self.current_dir, self.logdir, self.logname,self.trainid,"plots_raw_data"))
                 self.save_yaml(os.path.join(self.current_dir, self.logdir,self.logname,self.trainid,"config.yaml"),self.config)
+
+            train_ret_list = []
+            train_ep_len_list = []
+            train_pi_loss_list = []
+            train_q_loss_list = []
+            train_success_list = []
+            test_ret_list = []
+            test_success_list = []
+            for i in range(self.agent_num):
+                train_ret_list.append("train/train_ret_"+str(i))
+                train_ep_len_list.append("train/train_ep_len_"+str(i))
+                train_pi_loss_list.append("train/loss_pi_"+str(i))
+                train_q_loss_list.append("train/loss_q_"+str(i))
+                train_success_list.append("train/train_success_"+str(i))
+                test_ret_list.append("test/test_ret_"+str(i))
+                test_success_list.append("test/test_success_"+str(i))
+          
+            layout = {
+                "agents train": {
+                    "train_ret": ["Multiline", train_ret_list],
+                    "train_ep_len": ["Multiline", train_ep_len_list],
+                    "train_pi_loss": ["Multiline", train_pi_loss_list],
+                    "train_q_loss": ["Multiline", train_q_loss_list],     
+                    "train_success": ["Multiline", train_success_list],             
+                },
+                "agents test": {        
+                    "test_ret": ["Multiline", test_ret_list],
+                    "test_success": ["Multiline", test_success_list], 
+                },
+            }
+
             self.writer = SummaryWriter(log_dir = os.path.join(self.current_dir,self.logdir,self.logname,self.trainid,"runs"))
+            self.writer.add_custom_scalars(layout)
+            
           
     def compute_and_replace_auto_values(self):
         self.task_name = self.config['environment']['task']['name']
@@ -247,20 +280,23 @@ class Logger:
                               t,
                               actual_time,
                               update_iter):
-        self.writer.add_scalars('train/loss_q', self.np2dict(loss_q_np), update_iter)
-        self.writer.add_scalars("train/loss_p", self.np2dict(loss_pi_np), update_iter)
-        self.writer.add_scalars("train/train_ret", self.np2dict(train_ret_np), t)
-        self.writer.add_scalars("train/train_ep_len", self.np2dict(train_ep_len_np), t)
-        self.writer.add_scalars("train/train_ep_success", self.np2dict(train_ep_success_np), t)
+        
+        for i in range(self.agent_num):
+            self.writer.add_scalar("train/train_ret_"+ str(i), train_ret_np[i], t)
+            self.writer.add_scalar("train/train_ep_len_"+ str(i), train_ep_len_np[i], t)
+            self.writer.add_scalar('train/loss_q_'+ str(i), loss_q_np[i], update_iter)
+            self.writer.add_scalar("train/loss_pi_"+ str(i), loss_pi_np[i], update_iter)
+            self.writer.add_scalar("train/train_success_"+ str(i), train_ep_success_np[i], t)
+
         env_error_num_ratio = (env_error_num / float(t))
-        self.tb_writer_add_scalar("train/env_error_ratio", env_error_num_ratio, update_iter)
+        self.tb_writer_add_scalar("train_glob/env_error_ratio", env_error_num_ratio, update_iter)
         out_of_bounds_ratio = (out_of_bounds_num / float(t))
-        self.tb_writer_add_scalar("train/out_of_bounds_ratio", out_of_bounds_ratio, update_iter) 
+        self.tb_writer_add_scalar("train_glob/out_of_bounds_ratio", out_of_bounds_ratio, update_iter) 
         rel_time = 1000 * (actual_time / float(t))
-        self.tb_writer_add_scalar("train/time_sec_1000_transitions", rel_time, t)
+        self.tb_writer_add_scalar("train_glob/time_sec_1000_transitions", rel_time, t)
         reward_bonus_ratio = (reward_bonus_num / float(t))
-        self.tb_writer_add_scalar("train/reward_bonus_ratio", reward_bonus_ratio, t)
-        self.tb_writer_add_scalar("train/demo_ratio", demo_ratio, t)
+        self.tb_writer_add_scalar("train_glob/reward_bonus_ratio", reward_bonus_ratio, t)
+        self.tb_writer_add_scalar("train_glob/demo_ratio", demo_ratio, t)
 
         if self.heatmap_bool:
 
