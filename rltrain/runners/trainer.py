@@ -360,7 +360,7 @@ class Trainer:
                     tqdm.write("[info]: " + message)  
                     self.logger.print_logfile(message,level = "info", terminal = False) 
 
-                    self.logger.tb_writer_add_scalar("test_glob/fallback_diff", avg_test_return_np[best_agent_id] - fb_th, t_log)
+                    self.logger.tb_writer_add_scalar("test_glob/fallback_diff", avg_test_return_np[best_agent_id] - checkpoint_test_return, t_log)
 
                     if avg_test_return_np[best_agent_id] > fb_th:
                         message = "Epoch: " + str(epoch) + " | No Fallback "
