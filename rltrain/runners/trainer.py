@@ -379,12 +379,14 @@ class Trainer:
                     
                     self.logger.tb_writer_add_scalar("test_glob/fallback_safety", fb_active, t_log)              
                 else:
+                    fb_active = 0
                     best_model_path = model_paths[best_agent_id]
                     checkpoint_test_return = avg_test_return_np[best_agent_id]
                 
                 if agent_num>1:
                     for agent_id in range(agent_num):
-                        agents[agent_id].load_weights(best_model_path,mode="all",eval=False)
+                        if not (fb_active == 0 and agent_id == best_agent_id):
+                            agents[agent_id].load_weights(best_model_path,mode="all",eval=False)
                 elif self.fallback_safety == True:
                     if fb_active == 1:
                         agents[0].load_weights(best_model_path,mode="all",eval=False)
