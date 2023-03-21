@@ -26,9 +26,13 @@ args = parser.parse_args()
 
 create_folder(os.path.join(current_dir, args.outdir))
 
-expname_list = ["0320_A","0320_B","0320_C","0320_D","0320_E","0320_F"]
+# expname_list = ["0320_A","0320_B","0320_C","0320_D","0320_E","0320_F"]
+# expcolor_list = ["blue","orange","magenta","green","red","yellow"]
+# seeds_list = [2,2,2,2,2,3]
+
+expname_list = ["0320_C","0320_F","0321_A"]
 expcolor_list = ["blue","orange","magenta","green","red","yellow"]
-seeds_list = [2,2,2,2,2,3]
+seeds_list = [2,3,3]
 
 graph_name = "test_glob_checkpoint_test_return"
 
@@ -73,7 +77,7 @@ plt.show()
 # SD plot ###################################
 
 fig, _ = plt.subplots(figsize=(14,6))
-sns.lineplot(data=test_ret, x="Step", y="Value", hue="ExpName", errorbar=('ci', 95))
+sns.lineplot(data=test_ret, x="Step", y="Value", hue="ExpName", errorbar=('ci', 95), palette=expcolor_list)
 
 plt.legend(title='Labels', bbox_to_anchor=(1, 1.01), loc='upper left')
 plt.xlabel("Step (x1000)")
