@@ -348,9 +348,10 @@ class Trainer:
                     tqdm.write("[info]: " + message)  
                     self.logger.print_logfile(message,level = "info", terminal = False) 
 
-                best_agent_id = np.argmax(avg_test_return_np)
-
                 t_log = epoch * self.steps_per_epoch 
+
+                best_agent_id = np.argmax(avg_test_return_np)
+                self.logger.tb_writer_add_scalar("test_glob/best_agent_id", best_agent_id, t_log)
 
                 if self.fallback_safety == True:
 
@@ -392,7 +393,6 @@ class Trainer:
                         agents[0].load_weights(best_model_path,mode="all",eval=False)
 
                 self.logger.tb_writer_add_scalar("test_glob/checkpoint_test_return", checkpoint_test_return, t_log)
-                
 
                 ## To be implemented #####################
                 #self.logger.save_replay_buffer(replay_buffer, epoch)
