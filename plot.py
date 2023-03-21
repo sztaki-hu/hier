@@ -26,57 +26,60 @@ args = parser.parse_args()
 
 create_folder(os.path.join(current_dir, args.outdir))
 
-expname_list = ["0320_A","0320_F"]
-expcolor_list = ["blue","orange"]
-seeds_list = [2,3]
+expname_list = ["0320_A","0320_B","0320_C","0320_D","0320_E","0320_F"]
+expcolor_list = ["blue","orange","magenta","green","red","yellow"]
+seeds_list = [2,2,2,2,2,3]
 
 graph_name = "test_glob_checkpoint_test_return"
-test_ret_list = []
-for expname,seed in zip(expname_list,seeds_list):
-    print(expname)
-    print(seed)
-    graph_csv_name = "run-" + expname + "_" + args.taskname +  "_" + str(0) + "_runs-tag-" + graph_name + ".csv"
-    path = os.path.join(current_dir, args.logdir,graph_csv_name)
-    test_ret = pd.read_csv(path)
-    test_ret['Step'] /= 1000
-    test_ret = test_ret.rename(columns={"Value": "Value_0"})
-    test_ret = test_ret.drop(columns=['Wall time'])
 
-    for i in range(1,seed):
+test_ret = pd.DataFrame({'Step' : [], 'ExpName' : [],'Seed' : [],'Value' : []})
+for expname,seed_num in zip(expname_list,seeds_list):
+    for i in range(seed_num):
         graph_csv_name = "run-" + expname + "_" + args.taskname +  "_" + str(i) + "_runs-tag-" + graph_name + ".csv"
         path = os.path.join(current_dir, args.logdir,graph_csv_name)
         pivot = pd.read_csv(path)
-        test_ret['Value_'+str(i)] = pivot['Value']
+        pivot = pivot.drop(columns=['Wall time'])
+        pivot['ExpName'] = expname
+        pivot['Seed'] = str(i)
+        pivot['Step'] /= 1000
 
-    test_ret["id"] = test_ret.index
-    print(test_ret.head())
-    test_ret_list.append(test_ret)
+        test_ret = test_ret.append(pivot, ignore_index = True)
+
+#print(test_ret.to_string())
+#print(test_ret.head())
+   
 
 # Separate plotting ########################## 
 
-for i in range(len(test_ret_list)):
+fig, _ = plt.subplots(figsize=(14,6))
+for i in range(len(expname_list)):
     for j in range(seeds_list[i]):
-        #sns.lineplot(data=test_ret_list[i], x="Step", y="Value_"+str(j),palette=expcolor_list[i])
-        plt.plot(test_ret_list[i]['Step'],test_ret_list[i]['Value_'+str(j)],color=expcolor_list[i])
+
+        pivot=test_ret[test_ret["ExpName"] == expname_list[i]]    
+        pivot=pivot[pivot["Seed"] == str(j)] 
+        if j == 0:
+            plt.plot(pivot['Step'],pivot['Value'],color=expcolor_list[i],label=expname_list[i])
+        else:
+            plt.plot(pivot['Step'],pivot['Value'],color=expcolor_list[i])
+
+plt.legend(title='Labels', bbox_to_anchor=(1, 1.01), loc='upper left')
 plt.xlabel("Step (x1000)")
 plt.ylabel("Average test return")
 plt.title("Test returns")
 figname = 'test_res_separate.png'
 plt.savefig(os.path.join(current_dir, args.outdir, figname))
 plt.show()
-plt.clf()
 
 # SD plot ###################################
-test_ret_wide = []
-for i in range(len(test_ret_list)):
-    test_ret_wide.append(pd.wide_to_long(test_ret_list[i], stubnames='Value', i='id', j="Step", sep='_'))
 
-for i in range(len(test_ret_wide)):
-    sns.lineplot(data=test_ret_wide[i], x="Step", y="Value", errorbar=('ci', 95))
+fig, _ = plt.subplots(figsize=(14,6))
+sns.lineplot(data=test_ret, x="Step", y="Value", hue="ExpName", errorbar=('ci', 95))
+
+plt.legend(title='Labels', bbox_to_anchor=(1, 1.01), loc='upper left')
 plt.xlabel("Step (x1000)")
 plt.ylabel("Average test return")
 plt.title("Test returns with sd 95")
 figname = 'test_res_std.png'
 plt.savefig(os.path.join(current_dir, args.outdir, figname))
 plt.show()
-plt.clf()
+
