@@ -84,7 +84,7 @@ class Tester:
                 
                 if model_name != None:
 
-                    path = self.logger.get_model_path(model_name)
+                    path = self.logger.get_model_path(model_name,agent_id)
                     
                     while True:
                         try:
