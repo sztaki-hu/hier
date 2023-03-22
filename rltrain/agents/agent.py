@@ -16,7 +16,7 @@ class Agent:
         self.n_step = config['agent']['n_step'] 
         self.polyak = config['agent']['polyak'] 
         self.lr = config['agent']['lr'][agent_id]
-        self.alpha = config['agent']['alpha'] 
+        self.alpha = config['agent']['alpha'][agent_id]
         self.obs_dim = config['environment']['obs_dim']
         self.act_dim = config['environment']['act_dim']
         self.boundary_min = np.array(config['agent']['boundary_min'])[:self.act_dim]
