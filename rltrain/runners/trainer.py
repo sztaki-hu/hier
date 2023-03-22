@@ -388,6 +388,20 @@ class Trainer:
                     for agent_id in range(agent_num):
                         if not (fb_active == 0 and agent_id == best_agent_id):
                             agents[agent_id].load_weights(best_model_path,mode="all",eval=False)
+
+                    check_agents_list = self.check_agents(agents)
+                    # print(check_agents_list)
+                    # print(len(check_agents_list))
+
+                    if np.all(check_agents_list):
+                        message = "Epoch: " + str(epoch) + " | Loaded models are the same for all agents"
+                        tqdm.write("[info]: " + message)  
+                        self.logger.print_logfile(message,level = "info", terminal = False) 
+                    else:
+                        message = "Epoch: " + str(epoch) + " | Loaded models are NOT the same for all agents"
+                        tqdm.write("[info]: " + message)  
+                        self.logger.print_logfile(message,level = "info", terminal = False) 
+
                 elif self.fallback_safety == True:
                     if fb_active == 1:
                         agents[0].load_weights(best_model_path,mode="all",eval=False)
@@ -408,6 +422,42 @@ class Trainer:
             pbar.n = t + self.update_after #check this
             pbar.refresh() #check this
         pbar.close()
+    
+    def check_agents(self,agents):
+        check_agents_list = []
+        agent_num = len(agents)
+        for paramset_i in range(2):
+            for agent_i in range(agent_num):
+                for agent_j in range(agent_num):
+                    if agent_i != agent_j:
+                        agents_equal = True
+                        params_0 = agents[agent_i].get_params()[paramset_i]
+                        params_1 = agents[agent_j].get_params()[paramset_i]
+                        for p0,p1 in zip(params_0,params_1):
+                            if not torch.all(torch.eq(p0.data,p1.data)).item(): 
+                                print("NOT equal: Agent " + str(agent_i) + " and " + str(agent_j) + " are not the equal")
+                                agents_equal = False
+                                break
+                        #if agents_equal: print("Equal: Agent " + str(agent_i) + " and " + str(agent_j) + " are the equal")
+                        check_agents_list.append(agents_equal)
+        
+        for paramset_i in range(2,4):
+            for agent_i in range(agent_num): 
+                for agent_j in range(agent_num):
+                    if agent_i != agent_j:
+                        agents_equal = True     
+                        params_0 = agents[agent_i].get_params()[paramset_i][0]['params']
+                        params_1 = agents[agent_j].get_params()[paramset_i][0]['params']
+
+                        for p0,p1 in zip(params_0,params_1):
+                            for k in range(len(p0)):
+                                if not torch.all(torch.eq(p0[k].data,p1[k].data)).item(): 
+                                    agents_equal = False
+                                    break
+
+                        check_agents_list.append(agents_equal)
+
+        return check_agents_list
 
 
 

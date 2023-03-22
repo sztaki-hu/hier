@@ -124,8 +124,8 @@ class Tester:
                 if self.env.init_state_valid():
                     break
                 else:
-                    data = {'code': -21, 'description':'Init state is not valid. Repeat env reset.'}
-                    self.test2train.put(data)
+                    #data = {'code': -21, 'description':'Init state is not valid. Repeat env reset.'}
+                    #self.test2train.put(data)
                     time.sleep(0.1)
             except:
                 data = {'code': -1, 'description':'Could not reset the environment. Repeat env reset.'}

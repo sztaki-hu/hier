@@ -255,7 +255,9 @@ class Agent:
             if eval: self.ac.q2.eval()
 
             # Target networks
-            self.ac_targ = deepcopy(self.ac)
+            self.ac_targ.pi.load_state_dict(torch.load(path+"_targ_ppi"))
+            self.ac_targ.pi.to(self.device)
+            if eval: self.ac_targ.pi.eval()
 
             self.ac_targ.q1.load_state_dict(torch.load(path+"_targ_q1"))
             self.ac_targ.q1.to(self.device)
@@ -286,7 +288,8 @@ class Agent:
         if mode == "all":
             torch.save(self.ac.pi.state_dict(), model_path+"_pi")
             torch.save(self.ac.q1.state_dict(), model_path+"_q1")
-            torch.save(self.ac.q2.state_dict(), model_path+"_q2")           
+            torch.save(self.ac.q2.state_dict(), model_path+"_q2")        
+            torch.save(self.ac_targ.pi.state_dict(), model_path+"_targ_ppi")   
             torch.save(self.ac_targ.q1.state_dict(), model_path+"_targ_q1")
             torch.save(self.ac_targ.q2.state_dict(), model_path+"_targ_q2")
             torch.save(self.pi_optimizer.state_dict(), model_path+"_pi_optim")
@@ -296,7 +299,30 @@ class Agent:
         elif mode == "q":
             torch.save(self.ac.q1.state_dict(), model_path+"_q1")
             torch.save(self.ac.q2.state_dict(), model_path+"_q2")
+
+    
+    def get_params(self):
+        #print([self.ac.parameters(), self.ac_targ.parameters()])
+
+        ac_params = []
+        for p in self.ac.parameters():
+            ac_params.append(p)
         
+        ac_targ_params = []
+        for p in self.ac_targ.parameters():
+            ac_targ_params.append(p)
+
+        pi_optim_params = []
+        for p in self.pi_optimizer.param_groups:
+            pi_optim_params.append(p)
+        
+        q_optim_params = []
+        for p in self.q_optimizer.param_groups:
+            q_optim_params.append(p)
+        
+        return [ac_params, ac_targ_params,pi_optim_params,q_optim_params]
+
+            
 
 
     

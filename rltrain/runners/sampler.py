@@ -84,8 +84,8 @@ class Sampler:
                 if self.env.init_state_valid():
                     break
                 else:
-                    data = {'code': -21, 'agent_id':agent_id, 'description':'Init state is not valid. Repeat env reset.'}
-                    sample2train.put(data)
+                    #data = {'code': -21, 'agent_id':agent_id, 'description':'Init state is not valid. Repeat env reset.'}
+                    #sample2train.put(data)
                     time.sleep(0.1)
             except:
                 data = {'code': -1, 'agent_id':agent_id, 'description':'Could not reset the environment. Repeat env reset.'}
