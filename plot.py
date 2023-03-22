@@ -19,6 +19,7 @@ def create_folder(path):
         print(path + ' folder already exists!')
 
 parser = argparse.ArgumentParser()
+parser.add_argument("--plotid", default="PLOT_0322_B" ,help="Id of plot")
 parser.add_argument("--logdir", default="csv_to_plot" ,help="Path of the data folder")
 parser.add_argument("--outdir", default="plots" ,help="Path of the output folder")
 parser.add_argument("--taskname", default="stack_blocks_sac" ,help="Task name")
@@ -30,9 +31,13 @@ create_folder(os.path.join(current_dir, args.outdir))
 # expcolor_list = ["blue","orange","magenta","green","red","yellow"]
 # seeds_list = [2,2,2,2,2,3]
 
-expname_list = ["0320_C","0320_F","0321_A"]
+# expname_list = ["0320_C","0320_F","0321_A","0321_B"]
+# expcolor_list = ["blue","orange","magenta","green","red","yellow"]
+# seeds_list = [2,3,3,3]
+
+expname_list = ["0320_B","0320_C"]
 expcolor_list = ["blue","orange","magenta","green","red","yellow"]
-seeds_list = [2,3,3]
+seeds_list = [2,2]
 
 graph_name = "test_glob_checkpoint_test_return"
 
@@ -70,7 +75,7 @@ plt.legend(title='Labels', bbox_to_anchor=(1, 1.01), loc='upper left')
 plt.xlabel("Step (x1000)")
 plt.ylabel("Average test return")
 plt.title("Test returns")
-figname = 'test_res_separate.png'
+figname = args.plotid + '_test_res_separate.png'
 plt.savefig(os.path.join(current_dir, args.outdir, figname))
 plt.show()
 
@@ -83,7 +88,7 @@ plt.legend(title='Labels', bbox_to_anchor=(1, 1.01), loc='upper left')
 plt.xlabel("Step (x1000)")
 plt.ylabel("Average test return")
 plt.title("Test returns with sd 95")
-figname = 'test_res_std.png'
+figname = args.plotid + '_test_res_std.png'
 plt.savefig(os.path.join(current_dir, args.outdir, figname))
 plt.show()
 
