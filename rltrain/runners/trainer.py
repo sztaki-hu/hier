@@ -310,7 +310,7 @@ class Trainer:
 
             if t >= epoch * self.steps_per_epoch: 
 
-                if agent_num > 1 or self.fallback_safety:
+                if agent_num > 1 or self.fallback_safety or self.mode_sync == True:
                     pause_flag.value = True
 
                 epoch_real = (t+1) // self.steps_per_epoch
