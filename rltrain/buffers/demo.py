@@ -262,8 +262,9 @@ class Demo:
         
         self.env.shuttdown()
 
-        subgoal_ratio = subgoal_ratio / np.sum(subgoal_ratio)
-        print("Subgoal ratio: " + str(subgoal_ratio))
+        if self.demo_generate_type == 'subgoal_attention':
+            subgoal_ratio = subgoal_ratio / np.sum(subgoal_ratio)
+            print("Subgoal ratio: " + str(subgoal_ratio))
 
         self.logger.save_demos(self.demo_name,  self.demo_buffer)
 

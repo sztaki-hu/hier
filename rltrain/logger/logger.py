@@ -41,6 +41,8 @@ class Logger:
         cfg_rlbench = {'path' : self.config_path}
         self.create_folder(os.path.join(self.current_dir, "cfg_rlbench"))
 
+        self.check_config_values()
+
         if main_args.restart == False: 
             self.compute_and_replace_auto_values()
 
@@ -97,7 +99,12 @@ class Logger:
             self.writer = SummaryWriter(log_dir = os.path.join(self.current_dir,self.logdir,self.logname,self.trainid,"runs"))
             self.writer.add_custom_scalars(layout)
             
-          
+
+    def check_config_values(self):
+        assert self.config['buffer']['buffer_num'] >= 1
+        assert self.config['agent']['agent_num'] >= 1
+        assert self.config['agent']['agent_num'] >= self.config['buffer']['buffer_num']
+
     def compute_and_replace_auto_values(self):
         self.task_name = self.config['environment']['task']['name']
         self.task_params = self.config['environment']['task']['params']

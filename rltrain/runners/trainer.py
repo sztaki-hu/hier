@@ -77,6 +77,8 @@ class Trainer:
         self.pretrain_bool = config['trainer']['pretrain']['bool']
         self.pretrain_factor = config['trainer']['pretrain']['factor']
 
+        self.buffer_num = int(config['buffer']['buffer_num'])
+
         """
         Trainer
 
@@ -218,7 +220,7 @@ class Trainer:
                         done_nstep=torch.cat((replay_batch['done_nstep'], demo_batch['done_nstep']), 0),
                         n_nstep=torch.cat((replay_batch['n_nstep'], demo_batch['n_nstep']), 0)), demo_ratio  
 
-    def start(self,agents,replay_buffer,pause_flag,test2train,sample2train,t_glob,t_limit):
+    def start(self,agents,replay_buffers,pause_flag,test2train,sample2train,t_glob,t_limit):
 
         # Start Training
         epoch = 1
@@ -249,14 +251,18 @@ class Trainer:
         if self.mode_sync == True: t_limit.value = 0
         t = 0
         while t < total_steps:
-            t = replay_buffer.get_t() - self.update_after
+            t = 0
+            for replay_buffer in replay_buffers:
+                t += replay_buffer.get_t()
+            t -= self.update_after
             if self.mode_sync == True: t_glob.value = t
+            
 
             if (t >= 0) and (self.pretrain_bool == True):
                 pause_flag.value = True
                 for _ in tqdm(range(int(self.pretrain_factor)), desc ="Updating weights (pretraining): ", leave=False):
                     for agent_id in range(agent_num):
-                        batch, demo_ratio = self.get_batch(t,replay_buffer)
+                        batch, demo_ratio = self.get_batch(t,replay_buffers[agent_id%self.buffer_num])
                         loss_q_np[agent_id], loss_pi_np[agent_id] = agents[agent_id].update(data=batch)
                 self.pretrain_bool = False
                 if self.mode_sync == True: t_limit.value = update_iter * self.update_every
@@ -279,7 +285,7 @@ class Trainer:
                     update_iter_every_log += 1                   
                     for agent_id in range(agent_num):
                         if j <= (self.update_factor_np[agent_id] * self.update_every):
-                            batch, demo_ratio = self.get_batch(t,replay_buffer)
+                            batch, demo_ratio = self.get_batch(t,replay_buffers[agent_id%self.buffer_num])
                             loss_q_np[agent_id], loss_pi_np[agent_id] = agents[agent_id].update(data=batch)
 
                     if update_iter_every_log % self.save_freq == 0:

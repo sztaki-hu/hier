@@ -83,10 +83,16 @@ def main():
       
     manager = BaseManager()
     manager.start()
-    replay_buffer = manager.ReplayBuffer(
-        obs_dim=int(config['environment']['obs_dim']), 
-        act_dim=int(config['environment']['act_dim']), 
-        size=int(config['buffer']['replay_buffer_size']))
+
+    buffer_num = int(config['buffer']['buffer_num'])
+    replay_buffers = []
+
+    for _ in range(buffer_num):
+        replay_buffers.append(manager.ReplayBuffer(
+            obs_dim=int(config['environment']['obs_dim']), 
+            act_dim=int(config['environment']['act_dim']), 
+            size=int(config['buffer']['replay_buffer_size'])))
+
     logger = manager.Logger(current_dir = current_dir, main_args = args, light_mode = False)
 
     agents = []
@@ -107,7 +113,7 @@ def main():
 
     for agent_id in range(agent_num):
         for sampler_id in range(sampler_num):
-            p = Process(target=sampler.start, args=[agent_id,agents[agent_id],sampler_id,replay_buffer,end_flag,pause_flag,sample2train,t_glob,t_limit])
+            p = Process(target=sampler.start, args=[agent_id,agents[agent_id],sampler_id,replay_buffers[agent_id%buffer_num],end_flag,pause_flag,sample2train,t_glob,t_limit])
             p.start()
             processes.append(p)
     
@@ -117,7 +123,7 @@ def main():
     tester_p = Process(target=tester.start, args=[end_flag,test2train])
     tester_p.start()
 
-    trainer.start(agents,replay_buffer,pause_flag,test2train,sample2train,t_glob,t_limit)
+    trainer.start(agents,replay_buffers,pause_flag,test2train,sample2train,t_glob,t_limit)
 
     # Stop Training #############################################################
 
