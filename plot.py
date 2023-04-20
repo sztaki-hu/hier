@@ -23,6 +23,7 @@ parser.add_argument("--plotid", default="PLOT_demos_new" ,help="Id of plot")
 parser.add_argument("--logdir", default="csv_to_plot" ,help="Path of the data folder")
 parser.add_argument("--outdir", default="plots" ,help="Path of the output folder")
 parser.add_argument("--taskname", default="stack_blocks_sac" ,help="Task name")
+parser.add_argument("--sim2sim", type=bool, default=False ,help="Task name")
 args = parser.parse_args()
 
 create_folder(os.path.join(current_dir, args.outdir))
@@ -60,12 +61,25 @@ exps = []
 # exps.append({"name": ["0326_D"], "seed_num":[3], "color": "magenta", "plotname": "1 agent fb: False; uf: 2.0; alpha: 0.4"})
 
 # DEMO
-exps.append({"name": ["0325_D"], "seed_num":[3], "color": "orange", "plotname": "1 agent; 0325_D"})
-exps.append({"name": ["0326_E_01","0326_E_02"], "seed_num":[3,3], "color": "green", "plotname": "1 agent; 0326_E"})
-exps.append({"name": ["0326_F_01","0326_F_02"], "seed_num":[3,3], "color": "blue", "plotname": "1 agent; 0326_F"})
-exps.append({"name": ["0326_G_01","0326_G_02"], "seed_num":[3,3], "color": "magenta", "plotname": "1 agent; 0326_G"})
+# exps.append({"name": ["0325_D"], "seed_num":[3], "color": "orange", "plotname": "1 agent; 0325_D"})
+# exps.append({"name": ["0326_E_01","0326_E_02"], "seed_num":[3,3], "color": "green", "plotname": "1 agent; 0326_E"})
+# exps.append({"name": ["0326_F_01","0326_F_02"], "seed_num":[3,3], "color": "blue", "plotname": "1 agent; 0326_F"})
+# exps.append({"name": ["0326_G_01","0326_G_02"], "seed_num":[3,3], "color": "magenta", "plotname": "1 agent; 0326_G"})
 
+exps.append({"name": ["0420_D_test"], "seed_num":[1], "color": "orange", "plotname": "1 agent; 0325_D"})
 
+## SIM2SIM
+
+if args.sim2sim:
+    for i in range(len(exps)):
+        running_id = 0
+        for j in range(len(exps[i]['seed_num'])):
+            for k in range(exps[i]['seed_num'][j]):
+                graph_csv_name = "test_epochs_" + exps[i]['name'][j] +  "_" + str(k) + ".csv"
+                path = os.path.join(current_dir, args.logdir,graph_csv_name)
+                pivot = pd.read_csv(path)
+
+                print(pivot)
          
 print(exps)
 

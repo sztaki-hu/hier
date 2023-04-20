@@ -221,6 +221,71 @@ class Tester:
 
         print("########################################")
         print("avg return: " + str(avg_return))
+        return avg_return
+
+    def test_agent_all(self,num_display_episode):
+
+        self.env = make_env(self.config)
+        max_return = self.env.get_max_return()
+
+        avg_return_list = []
+        succes_rate_list = []
+        avg_episode_len_list = []
+        error_in_env_list = []
+        out_of_bounds_list = [] 
+
+        #self.epochs = 1
+
+        for model_i in tqdm(range(self.epochs), desc ="Testing: "):
+            model_name = "model_"+str(model_i+1)
+            path = self.logger.get_model_path(model_name)
+            self.agent.load_weights(path,mode="pi",eval=True)
+
+            avg_return = -1
+            sum_return = 0
+            sum_episode_len = 0
+            
+            error_in_env = 0
+            out_of_bounds = 0
+
+            for j in range(num_display_episode):
+
+                o, d, ep_ret, ep_len = self.reset_env(), False, 0, 0
+
+                while not(d or (ep_len == self.max_ep_len)):
+                    # Take deterministic actions at test time 
+                    try:
+                        a = self.agent.get_action(o, True)
+                        o, r, d, info = self.env.step(a)
+                    except:
+                        #data = {'code': -3, 'description':'[Test]: Error  simulation, thus reseting the environment'}
+                        #self.test2train.put(data)
+                        error_in_env+=1
+                        break   
+
+                    if bool(info): 
+                        if 'code' in info:            
+                            if info['code'] < 0:
+                                if info['code'] == -11:
+                                    #data = {'code': -11, 'description': '[Test]: Block is out of bounds'}
+                                    #self.test2train.put(data) 
+                                    out_of_bounds+=1 
+                                break
+
+                    ep_ret += r
+                    ep_len += 1    
+                sum_return += ep_ret
+                sum_episode_len += ep_len        
+            avg_return_list.append(sum_return / float(num_display_episode))
+            avg_episode_len_list.append(sum_episode_len / float(num_display_episode))
+            error_in_env_list.append(error_in_env / float(num_display_episode))
+            out_of_bounds_list.append(out_of_bounds / float(num_display_episode))
+            succes_rate_list.append(avg_return / float(max_return)) if max_return is not None else None
+
+        self.env.shuttdown() 
+
+        return avg_return_list, succes_rate_list, avg_episode_len_list, error_in_env_list, out_of_bounds_list
+
 
     def display_test(self, num_display_episode):
 
