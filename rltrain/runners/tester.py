@@ -280,7 +280,7 @@ class Tester:
             avg_episode_len_list.append(sum_episode_len / float(num_display_episode))
             error_in_env_list.append(error_in_env / float(num_display_episode))
             out_of_bounds_list.append(out_of_bounds / float(num_display_episode))
-            succes_rate_list.append(avg_return / float(max_return)) if max_return is not None else None
+            succes_rate_list.append(avg_return_list[-1] / float(max_return)) if max_return is not None else None
 
         self.env.shuttdown() 
 

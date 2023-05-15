@@ -6,6 +6,8 @@ import yaml
 from PIL import Image
 from torch.utils.tensorboard import SummaryWriter
 
+import pandas as pd
+
 
 class Logger:
     # init method or constructor
@@ -40,6 +42,8 @@ class Logger:
 
         cfg_rlbench = {'path' : self.config_path}
         self.create_folder(os.path.join(self.current_dir, "cfg_rlbench"))
+
+        self.handle_ancient_versions()
 
         self.check_config_values()
 
@@ -98,7 +102,12 @@ class Logger:
 
             self.writer = SummaryWriter(log_dir = os.path.join(self.current_dir,self.logdir,self.logname,self.trainid,"runs"))
             self.writer.add_custom_scalars(layout)
-            
+    
+    def handle_ancient_versions(self):
+        if "buffer_num" not in self.config['buffer']: 
+            self.config['buffer']['buffer_num'] = 1
+        if 'num_test2_episodes' not in self.config['tester']:
+            self.config['tester']['num_test2_episodes'] = max(int(self.config['tester']['num_test_episodes']/10),1)
 
     def check_config_values(self):
         assert self.config['buffer']['buffer_num'] >= 1
@@ -369,6 +378,13 @@ class Logger:
             with open(file) as f:
                 return yaml.load(f, Loader=yaml.UnsafeLoader)
         return None
+
+    def save_test2(self,df):
+        exp_name = str(self.config['general']['exp_name']) + "_" + str(self.trainid)
+        file_name = os.path.join(self.current_dir,"csv_to_plot","test_epochs_"+exp_name+".csv")
+
+        #df.to_excel(file_name) 
+        df.to_csv(file_name,index=False)
 
     # Save Images, Ground-Truth #####################################################
 

@@ -22,7 +22,7 @@ import torch
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--configfile", default="logs/0420_D_test_stack_blocks_sac/" ,help="Path of the config file")
+    parser.add_argument("--configfile", default="logs/0420_A_stack_blocks_sac/" ,help="Path of the config file")
     #parser.add_argument("--configfile", default="logs/0308_C_MountainCarContinuous-v0_sac/" ,help="Path of the config file")
     parser.add_argument("--trainid", type=int, default=0 ,help="Train ID")
     parser.add_argument("--restart", type=bool, default=False ,help="Set true if you want to restart a training")
@@ -33,6 +33,7 @@ if __name__ == '__main__':
     current_dir = dirname(abspath(__file__))
     #config_path = current_dir + "/logs/0216_B_stack_blocks_sac/"+ str(trainid) +"/config.yaml"
     args.restart = True
+
     logger = Logger(current_dir = current_dir, main_args = args)
     config = logger.get_config()
 
@@ -48,7 +49,7 @@ if __name__ == '__main__':
     torch.set_num_threads(torch.get_num_threads())
 
     # Init RLBenchEnv
-    #if config['environment']['name'] == 'simsim': config['environment']['name'] = 'rlbench' 
+    if config['environment']['name'] == 'simsim': config['environment']['name'] = 'rlbench' 
     config['environment']['headless'] = True
 
     # Init Agent

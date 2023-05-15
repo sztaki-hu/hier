@@ -113,10 +113,10 @@ class RLBenchEnv:
             o = self.get_obs()
             target_index =  (0, 1, 2)
             target = o[[target_index[0],target_index[1],target_index[2]]]
-            for j in range(1,self.target_blocks_num+1):
+            for j in range(1,self.target_blocks_num+self.task_params[1]+1):
                 block_index =  (j * 3, j * 3 + 1, j * 3 + 2)
                 block = o[[block_index[0],block_index[1],block_index[2]]]
-                if np.allclose(block, target, rtol=0.0, atol=0.02, equal_nan=False):
+                if np.allclose(block, target, rtol=0.0, atol=0.06, equal_nan=False):
                     return False
         return True
                 
@@ -206,7 +206,7 @@ class RLBenchEnv:
             subsubgoal_reached = False
             target[2] = self.block_on_desk_z + i * self.block_size
             for block in blocks:
-                if np.allclose(target, block, rtol=0.00, atol=0.01, equal_nan=False):
+                if np.allclose(target, block, rtol=0.00, atol=0.02, equal_nan=False):
                     subsubgoal_reached = True
                     break
             if subsubgoal_reached == False: 

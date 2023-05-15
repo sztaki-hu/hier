@@ -27,6 +27,7 @@ import datetime
 timestamp = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
 
 import torch
+import pandas as pd
     
 
 def main():
@@ -144,6 +145,29 @@ def main():
     
     while test2train.empty() == False:
         logger.print_logfile(test2train.get())
+    
+
+    # Test2 #######################################################################
+
+    # Init RLBenchEnv
+    if config['environment']['name'] == 'simsim': config['environment']['name'] = 'rlbench' 
+    config['environment']['headless'] = True
+
+    # Init Agent
+    agent = Agent(0,device,config)
+
+    # Init Trainer
+    tester = Tester(agent,logger,config)
+
+    # Test Agent
+    avg_return, succes_rate, avg_episode_len, error_in_env, out_of_bounds = tester.test_agent_all(config['tester']['num_test2_episodes'])
+
+    d = {'avg_return': avg_return, 'succes_rate': succes_rate, 'avg_episode_len': avg_episode_len, 'error_in_env': error_in_env, 'out_of_bounds': out_of_bounds}
+    df = pd.DataFrame(data=d)
+
+    logger.save_test2(df)
+
+    print(df)
 
 
 if __name__ == '__main__':

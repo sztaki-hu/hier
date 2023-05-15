@@ -19,11 +19,11 @@ def create_folder(path):
         print(path + ' folder already exists!')
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--plotid", default="PLOT_demos_new" ,help="Id of plot")
+parser.add_argument("--plotid", default="test2_01" ,help="Id of plot")
 parser.add_argument("--logdir", default="csv_to_plot" ,help="Path of the data folder")
 parser.add_argument("--outdir", default="plots" ,help="Path of the output folder")
 parser.add_argument("--taskname", default="stack_blocks_sac" ,help="Task name")
-parser.add_argument("--sim2sim", type=bool, default=False ,help="Task name")
+parser.add_argument("--sim2sim", type=bool, default=True ,help="Task name")
 args = parser.parse_args()
 
 create_folder(os.path.join(current_dir, args.outdir))
@@ -66,9 +66,30 @@ exps = []
 # exps.append({"name": ["0326_F_01","0326_F_02"], "seed_num":[3,3], "color": "blue", "plotname": "1 agent; 0326_F"})
 # exps.append({"name": ["0326_G_01","0326_G_02"], "seed_num":[3,3], "color": "magenta", "plotname": "1 agent; 0326_G"})
 
-exps.append({"name": ["0420_D_test"], "seed_num":[1], "color": "orange", "plotname": "1 agent; 0325_D"})
+# DEMO MODE
+exps.append({"name": ["0420_A"], "seed_num":[1], "color": ["orange","red"], "plotname": "1 agent; 0420_A"})
+# exps.append({"name": ["0420_B"], "seed_num":[3], "color": ["green","lime"], "plotname": "1 agent; 0420_B"})
+# exps.append({"name": ["0420_C"], "seed_num":[3], "color": ["blue","cyan"], "plotname": "1 agent; 0420_C"})
+
+# exps.append({"name": ["X_0515_A_test"], "seed_num":[1], "color": "blue", "plotname": "X_0515_A_test"})
+# exps.append({"name": ["X_0515_B_test"], "seed_num":[1], "color": "orange", "plotname": "X_0515_B_test"})
+# exps.append({"name": ["X_0515_C_test"], "seed_num":[1], "color": "purple", "plotname": "X_0515_C_test"})
+
+# exps.append({"name": ["0325_C"], "seed_num":[3], "color": "orange", "plotname": "1 agent; uf = 0.5" })
+# exps.append({"name": ["0323_B","0323_C","0324_D"], "seed_num":[3,3,3], "color": "cyan", "plotname": "1 agent; uf=1.0"})
+# exps.append({"name": ["0323_A","0324_C"], "seed_num":[3,3], "color": "blue", "plotname": "1 agent; fallback: True; uf=1.0"})
+
+#exps.append({"name": ["0420_A"], "seed_num":[3], "color": "orange", "plotname": "1 agent; 0420_A"})
 
 ## SIM2SIM
+
+exp_test_color_list = []
+exp_test2_color_list = []
+for i in range(len(exps)):
+    exp_test_color_list.append(exps[i]['color'][0])
+    exp_test2_color_list.append(exps[i]['color'][1])
+
+test_ret = pd.DataFrame({'Step' : [], 'ExpName' : [],'Seed' : [], 'Type' : [], 'Value' : []})
 
 if args.sim2sim:
     for i in range(len(exps)):
@@ -79,17 +100,32 @@ if args.sim2sim:
                 path = os.path.join(current_dir, args.logdir,graph_csv_name)
                 pivot = pd.read_csv(path)
 
-                print(pivot)
+                pivot = pivot.drop(columns=['avg_episode_len','error_in_env','out_of_bounds','succes_rate'])     
+                
+
+                pivot['ExpName'] = exps[i]['plotname']     
+                pivot['Seed'] = str(running_id)
+
+                pivot['Step'] = pivot.index * 10
+                pivot = pivot.rename(columns={"avg_return": "Value"})      
+
+                pivot['Type'] = "test2"
+
+                running_id += 1
+
+                #print(pivot)
+                test_ret = test_ret.append(pivot, ignore_index = True)
+
+print(test_ret.to_string())
+print(test_ret.head())        
          
 print(exps)
 
-exp_color_list = []
-for i in range(len(exps)):
-    exp_color_list.append(exps[i]['color'])
+
 
 graph_name = "test_glob_checkpoint_test_return"
 
-test_ret = pd.DataFrame({'Step' : [], 'ExpName' : [],'Seed' : [],'Value' : []})
+#test_ret = pd.DataFrame({'Step' : [], 'ExpName' : [],'Seed' : [],'Value' : []})
 
 for i in range(len(exps)):
     running_id = 0
@@ -105,10 +141,13 @@ for i in range(len(exps)):
             running_id += 1
             pivot['Step'] /= 1000
 
+            pivot['Type'] = "test"
+
             test_ret = test_ret.append(pivot, ignore_index = True)
 
 print(test_ret.to_string())
 print(test_ret.head())
+
 
 # Separate plotting ########################## 
 
@@ -119,12 +158,23 @@ for i in range(len(exps)):
     for j in range(len(exps[i]['seed_num'])):
         for k in range(exps[i]['seed_num'][j]):
             pivot=test_ret[test_ret["ExpName"] == exps[i]['plotname']]  
-            pivot=pivot[pivot["Seed"] == str(running_id)] 
+            pivot=pivot[pivot["Seed"] == str(running_id)]
+            pivot=pivot[pivot["Type"] == "test"] 
             
             if running_id == 0:
-                plt.plot(pivot['Step'],pivot['Value'],color=exps[i]['color'],label=exps[i]['plotname'])
+                plt.plot(pivot['Step'],pivot['Value'],color=exps[i]['color'][0],label=exps[i]['plotname'])
             else:
-                plt.plot(pivot['Step'],pivot['Value'],color=exps[i]['color'])
+                plt.plot(pivot['Step'],pivot['Value'],color=exps[i]['color'][0])
+
+            if args.sim2sim:
+                pivot=test_ret[test_ret["ExpName"] == exps[i]['plotname']]  
+                pivot=pivot[pivot["Seed"] == str(running_id)]
+                pivot=pivot[pivot["Type"] == "test2"] 
+
+                if running_id == 0:
+                    plt.plot(pivot['Step'],pivot['Value'],color=exps[i]['color'][1],label=exps[i]['plotname'] + " test 2")
+                else:
+                    plt.plot(pivot['Step'],pivot['Value'],color=exps[i]['color'][1])
             
             running_id += 1
 
@@ -139,7 +189,13 @@ plt.show()
 # SD plot ###################################
 
 fig, _ = plt.subplots(figsize=(14,6))
-sns.lineplot(data=test_ret, x="Step", y="Value", hue="ExpName", errorbar=('ci', 50), palette=exp_color_list)
+
+test_ret_test = test_ret[test_ret["Type"] == "test"] 
+sns.lineplot(data=test_ret_test, x="Step", y="Value", hue="ExpName", errorbar=('ci', 50), palette=exp_test_color_list)
+
+test_ret_test2 = test_ret[test_ret["Type"] == "test2"] 
+test_ret_test2["ExpName"] += " test2"
+sns.lineplot(data=test_ret_test2, x="Step", y="Value", hue="ExpName", errorbar=('ci', 50), palette=exp_test2_color_list)
 
 plt.legend(title='Labels', bbox_to_anchor=(1, 1.01), loc='upper left')
 plt.xlabel("Step (x1000)")
