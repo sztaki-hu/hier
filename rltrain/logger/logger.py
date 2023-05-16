@@ -106,8 +106,10 @@ class Logger:
     def handle_ancient_versions(self):
         if "buffer_num" not in self.config['buffer']: 
             self.config['buffer']['buffer_num'] = 1
-        if 'num_test2_episodes' not in self.config['tester']:
-            self.config['tester']['num_test2_episodes'] = max(int(self.config['tester']['num_test_episodes']/10),1)
+        if 'tester2' not in self.config:
+            self.config['tester2']['bool'] = False
+            self.config['tester2']['env_name'] = 'rlbench'
+            self.config['tester2']['num_test2_episodes'] = max(int(self.config['tester']['num_test_episodes']/10),1)         
 
     def check_config_values(self):
         assert self.config['buffer']['buffer_num'] >= 1

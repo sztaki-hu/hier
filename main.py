@@ -149,25 +149,26 @@ def main():
 
     # Test2 #######################################################################
 
-    # Init RLBenchEnv
-    if config['environment']['name'] == 'simsim': config['environment']['name'] = 'rlbench' 
-    config['environment']['headless'] = True
+    if config['tester2']['bool'] == True:
+        # Init RLBenchEnv
+        config['environment']['name'] = config['tester2']['env_name']
+        config['environment']['headless'] = True
 
-    # Init Agent
-    agent = Agent(0,device,config)
+        # Init Agent
+        agent = Agent(0,device,config)
 
-    # Init Trainer
-    tester = Tester(agent,logger,config)
+        # Init Trainer
+        tester = Tester(agent,logger,config)
 
-    # Test Agent
-    avg_return, succes_rate, avg_episode_len, error_in_env, out_of_bounds = tester.test_agent_all(config['tester']['num_test2_episodes'])
+        # Test Agent
+        avg_return, succes_rate, avg_episode_len, error_in_env, out_of_bounds = tester.test_agent_all(config['tester2']['num_test2_episodes'])
 
-    d = {'avg_return': avg_return, 'succes_rate': succes_rate, 'avg_episode_len': avg_episode_len, 'error_in_env': error_in_env, 'out_of_bounds': out_of_bounds}
-    df = pd.DataFrame(data=d)
+        d = {'avg_return': avg_return, 'succes_rate': succes_rate, 'avg_episode_len': avg_episode_len, 'error_in_env': error_in_env, 'out_of_bounds': out_of_bounds}
+        df = pd.DataFrame(data=d)
 
-    logger.save_test2(df)
+        logger.save_test2(df)
 
-    print(df)
+        print(df)
 
 
 if __name__ == '__main__':
