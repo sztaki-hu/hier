@@ -380,6 +380,9 @@ class Logger:
         return None
 
     def save_test2(self,df):
+
+        self.create_folder(os.path.join(self.current_dir, "csv_to_plot"))
+
         exp_name = str(self.config['general']['exp_name']) + "_" + str(self.trainid)
         file_name = os.path.join(self.current_dir,"csv_to_plot","test_epochs_"+exp_name+".csv")
 
