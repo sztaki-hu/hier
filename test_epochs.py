@@ -31,9 +31,8 @@ if __name__ == '__main__':
 
     # Init logger 
     current_dir = dirname(abspath(__file__))
-    #config_path = current_dir + "/logs/0216_B_stack_blocks_sac/"+ str(trainid) +"/config.yaml"
-    args.restart = True
 
+    args.restart = True
     logger = Logger(current_dir = current_dir, main_args = args)
     config = logger.get_config()
 
@@ -43,13 +42,13 @@ if __name__ == '__main__':
 
     print_torch_info(logger)
 
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu') # Init RLBenchEnv
+
     print(device)
 
     torch.set_num_threads(torch.get_num_threads())
 
-    # Init RLBenchEnv
-    if config['environment']['name'] == 'simsim': config['environment']['name'] = 'rlbench' 
+    config['environment']['name'] = config['tester2']['env_name']
     config['environment']['headless'] = True
 
     # Init Agent
@@ -59,22 +58,11 @@ if __name__ == '__main__':
     tester = Tester(agent,logger,config)
 
     # Test Agent
-    avg_return, succes_rate, avg_episode_len, error_in_env, out_of_bounds = tester.test_agent_all(5)
-
-    print(avg_return)
+    avg_return, succes_rate, avg_episode_len, error_in_env, out_of_bounds = tester.test_agent_all(config['tester2']['num_test2_episodes'])
 
     d = {'avg_return': avg_return, 'succes_rate': succes_rate, 'avg_episode_len': avg_episode_len, 'error_in_env': error_in_env, 'out_of_bounds': out_of_bounds}
     df = pd.DataFrame(data=d)
 
+    logger.save_test2(df)
+
     print(df)
-
-    exp_name = str(config['general']['exp_name']) + "_" + str(args.trainid)
-    file_name = os.path.join(current_dir,"csv_to_plot","test_epochs_"+exp_name+".csv")
-
-    #df.to_excel(file_name) 
-    df.to_csv(file_name,index=False)
-
-
-
-
-    

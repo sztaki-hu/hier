@@ -16,6 +16,8 @@ class Logger:
         self.current_dir = current_dir
         self.trainid = str(main_args.trainid)
 
+        print(main_args)
+
         if main_args.restart == False:       
             self.config_path = os.path.join(current_dir,main_args.configfile)
         else:
@@ -107,7 +109,8 @@ class Logger:
         if "buffer_num" not in self.config['buffer']: 
             self.config['buffer']['buffer_num'] = 1
         if 'tester2' not in self.config:
-            self.config['tester2']['bool'] = False
+            self.config['tester2'] = {}
+            self.config['tester2']['bool'] = True
             self.config['tester2']['env_name'] = 'rlbench'
             self.config['tester2']['num_test2_episodes'] = max(int(self.config['tester']['num_test_episodes']/10),1)         
 
