@@ -14,7 +14,7 @@ from rlbench.backend.observation import Observation
 #from rlbench.backend.task import Task
 from pyquaternion import Quaternion
 
-ACTION_SPACE_LIST = ["xyz","pick_and_place_2d","pick_and_place_3d"]
+ACTION_SPACE_LIST = ["xyz","pick_and_place_2d","pick_and_place_3d", "pick_and_place_3_1d"]
 REWARD_TYPE_LIST = ['sparse','mse','envchange','subgoal']
 
 class RLBenchEnv:
@@ -37,6 +37,11 @@ class RLBenchEnv:
 
         assert self.action_space in ACTION_SPACE_LIST
         assert self.reward_shaping_type in REWARD_TYPE_LIST
+
+        if self.action_space == ("pick_and_place_2d" or "pick_and_place_3d"):   
+            self.obs_period = 3
+        elif self.action_space == "pick_and_place_3_1d":
+            self.obs_period = 7
 
         if self.config['environment']['camera'] == True:
             cam_config = CameraConfig(rgb=True, depth=True, point_cloud=True, mask=False,image_size=(256, 256),
@@ -76,6 +81,8 @@ class RLBenchEnv:
         #self.desk_height = 0.765
         self.block_on_desk_z = 0.765
         self.block_size = 0.03
+
+        self.transport_height = self.block_on_desk_z + self.block_size * 3
         
     
     def shuttdown(self):
@@ -114,10 +121,11 @@ class RLBenchEnv:
             target_index =  (0, 1, 2)
             target = o[[target_index[0],target_index[1],target_index[2]]]
             for j in range(1,self.target_blocks_num+self.task_params[1]+1):
-                block_index =  (j * 3, j * 3 + 1, j * 3 + 2)
+                block_index =  (j * self.obs_period, j * self.obs_period + 1, j * self.obs_period + 2)
                 block = o[[block_index[0],block_index[1],block_index[2]]]
                 if np.allclose(block, target, rtol=0.0, atol=0.06, equal_nan=False):
-                    return False
+                    return False        
+
         return True
                 
     
@@ -132,6 +140,12 @@ class RLBenchEnv:
             o, r, d, info = self.execute_path(poses)  
         elif self.action_space == "pick_and_place_3d":
             poses = self.model2robot_pick_and_place_3d(a_model)
+            if self.grasp_speedup:
+                o, r, d, info = self.execute_path_grasp_speedup(poses)   
+            else:
+                o, r, d, info = self.execute_path(poses)  
+        elif self.action_space == "pick_and_place_3_1d":
+            poses = self.model2robot_pick_and_place_3_1d(a_model)
             if self.grasp_speedup:
                 o, r, d, info = self.execute_path_grasp_speedup(poses)   
             else:
@@ -221,13 +235,14 @@ class RLBenchEnv:
         if self.action_space == "xyz":
             return self.task_env._scene.task._target_place.get_position()[:self.obs_dim]
         elif self.task_name == "stack_blocks":
-            obs = [item.get_position() for item in self.task_env._scene.task._observation]
-            obs = np.hstack(obs)
-            return obs
+            if self.action_space == ("pick_and_place_2d" or "pick_and_place_3d"):
+                obs = [item.get_position() for item in self.task_env._scene.task._observation]
+            elif self.action_space == "pick_and_place_3_1d":
+                obs = [np.hstack([item.get_position(),item.get_quaternion()]) for item in self.task_env._scene.task._observation]
 
-            # obj = self.task_env._scene.task._graspable_objects[0].get_position()[:2]
-            # trgt = self.task_env._scene.task._target_place.get_position()[:2]
-            # return np.concatenate([obj,trgt])
+            obs = np.hstack(obs)
+            print(obs)
+            return obs
     
     def model2robot_pick_and_place_2d(self,a):
         xy1 = a[:2]
@@ -243,6 +258,18 @@ class RLBenchEnv:
         d = 0.03 * 1.5
         h = z + d
         return self.pick_and_place_planner(xyz1, self.quat, xyz2, self.quat, h1 = h, d1 = None, h2 = h, d2 = None)
+    
+    def model2robot_pick_and_place_3_1d(self,a):
+        xyz1 = a[:3] # 0,1,2
+        quat1 = a[3:7] # 3,4,5,6
+        quat1 = quat1 / np.linalg.norm(quat1)
+        xyz2 = a[7:10] # 7,8,9
+        quat2 = a[10:14] # 10,11,12,13
+        quat2 = quat2 / np.linalg.norm(quat2)
+        z = max(xyz1[2],xyz2[2])
+        d = 0.03 * 1.5
+        h = z + d
+        return self.pick_and_place_planner(xyz1, quat1, xyz2, quat2, h1 = h, d1 = None, h2 = h, d2 = None)
 
 
     def model2robot_xyz(self,a_model):
@@ -264,8 +291,10 @@ class RLBenchEnv:
         y = xyz[1]
         z = xyz[2]
 
-        if d is None: d = 0.03 * 2
-        if h is None: h = z + d
+        # if d is None: d = 0.03 * 2
+        # if h is None: h = z + d
+
+        h = self.transport_height
 
         poses = []
         if grasp == False and drop == True:

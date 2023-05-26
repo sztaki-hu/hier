@@ -1,10 +1,11 @@
 import numpy as np
 import time
+from pyquaternion import Quaternion
 
 #REWARD_TYPE_LIST = ['sparse','mse','envchange','subgoal']
 REWARD_TYPE_LIST = ['sparse','subgoal']
 TASK_TYPE_LIST = ['stack_blocks']
-ACTION_SPACE_LIST = ['pick_and_place_2d','pick_and_place_3d']
+ACTION_SPACE_LIST = ['pick_and_place_2d','pick_and_place_3d','pick_and_place_3_1d']
 
 class SimSimEnv:
     def __init__(self,config):
@@ -32,6 +33,11 @@ class SimSimEnv:
         assert self.task_name in TASK_TYPE_LIST
         assert self.action_space in ACTION_SPACE_LIST
 
+        if self.action_space == ("pick_and_place_2d" or "pick_and_place_3d"):   
+            self.obs_period = 3
+        elif self.action_space == "pick_and_place_3_1d":
+            self.obs_period = 7
+
         self.reset()
 
     def shuttdown(self):
@@ -42,19 +48,49 @@ class SimSimEnv:
     
     def reset(self):
         if self.task_name == 'stack_blocks':
-            obs = []
-            obs.append(0.25)
-            obs.append(0.0)
-            obs.append(0.752)
-            for _ in range(self.task_params[0] + self.task_params[1]):
-                block = np.random.uniform(low=self.boundary_min, high=self.boundary_max, size=(self.act_dim))
-                obs.append(block[0])
-                obs.append(block[1])
-                obs.append(0.765)
-            self.observation = np.asarray(obs)
-            self.subgoal_level = 0
-            #print(self.observation)
-            return self.observation.copy()
+            if self.action_space == ("pick_and_place_2d" or "pick_and_place_3d"):              
+                obs = []
+                obs.append(0.25)
+                obs.append(0.0)
+                obs.append(0.752)
+                for _ in range(self.task_params[0] + self.task_params[1]):
+                    block = np.random.uniform(low=self.boundary_min, high=self.boundary_max, size=(self.act_dim))
+                    obs.append(block[0])
+                    obs.append(block[1])
+                    obs.append(0.765)
+                self.observation = np.asarray(obs)
+                self.subgoal_level = 0
+                #print(self.observation)
+                return self.observation.copy()
+            elif self.action_space == "pick_and_place_3_1d":              
+                obs = []
+                obs.append(0.25)
+                obs.append(0.0)
+                obs.append(0.752)
+                obs.append(0.0)
+                obs.append(0.0)
+                obs.append(0.0)
+                obs.append(1.0)
+                for _ in range(self.task_params[0] + self.task_params[1]):
+                    block = np.random.uniform(low=self.boundary_min[:2], high=self.boundary_max[:2], size=(2))
+                    obs.append(block[0])
+                    obs.append(block[1])
+                    obs.append(0.765)
+
+                    q = self.rlbench2pyquat(np.array([0,0,0,1])) # (x,y,z,w) --> (w,x,y,z)
+                    z_rand = Quaternion(axis=[0, 0, 1], angle=np.random.uniform(low=0.0, high=3.14159265 / 4.0, size=1) ) # Rotate around Z
+                    q2 = q * z_rand
+                    quat_rand = self.pyquat2rlbench(q2) # (w,x,y,z) --> (x,y,z,w)  
+
+                    obs.append(quat_rand[0])
+                    obs.append(quat_rand[1])
+                    obs.append(quat_rand[2])
+                    obs.append(quat_rand[3])
+
+                self.observation = np.asarray(obs)
+                self.subgoal_level = 0
+                #print(self.observation)
+                return self.observation.copy()
         else:
             self.observation = np.random.uniform(low=self.boundary_min, high=self.boundary_max, size=(self.obs_dim))
             return self.observation
@@ -76,6 +112,30 @@ class SimSimEnv:
                 block = self.observation[(i+1)*3:(i+2)*3]
                 if np.allclose(a[:3], block, rtol=0.0, atol=0.01, equal_nan=False):
                     self.observation[(i+1)*3:(i+2)*3] = a[3:6]
+                    break
+            o = self.observation.copy()
+        elif self.action_space == "pick_and_place_3_1d":
+            # Movement of the block
+            r = 0
+            for i in range(self.task_params[0] + self.task_params[1]):
+                block = self.observation[(i+1)*7:(i+2)*7]
+                
+                q = self.rlbench2pyquat(block[3:7]) # (x,y,z,w) --> (w,x,y,z)
+                y_180 = Quaternion(axis=[0, 1, 0], angle=3.14159265) # Rotate 180 about Y
+                q2 = q * y_180
+                block[3:7] = self.pyquat2rlbench(q2) # (w,x,y,z) --> (x,y,z,w)
+                block2 = np.copy(block)
+                block2[3:7] = - block2[3:7]
+
+
+                if np.allclose(a[:7], block, rtol=0.0, atol=0.01, equal_nan=False) or np.allclose(a[:7], block2, rtol=0.0, atol=0.01, equal_nan=False):
+                    self.observation[(i+1)*7:(i+2)*7] = a[7:14]
+
+                    q = self.rlbench2pyquat(a[10:14]) # (x,y,z,w) --> (w,x,y,z)
+                    y_180 = Quaternion(axis=[0, 1, 0], angle=3.14159265) # Rotate 180 about Y
+                    q2 = q * y_180
+                    a[10:14] = self.pyquat2rlbench(q2) # (w,x,y,z) --> (x,y,z,w)  
+
                     break
             o = self.observation.copy()
         # Get reward
@@ -109,14 +169,14 @@ class SimSimEnv:
 
 
     def reward_shaping_subgoal_stack_blocks(self,o):
-        
+
         target_index =  (0, 1, 2)
         target = o[[target_index[0],target_index[1],target_index[2]]]
 
         blocks = []
         #dists = []
         for j in range(1,self.task_params[0]+1):
-            block_index =  (j * 3, j * 3 + 1, j * 3 + 2)
+            block_index =  (j * self.obs_period, j * self.obs_period + 1, j * self.obs_period + 2)
             block = o[[block_index[0],block_index[1],block_index[2]]]
             #dists.append(np.sum(np.square(target - block)))
             blocks.append(block) 
@@ -140,7 +200,7 @@ class SimSimEnv:
             target_index =  (0, 1, 2)
             target = o[[target_index[0],target_index[1],target_index[2]]]
             for j in range(1,self.target_blocks_num+1):
-                block_index =  (j * 3, j * 3 + 1, j * 3 + 2)
+                block_index =  (j * self.obs_period, j * self.obs_period + 1, j * self.obs_period + 2)
                 block = o[[block_index[0],block_index[1],block_index[2]]]
                 if np.allclose(block, target, rtol=0.0, atol=0.02, equal_nan=False):
                     return False
@@ -162,6 +222,11 @@ class SimSimEnv:
                     bonus += self.reward_bonus * i       
                 return (1 + bonus) * self.reward_scalor
         return None
+
+    def pyquat2rlbench(self,quat): # (w,x,y,z) --> (x,y,z,w)
+        return np.array([quat[1], quat[2], quat[3], quat[0]])
+    def rlbench2pyquat(self,quat): # (x,y,z,w) --> (w,x,y,z)
+        return Quaternion(quat[3], quat[0], quat[1], quat[2])
 
 
 

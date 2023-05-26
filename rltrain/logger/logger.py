@@ -112,7 +112,18 @@ class Logger:
             self.config['tester2'] = {}
             self.config['tester2']['bool'] = True
             self.config['tester2']['env_name'] = 'rlbench'
-            self.config['tester2']['num_test2_episodes'] = max(int(self.config['tester']['num_test_episodes']/10),1)         
+            self.config['tester2']['num_test2_episodes'] = max(int(self.config['tester']['num_test_episodes']/10),1)        
+        if 'params' not in self.config["environment"]: 
+            self.config["environment"]['params'] = {}
+            self.config["environment"]['params']['pick'] = {}
+            self.config["environment"]['params']['pick']['atol'] = 0.01
+            self.config["environment"]['params']['pick']['rtol'] = 0.0
+            self.config["environment"]['params']['place']  = {}
+            self.config["environment"]['params']['place']['mean'] = 0.0
+            self.config["environment"]['params']['place']['std'] = 0.01
+            self.config["environment"]['params']['reward']  = {}
+            self.config["environment"]['params']['reward']['atol'] = 0.01
+            self.config["environment"]['params']['reward']['rtol'] = 0.0
 
     def check_config_values(self):
         assert self.config['buffer']['buffer_num'] >= 1
@@ -126,7 +137,10 @@ class Logger:
 
         if self.config['environment']['obs_dim'] == "auto":
             if self.task_name == "stack_blocks":
-                self.config['environment']['obs_dim'] = 3 + self.task_params[0] * 3 + self.task_params[1] * 3
+                if self.action_space == ("pick_and_place_3d" or "pick_and_place_3d"):
+                    self.config['environment']['obs_dim'] = 3 + self.task_params[0] * 3 + self.task_params[1] * 3
+                elif self.action_space == "pick_and_place_3_1d":
+                    self.config['environment']['obs_dim'] = 7 + self.task_params[0] * 7 + self.task_params[1] * 7
             elif self.task_name == "MountainCarContinuous-v0":
                 self.config['environment']['obs_dim'] = 2
             else:
@@ -139,12 +153,30 @@ class Logger:
                 self.config['environment']['act_dim'] = 4
             elif self.action_space == "pick_and_place_3d":
                 self.config['environment']['act_dim'] = 6
+            elif self.action_space == "pick_and_place_3_1d":
+                self.config['environment']['act_dim'] = 14
             elif self.task_name == "MountainCarContinuous-v0":
                 self.config['environment']['act_dim'] = 1
             else:
                 self.print_logfile("Act dim could not be computed","error")
                 assert False
             self.print_logfile("Act dim is computed: " + str(self.config['environment']['act_dim']))
+        
+        if self.config['agent']['boundary_min'] == "auto":
+            if self.action_space == "pick_and_place_2d":
+                self.config['agent']['boundary_min'] = [0.1,-0.3,0.1,-0.3]
+            if self.action_space == "pick_and_place_3d":
+                self.config['agent']['boundary_min'] = [0.1,-0.3,0.76,0.1,-0.3,0.76]
+            if self.action_space == "pick_and_place_3_1d":
+                self.config['agent']['boundary_min'] = [0.1,-0.3,0.76,0,0,0,0,0.1,-0.3,0.76,0,0,0,0]
+        
+        if self.config['agent']['boundary_max'] == "auto":
+            if self.action_space == "pick_and_place_2d":
+                self.config['agent']['boundary_max'] = [0.35,0.3,0.35,0.3]
+            if self.action_space == "pick_and_place_3d":
+                self.config['agent']['boundary_max'] = [0.35,0.3,0.86,0.35,0.3,0.86]
+            if self.action_space == "pick_and_place_3_1d":
+                self.config['agent']['boundary_max'] = [0.35,0.3,0.86,1,1,1,1,0.35,0.3,0.86,1,1,1,1]
 
     def print_logfile(self,message,level = "info", terminal = True):
         if terminal:
@@ -384,12 +416,12 @@ class Logger:
                 return yaml.load(f, Loader=yaml.UnsafeLoader)
         return None
 
-    def save_test2(self,df):
+    def save_test2(self,df,test2env):
 
         self.create_folder(os.path.join(self.current_dir, "csv_to_plot"))
 
         exp_name = str(self.config['general']['exp_name']) + "_" + str(self.trainid)
-        file_name = os.path.join(self.current_dir,"csv_to_plot","test_epochs_"+exp_name+".csv")
+        file_name = os.path.join(self.current_dir,"csv_to_plot","test_epochs_"+exp_name+"_"+test2env+".csv")
 
         #df.to_excel(file_name) 
         df.to_csv(file_name,index=False)
