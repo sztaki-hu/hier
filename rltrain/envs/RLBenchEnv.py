@@ -13,8 +13,11 @@ from rlbench.task_environment import TaskEnvironment
 from rlbench.backend.observation import Observation
 #from rlbench.backend.task import Task
 from pyquaternion import Quaternion
+from scipy.spatial.transform import Rotation as R
+import math
 
-ACTION_SPACE_LIST = ["xyz","pick_and_place_2d","pick_and_place_3d", "pick_and_place_3_1d"]
+ACTION_SPACE_LIST = ["xyz","pick_and_place_2d","pick_and_place_3d","pick_and_place_3d_quat","pick_and_place_3d_z90"]
+STATE_SPACE_LIST = ["xyz","xyz_quat","xyz_z90"]
 REWARD_TYPE_LIST = ['sparse','mse','envchange','subgoal']
 
 class RLBenchEnv:
@@ -34,14 +37,17 @@ class RLBenchEnv:
         self.boundary_min = np.array(config['agent']['boundary_min'])[:self.act_dim]
         self.boundary_max = np.array(config['agent']['boundary_max'])[:self.act_dim]
         self.grasp_speedup = config['environment']['grasp_speedup']
+        self.state_space = config['environment']['state_space']
 
         assert self.action_space in ACTION_SPACE_LIST
         assert self.reward_shaping_type in REWARD_TYPE_LIST
 
-        if self.action_space == ("pick_and_place_2d" or "pick_and_place_3d"):   
+        if self.state_space == "xyz":   
             self.obs_period = 3
-        elif self.action_space == "pick_and_place_3_1d":
+        elif self.action_space == "xyz_quat":
             self.obs_period = 7
+        elif self.state_space == "xyz_z90":   
+            self.obs_period = 4
 
         if self.config['environment']['camera'] == True:
             cam_config = CameraConfig(rgb=True, depth=True, point_cloud=True, mask=False,image_size=(256, 256),
@@ -139,17 +145,16 @@ class RLBenchEnv:
             poses = self.model2robot_pick_and_place_2d(a_model)
             o, r, d, info = self.execute_path(poses)  
         elif self.action_space == "pick_and_place_3d":
-            poses = self.model2robot_pick_and_place_3d(a_model)
-            if self.grasp_speedup:
-                o, r, d, info = self.execute_path_grasp_speedup(poses)   
-            else:
-                o, r, d, info = self.execute_path(poses)  
-        elif self.action_space == "pick_and_place_3_1d":
-            poses = self.model2robot_pick_and_place_3_1d(a_model)
-            if self.grasp_speedup:
-                o, r, d, info = self.execute_path_grasp_speedup(poses)   
-            else:
-                o, r, d, info = self.execute_path(poses)  
+            poses = self.model2robot_pick_and_place_3d(a_model)    
+        elif self.action_space == "pick_and_place_3d_quat":
+            poses = self.model2robot_pick_and_place_3d_quat(a_model)
+        elif self.action_space == "pick_and_place_3d_z90":
+            poses = self.model2robot_pick_and_place_3d_z90(a_model)
+
+        if self.grasp_speedup:
+            o, r, d, info = self.execute_path_grasp_speedup(poses)   
+        else:
+            o, r, d, info = self.execute_path(poses)  
 
         ## Get the observation
         o = self.get_obs()
@@ -229,19 +234,30 @@ class RLBenchEnv:
         self.subgoal_level += 1
         return self.reward_bonus * self.subgoal_level
 
-        
-
     def get_obs(self):
         if self.action_space == "xyz":
             return self.task_env._scene.task._target_place.get_position()[:self.obs_dim]
         elif self.task_name == "stack_blocks":
-            if self.action_space == ("pick_and_place_2d" or "pick_and_place_3d"):
+            if self.state_space == "xyz":
                 obs = [item.get_position() for item in self.task_env._scene.task._observation]
-            elif self.action_space == "pick_and_place_3_1d":
+            elif self.state_space == "xyz_quat":
                 obs = [np.hstack([item.get_position(),item.get_quaternion()]) for item in self.task_env._scene.task._observation]
+            elif self.state_space == "xyz_z90":
+                obs = []
+                for item in self.task_env._scene.task._observation:
+                    quat = item.get_quaternion()
+                    r = R.from_quat(quat)
+                    obj_deg = r.as_euler('zyx', degrees=True)[0]
+                    obj_deg_mod90 = obj_deg % 90
+                    obj_deg -= obj_deg_mod90 * 90
+                    print(obj_deg)
+                    obj_rad = math.radians(obj_deg)
+                    obj_sin2x = math.sin(obj_rad)
+                    obs.append(np.hstack([item.get_position(),obj_sin2x]))       
 
             obs = np.hstack(obs)
             print(obs)
+            assert False
             return obs
     
     def model2robot_pick_and_place_2d(self,a):
@@ -259,13 +275,41 @@ class RLBenchEnv:
         h = z + d
         return self.pick_and_place_planner(xyz1, self.quat, xyz2, self.quat, h1 = h, d1 = None, h2 = h, d2 = None)
     
-    def model2robot_pick_and_place_3_1d(self,a):
+    def model2robot_pick_and_place_3d_quat(self,a):
         xyz1 = a[:3] # 0,1,2
         quat1 = a[3:7] # 3,4,5,6
         quat1 = quat1 / np.linalg.norm(quat1)
         xyz2 = a[7:10] # 7,8,9
         quat2 = a[10:14] # 10,11,12,13
         quat2 = quat2 / np.linalg.norm(quat2)
+        z = max(xyz1[2],xyz2[2])
+        d = 0.03 * 1.5
+        h = z + d
+        return self.pick_and_place_planner(xyz1, quat1, xyz2, quat2, h1 = h, d1 = None, h2 = h, d2 = None)
+    
+    def model2robot_pick_and_place_3d_z90(self,a):
+        xyz1 = a[:3] # 0,1,2
+
+        z_rad = math.asin(a[3])
+        r = R.from_rotvec(np.array([0, 0, z_rad]))
+        obj_quat1 = r.as_quat()
+
+        q = self.rlbench2pyquat(obj_quat1) # (x,y,z,w) --> (w,x,y,z)
+        y_180 = Quaternion(axis=[0, 1, 0], angle=3.14159265) # Rotate 180 about Y
+        q2 = q * y_180
+        quat1 = self.pyquat2rlbench(q2) # (w,x,y,z) --> (x,y,z,w)  
+        
+
+        xyz2 = a[4:7] 
+        z_rad = math.asin(a[7])
+        r = R.from_rotvec(np.array([0, 0, z_rad]))
+        obj_quat2 = r.as_quat()
+
+        q = self.rlbench2pyquat(obj_quat2) # (x,y,z,w) --> (w,x,y,z)
+        y_180 = Quaternion(axis=[0, 1, 0], angle=3.14159265) # Rotate 180 about Y
+        q2 = q * y_180
+        quat2 = self.pyquat2rlbench(q2) # (w,x,y,z) --> (x,y,z,w)  
+
         z = max(xyz1[2],xyz2[2])
         d = 0.03 * 1.5
         h = z + d

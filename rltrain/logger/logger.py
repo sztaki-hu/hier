@@ -33,6 +33,7 @@ class Logger:
 
         self.demodir = self.config['general']['demodir']
         
+        
         log_file_path = os.path.join(self.current_dir,self.logdir, self.logname,self.trainid,'logs.log')
         if os.path.isfile(log_file_path):
             os.remove(log_file_path) 
@@ -134,13 +135,16 @@ class Logger:
         self.task_name = self.config['environment']['task']['name']
         self.task_params = self.config['environment']['task']['params']
         self.action_space = self.config['agent']['action_space']
+        self.state_space = self.config['environment']['state_space']
 
         if self.config['environment']['obs_dim'] == "auto":
             if self.task_name == "stack_blocks":
-                if self.action_space == ("pick_and_place_3d" or "pick_and_place_3d"):
+                if self.state_space == "xyz":
                     self.config['environment']['obs_dim'] = 3 + self.task_params[0] * 3 + self.task_params[1] * 3
-                elif self.action_space == "pick_and_place_3_1d":
+                elif self.state_space == "xyz_quat":
                     self.config['environment']['obs_dim'] = 7 + self.task_params[0] * 7 + self.task_params[1] * 7
+                elif self.state_space == "xyz_z90":
+                    self.config['environment']['obs_dim'] = 4 + self.task_params[0] * 4 + self.task_params[1] * 4
             elif self.task_name == "MountainCarContinuous-v0":
                 self.config['environment']['obs_dim'] = 2
             else:
@@ -151,10 +155,14 @@ class Logger:
         if self.config['environment']['act_dim'] == "auto":
             if self.action_space == "pick_and_place_2d":
                 self.config['environment']['act_dim'] = 4
+            elif self.action_space == "pick_and_place_2d_z90":
+                self.config['environment']['act_dim'] = 6
             elif self.action_space == "pick_and_place_3d":
                 self.config['environment']['act_dim'] = 6
-            elif self.action_space == "pick_and_place_3_1d":
+            elif self.action_space == "pick_and_place_3d_quat":
                 self.config['environment']['act_dim'] = 14
+            elif self.action_space == "pick_and_place_3d_z90":
+                self.config['environment']['act_dim'] = 8
             elif self.task_name == "MountainCarContinuous-v0":
                 self.config['environment']['act_dim'] = 1
             else:
@@ -165,18 +173,26 @@ class Logger:
         if self.config['agent']['boundary_min'] == "auto":
             if self.action_space == "pick_and_place_2d":
                 self.config['agent']['boundary_min'] = [0.1,-0.3,0.1,-0.3]
-            if self.action_space == "pick_and_place_3d":
+            elif self.action_space == "pick_and_place_2d_z90":
+                self.config['agent']['boundary_min'] = [0.1,-0.3,-1.0,0.1,-0.3,-1.0]
+            elif self.action_space == "pick_and_place_3d":
                 self.config['agent']['boundary_min'] = [0.1,-0.3,0.76,0.1,-0.3,0.76]
-            if self.action_space == "pick_and_place_3_1d":
+            elif self.action_space == "pick_and_place_3d_quat":
                 self.config['agent']['boundary_min'] = [0.1,-0.3,0.76,0,0,0,0,0.1,-0.3,0.76,0,0,0,0]
+            elif self.action_space == "pick_and_place_3d_z90":
+                self.config['agent']['boundary_min'] = [0.1,-0.3,0.76,-1.0,0.1,-0.3,0.76,-1.0]
         
         if self.config['agent']['boundary_max'] == "auto":
             if self.action_space == "pick_and_place_2d":
                 self.config['agent']['boundary_max'] = [0.35,0.3,0.35,0.3]
-            if self.action_space == "pick_and_place_3d":
+            elif self.action_space == "pick_and_place_2d_z90":
+                self.config['agent']['boundary_min'] = [0.35,0.3,1.0,0.35,0.3,1.0]
+            elif self.action_space == "pick_and_place_3d":
                 self.config['agent']['boundary_max'] = [0.35,0.3,0.86,0.35,0.3,0.86]
-            if self.action_space == "pick_and_place_3_1d":
+            elif self.action_space == "pick_and_place_3d_quat":
                 self.config['agent']['boundary_max'] = [0.35,0.3,0.86,1,1,1,1,0.35,0.3,0.86,1,1,1,1]
+            elif self.action_space == "pick_and_place_3d_z90":
+                self.config['agent']['boundary_max'] = [0.35,0.3,0.86,1.0,0.35,0.3,0.86,1.0]
 
     def print_logfile(self,message,level = "info", terminal = True):
         if terminal:

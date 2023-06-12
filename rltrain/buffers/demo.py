@@ -51,14 +51,13 @@ class Demo:
 
         if self.action_space == "xyz":
             self.create_demos_xyz()
-        # elif self.action_space == "pick_and_place_2d":
-        #     self.create_demos_pick_and_place_2d()
-        elif (self.action_space == "pick_and_place_2d") or (self.action_space == "pick_and_place_3d"):
-            if self.task_name == "stack_blocks":
+        if self.task_name == "stack_blocks":
+            if (self.action_space == "pick_and_place_2d") or (self.action_space == "pick_and_place_3d"):
                 self.create_demos_stack_blocks_pick_and_place()
-        elif self.action_space == "pick_and_place_3_1d":
-            if self.task_name == "stack_blocks":
-                self.create_demos_stack_blocks_pick_and_place_3_1()
+            elif self.action_space == "pick_and_place_3d_quat":
+                self.create_demos_stack_blocks_pick_and_place_3d_quat()
+            elif self.action_space == "pick_and_place_3d_z90":        
+                self.create_demos_stack_blocks_pick_and_place_3d_z90()
         elif self.task_name == "MountainCarContinuous-v0":
             self.create_demo_MountainCarContinuous()
 
@@ -133,7 +132,6 @@ class Demo:
 
         self.logger.save_demos(self.demo_name,  self.demo_buffer)
 
-
     def create_demos_xyz(self):  
 
         self.env = make_env(self.config)
@@ -157,7 +155,124 @@ class Demo:
         # print(batch)
         # print(self.demo_buffer.ptr)
         
-    def create_demos_stack_blocks_pick_and_place_3_1(self):  
+    def create_demos_stack_blocks_pick_and_place_3d_z90(self):  
+
+        self.env = make_env(self.config)
+        unsuccessful_num = 0
+
+        assert self.target_blocks_num >= self.tower_height
+
+        if self.demo_generate_type == 'subgoal_attention':     
+            subgoal_add_th = []    
+            last_th = 0.0
+            for i in range(self.tower_height):
+                subgoal_add_th.append(float(self.demo_generate_params[i])+last_th)
+                last_th = subgoal_add_th[-1]
+            subgoal_ratio = np.zeros(self.tower_height)
+
+        pbar = tqdm(total=int(self.demo_buffer_size),colour="green")
+        t = 0
+        while t<int(self.demo_buffer_size):
+            
+            ## Reset Env
+            while True:
+
+                try:
+                    o = self.env.reset_once()
+                    if self.env.init_state_valid():
+                        break
+                    else:
+                        tqdm.write('Init state is not valid. Repeat env reset.')
+                        time.sleep(0.1)
+                except:
+                    tqdm.write('Could not reset the environment. Repeat env reset.')
+                    time.sleep(1)
+            
+            
+
+            ## Compute order
+            target_index =  (0, 1, 2, 3)
+            target = o[[target_index[0],target_index[1],target_index[2],target_index[3]]]
+
+            blocks_init = []
+            dists = []
+            for j in range(1,self.target_blocks_num+1):
+                block_index =  (j * 4, j * 4 + 1, j * 4 + 2,j * 4 + 3)
+                block = o[[block_index[0],block_index[1],block_index[2],block_index[3]]]
+                dists.append(np.sum(np.square(target - block)))
+                blocks_init.append(block)         
+            
+            if self.demo_block_order == "dist_based":
+                blocks = []
+                for _ in range(self.target_blocks_num):
+                    index = np.argmin(dists)
+                    blocks.append(blocks_init[index])
+                    dists[index] = float('inf')
+            elif self.demo_block_order == "random":
+                print("Not implemented yet")
+            elif self.demo_block_order == "as_init":
+                blocks = blocks_init
+
+            ## Execute demo
+            ep_transitions = []
+            ret = 0
+            
+            for i in range(self.tower_height):
+                
+                a = np.hstack((blocks[i],target)) 
+                a[6] += 0.01 + 0.03 * i
+
+                o2, r, d, info = self.env.step(a)
+                ep_transitions.append((o, a, r, o2, d))
+                o = o2
+                ret += r
+
+                # try:
+                #     o2, r, d, info = self.env.step(a)
+                #     ep_transitions.append((o, a, r, o2, d))
+                #     o = o2
+                #     ret += r
+                # except:
+                #     tqdm.write("Error in simulation, this demonstration is not added")
+                #     ret = -1
+                #     break
+
+            if ret >= self.reward_scalor:
+                if self.demo_generate_type == 'normal':
+                    self.demo_buffer.store_episode_nstep(ep_transitions,self.n_step,self.gamma)
+                    t+=len(ep_transitions)
+                    pbar.update(len(ep_transitions))
+                elif self.demo_generate_type == 'subgoal_attention':
+                    randnum = random.uniform(0.0, 1.0)
+                    for j in range(self.tower_height):
+                        if randnum < subgoal_add_th[j]:
+                            self.demo_buffer.store_episode_nstep(ep_transitions[j:],self.n_step,self.gamma)
+                            subgoal_ratio[j] += 1
+                            break
+                    increment = len(ep_transitions[j:])
+                    t+=increment
+                    pbar.update(increment)
+                    
+
+            else:
+                unsuccessful_num += 1   
+                tqdm.write("The demonstration is not successful, thus it is not added | Num: " + str(unsuccessful_num) + " | Return: " + str(ret) +  " | Obs: " + str(o))    
+        
+        pbar.close()
+        
+        self.env.shuttdown()
+
+        if self.demo_generate_type == 'subgoal_attention':
+            subgoal_ratio = subgoal_ratio / np.sum(subgoal_ratio)
+            print("Subgoal ratio: " + str(subgoal_ratio))
+
+        self.logger.save_demos(self.demo_name,  self.demo_buffer)
+
+        # batch = self.demo_buffer.sample_batch(self.batch_size) 
+        # print(batch)
+        # print(self.demo_buffer.ptr)
+
+    def create_demos_stack_blocks_pick_and_place_3d_quat(self):  
 
         self.env = make_env(self.config)
         unsuccessful_num = 0
@@ -224,7 +339,7 @@ class Demo:
                 elif self.action_space == "pick_and_place_3d":
                     a = np.hstack((blocks[i],target)) 
                     a[5] += 0.01 + 0.03 * i
-                elif self.action_space == "pick_and_place_3_1d":
+                elif self.action_space == "pick_and_place_3d_quat":
                     a = np.hstack((blocks[i],target)) 
                     a[9] += 0.01 + 0.03 * i
 

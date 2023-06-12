@@ -166,7 +166,7 @@ def main():
         d = {'avg_return': avg_return, 'succes_rate': succes_rate, 'avg_episode_len': avg_episode_len, 'error_in_env': error_in_env, 'out_of_bounds': out_of_bounds}
         df = pd.DataFrame(data=d)
 
-        logger.save_test2(df)
+        logger.save_test2(df,config['environment']['name'])
 
         print(df)
 

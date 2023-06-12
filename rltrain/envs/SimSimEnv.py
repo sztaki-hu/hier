@@ -5,7 +5,8 @@ from pyquaternion import Quaternion
 #REWARD_TYPE_LIST = ['sparse','mse','envchange','subgoal']
 REWARD_TYPE_LIST = ['sparse','subgoal']
 TASK_TYPE_LIST = ['stack_blocks']
-ACTION_SPACE_LIST = ['pick_and_place_2d','pick_and_place_3d','pick_and_place_3_1d']
+ACTION_SPACE_LIST = ['pick_and_place_2d','pick_and_place_3d','pick_and_place_3d_quat','pick_and_place_3d_z90']
+STATE_SPACE_LIST = ["xyz","xyz_quat","xyz_z90"]
 
 class SimSimEnv:
     def __init__(self,config):
@@ -23,6 +24,7 @@ class SimSimEnv:
         self.task_params = self.config['environment']['task']['params']
         self.target_blocks_num = self.task_params[0]
         self.action_space = config['agent']['action_space']
+        self.state_space = config['environment']['state_space']
 
         self.subgoal_level = 0
         #self.desk_height = 0.765
@@ -32,11 +34,15 @@ class SimSimEnv:
         assert self.reward_shaping_type in REWARD_TYPE_LIST
         assert self.task_name in TASK_TYPE_LIST
         assert self.action_space in ACTION_SPACE_LIST
+        assert self.state_space in STATE_SPACE_LIST
 
-        if self.action_space == ("pick_and_place_2d" or "pick_and_place_3d"):   
+        if self.state_space == "xyz":   
             self.obs_period = 3
-        elif self.action_space == "pick_and_place_3_1d":
+        elif self.state_space == "xyz_quat":  
             self.obs_period = 7
+        elif self.state_space == "xyz_z90":   
+            self.obs_period = 4
+        
 
         self.reset()
 
@@ -48,7 +54,7 @@ class SimSimEnv:
     
     def reset(self):
         if self.task_name == 'stack_blocks':
-            if self.action_space == ("pick_and_place_2d" or "pick_and_place_3d"):              
+            if self.state_space == "xyz":             
                 obs = []
                 obs.append(0.25)
                 obs.append(0.0)
@@ -62,7 +68,7 @@ class SimSimEnv:
                 self.subgoal_level = 0
                 #print(self.observation)
                 return self.observation.copy()
-            elif self.action_space == "pick_and_place_3_1d":              
+            elif self.state_space == "xyz_quat":              
                 obs = []
                 obs.append(0.25)
                 obs.append(0.0)
@@ -91,6 +97,26 @@ class SimSimEnv:
                 self.subgoal_level = 0
                 #print(self.observation)
                 return self.observation.copy()
+            elif self.state_space == "xyz_z90":              
+                obs = []
+                obs.append(0.25)
+                obs.append(0.0)
+                obs.append(0.752)
+                obs.append(0.0)
+
+                for _ in range(self.task_params[0] + self.task_params[1]):
+                    block = np.random.uniform(low=self.boundary_min[:2], high=self.boundary_max[:2], size=(2))
+                    obs.append(block[0])
+                    obs.append(block[1])
+                    obs.append(0.765)
+
+                    z = np.random.uniform(low=-1.0, high=1.0, size=(1))[0]
+                    obs.append(z)
+
+                self.observation = np.asarray(obs)
+                self.subgoal_level = 0
+                #print(self.observation)
+                return self.observation.copy()
         else:
             self.observation = np.random.uniform(low=self.boundary_min, high=self.boundary_max, size=(self.obs_dim))
             return self.observation
@@ -114,7 +140,7 @@ class SimSimEnv:
                     self.observation[(i+1)*3:(i+2)*3] = a[3:6]
                     break
             o = self.observation.copy()
-        elif self.action_space == "pick_and_place_3_1d":
+        elif self.action_space == "pick_and_place_3d_quat":
             # Movement of the block
             r = 0
             for i in range(self.task_params[0] + self.task_params[1]):
@@ -138,6 +164,17 @@ class SimSimEnv:
 
                     break
             o = self.observation.copy()
+
+        elif self.action_space == "pick_and_place_3d_z90":
+            # Movement of the block
+            r = 0
+            for i in range(self.task_params[0] + self.task_params[1]):
+                block = self.observation[(i+1)*self.obs_period:(i+2)*self.obs_period]
+                if np.allclose(a[:self.obs_period], block, rtol=0.0, atol=0.01, equal_nan=False):
+                    self.observation[(i+1)*self.obs_period:(i+2)*self.obs_period] = a[self.obs_period:2*self.obs_period]
+                    break
+            o = self.observation.copy()
+
         # Get reward
         bonus = self.reward_shaping_subgoal_stack_blocks(o)  
         if self.subgoal_level == self.task_params[2]:
