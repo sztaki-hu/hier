@@ -110,7 +110,7 @@ class SimSimEnv:
                     obs.append(block[1])
                     obs.append(0.765)
 
-                    z = np.random.uniform(low=-1.0, high=1.0, size=(1))[0]
+                    z = np.random.uniform(low=self.boundary_min[3], high=self.boundary_max[3], size=(1))[0]
                     obs.append(z)
 
                 self.observation = np.asarray(obs)
@@ -207,29 +207,83 @@ class SimSimEnv:
 
     def reward_shaping_subgoal_stack_blocks(self,o):
 
-        target_index =  (0, 1, 2)
-        target = o[[target_index[0],target_index[1],target_index[2]]]
+        if self.obs_period == 3:
+            target_index =  (0, 1, 2)
+            target = o[[target_index[0],target_index[1],target_index[2]]]
 
-        blocks = []
-        #dists = []
-        for j in range(1,self.task_params[0]+1):
-            block_index =  (j * self.obs_period, j * self.obs_period + 1, j * self.obs_period + 2)
-            block = o[[block_index[0],block_index[1],block_index[2]]]
-            #dists.append(np.sum(np.square(target - block)))
-            blocks.append(block) 
+            blocks = []
+            #dists = []
+            for j in range(1,self.task_params[0]+1):
+                block_index =  (j * self.obs_period, j * self.obs_period + 1, j * self.obs_period + 2)
+                block = o[[block_index[0],block_index[1],block_index[2]]]
+                #dists.append(np.sum(np.square(target - block)))
+                blocks.append(block) 
+            
+            subsubgoal_pts = 0
+            for i in range(self.subgoal_level+1):        
+                target[2] = self.block_on_desk_z + i * self.block_size
+                for block in blocks:
+                    if np.allclose(target, block, rtol=0.00, atol=0.01, equal_nan=False):
+                        subsubgoal_pts += 1
+                        break
+            if subsubgoal_pts == self.subgoal_level + 1: 
+                subsubgoal_reached = True
+                self.subgoal_level += 1
+
+            return self.reward_bonus * self.subgoal_level
+
+        if self.obs_period == 4:
+            target_index =  (0, 1, 2, 3)
+            target = o[[target_index[0],target_index[1],target_index[2],target_index[3]]]
+
+            blocks = []
+            #dists = []
+            for j in range(1,self.task_params[0]+1):
+                block_index =  (j * self.obs_period, j * self.obs_period + 1, j * self.obs_period + 2, j * self.obs_period + 3)
+                block = o[[block_index[0],block_index[1],block_index[2],block_index[3]]]
+                #dists.append(np.sum(np.square(target - block)))
+                blocks.append(block) 
+            
+            subsubgoal_pts = 0
+            for i in range(self.subgoal_level+1):        
+                target[2] = self.block_on_desk_z + i * self.block_size
+                for block in blocks:
+                    if np.allclose(target, block, rtol=0.00, atol=0.01, equal_nan=False):
+                        subsubgoal_pts += 1
+                        break
+            if subsubgoal_pts == self.subgoal_level + 1: 
+                subsubgoal_reached = True
+                self.subgoal_level += 1
+                
+            return self.reward_bonus * self.subgoal_level
+
+        if self.obs_period == 7:
+            target_index =  (0, 1, 2, 3, 4, 5, 6)
+            target = o[[target_index[0],target_index[1],target_index[2],target_index[3],target_index[4],target_index[5],target_index[6]]]
+
+
+            blocks = []
+            #dists = []
+            for j in range(1,self.task_params[0]+1):
+                block_index =  (j * self.obs_period, j * self.obs_period + 1, j * self.obs_period + 2,j * self.obs_period + 3, j * self.obs_period + 4, j * self.obs_period + 5,  j * self.obs_period + 6)
+                block = o[[block_index[0],block_index[1],block_index[2],block_index[3],block_index[4],block_index[5],block_index[6]]]
+                #dists.append(np.sum(np.square(target - block)))
+                blocks.append(block) 
+            
+            for i in range(self.subgoal_level+1):
+                subsubgoal_reached = False
+                target[2] = self.block_on_desk_z + i * self.block_size
+                for block in blocks:
+                    if np.allclose(target, block, rtol=0.00, atol=0.01, equal_nan=False):
+                        subsubgoal_reached = True
+                        break
+                if subsubgoal_reached == False: 
+                    return 0
+            
+            self.subgoal_level += 1
+            return self.reward_bonus * self.subgoal_level
+
         
-        for i in range(self.subgoal_level+1):
-            subsubgoal_reached = False
-            target[2] = self.block_on_desk_z + i * self.block_size
-            for block in blocks:
-                if np.allclose(target, block, rtol=0.00, atol=0.01, equal_nan=False):
-                    subsubgoal_reached = True
-                    break
-            if subsubgoal_reached == False: 
-                return 0
-        
-        self.subgoal_level += 1
-        return self.reward_bonus * self.subgoal_level
 
     def init_state_valid(self):
         if self.task_name == "stack_blocks":
