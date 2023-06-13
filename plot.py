@@ -19,11 +19,13 @@ def create_folder(path):
         print(path + ' folder already exists!')
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--plotid", default="test2_01" ,help="Id of plot")
+parser.add_argument("--plotid", default="alphav2_01" ,help="Id of plot")
+parser.add_argument("--title", default="Effect of different alpha values" ,help="Title of the plots")
 parser.add_argument("--logdir", default="csv_to_plot" ,help="Path of the data folder")
 parser.add_argument("--outdir", default="plots" ,help="Path of the output folder")
 parser.add_argument("--taskname", default="stack_blocks_sac" ,help="Task name")
-parser.add_argument("--sim2sim", type=bool, default=True ,help="Task name")
+parser.add_argument("--sim2sim", type=bool, default=False ,help="Task name")
+parser.add_argument("--test2env", default="simsimv2" ,help="Name of test2 env")
 args = parser.parse_args()
 
 create_folder(os.path.join(current_dir, args.outdir))
@@ -54,22 +56,31 @@ exps = []
 # exps.append({"name": ["0325_F"], "seed_num":[3], "color": "purple", "plotname": "1 agent; uf = 6.0"})
 
 # ALPHA
-# exps.append({"name": ["0326_B"], "seed_num":[3], "color": "orange", "plotname": "1 agent fb: False; uf: 2.0; alpha: 0.1"})
-# exps.append({"name": ["0325_D"], "seed_num":[3], "color": "lime", "plotname": "1 agent fb: False; uf: 2.0; alpha: 0.2"})
-# exps.append({"name": ["0326_A"], "seed_num":[3], "color": "green", "plotname": "1 agent fb: True; uf: 2.0; alpha: 0.2"})
-# exps.append({"name": ["0326_C"], "seed_num":[3], "color": "blue", "plotname": "1 agent fb: False; uf: 2.0; alpha: 0.3"})
-# exps.append({"name": ["0326_D"], "seed_num":[3], "color": "magenta", "plotname": "1 agent fb: False; uf: 2.0; alpha: 0.4"})
+exps.append({"name": ["0326_B"], "seed_num":[3], "color": ["orange","orange"], "plotname": "1 agent fb: False; uf: 2.0; alpha: 0.1"})
+exps.append({"name": ["0325_D"], "seed_num":[3], "color": ["lime","lime"], "plotname": "1 agent fb: False; uf: 2.0; alpha: 0.2"})
+exps.append({"name": ["0326_A"], "seed_num":[3], "color": ["green","green"], "plotname": "1 agent fb: True; uf: 2.0; alpha: 0.2"})
+exps.append({"name": ["0326_C"], "seed_num":[3], "color": ["blue","blue"], "plotname": "1 agent fb: False; uf: 2.0; alpha: 0.3"})
+exps.append({"name": ["0326_D"], "seed_num":[3], "color": ["magenta","magenta"], "plotname": "1 agent fb: False; uf: 2.0; alpha: 0.4"})
 
 # DEMO
-# exps.append({"name": ["0325_D"], "seed_num":[3], "color": "orange", "plotname": "1 agent; 0325_D"})
-# exps.append({"name": ["0326_E_01","0326_E_02"], "seed_num":[3,3], "color": "green", "plotname": "1 agent; 0326_E"})
-# exps.append({"name": ["0326_F_01","0326_F_02"], "seed_num":[3,3], "color": "blue", "plotname": "1 agent; 0326_F"})
-# exps.append({"name": ["0326_G_01","0326_G_02"], "seed_num":[3,3], "color": "magenta", "plotname": "1 agent; 0326_G"})
+# exps.append({"name": ["0325_D"], "seed_num":[3], "color": ["orange","orange"], "plotname": "1 agent; 0325_D"})
+# exps.append({"name": ["0326_E_01","0326_E_02"], "seed_num":[3,3], "color": ["green","green"], "plotname": "1 agent; 0326_E"})
+# exps.append({"name": ["0326_F_01","0326_F_02"], "seed_num":[3,3], "color": ["blue","blue"], "plotname": "1 agent; 0326_F"})
+# exps.append({"name": ["0326_G_01","0326_G_02"], "seed_num":[3,3], "color": ["magenta","magenta"], "plotname": "1 agent; 0326_G"})
 
 # DEMO MODE
-exps.append({"name": ["0420_A"], "seed_num":[1], "color": ["orange","red"], "plotname": "1 agent; 0420_A"})
+# exps.append({"name": ["0420_A"], "seed_num":[1], "color": ["orange","red"], "plotname": "1 agent; 0420_A"})
 # exps.append({"name": ["0420_B"], "seed_num":[3], "color": ["green","lime"], "plotname": "1 agent; 0420_B"})
 # exps.append({"name": ["0420_C"], "seed_num":[3], "color": ["blue","cyan"], "plotname": "1 agent; 0420_C"})
+
+# MULTI-AGENT
+# exps.append({"name": ["05_15_A"], "seed_num":[3], "color": ["violet","violet"], "plotname": "3 agents 3 buffers; 0515_A"})
+# exps.append({"name": ["0516_A"], "seed_num":[3], "color": ["blue","cyan"], "plotname": "1 agent + fallback; 0516_A"})
+#exps.append({"name": ["0517_A"], "seed_num":[3], "color": ["green","lime"], "plotname": "1 agent; 0517_A"})
+
+# exps.append({"name": ["0518_A"], "seed_num":[3], "color": ["lime","lime"], "plotname": "1 agent; 0518_A"})
+# exps.append({"name": ["0518_B"], "seed_num":[3], "color": ["cyan","cyan"], "plotname": "1 agent + fallback; 0518_B"})
+# exps.append({"name": ["0518_C"], "seed_num":[3], "color": ["magenta","magenta"], "plotname": "3 agents 3 buffers; ; 0518_C"})
 
 # exps.append({"name": ["X_0515_A_test"], "seed_num":[1], "color": "blue", "plotname": "X_0515_A_test"})
 # exps.append({"name": ["X_0515_B_test"], "seed_num":[1], "color": "orange", "plotname": "X_0515_B_test"})
@@ -96,7 +107,7 @@ if args.sim2sim:
         running_id = 0
         for j in range(len(exps[i]['seed_num'])):
             for k in range(exps[i]['seed_num'][j]):
-                graph_csv_name = "test_epochs_" + exps[i]['name'][j] +  "_" + str(k) + ".csv"
+                graph_csv_name = "test_epochs_" + exps[i]['name'][j] +  "_" + str(k) + "_" + args.test2env + ".csv"
                 path = os.path.join(current_dir, args.logdir,graph_csv_name)
                 pivot = pd.read_csv(path)
 
@@ -151,7 +162,7 @@ print(test_ret.head())
 
 # Separate plotting ########################## 
 
-fig, _ = plt.subplots(figsize=(16,6))
+fig, _ = plt.subplots(figsize=(10,8))
 
 for i in range(len(exps)):
     running_id = 0
@@ -181,14 +192,14 @@ for i in range(len(exps)):
 plt.legend(title='Labels', bbox_to_anchor=(1, 1.01), loc='upper left')
 plt.xlabel("Step (x1000)")
 plt.ylabel("Average test return")
-plt.title("Test returns")
+plt.title(args.title)
 figname = args.plotid + '_test_res_separate.png'
 plt.savefig(os.path.join(current_dir, args.outdir, figname), bbox_inches='tight')
 plt.show()
 
 # SD plot ###################################
 
-fig, _ = plt.subplots(figsize=(14,6))
+fig, _ = plt.subplots(figsize=(10,8))
 
 test_ret_test = test_ret[test_ret["Type"] == "test"] 
 sns.lineplot(data=test_ret_test, x="Step", y="Value", hue="ExpName", errorbar=('ci', 50), palette=exp_test_color_list)
@@ -200,7 +211,7 @@ sns.lineplot(data=test_ret_test2, x="Step", y="Value", hue="ExpName", errorbar=(
 plt.legend(title='Labels', bbox_to_anchor=(1, 1.01), loc='upper left')
 plt.xlabel("Step (x1000)")
 plt.ylabel("Average test return")
-plt.title("Test returns with sd")
+plt.title(args.title + " with sd")
 figname = args.plotid + '_test_res_std.png'
 plt.savefig(os.path.join(current_dir, args.outdir, figname),bbox_inches='tight')
 plt.show()
