@@ -180,7 +180,7 @@ class Logger:
             elif self.action_space == "pick_and_place_3d_quat":
                 self.config['agent']['boundary_min'] = [0.1,-0.3,0.76,0,0,0,0,0.1,-0.3,0.76,0,0,0,0]
             elif self.action_space == "pick_and_place_3d_z90":
-                self.config['agent']['boundary_min'] = [0.1,-0.3,0.76,-1.0,0.1,-0.3,0.76,-1.0]
+                self.config['agent']['boundary_min'] = [0.1,-0.3,0.76,0.0,0.1,-0.3,0.76,0.0]
         
         if self.config['agent']['boundary_max'] == "auto":
             if self.action_space == "pick_and_place_2d":

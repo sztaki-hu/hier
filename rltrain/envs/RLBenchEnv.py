@@ -248,16 +248,13 @@ class RLBenchEnv:
                     quat = item.get_quaternion()
                     r = R.from_quat(quat)
                     obj_deg = r.as_euler('zyx', degrees=True)[0]
-                    obj_deg_mod90 = obj_deg % 90
-                    obj_deg -= obj_deg_mod90 * 90
-                    print(obj_deg)
+                    obj_deg += 180      
+                    obj_deg = obj_deg % 90
                     obj_rad = math.radians(obj_deg)
-                    obj_sin2x = math.sin(obj_rad)
-                    obs.append(np.hstack([item.get_position(),obj_sin2x]))       
+                    obj_sinx = math.sin(obj_rad)
+                    obs.append(np.hstack([item.get_position(),obj_sinx]))       
 
             obs = np.hstack(obs)
-            print(obs)
-            assert False
             return obs
     
     def model2robot_pick_and_place_2d(self,a):
