@@ -226,11 +226,13 @@ class SimSimEnv:
                     if np.allclose(target, block, rtol=0.00, atol=0.01, equal_nan=False):
                         subsubgoal_pts += 1
                         break
+                if i >= subsubgoal_pts: break
             if subsubgoal_pts == self.subgoal_level + 1: 
                 subsubgoal_reached = True
                 self.subgoal_level += 1
-
-            return self.reward_bonus * self.subgoal_level
+                return self.reward_bonus * self.subgoal_level
+            
+            return 0
 
         if self.obs_period == 4:
             target_index =  (0, 1, 2, 3)
@@ -251,11 +253,13 @@ class SimSimEnv:
                     if np.allclose(target, block, rtol=0.00, atol=0.01, equal_nan=False):
                         subsubgoal_pts += 1
                         break
+                if i >= subsubgoal_pts: break
             if subsubgoal_pts == self.subgoal_level + 1: 
                 subsubgoal_reached = True
                 self.subgoal_level += 1
-                
-            return self.reward_bonus * self.subgoal_level
+                return self.reward_bonus * self.subgoal_level
+
+            return 0
 
         if self.obs_period == 7:
             target_index =  (0, 1, 2, 3, 4, 5, 6)
@@ -270,18 +274,23 @@ class SimSimEnv:
                 #dists.append(np.sum(np.square(target - block)))
                 blocks.append(block) 
             
+            subsubgoal_pts = 0
             for i in range(self.subgoal_level+1):
-                subsubgoal_reached = False
                 target[2] = self.block_on_desk_z + i * self.block_size
                 for block in blocks:
                     if np.allclose(target, block, rtol=0.00, atol=0.01, equal_nan=False):
-                        subsubgoal_reached = True
+                        subsubgoal_pts += 1
                         break
-                if subsubgoal_reached == False: 
-                    return 0
-            
-            self.subgoal_level += 1
-            return self.reward_bonus * self.subgoal_level
+                if i >= subsubgoal_pts: break
+                
+
+            if subsubgoal_pts == self.subgoal_level + 1: 
+                subsubgoal_reached = True
+                self.subgoal_level += 1
+                return self.reward_bonus * self.subgoal_level
+
+            return 0
+
 
         
 
