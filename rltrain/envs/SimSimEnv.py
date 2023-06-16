@@ -42,7 +42,7 @@ class SimSimEnv:
             self.obs_period = 7
         elif self.state_space == "xyz_z90":   
             self.obs_period = 4
-        
+
 
         self.reset()
 

@@ -143,7 +143,6 @@ class RLBenchEnv:
             o, r, d, info = self.task_env.step(a)    
         elif self.action_space == "pick_and_place_2d":
             poses = self.model2robot_pick_and_place_2d(a_model)
-            o, r, d, info = self.execute_path(poses)  
         elif self.action_space == "pick_and_place_3d":
             poses = self.model2robot_pick_and_place_3d(a_model)    
         elif self.action_space == "pick_and_place_3d_quat":
@@ -247,10 +246,11 @@ class RLBenchEnv:
                 for item in self.task_env._scene.task._observation:
                     quat = item.get_quaternion()
                     r = R.from_quat(quat)
-                    obj_deg = r.as_euler('zyx', degrees=True)[0]
-                    obj_deg += 180      
-                    obj_deg = obj_deg % 90
-                    obj_rad = math.radians(obj_deg)
+                    obj_rad = r.as_euler('zyx', degrees=False)[0]
+                    
+                    obj_rad = abs(obj_rad)
+                    if obj_rad > (math.pi / 2): obj_rad = math.pi - obj_rad
+                    
                     obj_sinx = math.sin(obj_rad)
                     obs.append(np.hstack([item.get_position(),obj_sinx]))       
 

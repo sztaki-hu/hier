@@ -155,8 +155,6 @@ class Logger:
         if self.config['environment']['act_dim'] == "auto":
             if self.action_space == "pick_and_place_2d":
                 self.config['environment']['act_dim'] = 4
-            elif self.action_space == "pick_and_place_2d_z90":
-                self.config['environment']['act_dim'] = 6
             elif self.action_space == "pick_and_place_3d":
                 self.config['environment']['act_dim'] = 6
             elif self.action_space == "pick_and_place_3d_quat":
@@ -173,8 +171,6 @@ class Logger:
         if self.config['agent']['boundary_min'] == "auto":
             if self.action_space == "pick_and_place_2d":
                 self.config['agent']['boundary_min'] = [0.1,-0.3,0.1,-0.3]
-            elif self.action_space == "pick_and_place_2d_z90":
-                self.config['agent']['boundary_min'] = [0.1,-0.3,-1.0,0.1,-0.3,-1.0]
             elif self.action_space == "pick_and_place_3d":
                 self.config['agent']['boundary_min'] = [0.1,-0.3,0.76,0.1,-0.3,0.76]
             elif self.action_space == "pick_and_place_3d_quat":
