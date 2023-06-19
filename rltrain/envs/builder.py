@@ -1,4 +1,4 @@
-ENVS = ['rlbench', 'simsim','simsimv2','gym']
+ENVS = ['rlbench', 'simsim','simsimv2','gym','rlbenchjoint']
 
 def make_env(config):
 
@@ -18,3 +18,6 @@ def make_env(config):
     elif env_name == 'gym':
         from rltrain.envs.Gym import Gym
         return Gym(config)
+    elif env_name == 'rlbenchjoint':
+        from rltrain.envs.RLBenchEnvJoint import RLBenchEnvJoint
+        return RLBenchEnvJoint(config)

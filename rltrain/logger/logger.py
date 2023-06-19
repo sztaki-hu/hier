@@ -140,6 +140,8 @@ class Logger:
         if self.config['environment']['obs_dim'] == "auto":
             if self.task_name == "MountainCarContinuous-v0":
                 self.config['environment']['obs_dim'] = 2
+            elif self.task_name == "reach_target_no_distractors":
+                self.config['environment']['obs_dim'] = 3
             elif self.task_name == "stack_blocks":
                 if self.state_space == "xyz":
                     self.config['environment']['obs_dim'] = 3 + self.task_params[0] * 3 + self.task_params[1] * 3
@@ -153,7 +155,12 @@ class Logger:
             self.print_logfile("Obs dim is computed: " + str(self.config['environment']['obs_dim']))
 
         if self.config['environment']['act_dim'] == "auto":
-            if self.task_name == "MountainCarContinuous-v0":
+            if self.config['environment']['name'] == "rlbenchjoint":
+                if self.action_space == "joint":
+                    self.config['environment']['act_dim'] = 6
+                elif self.action_space == "jointgripper":
+                    self.config['environment']['act_dim'] = 7
+            elif self.task_name == "MountainCarContinuous-v0":
                 self.config['environment']['act_dim'] = 1
             elif self.task_name == "stack_blocks":
                 if self.action_space == "pick_and_place_2d":
@@ -170,7 +177,12 @@ class Logger:
             self.print_logfile("Act dim is computed: " + str(self.config['environment']['act_dim']))
         
         if self.config['agent']['boundary_min'] == "auto":
-            if self.task_name == "MountainCarContinuous-v0":
+            if self.config['environment']['name'] == "rlbenchjoint":
+                if self.action_space == "joint":
+                    self.config['agent']['boundary_min'] = [-1.0,-1.0,-1.0,-1.0,-1.0,-1.0]
+                elif self.action_space == "jointgripper":
+                    self.config['agent']['boundary_min'] = [-1.0,-1.0,-1.0,-1.0,-1.0,-1.0,0.0]
+            elif self.task_name == "MountainCarContinuous-v0":
                 self.config['agent']['boundary_min'] = [-1.0]
             elif self.task_name == "stack_blocks":
                 if self.action_space == "pick_and_place_2d":
@@ -183,7 +195,12 @@ class Logger:
                     self.config['agent']['boundary_min'] = [0.1,-0.3,0.76,0.0,0.1,-0.3,0.76,0.0]
         
         if self.config['agent']['boundary_max'] == "auto":
-            if self.task_name == "MountainCarContinuous-v0":
+            if self.config['environment']['name'] == "rlbenchjoint":
+                if self.action_space == "joint":
+                    self.config['agent']['boundary_max'] = [1.0,1.0,1.0,1.0,1.0,1.0]
+                elif self.action_space == "jointgripper":
+                    self.config['agent']['boundary_max'] = [1.0,1.0,1.0,1.0,1.0,1.0,1.0]
+            elif self.task_name == "MountainCarContinuous-v0":
                 self.config['agent']['boundary_max'] = [1.0]
             elif self.task_name == "stack_blocks":
                 if self.action_space == "pick_and_place_2d":
