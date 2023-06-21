@@ -48,20 +48,99 @@ class Demo:
         self.demo_buffer = ReplayBuffer(obs_dim=self.obs_dim, act_dim=self.act_dim, size=self.demo_buffer_size)
 
     def create_demos(self):  
+        
+        # RLBENCH JOINT
+        if self.config['environment']['name'] == "rlbenchjoint":
+            if self.task_name == "reach_target_no_distractors":
+                if self.action_space == "joint":
+                    self.create_demo_reach_joint()
+        
+        # GYM
+        elif self.config['environment']['name'] == "gym":
+            if self.task_name == "MountainCarContinuous-v0":
+                self.create_demo_MountainCarContinuous()
+            elif self.task_name == "InvertedPendulum-v4":
+                self.create_demo_InvertedPendulum()
 
-        if self.task_name == "reach_target_no_distractors":
-            if self.action_space == "joint":
-                self.create_demo_reach_joint()
-        if self.task_name == "stack_blocks":
-            if (self.action_space == "pick_and_place_2d") or (self.action_space == "pick_and_place_3d"):
-                self.create_demos_stack_blocks_pick_and_place()
-            elif self.action_space == "pick_and_place_3d_quat":
-                self.create_demos_stack_blocks_pick_and_place_3d_quat()
-            elif self.action_space == "pick_and_place_3d_z90":        
-                self.create_demos_stack_blocks_pick_and_place_3d_z90()
-        elif self.task_name == "MountainCarContinuous-v0":
-            self.create_demo_MountainCarContinuous()
-    
+        # RLBENCH
+        elif self.config['environment']['name'] == "rlbench":       
+            if self.task_name == "stack_blocks":
+                if (self.action_space == "pick_and_place_2d") or (self.action_space == "pick_and_place_3d"):
+                    self.create_demos_stack_blocks_pick_and_place()
+                elif self.action_space == "pick_and_place_3d_quat":
+                    self.create_demos_stack_blocks_pick_and_place_3d_quat()
+                elif self.action_space == "pick_and_place_3d_z90":        
+                    self.create_demos_stack_blocks_pick_and_place_3d_z90()
+        
+    def create_demo_InvertedPendulum(self):
+        self.env = make_env(self.config)
+
+        pbar = tqdm(total=int(self.demo_buffer_size),colour="green")
+        t = 0
+        unsuccessful_num = 0
+        while t<int(self.demo_buffer_size):
+
+            ep_transitions = []
+            ret = 0
+
+            ## Reset Env
+            while True:
+
+                try:
+                    o = self.env.reset_once()
+                    if self.env.init_state_valid():
+                        break
+                    else:
+                        tqdm.write('Init state is not valid. Repeat env reset.')
+                        time.sleep(0.1)
+                except:
+                    tqdm.write('Could not reset the environment. Repeat env reset.')
+                    time.sleep(1)
+            
+            a = np.array([1.0])
+
+            d = 0
+            for _ in range(self.max_ep_len):
+
+                # if self.env_name == "gym" and self.env_headless == False:
+                #     self.env.render()
+                    #time.sleep(0.1)
+
+                a = np.array([-50.0 * o[0] - 0.0 * o[1] - 50.0 * o[2] - 0.0 * o[3]])
+                a = 3 * np.tanh(a)
+                print(a)
+                
+                try:
+                    o2, r, d, info = self.env.step(a)
+                    ep_transitions.append((o, a, r, o2, d))
+                    o = o2
+                    if d == 1:
+                        break
+                except:
+                    tqdm.write("Error in simulation, this demonstration is not added")
+                    d = 0
+                    break
+
+            if d == 1:
+                if len(ep_transitions) == self.max_ep_len:    
+                    self.demo_buffer.store_episode_nstep(ep_transitions,self.n_step,self.gamma)
+                    t+=len(ep_transitions)
+                    pbar.update(len(ep_transitions))
+                self.demo_buffer.store_episode_nstep(ep_transitions,self.n_step,self.gamma)
+                t+=len(ep_transitions)
+                pbar.update(len(ep_transitions))
+                print("#### Avg len: " + str(len(ep_transitions)))
+                
+            else:
+                unsuccessful_num += 1   
+                tqdm.write("The demonstration is not successful, thus it is not added | Num: " + str(unsuccessful_num) + " | Return: " + str(ret) +  " | Obs: " + str(o))    
+        
+        pbar.close()
+        
+        self.env.shuttdown()
+
+        self.logger.save_demos(self.demo_name,  self.demo_buffer)
+
     def create_demo_reach_joint(self):
 
         self.env = make_env(self.config)

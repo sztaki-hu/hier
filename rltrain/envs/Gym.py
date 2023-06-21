@@ -3,6 +3,7 @@ import gym
 
 
 REWARD_TYPE_LIST = ['sparse','energy']
+TASK_LIST = ['MountainCarContinuous-v0','InvertedPendulum-v4']
 
 class Gym:
     def __init__(self,config):
@@ -23,12 +24,13 @@ class Gym:
         self.max_ep_len = config['sampler']['max_ep_len'] 
 
         assert self.reward_shaping_type in REWARD_TYPE_LIST
+        assert self.task_name in TASK_LIST
 
         if self.config['environment']['headless']:
             self.env = gym.make(self.task_name)
         else:
-            # self.env = gym.make(self.task_name,render_mode="human") new version
-            self.env = gym.make(self.task_name) # old gym version 0.21.0
+            self.env = gym.make(self.task_name,render_mode="human") #new version
+            #self.env = gym.make(self.task_name) # old gym version 0.21.0
         self.env._max_episode_steps = self.max_ep_len
 
         self.reset()
@@ -53,18 +55,21 @@ class Gym:
     def step(self,action):
 
         # New gym version
-        # o, r, terminated, truncated, info = self.env.step(action)
-        # d = terminated or truncated
+        o, r, terminated, truncated, info = self.env.step(action)
+        d = terminated or truncated
 
         # Old gym version (0.21.0)
-        o, r, d, info = self.env.step(action)
+        #o, r, d, info = self.env.step(action)
 
         if self.reward_shaping_type == 'sparse':
             r = r * self.reward_scalor
         elif self.reward_shaping_type == 'energy':
-            energy = 9.81 * abs(o[0]) + 0.5 * o[1]**2 # assuming y is close to abs(x=o[0])
-            goal_bonus = self.reward_bonus if r > 0 else 0
-            r = r * self.reward_scalor + energy + goal_bonus
+            if self.task_name == "MountainCarContinuous-v0":
+                energy = 9.81 * abs(o[0]) + 0.5 * o[1]**2 # assuming y is close to abs(x=o[0])
+                goal_bonus = self.reward_bonus if r > 0 else 0
+                r = r * self.reward_scalor + energy + goal_bonus
+            else:
+                assert False
 
         return o, r, d, info
     
