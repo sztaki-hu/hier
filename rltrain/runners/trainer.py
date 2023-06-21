@@ -338,7 +338,7 @@ class Trainer:
                 while True:
                     msg = self.handle_messages(test2train,sample2train)
                     if msg is not None:
-                        if len(msg) == 4:
+                        if len(msg) == 5:
                             if msg[0] == "test" and msg[1] == 1 and msg[2] is not None and msg[3] is not None and msg[4] is not None:
                                 avg_test_return_np[int(msg[2])] = msg[3]
                                 avg_ep_len_np[int(msg[2])] = msg[4]
@@ -466,10 +466,3 @@ class Trainer:
                         check_agents_list.append(agents_equal)
 
         return check_agents_list
-
-
-
-        
-
-            
-               
