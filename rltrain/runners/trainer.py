@@ -156,7 +156,7 @@ class Trainer:
                     message = "[Test] AVG test return: " + str(epoch_test) + ". epoch ("+ str(test_t) + " transitions) | Agent id:" + str(agent_id) + " | Avg return: " + str(avg_test_return) + " | succes_rate: " + str(succes_rate) + " | avg episode len: " + str(avg_episode_len) + " | env error rate: " + str(test_env_error) + " | out of bound rate: " +str(test_out_of_bound)
                     tqdm.write("[info]: " + message)  
                     self.logger.print_logfile(message,level = "info", terminal = False)  
-            msg = ('test',data['code'],avg_test_return,agent_id)
+            msg = ('test',data['code'],agent_id,avg_test_return,avg_episode_len)
                 
             
         elif sample2train.empty() == False:
@@ -333,14 +333,16 @@ class Trainer:
                 
                 avg_test_return_np = np.zeros(agent_num)
                 avg_test_return_np_bool = np.zeros(agent_num)   
+                avg_ep_len_np = np.zeros(agent_num)
                 
                 while True:
                     msg = self.handle_messages(test2train,sample2train)
                     if msg is not None:
                         if len(msg) == 4:
-                            if msg[0] == "test" and msg[1] == 1 and msg[2] is not None and msg[3] is not None:
-                                avg_test_return_np[int(msg[3])] = msg[2]
-                                avg_test_return_np_bool[int(msg[3])] = 1.0
+                            if msg[0] == "test" and msg[1] == 1 and msg[2] is not None and msg[3] is not None and msg[4] is not None:
+                                avg_test_return_np[int(msg[2])] = msg[3]
+                                avg_ep_len_np[int(msg[2])] = msg[4]
+                                avg_test_return_np_bool[int(msg[2])] = 1.0
                                 if np.all(avg_test_return_np_bool == 1.0):
                                     break
                     time.sleep(0.1)

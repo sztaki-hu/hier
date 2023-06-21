@@ -71,6 +71,7 @@ class Tester:
 
         avg_return_np = np.zeros(self.agent_num)
         succes_rate_np = np.zeros(self.agent_num)
+        avg_episode_len_np = np.zeros(self.agent_num)
     
         epochs = np.zeros(self.agent_num)
         epoch = 1
@@ -98,6 +99,7 @@ class Tester:
                     avg_return, succes_rate, avg_episode_len, error_in_env, out_of_bounds = self.test_v2(max_return)
                     avg_return_np[agent_id] = avg_return
                     succes_rate_np[agent_id] = succes_rate
+                    avg_episode_len_np[agent_id] = avg_episode_len
                     data = {'code': 1, 'agent_id': agent_id, 'avg_return': avg_return, 'succes_rate': succes_rate,'error_in_env': error_in_env, 'avg_episode_len': avg_episode_len, 'out_of_bounds':out_of_bounds, 'epoch': epoch, 'description':'Average test result'}
                     test2train.put(data)
 
@@ -107,6 +109,7 @@ class Tester:
                 t = epoch * self.steps_per_epoch 
                 for i in range(self.agent_num):
                     self.logger.tb_writer_add_scalar("test/test_ret_"+str(i), avg_return_np[i], t) 
+                    self.logger.tb_writer_add_scalar("test/test_ep_len_"+str(i), avg_episode_len_np[i], t)
                     if succes_rate is not None: self.logger.tb_writer_add_scalar("test/test_success_"+str(i), succes_rate_np[i], t)
                 epoch += 1
 
@@ -286,7 +289,6 @@ class Tester:
 
         return avg_return_list, succes_rate_list, avg_episode_len_list, error_in_env_list, out_of_bounds_list
 
-
     def display_test(self, num_display_episode):
 
         avg_return = -1
@@ -318,7 +320,7 @@ class Tester:
                 # Take deterministic actions at test time 
                 try:
                     a = self.agent.get_action(o, True)
-                    print(a)
+                    #print(a)
                     o, r, d, info = self.env.step(a)
                 except:
                     tqdm.write('[Test]: Error  simulation, thus reseting the environment')
