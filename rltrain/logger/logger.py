@@ -149,6 +149,8 @@ class Logger:
                     self.config['environment']['obs_dim'] = 2
                 elif self.task_name == "InvertedPendulum-v4":
                     self.config['environment']['obs_dim'] = 4
+                elif self.task_name == "InvertedDoublePendulum-v4":
+                    self.config['environment']['obs_dim'] = 11
             # RLBENCH
             elif self.config['environment']['name'] == "rlbench":
                 if self.task_name == "stack_blocks":
@@ -177,6 +179,9 @@ class Logger:
                     self.config['environment']['act_dim'] = 1
                 elif self.task_name == "InvertedPendulum-v4":
                     self.config['environment']['act_dim'] = 1
+                elif self.task_name == 'InvertedDoublePendulum-v4':
+                    self.config['environment']['act_dim'] = 1
+                    
             # RLBENCH
             elif self.config['environment']['name'] == "rlbench":
                 if self.task_name == "stack_blocks":
@@ -207,6 +212,8 @@ class Logger:
                     self.config['agent']['boundary_min'] = [-1.0]
                 elif self.task_name == "InvertedPendulum-v4":
                     self.config['agent']['boundary_min'] = [-3.0]
+                elif self.task_name == "InvertedDoublePendulum-v4":
+                    self.config['agent']['boundary_min'] = [-1.0]
             # RLBENCH
             elif self.config['environment']['name'] == "rlbench":
                 if self.task_name == "stack_blocks":
@@ -233,6 +240,8 @@ class Logger:
                     self.config['agent']['boundary_max'] = [1.0]
                 elif self.task_name == "InvertedPendulum-v4":
                     self.config['agent']['boundary_max'] = [3.0]
+                elif self.task_name == "InvertedDoublePendulum-v4":
+                    self.config['agent']['boundary_max'] = [1.0]
             # RLBENCH
             elif self.config['environment']['name'] == "rlbench":
                 if self.task_name == "stack_blocks":

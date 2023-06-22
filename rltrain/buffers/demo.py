@@ -45,6 +45,10 @@ class Demo:
         self.env_name = config['environment']['name']
         self.env_headless = self.config['environment']['headless']
 
+        print(self.obs_dim)
+        print(self.act_dim)
+        print(self.demo_buffer_size)
+
         self.demo_buffer = ReplayBuffer(obs_dim=self.obs_dim, act_dim=self.act_dim, size=self.demo_buffer_size)
 
     def create_demos(self):  
@@ -60,7 +64,9 @@ class Demo:
             if self.task_name == "MountainCarContinuous-v0":
                 self.create_demo_MountainCarContinuous()
             elif self.task_name == "InvertedPendulum-v4":
-                self.create_demo_InvertedPendulum()
+                self.create_demo_InvertedPendulum(scalor=3) #only for testing (generates random moves)
+            elif self.task_name == "InvertedDoublePendulum-v4":
+                self.create_demo_InvertedPendulum(scalor=1) #only for testing (generates random moves)
 
         # RLBENCH
         elif self.config['environment']['name'] == "rlbench":       
@@ -72,7 +78,7 @@ class Demo:
                 elif self.action_space == "pick_and_place_3d_z90":        
                     self.create_demos_stack_blocks_pick_and_place_3d_z90()
         
-    def create_demo_InvertedPendulum(self):
+    def create_demo_InvertedPendulum(self, scalor=1):
         self.env = make_env(self.config)
 
         pbar = tqdm(total=int(self.demo_buffer_size),colour="green")
@@ -96,8 +102,6 @@ class Demo:
                 except:
                     tqdm.write('Could not reset the environment. Repeat env reset.')
                     time.sleep(1)
-            
-            a = np.array([1.0])
 
             d = 0
             for _ in range(self.max_ep_len):
@@ -107,8 +111,8 @@ class Demo:
                     #time.sleep(0.1)
 
                 a = np.array([-50.0 * o[0] - 0.0 * o[1] - 50.0 * o[2] - 0.0 * o[3]])
-                a = 3 * np.tanh(a)
-                print(a)
+                a = scalor * np.tanh(a)
+                #print(a)
                 
                 try:
                     o2, r, d, info = self.env.step(a)

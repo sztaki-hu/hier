@@ -3,7 +3,7 @@ import gym
 
 
 REWARD_TYPE_LIST = ['sparse','energy']
-TASK_LIST = ['MountainCarContinuous-v0','InvertedPendulum-v4']
+TASK_LIST = ['MountainCarContinuous-v0','InvertedPendulum-v4','InvertedDoublePendulum-v4']
 
 class Gym:
     def __init__(self,config):
@@ -45,8 +45,8 @@ class Gym:
 
     def reset(self):
         o, info = self.env.reset()
-        if self.task_name == "MountainCarContinuous-v0": # for old gym version (0.21.0)
-            o = np.array([o,0]) 
+        # if self.task_name == "MountainCarContinuous-v0": # for old gym version (0.21.0)
+        #     o = np.array([o,0]) 
         return o           
 
     def init_state_valid(self):
