@@ -30,6 +30,8 @@ class Demo:
 
         self.obs_dim = config['environment']['obs_dim']
         self.act_dim = config['environment']['act_dim']
+        self.boundary_min = np.array(config['agent']['boundary_min'])[:self.act_dim]
+        self.boundary_max = np.array(config['agent']['boundary_max'])[:self.act_dim]
         self.action_space = config['agent']['action_space']
         self.gamma = config['agent']['gamma'] 
         self.n_step = config['agent']['n_step'] 
@@ -64,9 +66,11 @@ class Demo:
             if self.task_name == "MountainCarContinuous-v0":
                 self.create_demo_MountainCarContinuous()
             elif self.task_name == "InvertedPendulum-v4":
-                self.create_demo_InvertedPendulum(scalor=3) #only for testing (generates random moves)
+                self.create_random_actions()
             elif self.task_name == "InvertedDoublePendulum-v4":
-                self.create_demo_InvertedPendulum(scalor=1) #only for testing (generates random moves)
+                self.create_random_actions()
+            elif self.task_name == 'Ant-v4':
+                self.create_random_actions()
 
         # RLBENCH
         elif self.config['environment']['name'] == "rlbench":       
@@ -78,7 +82,7 @@ class Demo:
                 elif self.action_space == "pick_and_place_3d_z90":        
                     self.create_demos_stack_blocks_pick_and_place_3d_z90()
         
-    def create_demo_InvertedPendulum(self, scalor=1):
+    def create_random_actions(self):
         self.env = make_env(self.config)
 
         pbar = tqdm(total=int(self.demo_buffer_size),colour="green")
@@ -106,13 +110,7 @@ class Demo:
             d = 0
             for _ in range(self.max_ep_len):
 
-                # if self.env_name == "gym" and self.env_headless == False:
-                #     self.env.render()
-                    #time.sleep(0.1)
-
-                a = np.array([-50.0 * o[0] - 0.0 * o[1] - 50.0 * o[2] - 0.0 * o[3]])
-                a = scalor * np.tanh(a)
-                #print(a)
+                a = np.random.uniform(low=self.boundary_min, high=self.boundary_max, size=self.act_dim)
                 
                 try:
                     o2, r, d, info = self.env.step(a)
@@ -133,7 +131,7 @@ class Demo:
                 self.demo_buffer.store_episode_nstep(ep_transitions,self.n_step,self.gamma)
                 t+=len(ep_transitions)
                 pbar.update(len(ep_transitions))
-                print("#### Avg len: " + str(len(ep_transitions)))
+                #print("#### Avg len: " + str(len(ep_transitions)))
                 
             else:
                 unsuccessful_num += 1   
