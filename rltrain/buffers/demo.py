@@ -69,6 +69,8 @@ class Demo:
                 self.create_random_actions()
             elif self.task_name == "InvertedDoublePendulum-v4":
                 self.create_random_actions()
+            elif self.task_name == "HalfCheetah-v4":
+                self.create_random_actions()
             elif self.task_name == 'Ant-v4':
                 self.create_random_actions()
 

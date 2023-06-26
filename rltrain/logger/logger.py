@@ -151,6 +151,8 @@ class Logger:
                     self.config['environment']['obs_dim'] = 4
                 elif self.task_name == "InvertedDoublePendulum-v4":
                     self.config['environment']['obs_dim'] = 11
+                elif self.task_name == 'HalfCheetah-v4':
+                    self.config['environment']['obs_dim'] = 17
                 elif self.task_name == 'Ant-v4':
                     self.config['environment']['obs_dim'] = 27
                 
@@ -185,6 +187,8 @@ class Logger:
                     self.config['environment']['act_dim'] = 1
                 elif self.task_name == 'InvertedDoublePendulum-v4':
                     self.config['environment']['act_dim'] = 1
+                elif self.task_name == 'HalfCheetah-v4':
+                    self.config['environment']['act_dim'] = 6
                 elif self.task_name == 'Ant-v4':
                     self.config['environment']['act_dim'] = 8
                     
@@ -220,6 +224,8 @@ class Logger:
                     self.config['agent']['boundary_min'] = [-3.0]
                 elif self.task_name == "InvertedDoublePendulum-v4":
                     self.config['agent']['boundary_min'] = [-1.0]
+                elif self.task_name == 'HalfCheetah-v4':
+                    self.config['agent']['boundary_min'] = [-1.0]
                 elif self.task_name == 'Ant-v4':
                     self.config['agent']['boundary_min'] = [-1.0]
             # RLBENCH
@@ -249,6 +255,8 @@ class Logger:
                 elif self.task_name == "InvertedPendulum-v4":
                     self.config['agent']['boundary_max'] = [3.0]
                 elif self.task_name == "InvertedDoublePendulum-v4":
+                    self.config['agent']['boundary_max'] = [1.0]
+                elif self.task_name == 'HalfCheetah-v4':
                     self.config['agent']['boundary_max'] = [1.0]
                 elif self.task_name == 'Ant-v4':
                     self.config['agent']['boundary_max'] = [1.0]
