@@ -69,6 +69,8 @@ class Demo:
                 self.create_random_actions()
             elif self.task_name == "InvertedDoublePendulum-v4":
                 self.create_random_actions()
+            elif self.task_name == 'Swimmer-v4':
+                self.create_random_actions()
             elif self.task_name == "HalfCheetah-v4":
                 self.create_random_actions()
             elif self.task_name == 'Ant-v4':
@@ -112,7 +114,12 @@ class Demo:
             d = 0
             for _ in range(self.max_ep_len):
 
+                print("#######################################################x")
+                print(self.boundary_min)
+                print(self.boundary_max)
+
                 a = np.random.uniform(low=self.boundary_min, high=self.boundary_max, size=self.act_dim)
+                print(a)
                 
                 try:
                     o2, r, d, info = self.env.step(a)

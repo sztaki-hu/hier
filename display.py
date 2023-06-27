@@ -20,8 +20,12 @@ import torch
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--configfile", default="logs/0307_test_01_MountainCarContinuous-v0_sac/" ,help="Path of the config file")
-    parser.add_argument("--trainid", type=int, default=0 ,help="Train ID")
+    #parser.add_argument("--configfile", default="logs/0615_B_stack_blocks_sac/" ,help="Path of the config file")
+    #parser.add_argument("--configfile", default="logs/0620_C_MountainCarContinuous-v0_sac/" ,help="Path of the config file")
+    #parser.add_argument("--configfile", default="logs/0622_B_InvertedDoublePendulum-v4_sac/" ,help="Path of the config file")
+    parser.add_argument("--configfile", default="logs/0626_A_HalfCheetah-v4_sac/" ,help="Path of the config file")
+    #parser.add_argument("--configfile", default="logs/0623_A_Ant-v4_sac/" ,help="Path of the config file")
+    parser.add_argument("--trainid", type=int, default=2 ,help="Train ID")
     parser.add_argument("--restart", type=bool, default=False ,help="Set true if you want to restart a training")
     # Example: python3 main.py --configfile /cfg/alma.yaml 0
     args = parser.parse_args()
@@ -49,13 +53,13 @@ if __name__ == '__main__':
     config['environment']['headless'] = False
 
     # Init Agent
-    agent = Agent(device,config)
+    agent = Agent(0,device,config)
 
     # Init Trainer
     tester = Tester(agent,logger,config)
 
     # Test Agent
-    tester.display_agent("model_1",50)
+    tester.display_agent("model_39",1)
 
     # Test Agent all models
     # models = logger.list_model_dir()
