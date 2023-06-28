@@ -258,13 +258,14 @@ class Trainer:
             if self.mode_sync == True: t_glob.value = t
             
 
-            if (t >= 0) and (self.pretrain_bool == True):
-                pause_flag.value = True
-                for _ in tqdm(range(int(self.pretrain_factor)), desc ="Updating weights (pretraining): ", leave=False):
-                    for agent_id in range(agent_num):
-                        batch, demo_ratio = self.get_batch(t,replay_buffers[agent_id%self.buffer_num])
-                        loss_q_np[agent_id], loss_pi_np[agent_id] = agents[agent_id].update(data=batch)
-                self.pretrain_bool = False
+            if (t >= 0):
+                if self.pretrain_bool == True:
+                    pause_flag.value = True
+                    for _ in tqdm(range(int(self.pretrain_factor)), desc ="Updating weights (pretraining): ", leave=False):
+                        for agent_id in range(agent_num):
+                            batch, demo_ratio = self.get_batch(t,replay_buffers[agent_id%self.buffer_num])
+                            loss_q_np[agent_id], loss_pi_np[agent_id] = agents[agent_id].update(data=batch)
+                    self.pretrain_bool = False
                 if self.mode_sync == True: t_limit.value = update_iter * self.update_every
                 pause_flag.value = False
 
