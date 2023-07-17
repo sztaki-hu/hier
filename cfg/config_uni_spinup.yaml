@@ -42,8 +42,8 @@ sampler:
   max_ep_len: 1000
 
 trainer:
-  steps_per_epoch: 100
-  epochs: 2
+  steps_per_epoch: 10000
+  epochs: 100
   batch_size: 100
   update_after: 1000
   update_every: 50
