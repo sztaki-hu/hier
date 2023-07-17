@@ -1,0 +1,56 @@
+general:
+  exp_name: 0717_A
+  logdir: logs
+  demodir: demos
+  seed: 0
+
+hardware:
+  gpu: [0,1,2] 
+  cpu_min: [1,1,1]
+  cpu_max: [32,32,32]
+
+environment:
+  name: gym
+  task: 
+    name: Hopper-v4
+    params: []
+  headless: True
+  obs_dim: auto
+  act_dim: auto
+  reward:
+    reward_scalor: 1
+    reward_bonus: 0.1
+    reward_shaping_type: sparse
+  
+
+agent:
+  type: sac
+  n_step: 1
+  gamma: 0.99 
+  polyak: 0.995
+  lr: [0.001]
+  alpha: [0.2]
+  hidden_sizes: [256,256]
+  boundary_min: auto
+  boundary_max: auto
+
+buffer:
+  replay_buffer_size: 100000
+
+sampler:
+  start_steps: 10000
+  max_ep_len: 1000
+
+trainer:
+  steps_per_epoch: 100
+  epochs: 2
+  batch_size: 100
+  update_after: 1000
+  update_every: 50
+
+tester:
+  num_test_episodes: 10
+
+logger:
+  num_log_loss_points: 500
+

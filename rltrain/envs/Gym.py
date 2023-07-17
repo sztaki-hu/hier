@@ -29,7 +29,7 @@ class Gym:
         if self.config['environment']['headless']:
             self.env = gym.make(self.task_name)
         else:
-            self.env = gym.make(self.task_name,render_mode="human") #new version
+            self.env = gym.make(self.task_name, render_mode="human") #new version
             #self.env = gym.make(self.task_name) # old gym version 0.21.0
         self.env._max_episode_steps = self.max_ep_len
 
@@ -73,6 +73,9 @@ class Gym:
 
         return o, r, d, info
     
+    def random_sample(self):
+        return self.env.action_space.sample()
+
     def render(self): # for old gym version 0.21.0
         self.env.render()
     

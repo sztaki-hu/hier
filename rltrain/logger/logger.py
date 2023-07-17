@@ -107,6 +107,10 @@ class Logger:
             self.writer.add_custom_scalars(layout)
     
     def handle_ancient_versions(self):
+        if "agent_num" not in self.config['agent']: 
+            self.config['agent']['agent_num'] = 1
+        if "sampler_num" not in self.config['sampler']: 
+            self.config['sampler']['sampler_num'] = 1
         if "buffer_num" not in self.config['buffer']: 
             self.config['buffer']['buffer_num'] = 1
         if 'tester2' not in self.config:
@@ -125,6 +129,16 @@ class Logger:
             self.config["environment"]['params']['reward']  = {}
             self.config["environment"]['params']['reward']['atol'] = 0.01
             self.config["environment"]['params']['reward']['rtol'] = 0.0
+        if "action_space" not in self.config['agent']:
+            self.config['agent']['action_space'] = 'none'
+        if "state_space" not in self.config['environment']:
+            self.config['environment']['state_space'] = 'none'
+        if "heatmap" not in self.config['logger']:
+            self.config['logger']['heatmap'] = {}
+            self.config['logger']['heatmap']['bool'] = False
+        if "demo" not in self.config:
+            self.config['demo'] = {}
+            self.config['demo']['demo_use'] = False
 
     def check_config_values(self):
         assert self.config['buffer']['buffer_num'] >= 1
