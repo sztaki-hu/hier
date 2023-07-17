@@ -4,9 +4,9 @@ import numpy as np
 import torch
 import argparse
 
-from rltrain.agents.agent import Agent
+from rltrain.agents.agent_v0 import Agent
 
-from rltrain.buffers.replay import ReplayBuffer
+from rltrain.buffers.replay_v0 import ReplayBuffer
 
 from rltrain.utils.utils import init_cuda, print_torch_info
 from rltrain.logger.logger import Logger

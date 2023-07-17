@@ -158,6 +158,7 @@ class SamplerTrainerTester:
             if t >= self.update_after and t % self.update_every == 0:
                 for j in range(self.update_every):
                     batch = replay_buffer.sample_batch(self.batch_size)
+                    #print(batch)
                     ret_loss_q, ret_loss_pi = self.agent.update(data=batch)
                     self.loss_q_dq.append(ret_loss_q)
                     self.loss_pi_dq.append(ret_loss_pi)
