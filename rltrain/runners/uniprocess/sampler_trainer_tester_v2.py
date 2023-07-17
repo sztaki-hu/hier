@@ -160,7 +160,7 @@ class SamplerTrainerTester:
                     batch = replay_buffer.sample_batch(self.batch_size)
                     ret_loss_q, ret_loss_pi = self.agent.update(data=batch)
                     self.loss_q_dq.append(ret_loss_q)
-                    self.loss_pi_dq.append = ret_loss_pi
+                    self.loss_pi_dq.append(ret_loss_pi)
 
             # End of epoch handling
             if (t+1) % self.steps_per_epoch == 0:
