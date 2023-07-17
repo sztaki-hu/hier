@@ -1,5 +1,6 @@
 import numpy as np
 import gym
+import time
 
 
 REWARD_TYPE_LIST = ['sparse','energy']
@@ -53,6 +54,8 @@ class Gym:
         return True  
     
     def step(self,action):
+
+        time.sleep(.002)
 
         # New gym version
         o, r, terminated, truncated, info = self.env.step(action)
