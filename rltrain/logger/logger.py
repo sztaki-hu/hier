@@ -171,9 +171,10 @@ class Logger:
                     self.config['environment']['obs_dim'] = 11
                 elif self.task_name == 'HalfCheetah-v4':
                     self.config['environment']['obs_dim'] = 17
+                elif self.task_name == 'Walker2d-v4':
+                    self.config['environment']['obs_dim'] = 17
                 elif self.task_name == 'Ant-v4':
-                    self.config['environment']['obs_dim'] = 27
-                
+                    self.config['environment']['obs_dim'] = 27       
                 
             # RLBENCH
             elif self.config['environment']['name'] == "rlbench":
@@ -210,6 +211,8 @@ class Logger:
                 elif self.task_name == 'Hopper-v4':
                     self.config['environment']['act_dim'] = 3
                 elif self.task_name == 'HalfCheetah-v4':
+                    self.config['environment']['act_dim'] = 6
+                elif self.task_name == 'Walker2d-v4':
                     self.config['environment']['act_dim'] = 6
                 elif self.task_name == 'Ant-v4':
                     self.config['environment']['act_dim'] = 8
@@ -252,6 +255,8 @@ class Logger:
                     self.config['agent']['boundary_min'] = [-1.0, -1.0, -1.0]
                 elif self.task_name == 'HalfCheetah-v4':
                     self.config['agent']['boundary_min'] = [-1.0, -1.0, -1.0, -1.0, -1.0, -1.0]
+                elif self.task_name == 'Walker2d-v4':
+                    self.config['agent']['boundary_min'] = [-1.0, -1.0, -1.0, -1.0, -1.0, -1.0]
                 elif self.task_name == 'Ant-v4':
                     self.config['agent']['boundary_min'] = [-1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0]
             # RLBENCH
@@ -287,6 +292,8 @@ class Logger:
                 elif self.task_name == 'Hopper-v4':
                     self.config['agent']['boundary_max'] = [1.0, 1.0, 1.0]
                 elif self.task_name == 'HalfCheetah-v4':
+                    self.config['agent']['boundary_max'] = [1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
+                elif self.task_name == 'Walker2d-v4':
                     self.config['agent']['boundary_max'] = [1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
                 elif self.task_name == 'Ant-v4':
                     self.config['agent']['boundary_max'] = [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
