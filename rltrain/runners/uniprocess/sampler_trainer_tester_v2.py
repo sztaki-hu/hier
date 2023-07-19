@@ -184,7 +184,7 @@ class SamplerTrainerTester:
                         best_test_ep_ret = test_ep_ret
                         best_model_changed = True
                 
-                self.logger.tb_writer_add_scalar("test/best_ep_len", best_test_ep_ret, epoch)
+                self.logger.tb_writer_add_scalar("test/best_ep_ret", best_test_ep_ret, epoch)
 
                 # Save model 
                 if (epoch % self.model_save_freq == 0) or (epoch == self.epochs) or best_model_changed:
