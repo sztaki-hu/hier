@@ -79,6 +79,8 @@ class Demo:
                 self.create_random_actions()
             elif self.task_name == 'Ant-v4':
                 self.create_random_actions()
+            elif self.task_name == 'Reacher-v4':
+                self.create_random_actions()
 
         # RLBENCH
         elif self.config['environment']['name'] == "rlbench":       
