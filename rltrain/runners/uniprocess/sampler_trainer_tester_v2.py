@@ -27,8 +27,6 @@ class SamplerTrainerTester:
         self.update_after = config['trainer']['update_after'] 
         self.update_every = config['trainer']['update_every'] 
 
-        self.num_log_loss_points = config['logger']['num_log_loss_points'] 
-
         self.obs_dim = config['environment']['obs_dim']
         self.act_dim = config['environment']['act_dim']
         self.boundary_min = np.array(config['agent']['boundary_min'])[:self.act_dim]
@@ -39,6 +37,10 @@ class SamplerTrainerTester:
         self.start_steps = config['sampler']['start_steps']
         self.max_ep_len = config['sampler']['max_ep_len']
         self.num_test_episodes = config['tester']['num_test_episodes']
+
+        self.model_save_freq = config['logger']['model']['save']['freq']
+        self.model_save_best_after = config['logger']['model']['save']['best_after']
+        self.model_save_mode = config['logger']['model']['save']['mode']
 
         self.train_ep_ret_dq = collections.deque(maxlen=10)
         self.train_ep_len_dq = collections.deque(maxlen=10)
@@ -90,7 +92,7 @@ class SamplerTrainerTester:
     # def get_action(self, o, deterministic=False):
     #     return self.agent.ac.act(torch.as_tensor(o, dtype=torch.float32), deterministic)
 
-    def test_agent(self, epoch):
+    def test_agent(self):
         for j in range(self.num_test_episodes):
             o, d, ep_ret, ep_len = self.test_env.reset(), False, 0, 0
             while not(d or (ep_len == self.max_ep_len)):
@@ -99,8 +101,9 @@ class SamplerTrainerTester:
                 ep_ret += r
                 ep_len += 1
             #logger.store(TestEpRet=ep_ret, TestEpLen=ep_len)
-            self.logger.tb_writer_add_scalar("test/ep_ret", ep_ret, epoch)
-            self.logger.tb_writer_add_scalar("test/ep_len", ep_len, epoch)
+        
+        return ep_ret, ep_len
+            
 
     def start(self,agent,replay_buffer):
 
@@ -113,7 +116,7 @@ class SamplerTrainerTester:
         #start_time = time.time()
         o, ep_ret, ep_len = self.env.reset(), 0, 0
 
-        self.save_freq = 1
+        best_test_ep_ret = -float('inf')
 
         # Main loop: collect experience in env and update/log each epoch
         for t in tqdm(range(total_steps), desc ="Training: ", leave=True):
@@ -167,14 +170,25 @@ class SamplerTrainerTester:
             if (t+1) % self.steps_per_epoch == 0:
                 epoch = (t+1) // self.steps_per_epoch
 
-                # Save model
-                if (epoch % self.save_freq == 0) or (epoch == self.epochs):
-                    model_path = self.logger.get_model_save_path(epoch)
-                    self.agent.save_model(model_path)
-                    #logger.save_state({'env': env}, None)
-
                 # Test the performance of the deterministic version of the agent.
-                self.test_agent(epoch-1)
+                test_ep_ret, test_ep_len = self.test_agent()
+
+                self.logger.tb_writer_add_scalar("test/ep_ret", test_ep_ret, epoch)
+                self.logger.tb_writer_add_scalar("test/ep_len", test_ep_len, epoch)
+
+                best_model_changed = False
+                if epoch > self.model_save_best_after:
+                    if test_ep_ret > best_test_ep_ret:
+                        best_test_ep_ret = test_ep_ret
+                        best_model_changed = True
+                
+                self.logger.tb_writer_add_scalar("test/best_ep_len", best_test_ep_ret, epoch)
+
+                # Save model 
+                if (epoch % self.model_save_freq == 0) or (epoch == self.epochs) or best_model_changed:
+                    model_path = self.logger.get_model_save_path(epoch)
+                    self.agent.save_model(model_path,self.model_save_mode)
+                    #logger.save_state({'env': env}, None)       
 
                 self.logger.tb_writer_add_scalar("train/train_ep_ret_", np.mean(self.train_ep_ret_dq), t)
                 self.logger.tb_writer_add_scalar("train/train_ep_len_", np.mean(self.train_ep_len_dq), t)

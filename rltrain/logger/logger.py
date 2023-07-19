@@ -139,6 +139,12 @@ class Logger:
         if "demo" not in self.config:
             self.config['demo'] = {}
             self.config['demo']['demo_use'] = False
+        if "model" not in self.config['logger']:
+            self.config['logger']['model'] = {}
+            self.config['logger']['model']['save'] = {}
+            self.config['logger']['model']['save']['freq'] = 1
+            self.config['logger']['model']['save']['best_after'] = 0
+            self.config['logger']['model']['save']['mode'] = "pi"
 
     def check_config_values(self):
         assert self.config['buffer']['buffer_num'] >= 1

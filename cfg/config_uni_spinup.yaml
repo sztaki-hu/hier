@@ -1,5 +1,5 @@
 general:
-  exp_name: 0717_A
+  exp_name: 0719_A
   logdir: logs
   demodir: demos
   seed: 0
@@ -12,7 +12,7 @@ hardware:
 environment:
   name: gym
   task: 
-    name: Hopper-v4
+    name: InvertedPendulum-v4
     params: []
   headless: True
   obs_dim: auto
@@ -52,5 +52,8 @@ tester:
   num_test_episodes: 10
 
 logger:
-  num_log_loss_points: 500
-
+  model:
+    save:
+      mode: pi
+      freq: 5
+      best_after: 30
