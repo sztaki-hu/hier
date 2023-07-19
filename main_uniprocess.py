@@ -59,7 +59,7 @@ def main():
     
     agent = Agent(0,device,config)
 
-    samplerTrainerTester = SamplerTrainerTester(device,logger,config)
+    samplerTrainerTester = SamplerTrainerTester(device,logger,config,args)
 
     samplerTrainerTester.start(agent,replay_buffer)
 

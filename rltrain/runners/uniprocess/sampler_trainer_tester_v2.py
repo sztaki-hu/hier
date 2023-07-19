@@ -9,7 +9,7 @@ from rltrain.envs.builder import make_env
 
 class SamplerTrainerTester:
 
-    def __init__(self,device,logger,config):
+    def __init__(self,device,logger,config,main_args):
 
         self.device = device
         
@@ -41,6 +41,8 @@ class SamplerTrainerTester:
         self.model_save_freq = config['logger']['model']['save']['freq']
         self.model_save_best_after = config['logger']['model']['save']['best_after']
         self.model_save_mode = config['logger']['model']['save']['mode']
+
+        self.logname = self.config['general']['exp_name'] + "_" + self.config['environment']['task']['name'] + "_" + self.config['agent']['type'] + "_" + str(main_args.trainid)
 
         self.train_ep_ret_dq = collections.deque(maxlen=10)
         self.train_ep_len_dq = collections.deque(maxlen=10)
@@ -188,6 +190,9 @@ class SamplerTrainerTester:
                 if (epoch % self.model_save_freq == 0) or (epoch == self.epochs) or best_model_changed:
                     model_path = self.logger.get_model_save_path(epoch)
                     self.agent.save_model(model_path,self.model_save_mode)
+                    message = self.logname +  " | Epoch: " + str(epoch) + " | test ep ret: " + str(test_ep_ret) + " | test ep len: " + str(test_ep_len)
+                    if best_model_changed: message += " *"
+                    tqdm.write("[info] " + message)
                     #logger.save_state({'env': env}, None)       
 
                 self.logger.tb_writer_add_scalar("train/train_ep_ret_", np.mean(self.train_ep_ret_dq), t)
