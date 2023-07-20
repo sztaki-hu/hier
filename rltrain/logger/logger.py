@@ -184,7 +184,10 @@ class Logger:
                 elif self.task_name == 'Reacher-v4':
                     self.config['environment']['obs_dim'] = 11
                 elif self.task_name == 'Humanoid-v4':
-                    self.config['environment']['obs_dim'] = 376                   
+                    self.config['environment']['obs_dim'] = 376        
+                elif self.task_name == 'HumanoidStandup-v4':
+                    self.config['environment']['obs_dim'] = 376
+                              
                 
             # RLBENCH
             elif self.config['environment']['name'] == "rlbench":
@@ -229,6 +232,8 @@ class Logger:
                 elif self.task_name == 'Reacher-v4':
                     self.config['environment']['act_dim'] = 2
                 elif self.task_name == 'Humanoid-v4':
+                    self.config['environment']['act_dim'] = 17
+                elif self.task_name == 'HumanoidStandup-v4':
                     self.config['environment']['act_dim'] = 17
                     
             # RLBENCH
@@ -277,6 +282,8 @@ class Logger:
                     self.config['agent']['boundary_min'] = [-1.0] * 2
                 elif self.task_name == 'Humanoid-v4':
                     self.config['agent']['boundary_min'] = [-0.4] * 17
+                elif self.task_name == 'HumanoidStandup-v4':
+                    self.config['agent']['boundary_min'] = [-0.4] * 17
 
             # RLBENCH
             elif self.config['environment']['name'] == "rlbench":
@@ -319,6 +326,8 @@ class Logger:
                 elif self.task_name == 'Reacher-v4':
                     self.config['agent']['boundary_max'] = [1.0] * 2
                 elif self.task_name == 'Humanoid-v4':
+                    self.config['agent']['boundary_max'] = [0.4] * 17
+                elif self.task_name == 'HumanoidStandup-v4':
                     self.config['agent']['boundary_max'] = [0.4] * 17
                     
             # RLBENCH
