@@ -85,6 +85,8 @@ class Demo:
                 self.create_random_actions()
             elif self.task_name == 'HumanoidStandup-v4':
                 self.create_random_actions()
+            elif self.task_name == 'Pusher-v4':
+                self.create_random_actions()
 
         # RLBENCH
         elif self.config['environment']['name'] == "rlbench":       

@@ -1,11 +1,11 @@
 import numpy as np
-import gym
+import gymnasium as gym
 import time
 
 
 REWARD_TYPE_LIST = ['sparse','energy']
 TASK_LIST = ['MountainCarContinuous-v0','InvertedPendulum-v4','InvertedDoublePendulum-v4','Swimmer-v4',
-             'Hopper-v4','HalfCheetah-v4','Walker2d-v4','Ant-v4','Reacher-v4','Humanoid-v4','HumanoidStandup-v4']
+             'Hopper-v4','HalfCheetah-v4','Walker2d-v4','Ant-v4','Reacher-v4','Humanoid-v4','HumanoidStandup-v4','Pusher-v4']
 
 class Gym:
     def __init__(self,config):
