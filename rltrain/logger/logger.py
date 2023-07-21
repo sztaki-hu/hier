@@ -157,6 +157,36 @@ class Logger:
         self.action_space = self.config['agent']['action_space']
         self.state_space = self.config['environment']['state_space']
 
+        ## MAX_EP_LEN
+        if self.config['sampler']['max_ep_len'] == "auto":
+            # GYM
+            if self.config['environment']['name'] == "gym":
+                if self.task_name == "MountainCarContinuous-v0":
+                    self.config['sampler']['max_ep_len'] = 999
+                elif self.task_name == "InvertedPendulum-v4":
+                    self.config['sampler']['max_ep_len'] = 1000
+                elif self.task_name == "InvertedDoublePendulum-v4":
+                    self.config['sampler']['max_ep_len'] = 1000
+                elif self.task_name == 'Swimmer-v4':
+                    self.config['sampler']['max_ep_len'] = 1000
+                elif self.task_name == 'Hopper-v4':
+                    self.config['sampler']['max_ep_len'] = 1000
+                elif self.task_name == 'HalfCheetah-v4':
+                    self.config['sampler']['max_ep_len'] = 1000
+                elif self.task_name == 'Walker2d-v4':
+                    self.config['sampler']['max_ep_len'] = 1000
+                elif self.task_name == 'Ant-v4':
+                    self.config['sampler']['max_ep_len'] = 1000  
+                elif self.task_name == 'Reacher-v4':
+                    self.config['sampler']['max_ep_len'] = 50
+                elif self.task_name == 'Humanoid-v4':
+                    self.config['sampler']['max_ep_len'] = 1000       
+                elif self.task_name == 'HumanoidStandup-v4':
+                    self.config['sampler']['max_ep_len'] = 1000 
+                elif self.task_name == 'Pusher-v4': 
+                    self.config['sampler']['max_ep_len'] = 100 
+        
+
         ## OBS DIM
         if self.config['environment']['obs_dim'] == "auto":
             # RLBENCH JOINT

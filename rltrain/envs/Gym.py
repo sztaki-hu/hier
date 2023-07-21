@@ -32,7 +32,7 @@ class Gym:
             self.env = gym.make(self.task_name)
         else:
             self.env = gym.make(self.task_name, render_mode="human") #new version
-            #self.env = gym.make(self.task_name) # old gym version 0.21.0
+            #self.env = gym.make(self.task_name) # old gym version 0.21.0     
         self.env._max_episode_steps = self.max_ep_len
 
         self.reset()
