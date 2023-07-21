@@ -87,6 +87,11 @@ class Demo:
                 self.create_random_actions()
             elif self.task_name == 'Pusher-v4':
                 self.create_random_actions()
+        
+        # GYMPANDA      
+        elif self.config['environment']['name'] == "gympanda":    
+            if self.task_name == 'PandaReach-v3': 
+                self.create_random_actions()
 
         # RLBENCH
         elif self.config['environment']['name'] == "rlbench":       

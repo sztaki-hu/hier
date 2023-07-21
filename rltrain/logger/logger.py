@@ -189,8 +189,11 @@ class Logger:
                     self.config['environment']['obs_dim'] = 376
                 elif self.task_name == 'Pusher-v4': 
                     self.config['environment']['obs_dim'] = 23
-                    
-                              
+
+            # GYMPANDA      
+            elif self.config['environment']['name'] == "gympanda":    
+                if self.task_name == 'PandaReach-v3':   
+                    self.config['environment']['obs_dim'] = 9        
                 
             # RLBENCH
             elif self.config['environment']['name'] == "rlbench":
@@ -240,6 +243,11 @@ class Logger:
                     self.config['environment']['act_dim'] = 17
                 elif self.task_name == 'Pusher-v4':
                     self.config['environment']['act_dim'] = 7
+
+            # GYMPANDA      
+            elif self.config['environment']['name'] == "gympanda":    
+                if self.task_name == 'PandaReach-v3': 
+                    self.config['environment']['act_dim'] = 3
 
                     
             # RLBENCH
@@ -292,6 +300,11 @@ class Logger:
                     self.config['agent']['boundary_min'] = [-0.4] * 17
                 elif self.task_name == 'Pusher-v4':
                     self.config['agent']['boundary_min'] = [-2.0] * 7
+            
+            # GYMPANDA      
+            elif self.config['environment']['name'] == "gympanda":    
+                if self.task_name == 'PandaReach-v3': 
+                    self.config['agent']['boundary_min'] = [-1.0] * 3 #?
 
 
             # RLBENCH
@@ -340,6 +353,11 @@ class Logger:
                     self.config['agent']['boundary_max'] = [0.4] * 17
                 elif self.task_name == 'Pusher-v4':
                     self.config['agent']['boundary_max'] = [2.0] * 7
+            
+            # GYMPANDA      
+            elif self.config['environment']['name'] == "gympanda":    
+                if self.task_name == 'PandaReach-v3': 
+                    self.config['agent']['boundary_max'] = [1.0] * 3
                     
             # RLBENCH
             elif self.config['environment']['name'] == "rlbench":
