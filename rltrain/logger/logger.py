@@ -185,6 +185,11 @@ class Logger:
                     self.config['sampler']['max_ep_len'] = 1000 
                 elif self.task_name == 'Pusher-v4': 
                     self.config['sampler']['max_ep_len'] = 100 
+            
+            # GYMPANDA      
+            elif self.config['environment']['name'] == "gympanda":    
+                if self.task_name == 'PandaReach-v3':
+                    self.config['sampler']['max_ep_len'] = 50 
         
 
         ## OBS DIM

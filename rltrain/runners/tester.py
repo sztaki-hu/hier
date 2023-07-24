@@ -322,6 +322,10 @@ class Tester:
                     a = self.agent.get_action(o, True)
                     #print(a)
                     o, r, d, info = self.env.step(a)
+                    # print(o)
+                    # print(info)
+                    # time.sleep(0.5)
+
                 except:
                     tqdm.write('[Test]: Error  simulation, thus reseting the environment')
                     break    
@@ -334,11 +338,13 @@ class Tester:
                             break
 
                 ep_ret += r
-                ep_len += 1          
+                ep_len += 1   
+                #tqdm.write(str(ep_len))       
             sum_return += ep_ret          
             tqdm.write("------------------------")
             #tqdm.write("Obs: " + str(o) + " | Act: " + str(a))
-            tqdm.write("Ep Ret: " + str(ep_ret) + " | Ep Len: " + str(ep_len))
+            tqdm.write("Ep Ret: " + str(ep_ret) + " | Ep Len: " + str(ep_len) + " | Info: " + str(info))
+   
         avg_return = sum_return / float(num_display_episode)
         
         self.env.shuttdown() 

@@ -136,10 +136,12 @@ class Demo:
                 print(self.boundary_max)
 
                 a = np.random.uniform(low=self.boundary_min, high=self.boundary_max, size=self.act_dim)
+                #a = np.array([0.1,0.0,0.0])
                 print(a)
                 
                 try:
                     o2, r, d, info = self.env.step(a)
+                    #print(info)
                     ep_transitions.append((o, a, r, o2, d))
                     o = o2
                     if d == 1:
