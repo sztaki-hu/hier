@@ -86,11 +86,13 @@ class Demo:
             elif self.task_name == 'HumanoidStandup-v4':
                 self.create_random_actions()
             elif self.task_name == 'Pusher-v4':
-                self.create_random_actions()
+                self.create_random_actions()          
         
         # GYMPANDA      
         elif self.config['environment']['name'] == "gympanda":    
             if self.task_name == 'PandaReach-v3': 
+                self.create_random_actions()
+            elif self.task_name == 'PandaPush-v3':
                 self.create_random_actions()
 
         # RLBENCH
@@ -104,6 +106,7 @@ class Demo:
                     self.create_demos_stack_blocks_pick_and_place_3d_z90()
         
     def create_random_actions(self):
+
         self.env = make_env(self.config)
 
         pbar = tqdm(total=int(self.demo_buffer_size),colour="green")

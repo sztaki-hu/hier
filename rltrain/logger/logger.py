@@ -190,7 +190,8 @@ class Logger:
             elif self.config['environment']['name'] == "gympanda":    
                 if self.task_name == 'PandaReach-v3':
                     self.config['sampler']['max_ep_len'] = 50 
-        
+                elif self.task_name == 'PandaPush-v3':
+                    self.config['sampler']['max_ep_len'] = 50             
 
         ## OBS DIM
         if self.config['environment']['obs_dim'] == "auto":
@@ -228,7 +229,9 @@ class Logger:
             # GYMPANDA      
             elif self.config['environment']['name'] == "gympanda":    
                 if self.task_name == 'PandaReach-v3':   
-                    self.config['environment']['obs_dim'] = 9        
+                    self.config['environment']['obs_dim'] = 9 # 6 (robot) + 3 (target) 
+                elif self.task_name == 'PandaPush-v3':
+                    self.config['environment']['obs_dim'] = 21 # 6 (robot) + 12 (1 object) + 3 (target)     
                 
             # RLBENCH
             elif self.config['environment']['name'] == "rlbench":
@@ -283,6 +286,8 @@ class Logger:
             elif self.config['environment']['name'] == "gympanda":    
                 if self.task_name == 'PandaReach-v3': 
                     self.config['environment']['act_dim'] = 3
+                elif self.task_name == 'PandaPush-v3':
+                    self.config['environment']['act_dim'] = 3
 
                     
             # RLBENCH
@@ -296,12 +301,13 @@ class Logger:
                         self.config['environment']['act_dim'] = 14
                     elif self.action_space == "pick_and_place_3d_z90":
                         self.config['environment']['act_dim'] = 8
+
             else:
                 self.print_logfile("Act dim could not be computed","error")
                 assert False
             self.print_logfile("Act dim is computed: " + str(self.config['environment']['act_dim']))
         
-        ## BOUNDARY MAX
+        ## BOUNDARY MIN
         if self.config['agent']['boundary_min'] == "auto":
             # RLBENCH JOINT
             if self.config['environment']['name'] == "rlbenchjoint":
@@ -339,6 +345,8 @@ class Logger:
             # GYMPANDA      
             elif self.config['environment']['name'] == "gympanda":    
                 if self.task_name == 'PandaReach-v3': 
+                    self.config['agent']['boundary_min'] = [-1.0] * 3 #?
+                elif self.task_name == 'PandaPush-v3':
                     self.config['agent']['boundary_min'] = [-1.0] * 3 #?
 
 
@@ -392,6 +400,8 @@ class Logger:
             # GYMPANDA      
             elif self.config['environment']['name'] == "gympanda":    
                 if self.task_name == 'PandaReach-v3': 
+                    self.config['agent']['boundary_max'] = [1.0] * 3
+                elif self.task_name == 'PandaPush-v3':
                     self.config['agent']['boundary_max'] = [1.0] * 3
                     
             # RLBENCH
