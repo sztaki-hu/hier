@@ -100,7 +100,7 @@ class SamplerTrainerTester:
         ep_lens = []
         success_num = 0.0
         for j in range(self.num_test_episodes):
-            o, d, ep_ret, ep_len = self.test_env.reset_with_init_check, False, 0, 0
+            o, d, ep_ret, ep_len = self.test_env.reset_with_init_check(), False, 0, 0
             while not(d or (ep_len == self.max_ep_len)):
                 # Take deterministic actions at test time 
                 o, r, terminated, truncated, info = self.test_env.step(self.agent.get_action(o, True))
