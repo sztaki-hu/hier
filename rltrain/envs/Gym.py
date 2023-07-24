@@ -9,30 +9,29 @@ TASK_LIST = ['MountainCarContinuous-v0','InvertedPendulum-v4','InvertedDoublePen
 
 class Gym:
     def __init__(self,config):
+        
         self.config = config
 
+        # General
+        self.task_name = self.config['environment']['task']['name']
+        self.action_space = config['agent']['action_space']
+        self.max_ep_len = config['sampler']['max_ep_len']
+        self.t = 0 
+
+        # Reward
         self.reward_shaping_type = config['environment']['reward']['reward_shaping_type']
         self.reward_scalor = config['environment']['reward']['reward_scalor']
         self.reward_bonus = config['environment']['reward']['reward_bonus']
 
-        self.obs_dim = config['environment']['obs_dim']
-        self.action_space = config['agent']['action_space']
-        self.task_name = self.config['environment']['task']['name']
-        self.task_params = self.config['environment']['task']['params']
-        self.act_dim = config['environment']['act_dim']
-        self.boundary_min = np.array(config['agent']['boundary_min'])[:self.act_dim]
-        self.boundary_max = np.array(config['agent']['boundary_max'])[:self.act_dim]
-
-        self.max_ep_len = config['sampler']['max_ep_len'] 
-
+        # Check validity
         assert self.reward_shaping_type in REWARD_TYPE_LIST
         assert self.task_name in TASK_LIST
 
+        # Create env
         if self.config['environment']['headless']:
             self.env = gym.make(self.task_name)
         else:
-            self.env = gym.make(self.task_name, render_mode="human") #new version
-            #self.env = gym.make(self.task_name) # old gym version 0.21.0     
+            self.env = gym.make(self.task_name, render_mode="human")
         self.env._max_episode_steps = self.max_ep_len
 
         self.reset()
@@ -47,8 +46,6 @@ class Gym:
 
     def reset(self):
         o, info = self.env.reset()
-        # if self.task_name == "MountainCarContinuous-v0": # for old gym version (0.21.0)
-        #     o = np.array([o,0]) 
         return o           
 
     def init_state_valid(self):
@@ -56,14 +53,8 @@ class Gym:
     
     def step(self,action):
 
-        #time.sleep(.002)
-
-        # New gym version
         o, r, terminated, truncated, info = self.env.step(action)
-        d = terminated or truncated
-
-        # Old gym version (0.21.0)
-        #o, r, d, info = self.env.step(action)
+        self.t += 1
 
         if self.reward_shaping_type == 'sparse':
             r = r * self.reward_scalor
@@ -74,17 +65,26 @@ class Gym:
                 r = r * self.reward_scalor + energy + goal_bonus
             else:
                 assert False
+        
+        info['is_success'] = True if self.is_success() == True else False
 
-        return o, r, d, info
+        return o, r, terminated, truncated, info
     
     def random_sample(self):
         return self.env.action_space.sample()
 
-    def render(self): # for old gym version 0.21.0
-        self.env.render()
-    
+    def is_success(self):
+        if self.task_name == 'InvertedPendulum-v4':
+            return True if self.t == self.max_ep_len else False
+        elif self.task_name == 'InvertedDoublePendulum-v4':
+            return True if self.t == self.max_ep_len else False
+
+        return False
+
     def get_max_return(self):
         return None
+    
+
     
   
                  

@@ -140,8 +140,9 @@ class Demo:
                 print(a)
                 
                 try:
-                    o2, r, d, info = self.env.step(a)
-                    #print(info)
+                    o2, r, terminated, truncated, info = self.env.step(a)
+                    d = terminated or truncated
+                    print(info)
                     ep_transitions.append((o, a, r, o2, d))
                     o = o2
                     if d == 1:

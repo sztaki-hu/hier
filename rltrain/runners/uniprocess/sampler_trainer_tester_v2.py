@@ -95,16 +95,26 @@ class SamplerTrainerTester:
     #     return self.agent.ac.act(torch.as_tensor(o, dtype=torch.float32), deterministic)
 
     def test_agent(self):
+        ep_rets = []
+        ep_lens = []
+        success_num = 0.0
         for j in range(self.num_test_episodes):
             o, d, ep_ret, ep_len = self.test_env.reset(), False, 0, 0
             while not(d or (ep_len == self.max_ep_len)):
                 # Take deterministic actions at test time 
-                o, r, d, _ = self.test_env.step(self.agent.get_action(o, True))
+                o, r, terminated, truncated, info = self.test_env.step(self.agent.get_action(o, True))
+                d = terminated or truncated
                 ep_ret += r
                 ep_len += 1
-            #logger.store(TestEpRet=ep_ret, TestEpLen=ep_len)
+            ep_rets.append(ep_ret)
+            ep_lens.append(ep_len)
+            if info['is_success'] == True: success_num += 1
         
-        return ep_ret, ep_len
+        ep_ret_avg = sum(ep_rets) / len(ep_rets)
+        ep_len_avg = sum(ep_lens) / len(ep_lens)
+        success_rate = success_num / self.num_test_episodes
+        
+        return ep_ret_avg, ep_len_avg, success_rate
             
 
     def start(self,agent,replay_buffer):
@@ -134,7 +144,8 @@ class SamplerTrainerTester:
                 # a = self.env.env.action_space.sample()
 
             # Step the env
-            o2, r, d, _ = self.env.step(a)
+            o2, r, terminated, truncated, info = self.env.step(a)
+            d = terminated or truncated
             ep_ret += r
             ep_len += 1
 
@@ -170,13 +181,15 @@ class SamplerTrainerTester:
 
             # End of epoch handling
             if (t+1) % self.steps_per_epoch == 0:
+
                 epoch = (t+1) // self.steps_per_epoch
 
                 # Test the performance of the deterministic version of the agent.
-                test_ep_ret, test_ep_len = self.test_agent()
+                test_ep_ret, test_ep_len, test_success_rate = self.test_agent()
 
                 self.logger.tb_writer_add_scalar("test/ep_ret", test_ep_ret, epoch)
                 self.logger.tb_writer_add_scalar("test/ep_len", test_ep_len, epoch)
+                self.logger.tb_writer_add_scalar("test/success_rate", test_success_rate, epoch)
 
                 best_model_changed = False
                 if epoch > self.model_save_best_after:
@@ -190,7 +203,7 @@ class SamplerTrainerTester:
                 if (epoch % self.model_save_freq == 0) or (epoch == self.epochs) or best_model_changed:
                     model_path = self.logger.get_model_save_path(epoch)
                     self.agent.save_model(model_path,self.model_save_mode)
-                    message = self.logname +  " | Epoch: " + str(epoch) + " | test ep ret: " + str(test_ep_ret) + " | test ep len: " + str(test_ep_len)
+                    message = self.logname +  " | Epoch: " + str(epoch) + " | test ep ret: " + str(test_ep_ret) + " | test ep len: " + str(test_ep_len) + " | test success rate: " + str(test_success_rate)
                     if best_model_changed: message += " *"
                     tqdm.write("[info] " + message)
                     #logger.save_state({'env': env}, None)       
@@ -199,5 +212,7 @@ class SamplerTrainerTester:
                 self.logger.tb_writer_add_scalar("train/train_ep_len_", np.mean(self.train_ep_len_dq), t)
                 self.logger.tb_writer_add_scalar('train/loss_q_', np.mean(self.loss_q_dq), t)
                 self.logger.tb_writer_add_scalar("train/loss_pi_", np.mean(self.loss_pi_dq), t)
+
+        self.logger.tb_close()
    
     

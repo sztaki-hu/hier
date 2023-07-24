@@ -55,14 +55,13 @@ class GymPanda:
     def step(self,action):
 
         o_dict, r, terminated, truncated, info = self.env.step(action)
-        d = terminated or truncated
 
         o = np.concatenate((o_dict['observation'], o_dict['desired_goal']))
        
         r = r * self.reward_scalor
 
 
-        return o, r, d, info
+        return o, r, terminated, truncated, info
     
     def random_sample(self):
         return self.env.action_space.sample()

@@ -725,3 +725,8 @@ class Logger:
         
         with open(self.current_dir + "/" + self.logdir + "/" + name_core +"_objects_pos_pixel.npy", 'wb') as f:
             np.save(f, objs_poses_pixel)
+    
+    
+    def tb_close(self):
+        self.writer.flush()
+        self.writer.close()

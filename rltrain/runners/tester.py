@@ -314,14 +314,12 @@ class Tester:
 
             while not(d or (ep_len == self.max_ep_len)):
 
-                if self.env_name == "gym" and self.env_headless == False:
-                    self.env.render()
-
                 # Take deterministic actions at test time 
                 try:
                     a = self.agent.get_action(o, True)
                     #print(a)
-                    o, r, d, info = self.env.step(a)
+                    o, r, terminated, truncated, info = self.env.step(a)
+                    d = terminated or truncated
                     # print(o)
                     # print(info)
                     # time.sleep(0.5)
