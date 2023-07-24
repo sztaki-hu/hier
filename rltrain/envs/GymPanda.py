@@ -40,14 +40,23 @@ class GymPanda:
     def shuttdown(self):
         self.reset()
         self.env.close()
-    
-    def reset_once(self):
-        return self.reset()
 
     def reset(self):
         o_dict, info = self.env.reset()
         o = np.concatenate((o_dict['observation'], o_dict['desired_goal']))
-        return o           
+        return o     
+
+    def reset_with_init_check(self):
+        ## Reset Env
+        while True:
+            try:
+                o = self.reset()
+                if self.init_state_valid(o):
+                    return o
+                else:                   
+                    time.sleep(0.1)
+            except:        
+                time.sleep(1)      
 
     def init_state_valid(self, o):
         if self.task_name == 'PandaPush-v3':

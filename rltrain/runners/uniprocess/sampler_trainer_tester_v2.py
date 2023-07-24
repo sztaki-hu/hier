@@ -93,13 +93,14 @@ class SamplerTrainerTester:
     
     # def get_action(self, o, deterministic=False):
     #     return self.agent.ac.act(torch.as_tensor(o, dtype=torch.float32), deterministic)
+     
 
     def test_agent(self):
         ep_rets = []
         ep_lens = []
         success_num = 0.0
         for j in range(self.num_test_episodes):
-            o, d, ep_ret, ep_len = self.test_env.reset(), False, 0, 0
+            o, d, ep_ret, ep_len = self.test_env.reset_with_init_check, False, 0, 0
             while not(d or (ep_len == self.max_ep_len)):
                 # Take deterministic actions at test time 
                 o, r, terminated, truncated, info = self.test_env.step(self.agent.get_action(o, True))
@@ -126,7 +127,7 @@ class SamplerTrainerTester:
         # Prepare for interaction with environment
         total_steps = self.steps_per_epoch * self.epochs
         #start_time = time.time()
-        o, ep_ret, ep_len = self.env.reset(), 0, 0
+        o, ep_ret, ep_len = self.env.reset_with_init_check(), 0, 0
 
         best_test_ep_ret = -float('inf')
 
@@ -168,7 +169,7 @@ class SamplerTrainerTester:
                 # self.logger.tb_writer_add_scalar("train/ep_len", ep_len, t)
                 self.train_ep_ret_dq.append(ep_ret)
                 self.train_ep_len_dq.append(ep_len)
-                o, ep_ret, ep_len = self.env.reset(), 0, 0
+                o, ep_ret, ep_len = self.env.reset_with_init_check(), 0, 0
 
             # Update handling
             if t >= self.update_after and t % self.update_every == 0:
