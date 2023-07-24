@@ -124,7 +124,7 @@ class Demo:
 
                 try:
                     o = self.env.reset_once()
-                    if self.env.init_state_valid():
+                    if self.env.init_state_valid(o):
                         break
                     else:
                         tqdm.write('Init state is not valid. Repeat env reset.')
@@ -136,19 +136,20 @@ class Demo:
             d = 0
             for _ in range(self.max_ep_len):
 
-                print("#######################################################x")
-                print(self.boundary_min)
-                print(self.boundary_max)
+                # print("#######################################################x")
+                # print(self.boundary_min)
+                # print(self.boundary_max)
 
                 a = np.random.uniform(low=self.boundary_min, high=self.boundary_max, size=self.act_dim)
                 #a = np.array([0.1,0.0,0.0])
-                print(a)
-                
+                #print(a)
+
+
                 try:
                     #time.sleep(0.1)
                     o2, r, terminated, truncated, info = self.env.step(a)
                     d = terminated or truncated
-                    print(info)
+                    #print(info)
                     ep_transitions.append((o, a, r, o2, d))
                     o = o2
                     if d == 1:
