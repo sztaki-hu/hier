@@ -94,6 +94,8 @@ class Demo:
                 self.create_random_actions()
             elif self.task_name == 'PandaPush-v3':
                 self.create_random_actions()
+            elif self.task_name == 'PandaSlide-v3':
+                self.create_random_actions()
 
         # RLBENCH
         elif self.config['environment']['name'] == "rlbench":       
@@ -143,6 +145,7 @@ class Demo:
                 print(a)
                 
                 try:
+                    #time.sleep(0.1)
                     o2, r, terminated, truncated, info = self.env.step(a)
                     d = terminated or truncated
                     print(info)
@@ -160,9 +163,10 @@ class Demo:
                     self.demo_buffer.store_episode_nstep(ep_transitions,self.n_step,self.gamma)
                     t+=len(ep_transitions)
                     pbar.update(len(ep_transitions))
-                self.demo_buffer.store_episode_nstep(ep_transitions,self.n_step,self.gamma)
-                t+=len(ep_transitions)
-                pbar.update(len(ep_transitions))
+                else:
+                    self.demo_buffer.store_episode_nstep(ep_transitions,self.n_step,self.gamma)
+                    t+=len(ep_transitions)
+                    pbar.update(len(ep_transitions))
                 #print("#### Avg len: " + str(len(ep_transitions)))
                 
             else:

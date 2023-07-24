@@ -5,7 +5,7 @@ import time
 
 
 REWARD_TYPE_LIST = ['sparse']
-TASK_LIST = ['PandaReach-v3','PandaPush-v3']
+TASK_LIST = ['PandaReach-v3','PandaPush-v3','PandaSlide-v3']
 
 class GymPanda:
     def __init__(self,config):
