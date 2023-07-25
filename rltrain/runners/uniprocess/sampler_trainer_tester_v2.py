@@ -17,6 +17,7 @@ class SamplerTrainerTester:
         self.config = config
 
         self.seed = config['general']['seed'] 
+        self.agent_type = config['agent']['type']
 
         self.steps_per_epoch = config['trainer']['steps_per_epoch'] 
         self.epochs = config['trainer']['epochs'] 
@@ -103,7 +104,11 @@ class SamplerTrainerTester:
             [o, info], d, ep_ret, ep_len = self.test_env.reset_with_init_check(), False, 0, 0
             while not(d or (ep_len == self.max_ep_len)):
                 # Take deterministic actions at test time 
-                o, r, terminated, truncated, info = self.test_env.step(self.agent.get_action(o, True))
+                if self.agent_type == 'sac':
+                    a = self.agent.get_action(o, True)
+                elif self.agent_type == 'td3':
+                    a = self.agent.get_action(o, 0)
+                o, r, terminated, truncated, info = self.test_env.step(a)
                 d = terminated or truncated
                 ep_ret += r
                 ep_len += 1
@@ -143,7 +148,10 @@ class SamplerTrainerTester:
             # from a uniform distribution for better exploration. Afterwards, 
             # use the learned policy. 
             if t > self.start_steps:
-                a = self.agent.get_action(o, False) 
+                if self.agent_type == 'sac':
+                    a = self.agent.get_action(o, False) 
+                elif self.agent_type == 'td3':
+                    a = self.agent.get_action(o, self.agent.act_noise)
                 # a = self.get_action(o)
             else:
                 a = self.env.random_sample()
