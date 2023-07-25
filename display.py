@@ -4,13 +4,14 @@ from os.path import dirname, abspath
 import numpy as np
 import torch
 import argparse
-import rltrain.agents.core as core
+import rltrain.agents.sac.core as core
 
 from rltrain.utils.utils import init_cuda, print_torch_info
 from rltrain.logger.logger import Logger
 from rltrain.envs.RLBenchEnv import RLBenchEnv
 from rltrain.runners.tester import Tester
-from rltrain.agents.agent import Agent
+
+from rltrain.agents.builder import make_agent
 
 import datetime
 timestamp = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
@@ -22,10 +23,21 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     #parser.add_argument("--configfile", default="logs/0615_B_stack_blocks_sac/" ,help="Path of the config file")
     #parser.add_argument("--configfile", default="logs/0620_C_MountainCarContinuous-v0_sac/" ,help="Path of the config file")
-    #parser.add_argument("--configfile", default="logs/0622_B_InvertedDoublePendulum-v4_sac/" ,help="Path of the config file")
-    parser.add_argument("--configfile", default="logs/0626_A_HalfCheetah-v4_sac/" ,help="Path of the config file")
-    #parser.add_argument("--configfile", default="logs/0623_A_Ant-v4_sac/" ,help="Path of the config file")
-    parser.add_argument("--trainid", type=int, default=2 ,help="Train ID")
+    #parser.add_argument("--configfile", default="logs/0719_A_InvertedPendulum-v4_sac/" ,help="Path of the config file")
+    #parser.add_argument("--configfile", default="logs/0719_B_InvertedDoublePendulum-v4_sac/" ,help="Path of the config file")
+    #parser.add_argument("--configfile", default="logs/0718_D_Swimmer-v4_sac/" ,help="Path of the config file")
+    #parser.add_argument("--configfile", default="logs/0717_G_Hopper-v4_sac/" ,help="Path of the config file")
+    #parser.add_argument("--configfile", default="logs/0718_A_HalfCheetah-v4_sac/" ,help="Path of the config file")
+    #parser.add_argument("--configfile", default="logs/0718_B_Ant-v4_sac/" ,help="Path of the config file")
+    #parser.add_argument("--configfile", default="logs/0718_C_Walker2d-v4_sac/" ,help="Path of the config file")
+    #parser.add_argument("--configfile", default="logs/0719_C_Reacher-v4_sac/" ,help="Path of the config file")
+    #parser.add_argument("--configfile", default="logs/0720_A_Humanoid-v4_sac/" ,help="Path of the config file")
+    #parser.add_argument("--configfile", default="logs/0720_B_HumanoidStandup-v4_sac/" ,help="Path of the config file")
+    #parser.add_argument("--configfile", default="logs/0721_A_Pusher-v4_sac/" ,help="Path of the config file")
+    #parser.add_argument("--configfile", default="logs/0721_B_PandaReach-v3_sac/" ,help="Path of the config file")
+    #parser.add_argument("--configfile", default="logs/0724_H_PandaPush-v3_sac/" ,help="Path of the config file")
+    parser.add_argument("--configfile", default="logs/0725_X_01_PandaReach-v3_sac/" ,help="Path of the config file")
+    parser.add_argument("--trainid", type=int, default=0 ,help="Train ID")
     parser.add_argument("--restart", type=bool, default=False ,help="Set true if you want to restart a training")
     # Example: python3 main.py --configfile /cfg/alma.yaml 0
     args = parser.parse_args()
@@ -53,13 +65,13 @@ if __name__ == '__main__':
     config['environment']['headless'] = False
 
     # Init Agent
-    agent = Agent(0,device,config)
+    agent = make_agent(0,device,config)
 
     # Init Trainer
     tester = Tester(agent,logger,config)
 
     # Test Agent
-    tester.display_agent("model_39",1)
+    tester.display_agent("model_50",5)
 
     # Test Agent all models
     # models = logger.list_model_dir()

@@ -4,7 +4,7 @@ from os.path import dirname, abspath
 import numpy as np
 import torch
 import argparse
-import rltrain.agents.core as core
+import rltrain.agents.sac.core as core
 
 from rltrain.utils.utils import init_cuda, print_torch_info
 from rltrain.logger.logger import Logger

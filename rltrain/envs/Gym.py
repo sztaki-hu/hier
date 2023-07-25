@@ -46,16 +46,22 @@ class Gym:
         return o       
 
     def reset_with_init_check(self):
+        init_invalid_num = 0
+        reset_num = 0
         ## Reset Env
         while True:
             try:
                 o = self.reset()
+                reset_num += 1
                 if self.init_state_valid(o):
-                    return o
-                else:                   
-                    time.sleep(0.1)
+                    info = {}
+                    info['init_invalid_num'] = init_invalid_num
+                    info['reset_num'] = reset_num
+                    return o, info
+                else:
+                    init_invalid_num+=0                   
             except:        
-                time.sleep(1)       
+                time.sleep(0.1)        
 
     def init_state_valid(self):
         return True  

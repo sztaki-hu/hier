@@ -100,7 +100,7 @@ class SamplerTrainerTester:
         ep_lens = []
         success_num = 0.0
         for j in range(self.num_test_episodes):
-            o, d, ep_ret, ep_len = self.test_env.reset_with_init_check(), False, 0, 0
+            [o, info], d, ep_ret, ep_len = self.test_env.reset_with_init_check(), False, 0, 0
             while not(d or (ep_len == self.max_ep_len)):
                 # Take deterministic actions at test time 
                 o, r, terminated, truncated, info = self.test_env.step(self.agent.get_action(o, True))
@@ -124,10 +124,15 @@ class SamplerTrainerTester:
         self.test_env = make_env(self.config)
         self.agent = agent
 
+        init_invalid_num = 0
+        reset_num = 0
+
         # Prepare for interaction with environment
         total_steps = self.steps_per_epoch * self.epochs
         #start_time = time.time()
-        o, ep_ret, ep_len = self.env.reset_with_init_check(), 0, 0
+        [o, reset_info], ep_ret, ep_len = self.env.reset_with_init_check(), 0, 0
+        init_invalid_num += reset_info['init_invalid_num']
+        reset_num += reset_info['reset_num']
 
         best_test_ep_ret = -float('inf')
 
@@ -169,16 +174,18 @@ class SamplerTrainerTester:
                 # self.logger.tb_writer_add_scalar("train/ep_len", ep_len, t)
                 self.train_ep_ret_dq.append(ep_ret)
                 self.train_ep_len_dq.append(ep_len)
-                o, ep_ret, ep_len = self.env.reset_with_init_check(), 0, 0
+                [o, reset_info], ep_ret, ep_len = self.env.reset_with_init_check(), 0, 0
+                init_invalid_num += reset_info['init_invalid_num']
+                reset_num += reset_info['reset_num']
 
             # Update handling
             if t >= self.update_after and t % self.update_every == 0:
                 for j in range(self.update_every):
                     batch = replay_buffer.sample_batch(self.batch_size)
                     #print(batch)
-                    ret_loss_q, ret_loss_pi = self.agent.update(data=batch)
+                    ret_loss_q, ret_loss_pi = self.agent.update(batch, j)
                     self.loss_q_dq.append(ret_loss_q)
-                    self.loss_pi_dq.append(ret_loss_pi)
+                    if ret_loss_pi != None: self.loss_pi_dq.append(ret_loss_pi)
 
             # End of epoch handling
             if (t+1) % self.steps_per_epoch == 0:
@@ -209,10 +216,13 @@ class SamplerTrainerTester:
                     tqdm.write("[info] " + message)
                     #logger.save_state({'env': env}, None)       
 
-                self.logger.tb_writer_add_scalar("train/train_ep_ret_", np.mean(self.train_ep_ret_dq), t)
-                self.logger.tb_writer_add_scalar("train/train_ep_len_", np.mean(self.train_ep_len_dq), t)
-                self.logger.tb_writer_add_scalar('train/loss_q_', np.mean(self.loss_q_dq), t)
-                self.logger.tb_writer_add_scalar("train/loss_pi_", np.mean(self.loss_pi_dq), t)
+                self.logger.tb_writer_add_scalar("train/train_ep_ret", np.mean(self.train_ep_ret_dq), t)
+                self.logger.tb_writer_add_scalar("train/train_ep_len", np.mean(self.train_ep_len_dq), t)
+                self.logger.tb_writer_add_scalar('train/loss_q', np.mean(self.loss_q_dq), t)
+                self.logger.tb_writer_add_scalar("train/loss_pi", np.mean(self.loss_pi_dq), t)
+
+                invalid_init_ratio = float(init_invalid_num) / reset_num 
+                self.logger.tb_writer_add_scalar("train/invalid_init_ratio", invalid_init_ratio, t)
 
         self.logger.tb_close()
    

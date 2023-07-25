@@ -4,13 +4,12 @@ import numpy as np
 import torch
 import argparse
 
-from rltrain.agents.agent_v0 import Agent
-
 from rltrain.buffers.replay_v0 import ReplayBuffer
 
 from rltrain.utils.utils import init_cuda, print_torch_info
 from rltrain.logger.logger import Logger
-from rltrain.envs.builder import make_env
+
+from rltrain.agents.builder import make_agent
 from rltrain.runners.uniprocess.sampler_trainer_tester_v2 import SamplerTrainerTester
 
 
@@ -57,7 +56,7 @@ def main():
             act_dim=int(config['environment']['act_dim']), 
             size=int(config['buffer']['replay_buffer_size']))
     
-    agent = Agent(0,device,config)
+    agent = make_agent(0,device,config)
 
     samplerTrainerTester = SamplerTrainerTester(device,logger,config,args)
 

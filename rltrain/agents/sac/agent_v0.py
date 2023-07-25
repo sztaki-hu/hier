@@ -4,7 +4,7 @@ from torch.optim import Adam
 from copy import deepcopy
 import itertools
 
-import rltrain.agents.core as core
+import rltrain.agents.sac.core as core
 
 class Agent:
     def __init__(self,agent_id,device,config):
@@ -13,10 +13,11 @@ class Agent:
         self.actor_critic=core.MLPActorCritic
         self.seed = config['general']['seed'] 
         self.gamma = config['agent']['gamma'] 
+        
+        self.polyak = config['agent']['sac']['polyak'] 
+        self.lr = config['agent']['sac']['lr'][agent_id]
+        self.alpha = config['agent']['sac']['alpha'][agent_id]
 
-        self.polyak = config['agent']['polyak'] 
-        self.lr = config['agent']['lr'][agent_id]
-        self.alpha = config['agent']['alpha'][agent_id]
         self.obs_dim = config['environment']['obs_dim']
         self.act_dim = config['environment']['act_dim']
         self.boundary_min = np.array(config['agent']['boundary_min'])[:self.act_dim]
@@ -184,7 +185,7 @@ class Agent:
 
         return loss_pi, pi_info
 
-    def update(self, data):
+    def update(self, data, placeholder):
 
         self.pivot += 1
 
