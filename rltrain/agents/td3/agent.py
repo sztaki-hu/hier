@@ -34,7 +34,10 @@ class Agent:
         self.act_offset = torch.from_numpy(self.act_offset).float().to(self.device)
         self.act_limit = torch.from_numpy(self.act_limit).float().to(self.device)
 
-        self.act_limit_np = self.act_limit.detach().cpu().numpy()
+        #self.act_limit_np = self.act_limit.detach().cpu().numpy()
+
+        self.act_min = torch.from_numpy(self.boundary_min).float().to(self.device)
+        self.act_max = torch.from_numpy(self.boundary_max).float().to(self.device)
 
         # Create actor-critic module and target networks
         #ac = actor_critic(obs_dim, act_dim, act_offset, act_limit)
@@ -88,7 +91,9 @@ class Agent:
             epsilon = torch.randn_like(pi_targ) * self.target_noise
             epsilon = torch.clamp(epsilon, -self.noise_clip, self.noise_clip)
             a2 = pi_targ + epsilon
-            a2 = torch.clamp(a2, -self.act_limit, self.act_limit)
+            
+            #a2 = torch.clamp(a2, -self.act_limit_np, self.act_limit_np)
+            a2 = torch.max(torch.min(a2, self.act_max), self.act_min)
 
             # Target Q-values
             q1_pi_targ = self.ac_targ.q1(o2, a2)
@@ -159,9 +164,9 @@ class Agent:
     
     def get_action(self,o, noise_scale):
         o = torch.from_numpy(o).float().unsqueeze(0).to(self.device)
-        a = self.ac.act(torch.as_tensor(o, dtype=torch.float32))[0]
+        a = self.ac.act(o)[0]
         a += noise_scale * np.random.randn(self.act_dim)
-        return np.clip(a, -self.act_limit_np, self.act_limit_np)
+        return np.clip(a, self.boundary_min, self.boundary_max)
 
     # def get_action(self, o, deterministic=False):
     #     o = torch.from_numpy(o).float().unsqueeze(0).to(self.device)
@@ -252,4 +257,3 @@ class Agent:
             self.ac.pi.load_state_dict(torch.load(path+"_pi"))
             self.ac.pi.to(self.device)
             if eval: self.ac.pi.eval()
-    
