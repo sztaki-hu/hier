@@ -1,5 +1,5 @@
-general:
-  exp_name: 0725_X_01
+eneral:
+  exp_name: 0725_A
   logdir: logs
   demodir: demos
   seed: 0
@@ -7,12 +7,12 @@ general:
 hardware:
   gpu: [0,1,2] 
   cpu_min: [1,1,1]
-  cpu_max: [10,10,10]
+  cpu_max: [32,32,32]
 
 environment:
-  name: gympanda
+  name: gym
   task: 
-    name: PandaReach-v3
+    name: InvertedPendulum-v4
     params: []
   headless: True
   obs_dim: auto
@@ -21,7 +21,7 @@ environment:
     reward_scalor: 1
     reward_bonus: 0.1
     reward_shaping_type: sparse
-  
+
 
 agent:
   type: sac
@@ -46,11 +46,11 @@ buffer:
   replay_buffer_size: 100000
 
 sampler:
-  start_steps: 1000
+  start_steps: 10000
   max_ep_len: auto
 
 trainer:
-  steps_per_epoch: 100
+  steps_per_epoch: 10000
   epochs: 100
   batch_size: 100
   update_after: 1000
