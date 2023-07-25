@@ -1,7 +1,7 @@
 import numpy as np
 import torch
 
-from rltrain.agents.core import combined_shape
+from rltrain.agents.sac.core import combined_shape
 
 class ReplayBuffer:
     """
