@@ -1,5 +1,5 @@
 general:
-  exp_name: 0725_A
+  exp_name: 0725_B
   logdir: logs
   demodir: demos
   seed: 0
@@ -10,9 +10,9 @@ hardware:
   cpu_max: [32,32,32]
 
 environment:
-  name: gym
+  name: gympanda
   task: 
-    name: InvertedPendulum-v4
+    name: PandaReach-v3
     params: []
   headless: True
   obs_dim: auto
@@ -24,7 +24,7 @@ environment:
 
 
 agent:
-  type: sac
+  type: td3
   hidden_sizes: [256,256]
   boundary_min: auto
   boundary_max: auto
@@ -41,6 +41,7 @@ agent:
     q_lr : 0.001
     policy_delay : 2
     polyak : 0.995
+    act_noise: 0.1
 
 buffer:
   replay_buffer_size: 100000
@@ -50,7 +51,7 @@ sampler:
   max_ep_len: auto
 
 trainer:
-  steps_per_epoch: 10000
+  steps_per_epoch: 250
   epochs: 100
   batch_size: 100
   update_after: 1000
