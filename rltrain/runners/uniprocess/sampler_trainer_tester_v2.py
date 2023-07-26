@@ -9,12 +9,13 @@ from rltrain.envs.builder import make_env
 
 class SamplerTrainerTester:
 
-    def __init__(self,device,logger,config,main_args):
+    def __init__(self,device,logger,config,main_args,config_framework):
 
         self.device = device
         
         self.logger = logger
         self.config = config
+        self.config_framework = config_framework
 
         self.seed = config['general']['seed'] 
         self.agent_type = config['agent']['type']
@@ -125,8 +126,8 @@ class SamplerTrainerTester:
 
     def start(self,agent,replay_buffer):
 
-        self.env = make_env(self.config)
-        self.test_env = make_env(self.config)
+        self.env = make_env(self.config, self.config_framework)
+        self.test_env = make_env(self.config, self.config_framework)
         self.agent = agent
 
         init_invalid_num = 0

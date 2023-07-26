@@ -11,22 +11,29 @@ import pandas as pd
 
 class Logger:
     # init method or constructor
-    def __init__(self, current_dir, main_args, light_mode = False):
+    def __init__(self, current_dir, main_args, display_mode = False, tb_layout = False, exp = None):
 
         self.current_dir = current_dir
         self.trainid = str(main_args.trainid)
 
         print(main_args)
-
-        if main_args.restart == False:       
-            self.config_path = os.path.join(current_dir,main_args.configfile)
-        else:
-            self.config_path = os.path.join(current_dir,main_args.configfile,self.trainid,"config.yaml")
         
+        if display_mode == False:       
+            self.config_path = os.path.join(current_dir,main_args.config)
+        else:
+            self.config_path = os.path.join(current_dir,main_args.config,self.trainid,"config.yaml")
+     
         print(current_dir)
         print(self.config_path)
         
         self.config = self.load_yaml(self.config_path)
+
+        if exp != None:
+            self.config['environment']['name'] = exp['env']
+            self.config['environment']['task']['name'] = exp['task']
+            self.config['agent']['type'] = exp['agent']
+
+        self.config_framework = self.load_yaml(os.path.join(current_dir,'cfg_framework','config_framework.yaml'))
 
         self.logdir = self.config['general']['logdir']
         self.logname = self.config['general']['exp_name'] + "_" + self.config['environment']['task']['name'] + "_" + self.config['agent']['type'] 
@@ -50,8 +57,7 @@ class Logger:
 
         self.check_config_values()
 
-        if main_args.restart == False: 
-            self.compute_and_replace_auto_values()
+        self.compute_and_replace_auto_values()
 
         self.save_yaml(os.path.join(self.current_dir, "cfg_rlbench" ,"config.yaml"),cfg_rlbench)
 
@@ -65,14 +71,15 @@ class Logger:
         self.agent_num = int(self.config['agent']['agent_num'])
         if self.agent_num > 1: assert self.config['general']['sync'] == True
 
-        if light_mode == False:
-            if main_args.restart == False:     
-                for agent_id in range(self.agent_num):
+        if display_mode == False: 
+            for agent_id in range(self.agent_num):
                     self.create_folder(os.path.join(self.current_dir,self.logdir, self.logname,self.trainid,"model_backup",str(agent_id)))
                 #self.create_folder(os.path.join(self.current_dir,self.logdir, self.logname,self.trainid,"replay_buffer_backup"))
-                #self.create_folder(os.path.join(self.current_dir, self.logdir, self.logname,self.trainid,"plots_raw_data"))
-                self.save_yaml(os.path.join(self.current_dir, self.logdir,self.logname,self.trainid,"config.yaml"),self.config)
+                #self.create_folder(os.path.join(self.current_dir, self.logdir, self.logname,self.trainid,"plots_raw_data"))              
+            self.save_yaml(os.path.join(self.current_dir, self.logdir,self.logname,self.trainid,"config.yaml"),self.config)
 
+        self.writer = SummaryWriter(log_dir = os.path.join(self.current_dir,self.logdir,self.logname,self.trainid,"runs"))
+        if tb_layout == True:
             train_ret_list = []
             train_ep_len_list = []
             train_pi_loss_list = []
@@ -103,7 +110,6 @@ class Logger:
                 },
             }
 
-            self.writer = SummaryWriter(log_dir = os.path.join(self.current_dir,self.logdir,self.logname,self.trainid,"runs"))
             self.writer.add_custom_scalars(layout)
     
     def handle_ancient_versions(self):
@@ -457,13 +463,12 @@ class Logger:
 
     def get_model_path(self,name, agent_id = 0):
         return os.path.join(self.current_dir,self.logdir, self.logname,self.trainid,"model_backup",str(agent_id),name)
-    
-    def get_model_path_for_restart(self,dir = "model_backup_restart", epoch = 1, agent_id = 0):
-        name = "model_" + str(epoch)
-        return os.path.join(self.current_dir,self.logdir, self.logname,self.trainid,str(dir),str(agent_id),name)
 
     def get_config(self):
         return self.config
+    
+    def get_config_framework(self):
+        return self.config_framework
     
     def tb_writer_add_scalar(self,name,value,iter):
         self.writer.add_scalar(name, value, iter)

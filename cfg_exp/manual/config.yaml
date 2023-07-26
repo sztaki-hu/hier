@@ -1,5 +1,5 @@
 general:
-  exp_name: 0725_B
+  exp_name: 0726_X_test
   logdir: logs
   demodir: demos
   seed: 0
@@ -52,7 +52,7 @@ sampler:
 
 trainer:
   steps_per_epoch: 250
-  epochs: 100
+  epochs: 10
   batch_size: 100
   update_after: 1000
   update_every: 50

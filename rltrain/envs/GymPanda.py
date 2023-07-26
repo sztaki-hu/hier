@@ -3,14 +3,14 @@ import gymnasium as gym
 import panda_gym
 import time
 
+from rltrain.envs.Env import Env
 
-
-TASK_LIST = ['PandaReach-v3','PandaPush-v3','PandaSlide-v3']
-
-class GymPanda:
-    def __init__(self,config):
+class GymPanda(Env):
+    def __init__(self,config,config_framework):
+        
         self.config = config
-
+        self.config_framework = config_framework
+        
         # General
         self.action_space = config['agent']['action_space']
         self.task_name = self.config['environment']['task']['name']
@@ -22,7 +22,7 @@ class GymPanda:
         self.reward_bonus = config['environment']['reward']['reward_bonus']
 
         # Check validity
-        assert self.task_name in TASK_LIST
+        assert self.task_name in self.config_framework['task_list']['gympanda']
 
         self.npclose = 0
         self.close = 0
@@ -35,34 +35,12 @@ class GymPanda:
         self.env._max_episode_steps = self.max_ep_len
 
         self.reset()
-
     
-    def shuttdown(self):
-        self.reset()
-        self.env.close()
-
     def reset(self):
-        o_dict, info = self.env.reset()
+        o_dict, _ = self.env.reset()
         o = np.concatenate((o_dict['observation'], o_dict['desired_goal']))
-        return o     
+        return o    
 
-    def reset_with_init_check(self):
-        init_invalid_num = 0
-        reset_num = 0
-        ## Reset Env
-        while True:
-            try:
-                o = self.reset()
-                reset_num += 1
-                if self.init_state_valid(o):
-                    info = {}
-                    info['init_invalid_num'] = init_invalid_num
-                    info['reset_num'] = reset_num
-                    return o, info
-                else:
-                    init_invalid_num+=0                   
-            except:        
-                time.sleep(0.1)      
 
     def init_state_valid(self, o):
         if self.task_name == 'PandaPush-v3':
@@ -84,11 +62,6 @@ class GymPanda:
 
         return o, r, terminated, truncated, info
     
-    def random_sample(self):
-        return self.env.action_space.sample()
-    
-    def get_max_return(self):
-        return None
     
   
                  

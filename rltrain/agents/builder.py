@@ -1,10 +1,8 @@
-AGENT_TYPES = ['sac', 'td3']
-
-def make_agent(id,device,config):
+def make_agent(id,device,config,config_framework):
 
     agent_type = config['agent']['type']
 
-    assert agent_type in AGENT_TYPES 
+    assert agent_type in config_framework['agent_list'] 
 
     if agent_type == 'sac':
         from rltrain.agents.sac.agent_v0 import Agent

@@ -19,17 +19,14 @@ import torch
 def main():
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--configfile", default="cfg/config.yaml" ,help="Path of the config file")
-    #parser.add_argument("--configfile", default="logs/0216_A_test_stack_blocks_sac" ,help="Path of the config file")
+    parser.add_argument("--config", default="cfg/config.yaml" ,help="Path of the config file")
     parser.add_argument("--trainid", type=int, default=0 ,help="Train ID")
-    parser.add_argument("--restart", type=bool, default=False ,help="Set true if you want to restart a training")
-    parser.add_argument("--restart_epoch", type=int, default=5 ,help="The epoch number from where you want to restart the training.")
     # Example: python3 main.py --configfile /cfg/alma.yaml
     args = parser.parse_args()
 
     # Init logger ###############################################x
     current_dir = dirname(abspath(__file__))
-    logger = Logger(current_dir = current_dir, main_args = args, light_mode = True)
+    logger = Logger(current_dir = current_dir, main_args = args, display_mode = True, tb_layout = False)
     config = logger.get_config()
 
     #print(config['environment']['task']['params'])
@@ -56,9 +53,9 @@ def main():
     # demo = Demo(logger,config)
     # demoBuffer = demo.load_demos()
     # #print(demoBuffer.get_t())
-    # batch = demoBuffer.get_first(10)
+    # batch = demoBuffer.get_first(12)
     # print(batch)
-    #print(demoBuffer.get_t())
+    # print(demoBuffer.get_t())
                      
 
 if __name__ == '__main__':

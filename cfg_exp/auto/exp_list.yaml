@@ -1,0 +1,6 @@
+agent_list: ['sac','td3']
+task_list:
+  gym: ['InvertedPendulum-v4','InvertedDoublePendulum-v4','Swimmer-v4']
+  gympanda: ['PandaReach-v3','PandaPush-v3','PandaSlide-v3']
+
+    

@@ -27,7 +27,6 @@ if __name__ == '__main__':
     parser.add_argument("--configfile", default="logs/0420_A_stack_blocks_sac/" ,help="Path of the config file")
     #parser.add_argument("--configfile", default="logs/0308_C_MountainCarContinuous-v0_sac/" ,help="Path of the config file")
     parser.add_argument("--trainid", type=int, default=0 ,help="Train ID")
-    parser.add_argument("--restart", type=bool, default=False ,help="Set true if you want to restart a training")
     parser.add_argument("--test2env", default="simsimv2" ,help="Name of test2 env")
     # Example: python3 main.py --configfile /cfg/alma.yaml 0
     args = parser.parse_args()
@@ -35,8 +34,7 @@ if __name__ == '__main__':
     # Init logger 
     current_dir = dirname(abspath(__file__))
 
-    args.restart = True
-    logger = Logger(current_dir = current_dir, main_args = args)
+    logger = Logger(current_dir = current_dir, main_args = args, display_mode = False, tb_layout = False)
     config = logger.get_config()
 
     # Init CUDA

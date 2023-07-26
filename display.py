@@ -21,32 +21,16 @@ import torch
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
-    #parser.add_argument("--configfile", default="logs/0615_B_stack_blocks_sac/" ,help="Path of the config file")
-    #parser.add_argument("--configfile", default="logs/0620_C_MountainCarContinuous-v0_sac/" ,help="Path of the config file")
-    #parser.add_argument("--configfile", default="logs/0719_A_InvertedPendulum-v4_sac/" ,help="Path of the config file")
-    #parser.add_argument("--configfile", default="logs/0719_B_InvertedDoublePendulum-v4_sac/" ,help="Path of the config file")
-    #parser.add_argument("--configfile", default="logs/0718_D_Swimmer-v4_sac/" ,help="Path of the config file")
-    #parser.add_argument("--configfile", default="logs/0717_G_Hopper-v4_sac/" ,help="Path of the config file")
-    #parser.add_argument("--configfile", default="logs/0718_A_HalfCheetah-v4_sac/" ,help="Path of the config file")
-    #parser.add_argument("--configfile", default="logs/0718_B_Ant-v4_sac/" ,help="Path of the config file")
-    #parser.add_argument("--configfile", default="logs/0718_C_Walker2d-v4_sac/" ,help="Path of the config file")
-    #parser.add_argument("--configfile", default="logs/0719_C_Reacher-v4_sac/" ,help="Path of the config file")
-    #parser.add_argument("--configfile", default="logs/0720_A_Humanoid-v4_sac/" ,help="Path of the config file")
-    #parser.add_argument("--configfile", default="logs/0720_B_HumanoidStandup-v4_sac/" ,help="Path of the config file")
-    #parser.add_argument("--configfile", default="logs/0721_A_Pusher-v4_sac/" ,help="Path of the config file")
-    #parser.add_argument("--configfile", default="logs/0721_B_PandaReach-v3_sac/" ,help="Path of the config file")
-    #parser.add_argument("--configfile", default="logs/0724_H_PandaPush-v3_sac/" ,help="Path of the config file")
-    parser.add_argument("--configfile", default="logs/0725_X_01_PandaReach-v3_sac/" ,help="Path of the config file")
+    parser.add_argument("--config", default="logs/0725_X_01_PandaReach-v3_sac/" ,help="Path of the config file")
     parser.add_argument("--trainid", type=int, default=0 ,help="Train ID")
-    parser.add_argument("--restart", type=bool, default=False ,help="Set true if you want to restart a training")
     # Example: python3 main.py --configfile /cfg/alma.yaml 0
     args = parser.parse_args()
 
     # Init logger 
     current_dir = dirname(abspath(__file__))
-    #config_path = current_dir + "/logs/0216_B_stack_blocks_sac/"+ str(trainid) +"/config.yaml"
-    args.restart = True
-    logger = Logger(current_dir = current_dir, main_args = args)
+    config_path = os.path.join(current_dir,args.config)
+
+    logger = Logger(current_dir = current_dir, main_args = args, display_mode = True, tb_layout = False)
     config = logger.get_config()
 
     # Init CUDA

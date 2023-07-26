@@ -2,15 +2,15 @@ import numpy as np
 import gymnasium as gym
 import time
 
+from rltrain.envs.Env import Env
 
 REWARD_TYPE_LIST = ['sparse','energy']
-TASK_LIST = ['MountainCarContinuous-v0','InvertedPendulum-v4','InvertedDoublePendulum-v4','Swimmer-v4',
-             'Hopper-v4','HalfCheetah-v4','Walker2d-v4','Ant-v4','Reacher-v4','Humanoid-v4','HumanoidStandup-v4','Pusher-v4']
 
-class Gym:
-    def __init__(self,config):
+class Gym(Env):
+    def __init__(self,config,config_framework):
         
         self.config = config
+        self.config_framework = config_framework
 
         # General
         self.task_name = self.config['environment']['task']['name']
@@ -23,9 +23,9 @@ class Gym:
         self.reward_scalor = config['environment']['reward']['reward_scalor']
         self.reward_bonus = config['environment']['reward']['reward_bonus']
 
-        # Check validity
+        # Check validity       
+        assert self.task_name in self.config_framework['task_list']['gym']
         assert self.reward_shaping_type in REWARD_TYPE_LIST
-        assert self.task_name in TASK_LIST
 
         # Create env
         if self.config['environment']['headless']:
@@ -34,38 +34,16 @@ class Gym:
             self.env = gym.make(self.task_name, render_mode="human")
         self.env._max_episode_steps = self.max_ep_len
 
-        self.reset()
-
+        self.reset() 
     
-    def shuttdown(self):
-        self.reset()
-        self.env.close()
+    def is_success(self):
+        if self.task_name == 'InvertedPendulum-v4':
+            return True if self.t == self.max_ep_len else False
+        elif self.task_name == 'InvertedDoublePendulum-v4':
+            return True if self.t == self.max_ep_len else False
 
-    def reset(self):
-        o, info = self.env.reset()
-        return o       
-
-    def reset_with_init_check(self):
-        init_invalid_num = 0
-        reset_num = 0
-        ## Reset Env
-        while True:
-            try:
-                o = self.reset()
-                reset_num += 1
-                if self.init_state_valid(o):
-                    info = {}
-                    info['init_invalid_num'] = init_invalid_num
-                    info['reset_num'] = reset_num
-                    return o, info
-                else:
-                    init_invalid_num+=0                   
-            except:        
-                time.sleep(0.1)        
-
-    def init_state_valid(self):
-        return True  
-    
+        return False
+      
     def step(self,action):
 
         o, r, terminated, truncated, info = self.env.step(action)
@@ -84,20 +62,9 @@ class Gym:
         info['is_success'] = True if self.is_success() == True else False
 
         return o, r, terminated, truncated, info
-    
-    def random_sample(self):
-        return self.env.action_space.sample()
 
-    def is_success(self):
-        if self.task_name == 'InvertedPendulum-v4':
-            return True if self.t == self.max_ep_len else False
-        elif self.task_name == 'InvertedDoublePendulum-v4':
-            return True if self.t == self.max_ep_len else False
+   
 
-        return False
-
-    def get_max_return(self):
-        return None
     
 
     
