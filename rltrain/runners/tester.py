@@ -13,11 +13,12 @@ from rltrain.envs.builder import make_env
 
 class Tester:
 
-    def __init__(self,agent,logger,config):
+    def __init__(self,agent,logger,config,config_framework):
         #self.env = env
         self.agent = agent
         self.logger = logger
         self.config = config
+        self.config_framework = config_framework
 
         self.seed = config['general']['seed']        
         self.max_ep_len = config['sampler']['max_ep_len']
@@ -293,7 +294,7 @@ class Tester:
 
         avg_return = -1
 
-        self.env = make_env(self.config)
+        self.env = make_env(self.config,self.config_framework)
 
         sum_return = 0
         for j in tqdm(range(num_display_episode), desc ="Testing: ", leave=False):

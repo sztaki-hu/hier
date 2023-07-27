@@ -21,8 +21,8 @@ import torch
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--config", default="logs/0725_X_01_PandaReach-v3_sac/" ,help="Path of the config file")
-    parser.add_argument("--trainid", type=int, default=0 ,help="Train ID")
+    parser.add_argument("--config", default="logs/0726_A_auto_Swimmer-v4_td3/" ,help="Path of the config file")
+    parser.add_argument("--trainid", type=int, default=1 ,help="Train ID")
     # Example: python3 main.py --configfile /cfg/alma.yaml 0
     args = parser.parse_args()
 
@@ -32,6 +32,7 @@ if __name__ == '__main__':
 
     logger = Logger(current_dir = current_dir, main_args = args, display_mode = True, tb_layout = False)
     config = logger.get_config()
+    config_framework = logger.get_config_framework()
 
     # Init CUDA
     hw_train_id = 0
@@ -49,13 +50,13 @@ if __name__ == '__main__':
     config['environment']['headless'] = False
 
     # Init Agent
-    agent = make_agent(0,device,config)
+    agent = make_agent(0,device,config,config_framework)
 
     # Init Trainer
-    tester = Tester(agent,logger,config)
+    tester = Tester(agent,logger,config,config_framework)
 
     # Test Agent
-    tester.display_agent("model_50",5)
+    tester.display_agent("model_69",1)
 
     # Test Agent all models
     # models = logger.list_model_dir()
