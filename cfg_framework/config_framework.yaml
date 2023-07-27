@@ -1,8 +1,9 @@
 agent_list: ['sac','td3']
-env_list: ['gym','gympanda']
+env_list: ['gym','gympanda','gym_mod']
 task_list:
   gym: ['MountainCarContinuous-v0','InvertedPendulum-v4','InvertedDoublePendulum-v4','Swimmer-v4',
              'Hopper-v4','HalfCheetah-v4','Walker2d-v4','Ant-v4','Reacher-v4','Humanoid-v4','HumanoidStandup-v4','Pusher-v4']
   gympanda: ['PandaReach-v3','PandaPush-v3','PandaSlide-v3']
+  gym_mod: ['Hopper-v4']
 
     

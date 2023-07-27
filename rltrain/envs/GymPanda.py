@@ -4,37 +4,9 @@ import panda_gym
 import time
 
 from rltrain.envs.Env import Env
+from rltrain.envs.builder import make_task
 
 class GymPanda(Env):
-    def __init__(self,config,config_framework):
-        
-        self.config = config
-        self.config_framework = config_framework
-        
-        # General
-        self.action_space = config['agent']['action_space']
-        self.task_name = self.config['environment']['task']['name']
-        self.max_ep_len = config['sampler']['max_ep_len'] 
-
-        # Reward
-        self.reward_shaping_type = config['environment']['reward']['reward_shaping_type']
-        self.reward_scalor = config['environment']['reward']['reward_scalor']
-        self.reward_bonus = config['environment']['reward']['reward_bonus']
-
-        # Check validity
-        assert self.task_name in self.config_framework['task_list']['gympanda']
-
-        self.npclose = 0
-        self.close = 0
-
-        # Create env
-        if self.config['environment']['headless']:
-            self.env = gym.make(self.task_name)
-        else:
-            self.env = gym.make(self.task_name, render_mode="human")
-        self.env._max_episode_steps = self.max_ep_len
-
-        self.reset()
     
     def reset(self):
         o_dict, _ = self.env.reset()

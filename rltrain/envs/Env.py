@@ -2,10 +2,31 @@ import numpy as np
 import gymnasium as gym
 import time
 
+from rltrain.envs.builder import make_task
+
 class Env:
-    def __init__(self):
-        self.env = None
-        pass
+
+    def __init__(self,config,config_framework):
+        
+        self.config = config
+        self.config_framework = config_framework
+
+        # General
+        self.task_name = self.config['environment']['task']['name']
+        self.action_space = config['agent']['action_space']
+        self.max_ep_len = config['sampler']['max_ep_len']
+        self.t = 0           
+
+        # Reward
+        self.reward_shaping_type = config['environment']['reward']['reward_shaping_type']
+        self.reward_scalor = config['environment']['reward']['reward_scalor']
+        self.reward_bonus = config['environment']['reward']['reward_bonus']
+
+        # Create taskenv
+        self.env = make_task(config,config_framework)
+        self.env._max_episode_steps = self.max_ep_len
+
+        self.reset() 
     
     def reset(self):
         o, _ = self.env.reset()
