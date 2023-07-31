@@ -55,14 +55,8 @@ class Demo:
 
     def create_demos(self):  
         
-        # RLBENCH JOINT
-        if self.config['environment']['name'] == "rlbenchjoint":
-            if self.task_name == "reach_target_no_distractors":
-                if self.action_space == "joint":
-                    self.create_demo_reach_joint()
-        
         # GYM
-        elif self.config['environment']['name'] == "gym":
+        if self.config['environment']['name'] == "gym":
             if self.task_name == "MountainCarContinuous-v0":
                 self.create_demo_MountainCarContinuous()
             elif self.task_name == "InvertedPendulum-v4":
@@ -96,16 +90,21 @@ class Demo:
                 self.create_random_actions()
             elif self.task_name == 'PandaSlide-v3':
                 self.create_random_actions()
+        
+        # RLBENCH JOINT
+        elif self.config['environment']['name'] == "rlbench_joint":
+            if self.task_name == "reach_target_no_distractors":
+                    self.create_random_actions()
 
-        # RLBENCH
-        elif self.config['environment']['name'] == "rlbench":       
-            if self.task_name == "stack_blocks":
-                if (self.action_space == "pick_and_place_2d") or (self.action_space == "pick_and_place_3d"):
-                    self.create_demos_stack_blocks_pick_and_place()
-                elif self.action_space == "pick_and_place_3d_quat":
-                    self.create_demos_stack_blocks_pick_and_place_3d_quat()
-                elif self.action_space == "pick_and_place_3d_z90":        
-                    self.create_demos_stack_blocks_pick_and_place_3d_z90()
+        # # RLBENCH
+        # elif self.config['environment']['name'] == "rlbench":       
+        #     if self.task_name == "stack_blocks":
+        #         if (self.action_space == "pick_and_place_2d") or (self.action_space == "pick_and_place_3d"):
+        #             self.create_demos_stack_blocks_pick_and_place()
+        #         elif self.action_space == "pick_and_place_3d_quat":
+        #             self.create_demos_stack_blocks_pick_and_place_3d_quat()
+        #         elif self.action_space == "pick_and_place_3d_z90":        
+        #             self.create_demos_stack_blocks_pick_and_place_3d_z90()
         
     def create_random_actions(self):
 

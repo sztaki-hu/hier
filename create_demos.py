@@ -19,14 +19,14 @@ import torch
 def main():
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--config", default="cfg/config.yaml" ,help="Path of the config file")
+    parser.add_argument("--config", default="cfg_exp/manual/config.yaml" ,help="Path of the config file")
     parser.add_argument("--trainid", type=int, default=0 ,help="Train ID")
     # Example: python3 main.py --configfile /cfg/alma.yaml
     args = parser.parse_args()
 
     # Init logger ###############################################x
     current_dir = dirname(abspath(__file__))
-    logger = Logger(current_dir = current_dir, main_args = args, display_mode = True, tb_layout = False)
+    logger = Logger(current_dir = current_dir, main_args = args, display_mode = False, tb_layout = False)
     config = logger.get_config()
 
     #print(config['environment']['task']['params'])

@@ -1,5 +1,5 @@
 general:
-  exp_name: 0726_X_test
+  exp_name: 0731_X
   logdir: logs
   demodir: demos
   seed: 0
@@ -10,18 +10,18 @@ hardware:
   cpu_max: [32,32,32]
 
 environment:
-  name: gympanda
+  name: gym
   task: 
-    name: PandaReach-v3
+    name: Pusher-v4
     params: []
   headless: True
   obs_dim: auto
   act_dim: auto
+  camera: False
   reward:
     reward_scalor: 1
     reward_bonus: 0.1
     reward_shaping_type: sparse
-
 
 agent:
   type: td3

@@ -191,16 +191,17 @@ class Logger:
                 elif self.task_name == 'PandaPush-v3':
                     self.config['sampler']['max_ep_len'] = 50
                 elif self.task_name == 'PandaSlide-v3':
-                    self.config['sampler']['max_ep_len'] = 50                  
+                    self.config['sampler']['max_ep_len'] = 50   
+
+            elif env_name == "rlbench_joint":
+                if self.task_name == "reach_target_no_distractors": 
+                    self.config['sampler']['max_ep_len'] = 50               
 
         ## OBS DIM
         if self.config['environment']['obs_dim'] == "auto":
-            # RLBENCH JOINT
-            if env_name == "rlbenchjoint":
-                if self.task_name == "reach_target_no_distractors":
-                    self.config['environment']['obs_dim'] = 3
+
             # GYM
-            elif env_name == "gym" or env_name == "gym_mod":
+            if env_name == "gym" or env_name == "gym_mod":
                 if self.task_name == "MountainCarContinuous-v0":
                     self.config['environment']['obs_dim'] = 2
                 elif self.task_name == "InvertedPendulum-v4":
@@ -233,18 +234,22 @@ class Logger:
                 elif self.task_name == 'PandaPush-v3':
                     self.config['environment']['obs_dim'] = 21 # 6 (robot) + 12 (1 object) + 3 (target)     
                 elif self.task_name == 'PandaSlide-v3':
-                    self.config['environment']['obs_dim'] = 21 # 6 (robot) + 12 (1 object) + 3 (target)  
+                    self.config['environment']['obs_dim'] = 21 # 6 (robot) + 12 (1 object) + 3 (target) 
 
-                
-            # RLBENCH
-            elif env_name == "rlbench":
-                if self.task_name == "stack_blocks":
-                    if self.state_space == "xyz":
-                        self.config['environment']['obs_dim'] = 3 + self.task_params[0] * 3 + self.task_params[1] * 3
-                    elif self.state_space == "xyz_quat":
-                        self.config['environment']['obs_dim'] = 7 + self.task_params[0] * 7 + self.task_params[1] * 7
-                    elif self.state_space == "xyz_z90":
-                        self.config['environment']['obs_dim'] = 4 + self.task_params[0] * 4 + self.task_params[1] * 4
+            # RLBENCH JOINT
+            elif env_name == "rlbench_joint":
+                if self.task_name == "reach_target_no_distractors":
+                    self.config['environment']['obs_dim'] = 9 # 6 (robot) + 3 (target)  
+              
+            # # RLBENCH
+            # elif env_name == "rlbench":
+            #     if self.task_name == "stack_blocks":
+            #         if self.state_space == "xyz":
+            #             self.config['environment']['obs_dim'] = 3 + self.task_params[0] * 3 + self.task_params[1] * 3
+            #         elif self.state_space == "xyz_quat":
+            #             self.config['environment']['obs_dim'] = 7 + self.task_params[0] * 7 + self.task_params[1] * 7
+            #         elif self.state_space == "xyz_z90":
+            #             self.config['environment']['obs_dim'] = 4 + self.task_params[0] * 4 + self.task_params[1] * 4
             else:
                 self.print_logfile("Obs dim could not be computed","error")
                 assert False
@@ -252,14 +257,9 @@ class Logger:
 
         ## ACT DIM
         if self.config['environment']['act_dim'] == "auto":
-            # RLBENCH JOINT
-            if env_name == "rlbenchjoint":
-                if self.action_space == "joint":
-                    self.config['environment']['act_dim'] = 6
-                elif self.action_space == "jointgripper":
-                    self.config['environment']['act_dim'] = 7
+           
             # GYM
-            elif env_name == "gym" or env_name == "gym_mod":
+            if env_name == "gym" or env_name == "gym_mod":
                 if self.task_name == "MountainCarContinuous-v0":
                     self.config['environment']['act_dim'] = 1
                 elif self.task_name == "InvertedPendulum-v4":
@@ -293,19 +293,24 @@ class Logger:
                     self.config['environment']['act_dim'] = 3
                 elif self.task_name == 'PandaSlide-v3':
                     self.config['environment']['act_dim'] = 3
+            
+             # RLBENCH JOINT
+            elif env_name == "rlbench_joint":
+               if self.task_name == "reach_target_no_distractors":
+                   self.config['environment']['act_dim'] = 6
 
                     
-            # RLBENCH
-            elif env_name == "rlbench":
-                if self.task_name == "stack_blocks":
-                    if self.action_space == "pick_and_place_2d":
-                        self.config['environment']['act_dim'] = 4
-                    elif self.action_space == "pick_and_place_3d":
-                        self.config['environment']['act_dim'] = 6
-                    elif self.action_space == "pick_and_place_3d_quat":
-                        self.config['environment']['act_dim'] = 14
-                    elif self.action_space == "pick_and_place_3d_z90":
-                        self.config['environment']['act_dim'] = 8
+            # # RLBENCH
+            # elif env_name == "rlbench":
+            #     if self.task_name == "stack_blocks":
+            #         if self.action_space == "pick_and_place_2d":
+            #             self.config['environment']['act_dim'] = 4
+            #         elif self.action_space == "pick_and_place_3d":
+            #             self.config['environment']['act_dim'] = 6
+            #         elif self.action_space == "pick_and_place_3d_quat":
+            #             self.config['environment']['act_dim'] = 14
+            #         elif self.action_space == "pick_and_place_3d_z90":
+            #             self.config['environment']['act_dim'] = 8
 
             else:
                 self.print_logfile("Act dim could not be computed","error")
@@ -314,14 +319,9 @@ class Logger:
         
         ## BOUNDARY MIN
         if self.config['agent']['boundary_min'] == "auto":
-            # RLBENCH JOINT
-            if env_name == "rlbenchjoint":
-                if self.action_space == "joint":
-                    self.config['agent']['boundary_min'] = [-1.0,-1.0,-1.0,-1.0,-1.0,-1.0]
-                elif self.action_space == "jointgripper":
-                    self.config['agent']['boundary_min'] = [-1.0,-1.0,-1.0,-1.0,-1.0,-1.0,0.0]
+            
             # GYM
-            elif env_name == "gym" or env_name == "gym_mod":
+            if env_name == "gym" or env_name == "gym_mod":
                 if self.task_name == "MountainCarContinuous-v0":
                     self.config['agent']['boundary_min'] = [-1.0]
                 elif self.task_name == "InvertedPendulum-v4":
@@ -355,30 +355,30 @@ class Logger:
                     self.config['agent']['boundary_min'] = [-1.0] * 3 #?
                 elif self.task_name == 'PandaSlide-v3':
                     self.config['agent']['boundary_min'] = [-1.0] * 3 #?
+            
+            # RLBENCH JOINT
+            elif env_name == "rlbench_joint":
+                if self.task_name == "reach_target_no_distractors":
+                    self.config['agent']['boundary_min'] = [-1.0] * 6 #?
 
 
-            # RLBENCH
-            elif env_name == "rlbench":
-                if self.task_name == "stack_blocks":
-                    if self.action_space == "pick_and_place_2d":
-                        self.config['agent']['boundary_min'] = [0.1,-0.3,0.1,-0.3]
-                    elif self.action_space == "pick_and_place_3d":
-                        self.config['agent']['boundary_min'] = [0.1,-0.3,0.76,0.1,-0.3,0.76]
-                    elif self.action_space == "pick_and_place_3d_quat":
-                        self.config['agent']['boundary_min'] = [0.1,-0.3,0.76,0,0,0,0,0.1,-0.3,0.76,0,0,0,0]
-                    elif self.action_space == "pick_and_place_3d_z90":
-                        self.config['agent']['boundary_min'] = [0.1,-0.3,0.76,0.0,0.1,-0.3,0.76,0.0]
+            # # RLBENCH
+            # elif env_name == "rlbench":
+            #     if self.task_name == "stack_blocks":
+            #         if self.action_space == "pick_and_place_2d":
+            #             self.config['agent']['boundary_min'] = [0.1,-0.3,0.1,-0.3]
+            #         elif self.action_space == "pick_and_place_3d":
+            #             self.config['agent']['boundary_min'] = [0.1,-0.3,0.76,0.1,-0.3,0.76]
+            #         elif self.action_space == "pick_and_place_3d_quat":
+            #             self.config['agent']['boundary_min'] = [0.1,-0.3,0.76,0,0,0,0,0.1,-0.3,0.76,0,0,0,0]
+            #         elif self.action_space == "pick_and_place_3d_z90":
+            #             self.config['agent']['boundary_min'] = [0.1,-0.3,0.76,0.0,0.1,-0.3,0.76,0.0]
         
         ## BOUNDARY MAX
         if self.config['agent']['boundary_max'] == "auto":
-            # RLBENCH JOINT
-            if env_name == "rlbenchjoint":
-                if self.action_space == "joint":
-                    self.config['agent']['boundary_max'] = [1.0,1.0,1.0,1.0,1.0,1.0]
-                elif self.action_space == "jointgripper":
-                    self.config['agent']['boundary_max'] = [1.0,1.0,1.0,1.0,1.0,1.0,1.0]
+            
             # GYM
-            elif env_name == "gym" or env_name == "gym_mod":
+            if env_name == "gym" or env_name == "gym_mod":
                 if self.task_name == "MountainCarContinuous-v0":
                     self.config['agent']['boundary_max'] = [1.0]
                 elif self.task_name == "InvertedPendulum-v4":
@@ -412,20 +412,25 @@ class Logger:
                     self.config['agent']['boundary_max'] = [1.0] * 3
                 elif self.task_name == 'PandaSlide-v3':
                     self.config['agent']['boundary_max'] = [1.0] * 3
+            
+            # RLBENCH JOINT
+            elif env_name == "rlbench_joint":
+                if self.task_name == "reach_target_no_distractors":
+                    self.config['agent']['boundary_max'] = [1.0] * 6
                     
-            # RLBENCH
-            elif env_name == "rlbench":
-                if self.task_name == "stack_blocks":
-                    if self.action_space == "pick_and_place_2d":
-                        self.config['agent']['boundary_max'] = [0.35,0.3,0.35,0.3]
-                    elif self.action_space == "pick_and_place_2d_z90":
-                        self.config['agent']['boundary_min'] = [0.35,0.3,1.0,0.35,0.3,1.0]
-                    elif self.action_space == "pick_and_place_3d":
-                        self.config['agent']['boundary_max'] = [0.35,0.3,0.86,0.35,0.3,0.86]
-                    elif self.action_space == "pick_and_place_3d_quat":
-                        self.config['agent']['boundary_max'] = [0.35,0.3,0.86,1,1,1,1,0.35,0.3,0.86,1,1,1,1]
-                    elif self.action_space == "pick_and_place_3d_z90":
-                        self.config['agent']['boundary_max'] = [0.35,0.3,0.86,1.0,0.35,0.3,0.86,1.0]
+            # # RLBENCH
+            # elif env_name == "rlbench":
+            #     if self.task_name == "stack_blocks":
+            #         if self.action_space == "pick_and_place_2d":
+            #             self.config['agent']['boundary_max'] = [0.35,0.3,0.35,0.3]
+            #         elif self.action_space == "pick_and_place_2d_z90":
+            #             self.config['agent']['boundary_min'] = [0.35,0.3,1.0,0.35,0.3,1.0]
+            #         elif self.action_space == "pick_and_place_3d":
+            #             self.config['agent']['boundary_max'] = [0.35,0.3,0.86,0.35,0.3,0.86]
+            #         elif self.action_space == "pick_and_place_3d_quat":
+            #             self.config['agent']['boundary_max'] = [0.35,0.3,0.86,1,1,1,1,0.35,0.3,0.86,1,1,1,1]
+            #         elif self.action_space == "pick_and_place_3d_z90":
+            #             self.config['agent']['boundary_max'] = [0.35,0.3,0.86,1.0,0.35,0.3,0.86,1.0]
 
     def print_logfile(self,message,level = "info", terminal = True):
         if terminal:

@@ -102,14 +102,14 @@ class SamplerTrainerTester:
         ep_lens = []
         success_num = 0.0
         for j in range(self.num_test_episodes):
-            [o, info], d, ep_ret, ep_len = self.test_env.reset_with_init_check(), False, 0, 0
+            [o, info], d, ep_ret, ep_len = self.env.reset_with_init_check(), False, 0, 0
             while not(d or (ep_len == self.max_ep_len)):
                 # Take deterministic actions at test time 
                 if self.agent_type == 'sac':
                     a = self.agent.get_action(o, True)
                 elif self.agent_type == 'td3':
                     a = self.agent.get_action(o, 0)
-                o, r, terminated, truncated, info = self.test_env.step(a)
+                o, r, terminated, truncated, info = self.env.step(a)
                 d = terminated or truncated
                 ep_ret += r
                 ep_len += 1
@@ -127,7 +127,7 @@ class SamplerTrainerTester:
     def start(self,agent,replay_buffer):
 
         self.env = make_env(self.config, self.config_framework)
-        self.test_env = make_env(self.config, self.config_framework)
+        
         self.agent = agent
 
         init_invalid_num = 0
@@ -141,6 +141,8 @@ class SamplerTrainerTester:
         reset_num += reset_info['reset_num']
 
         best_test_ep_ret = -float('inf')
+
+        print("Training starts")
 
         # Main loop: collect experience in env and update/log each epoch
         for t in tqdm(range(total_steps), desc ="Training: ", leave=True):
