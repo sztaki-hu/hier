@@ -188,6 +188,12 @@ class Logger:
             elif env_name == "gympanda":    
                 if self.task_name == 'PandaReach-v3':
                     self.config['sampler']['max_ep_len'] = 50 
+                elif self.task_name == 'PandaReachDense-v3':
+                    self.config['sampler']['max_ep_len'] = 50 
+                elif self.task_name == 'PandaReachJoints-v3':
+                    self.config['sampler']['max_ep_len'] = 50 
+                elif self.task_name == 'PandaReachJointsDense-v3':
+                    self.config['sampler']['max_ep_len'] = 50 
                 elif self.task_name == 'PandaPush-v3':
                     self.config['sampler']['max_ep_len'] = 50
                 elif self.task_name == 'PandaSlide-v3':
@@ -231,6 +237,12 @@ class Logger:
             elif env_name == "gympanda":    
                 if self.task_name == 'PandaReach-v3':   
                     self.config['environment']['obs_dim'] = 9 # 6 (robot) + 3 (target) 
+                elif self.task_name == 'PandaReachDense-v3':
+                    self.config['environment']['obs_dim'] = 9 # 6 (robot) + 3 (target) 
+                elif self.task_name == 'PandaReachJoints-v3':
+                    self.config['environment']['obs_dim'] = 9 # 6 (robot) + 3 (target)
+                elif self.task_name == 'PandaReachJointsDense-v3': 
+                    self.config['environment']['obs_dim'] = 9 # 6 (robot) + 3 (target)
                 elif self.task_name == 'PandaPush-v3':
                     self.config['environment']['obs_dim'] = 21 # 6 (robot) + 12 (1 object) + 3 (target)     
                 elif self.task_name == 'PandaSlide-v3':
@@ -289,6 +301,12 @@ class Logger:
             elif env_name == "gympanda":    
                 if self.task_name == 'PandaReach-v3': 
                     self.config['environment']['act_dim'] = 3
+                elif self.task_name == 'PandaReachDense-v3':
+                    self.config['environment']['act_dim'] = 3
+                elif self.task_name == 'PandaReachJoints-v3':
+                    self.config['environment']['act_dim'] = 7
+                elif self.task_name == 'PandaReachJointsDense-v3': 
+                    self.config['environment']['act_dim'] = 7
                 elif self.task_name == 'PandaPush-v3':
                     self.config['environment']['act_dim'] = 3
                 elif self.task_name == 'PandaSlide-v3':
@@ -351,6 +369,12 @@ class Logger:
             elif env_name == "gympanda":    
                 if self.task_name == 'PandaReach-v3': 
                     self.config['agent']['boundary_min'] = [-1.0] * 3 #?
+                elif self.task_name == 'PandaReachDense-v3':
+                    self.config['agent']['boundary_min'] = [-1.0] * 3 #?
+                elif self.task_name == 'PandaReachJoints-v3':
+                    self.config['agent']['boundary_min'] = [-1.0] * 7 #?
+                elif self.task_name == 'PandaReachJointsDense-v3': 
+                    self.config['agent']['boundary_min'] = [-1.0] * 7 #?
                 elif self.task_name == 'PandaPush-v3':
                     self.config['agent']['boundary_min'] = [-1.0] * 3 #?
                 elif self.task_name == 'PandaSlide-v3':
@@ -408,6 +432,12 @@ class Logger:
             elif env_name == "gympanda":    
                 if self.task_name == 'PandaReach-v3': 
                     self.config['agent']['boundary_max'] = [1.0] * 3
+                elif self.task_name == 'PandaReachDense-v3':
+                    self.config['agent']['boundary_max'] = [1.0] * 3
+                elif self.task_name == 'PandaReachJoints-v3':
+                    self.config['agent']['boundary_max'] = [1.0] * 7
+                elif self.task_name == 'PandaReachJointsDense-v3':
+                    self.config['agent']['boundary_max'] = [1.0] * 7
                 elif self.task_name == 'PandaPush-v3':
                     self.config['agent']['boundary_max'] = [1.0] * 3
                 elif self.task_name == 'PandaSlide-v3':
