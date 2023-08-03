@@ -1,0 +1,146 @@
+gym:
+  MountainCarContinuous-v0:
+    max_ep_len: 999
+    obs_dim: 2
+    act_dim: 1
+    boundary_min: [-1.0]
+    boundary_max: [+1.0]
+
+  InvertedPendulum-v4:
+    max_ep_len: 1000
+    obs_dim: 4
+    act_dim: 1
+    boundary_min: [-3.0]
+    boundary_max: [+3.0]
+
+  InvertedDoublePendulum-v4:
+    max_ep_len: 1000
+    obs_dim: 11
+    act_dim: 1
+    boundary_min: [-1.0]
+    boundary_max: [+1.0]
+
+  Swimmer-v4:
+    max_ep_len: 1000
+    obs_dim: 8
+    act_dim: 2
+    boundary_min: [-1.0, -1.0]
+    boundary_max: [+1.0, +1.0]
+
+  Hopper-v4:
+    max_ep_len: 1000
+    obs_dim: 8
+    act_dim: 2
+    boundary_min: [-1.0, -1.0]
+    boundary_max: [+1.0, +1.0]
+
+  HalfCheetah-v4:
+    max_ep_len: 1000
+    obs_dim: 17
+    act_dim: 6
+    boundary_min: [-1.0, -1.0, -1.0, -1.0, -1.0, -1.0]
+    boundary_max: [+1.0, +1.0, +1.0, +1.0, +1.0, +1.0]
+
+  Walker2d-v4:
+    max_ep_len: 1000
+    obs_dim: 17
+    act_dim: 6
+    boundary_min: [-1.0, -1.0, -1.0, -1.0, -1.0, -1.0]
+    boundary_max: [+1.0, +1.0, +1.0, +1.0, +1.0, +1.0]
+
+  Ant-v4:
+    max_ep_len: 1000
+    obs_dim: 27
+    act_dim: 8
+    boundary_min: [-1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0]
+    boundary_max: [+1.0, +1.0, +1.0, +1.0, +1.0, +1.0, +1.0, +1.0]
+
+  Reacher-v4:
+    max_ep_len: 50
+    obs_dim: 11
+    act_dim: 2
+    boundary_min: [-1.0, -1.0]
+    boundary_max: [+1.0, +1.0]
+
+  Humanoid-v4:
+    max_ep_len: 1000
+    obs_dim: 376
+    act_dim: 17
+    boundary_min: [-0.4, -0.4, -0.4, -0.4, -0.4, -0.4, -0.4, -0.4, -0.4, -0.4, -0.4, -0.4, -0.4, -0.4, -0.4, -0.4, -0.4]
+    boundary_max: [+0.4, +0.4, +0.4, +0.4, +0.4, +0.4, +0.4, +0.4, +0.4, +0.4, +0.4, +0.4, +0.4, +0.4, +0.4, +0.4, +0.4]
+
+  HumanoidStandup-v4:
+    max_ep_len: 1000
+    obs_dim: 376
+    act_dim: 17
+    boundary_min: [-0.4, -0.4, -0.4, -0.4, -0.4, -0.4, -0.4, -0.4, -0.4, -0.4, -0.4, -0.4, -0.4, -0.4, -0.4, -0.4, -0.4]
+    boundary_max: [+0.4, +0.4, +0.4, +0.4, +0.4, +0.4, +0.4, +0.4, +0.4, +0.4, +0.4, +0.4, +0.4, +0.4, +0.4, +0.4, +0.4]
+
+  Pusher-v4:
+    max_ep_len: 100
+    obs_dim: 23
+    act_dim: 7
+    boundary_min: [-2.0, -2.0, -2.0, -2.0, -2.0, -2.0, -2.0]
+    boundary_max: [+2.0, +2.0, +2.0, +2.0, +2.0, +2.0, +2.0]
+
+
+gympanda:
+  PandaReach-v3:
+    max_ep_len: 50
+    obs_dim: 9
+    act_dim: 3
+    boundary_min: [-1.0, -1.0, -1.0]
+    boundary_max: [+1.0, +1.0, +1.0]
+
+  PandaReachDense-v3:
+    max_ep_len: 50
+    obs_dim: 9
+    act_dim: 3
+    boundary_min: [-1.0, -1.0, -1.0]
+    boundary_max: [+1.0, +1.0, +1.0]
+
+  PandaReachJoints-v3:
+    max_ep_len: 50
+    obs_dim: 9
+    act_dim: 7
+    boundary_min: [-1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0]
+    boundary_max: [+1.0, +1.0, +1.0, +1.0, +1.0, +1.0, +1.0]
+
+  PandaReachJointsDense-v3:
+    max_ep_len: 50
+    obs_dim: 9
+    act_dim: 7
+    boundary_min: [-1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0]
+    boundary_max: [+1.0, +1.0, +1.0, +1.0, +1.0, +1.0, +1.0]
+
+  PandaPush-v3:
+    max_ep_len: 50
+    obs_dim: 21
+    act_dim: 3
+    boundary_min: [-1.0, -1.0, -1.0]
+    boundary_max: [+1.0, +1.0, +1.0]
+
+  PandaSlide-v3:
+    max_ep_len: 50
+    obs_dim: 21
+    act_dim: 3
+    boundary_min: [-1.0, -1.0, -1.0]
+    boundary_max: [+1.0, +1.0, +1.0]
+
+gym_mod:
+  Hopper-v4:
+    max_ep_len: 1000
+    obs_dim: 8
+    act_dim: 2
+    boundary_min: [-1.0, -1.0]
+    boundary_max: [+1.0, +1.0]
+
+rlbench_joint:
+  reach_target_no_distractors:
+    max_ep_len: 50
+    obs_dim: 9
+    act_dim: 6
+    boundary_min: [-1.0, -1.0, -1.0, -1.0, -1.0, -1.0]
+    boundary_max: [+1.0, +1.0, +1.0, +1.0, +1.0, +1.0]
+
+    

@@ -36,6 +36,7 @@ class Logger:
         self.config['general']['current_dir'] = current_dir
 
         self.config_framework = self.load_yaml(os.path.join(current_dir,'cfg_framework','config_framework.yaml'))
+        self.config_tasks = self.load_yaml(os.path.join(current_dir,'cfg_framework','config_tasks.yaml'))
 
         self.logdir = self.config['general']['logdir']
         self.logname = self.config['general']['exp_name'] + "_" + self.config['environment']['task']['name'] + "_" + self.config['agent']['type'] 
@@ -156,311 +157,24 @@ class Logger:
         self.state_space = self.config['environment']['state_space']
 
         ## MAX_EP_LEN
-        if self.config['sampler']['max_ep_len'] == "auto":
-            # GYM
-            if env_name == "gym" or env_name == "gym_mod":
-                if self.task_name == "MountainCarContinuous-v0":
-                    self.config['sampler']['max_ep_len'] = 999
-                elif self.task_name == "InvertedPendulum-v4":
-                    self.config['sampler']['max_ep_len'] = 1000
-                elif self.task_name == "InvertedDoublePendulum-v4":
-                    self.config['sampler']['max_ep_len'] = 1000
-                elif self.task_name == 'Swimmer-v4':
-                    self.config['sampler']['max_ep_len'] = 1000
-                elif self.task_name == 'Hopper-v4':
-                    self.config['sampler']['max_ep_len'] = 1000
-                elif self.task_name == 'HalfCheetah-v4':
-                    self.config['sampler']['max_ep_len'] = 1000
-                elif self.task_name == 'Walker2d-v4':
-                    self.config['sampler']['max_ep_len'] = 1000
-                elif self.task_name == 'Ant-v4':
-                    self.config['sampler']['max_ep_len'] = 1000  
-                elif self.task_name == 'Reacher-v4':
-                    self.config['sampler']['max_ep_len'] = 50
-                elif self.task_name == 'Humanoid-v4':
-                    self.config['sampler']['max_ep_len'] = 1000       
-                elif self.task_name == 'HumanoidStandup-v4':
-                    self.config['sampler']['max_ep_len'] = 1000 
-                elif self.task_name == 'Pusher-v4': 
-                    self.config['sampler']['max_ep_len'] = 100 
-            
-            # GYMPANDA      
-            elif env_name == "gympanda":    
-                if self.task_name == 'PandaReach-v3':
-                    self.config['sampler']['max_ep_len'] = 50 
-                elif self.task_name == 'PandaReachDense-v3':
-                    self.config['sampler']['max_ep_len'] = 50 
-                elif self.task_name == 'PandaReachJoints-v3':
-                    self.config['sampler']['max_ep_len'] = 50 
-                elif self.task_name == 'PandaReachJointsDense-v3':
-                    self.config['sampler']['max_ep_len'] = 50 
-                elif self.task_name == 'PandaPush-v3':
-                    self.config['sampler']['max_ep_len'] = 50
-                elif self.task_name == 'PandaSlide-v3':
-                    self.config['sampler']['max_ep_len'] = 50   
-
-            elif env_name == "rlbench_joint":
-                if self.task_name == "reach_target_no_distractors": 
-                    self.config['sampler']['max_ep_len'] = 50               
+        if self.config['sampler']['max_ep_len'] == "auto":  
+            self.config['sampler']['max_ep_len'] = self.config_tasks[env_name][self.task_name]['max_ep_len']               
 
         ## OBS DIM
         if self.config['environment']['obs_dim'] == "auto":
-
-            # GYM
-            if env_name == "gym" or env_name == "gym_mod":
-                if self.task_name == "MountainCarContinuous-v0":
-                    self.config['environment']['obs_dim'] = 2
-                elif self.task_name == "InvertedPendulum-v4":
-                    self.config['environment']['obs_dim'] = 4
-                elif self.task_name == "InvertedDoublePendulum-v4":
-                    self.config['environment']['obs_dim'] = 11
-                elif self.task_name == 'Swimmer-v4':
-                    self.config['environment']['obs_dim'] = 8
-                elif self.task_name == 'Hopper-v4':
-                    self.config['environment']['obs_dim'] = 11
-                elif self.task_name == 'HalfCheetah-v4':
-                    self.config['environment']['obs_dim'] = 17
-                elif self.task_name == 'Walker2d-v4':
-                    self.config['environment']['obs_dim'] = 17
-                elif self.task_name == 'Ant-v4':
-                    self.config['environment']['obs_dim'] = 27   
-                elif self.task_name == 'Reacher-v4':
-                    self.config['environment']['obs_dim'] = 11
-                elif self.task_name == 'Humanoid-v4':
-                    self.config['environment']['obs_dim'] = 376        
-                elif self.task_name == 'HumanoidStandup-v4':
-                    self.config['environment']['obs_dim'] = 376
-                elif self.task_name == 'Pusher-v4': 
-                    self.config['environment']['obs_dim'] = 23
-
-            # GYMPANDA      
-            elif env_name == "gympanda":    
-                if self.task_name == 'PandaReach-v3':   
-                    self.config['environment']['obs_dim'] = 9 # 6 (robot) + 3 (target) 
-                elif self.task_name == 'PandaReachDense-v3':
-                    self.config['environment']['obs_dim'] = 9 # 6 (robot) + 3 (target) 
-                elif self.task_name == 'PandaReachJoints-v3':
-                    self.config['environment']['obs_dim'] = 9 # 6 (robot) + 3 (target)
-                elif self.task_name == 'PandaReachJointsDense-v3': 
-                    self.config['environment']['obs_dim'] = 9 # 6 (robot) + 3 (target)
-                elif self.task_name == 'PandaPush-v3':
-                    self.config['environment']['obs_dim'] = 21 # 6 (robot) + 12 (1 object) + 3 (target)     
-                elif self.task_name == 'PandaSlide-v3':
-                    self.config['environment']['obs_dim'] = 21 # 6 (robot) + 12 (1 object) + 3 (target) 
-
-            # RLBENCH JOINT
-            elif env_name == "rlbench_joint":
-                if self.task_name == "reach_target_no_distractors":
-                    self.config['environment']['obs_dim'] = 9 # 6 (robot) + 3 (target)  
-              
-            # # RLBENCH
-            # elif env_name == "rlbench":
-            #     if self.task_name == "stack_blocks":
-            #         if self.state_space == "xyz":
-            #             self.config['environment']['obs_dim'] = 3 + self.task_params[0] * 3 + self.task_params[1] * 3
-            #         elif self.state_space == "xyz_quat":
-            #             self.config['environment']['obs_dim'] = 7 + self.task_params[0] * 7 + self.task_params[1] * 7
-            #         elif self.state_space == "xyz_z90":
-            #             self.config['environment']['obs_dim'] = 4 + self.task_params[0] * 4 + self.task_params[1] * 4
-            else:
-                self.print_logfile("Obs dim could not be computed","error")
-                assert False
-            self.print_logfile("Obs dim is computed: " + str(self.config['environment']['obs_dim']))
+            self.config['environment']['obs_dim']  = self.config_tasks[env_name][self.task_name]['obs_dim']
 
         ## ACT DIM
         if self.config['environment']['act_dim'] == "auto":
-           
-            # GYM
-            if env_name == "gym" or env_name == "gym_mod":
-                if self.task_name == "MountainCarContinuous-v0":
-                    self.config['environment']['act_dim'] = 1
-                elif self.task_name == "InvertedPendulum-v4":
-                    self.config['environment']['act_dim'] = 1
-                elif self.task_name == 'InvertedDoublePendulum-v4':
-                    self.config['environment']['act_dim'] = 1
-                elif self.task_name == 'Swimmer-v4':
-                    self.config['environment']['act_dim'] = 2
-                elif self.task_name == 'Hopper-v4':
-                    self.config['environment']['act_dim'] = 3
-                elif self.task_name == 'HalfCheetah-v4':
-                    self.config['environment']['act_dim'] = 6
-                elif self.task_name == 'Walker2d-v4':
-                    self.config['environment']['act_dim'] = 6
-                elif self.task_name == 'Ant-v4':
-                    self.config['environment']['act_dim'] = 8
-                elif self.task_name == 'Reacher-v4':
-                    self.config['environment']['act_dim'] = 2
-                elif self.task_name == 'Humanoid-v4':
-                    self.config['environment']['act_dim'] = 17
-                elif self.task_name == 'HumanoidStandup-v4':
-                    self.config['environment']['act_dim'] = 17
-                elif self.task_name == 'Pusher-v4':
-                    self.config['environment']['act_dim'] = 7
-
-            # GYMPANDA      
-            elif env_name == "gympanda":    
-                if self.task_name == 'PandaReach-v3': 
-                    self.config['environment']['act_dim'] = 3
-                elif self.task_name == 'PandaReachDense-v3':
-                    self.config['environment']['act_dim'] = 3
-                elif self.task_name == 'PandaReachJoints-v3':
-                    self.config['environment']['act_dim'] = 7
-                elif self.task_name == 'PandaReachJointsDense-v3': 
-                    self.config['environment']['act_dim'] = 7
-                elif self.task_name == 'PandaPush-v3':
-                    self.config['environment']['act_dim'] = 3
-                elif self.task_name == 'PandaSlide-v3':
-                    self.config['environment']['act_dim'] = 3
-            
-             # RLBENCH JOINT
-            elif env_name == "rlbench_joint":
-               if self.task_name == "reach_target_no_distractors":
-                   self.config['environment']['act_dim'] = 6
-
-                    
-            # # RLBENCH
-            # elif env_name == "rlbench":
-            #     if self.task_name == "stack_blocks":
-            #         if self.action_space == "pick_and_place_2d":
-            #             self.config['environment']['act_dim'] = 4
-            #         elif self.action_space == "pick_and_place_3d":
-            #             self.config['environment']['act_dim'] = 6
-            #         elif self.action_space == "pick_and_place_3d_quat":
-            #             self.config['environment']['act_dim'] = 14
-            #         elif self.action_space == "pick_and_place_3d_z90":
-            #             self.config['environment']['act_dim'] = 8
-
-            else:
-                self.print_logfile("Act dim could not be computed","error")
-                assert False
-            self.print_logfile("Act dim is computed: " + str(self.config['environment']['act_dim']))
+            self.config['environment']['act_dim'] = self.config_tasks[env_name][self.task_name]['act_dim']
         
         ## BOUNDARY MIN
         if self.config['agent']['boundary_min'] == "auto":
-            
-            # GYM
-            if env_name == "gym" or env_name == "gym_mod":
-                if self.task_name == "MountainCarContinuous-v0":
-                    self.config['agent']['boundary_min'] = [-1.0]
-                elif self.task_name == "InvertedPendulum-v4":
-                    self.config['agent']['boundary_min'] = [-3.0]
-                elif self.task_name == "InvertedDoublePendulum-v4":
-                    self.config['agent']['boundary_min'] = [-1.0]
-                elif self.task_name == 'Swimmer-v4':
-                    self.config['agent']['boundary_min'] = [-1.0] * 2
-                elif self.task_name == 'Hopper-v4':
-                    self.config['agent']['boundary_min'] = [-1.0] * 3
-                elif self.task_name == 'HalfCheetah-v4':
-                    self.config['agent']['boundary_min'] = [-1.0] * 6
-                elif self.task_name == 'Walker2d-v4':
-                    self.config['agent']['boundary_min'] = [-1.0] * 6
-                elif self.task_name == 'Ant-v4':
-                    self.config['agent']['boundary_min'] = [-1.0] * 8
-                elif self.task_name == 'Reacher-v4':
-                    self.config['agent']['boundary_min'] = [-1.0] * 2
-                elif self.task_name == 'Humanoid-v4':
-                    self.config['agent']['boundary_min'] = [-0.4] * 17
-                elif self.task_name == 'HumanoidStandup-v4':
-                    self.config['agent']['boundary_min'] = [-0.4] * 17
-                elif self.task_name == 'Pusher-v4':
-                    self.config['agent']['boundary_min'] = [-2.0] * 7
-            
-            # GYMPANDA      
-            elif env_name == "gympanda":    
-                if self.task_name == 'PandaReach-v3': 
-                    self.config['agent']['boundary_min'] = [-1.0] * 3 #?
-                elif self.task_name == 'PandaReachDense-v3':
-                    self.config['agent']['boundary_min'] = [-1.0] * 3 #?
-                elif self.task_name == 'PandaReachJoints-v3':
-                    self.config['agent']['boundary_min'] = [-1.0] * 7 #?
-                elif self.task_name == 'PandaReachJointsDense-v3': 
-                    self.config['agent']['boundary_min'] = [-1.0] * 7 #?
-                elif self.task_name == 'PandaPush-v3':
-                    self.config['agent']['boundary_min'] = [-1.0] * 3 #?
-                elif self.task_name == 'PandaSlide-v3':
-                    self.config['agent']['boundary_min'] = [-1.0] * 3 #?
-            
-            # RLBENCH JOINT
-            elif env_name == "rlbench_joint":
-                if self.task_name == "reach_target_no_distractors":
-                    self.config['agent']['boundary_min'] = [-1.0] * 6 #?
-
-
-            # # RLBENCH
-            # elif env_name == "rlbench":
-            #     if self.task_name == "stack_blocks":
-            #         if self.action_space == "pick_and_place_2d":
-            #             self.config['agent']['boundary_min'] = [0.1,-0.3,0.1,-0.3]
-            #         elif self.action_space == "pick_and_place_3d":
-            #             self.config['agent']['boundary_min'] = [0.1,-0.3,0.76,0.1,-0.3,0.76]
-            #         elif self.action_space == "pick_and_place_3d_quat":
-            #             self.config['agent']['boundary_min'] = [0.1,-0.3,0.76,0,0,0,0,0.1,-0.3,0.76,0,0,0,0]
-            #         elif self.action_space == "pick_and_place_3d_z90":
-            #             self.config['agent']['boundary_min'] = [0.1,-0.3,0.76,0.0,0.1,-0.3,0.76,0.0]
+            self.config['agent']['boundary_min'] = self.config_tasks[env_name][self.task_name]['boundary_min']
         
         ## BOUNDARY MAX
         if self.config['agent']['boundary_max'] == "auto":
-            
-            # GYM
-            if env_name == "gym" or env_name == "gym_mod":
-                if self.task_name == "MountainCarContinuous-v0":
-                    self.config['agent']['boundary_max'] = [1.0]
-                elif self.task_name == "InvertedPendulum-v4":
-                    self.config['agent']['boundary_max'] = [3.0]
-                elif self.task_name == "InvertedDoublePendulum-v4":
-                    self.config['agent']['boundary_max'] = [1.0]
-                elif self.task_name == 'Swimmer-v4':
-                    self.config['agent']['boundary_max'] = [1.0] * 2
-                elif self.task_name == 'Hopper-v4':
-                    self.config['agent']['boundary_max'] = [1.0] * 3
-                elif self.task_name == 'HalfCheetah-v4':
-                    self.config['agent']['boundary_max'] = [1.0] * 6
-                elif self.task_name == 'Walker2d-v4':
-                    self.config['agent']['boundary_max'] = [1.0] * 6
-                elif self.task_name == 'Ant-v4':
-                    self.config['agent']['boundary_max'] = [1.0] * 8
-                elif self.task_name == 'Reacher-v4':
-                    self.config['agent']['boundary_max'] = [1.0] * 2
-                elif self.task_name == 'Humanoid-v4':
-                    self.config['agent']['boundary_max'] = [0.4] * 17
-                elif self.task_name == 'HumanoidStandup-v4':
-                    self.config['agent']['boundary_max'] = [0.4] * 17
-                elif self.task_name == 'Pusher-v4':
-                    self.config['agent']['boundary_max'] = [2.0] * 7
-            
-            # GYMPANDA      
-            elif env_name == "gympanda":    
-                if self.task_name == 'PandaReach-v3': 
-                    self.config['agent']['boundary_max'] = [1.0] * 3
-                elif self.task_name == 'PandaReachDense-v3':
-                    self.config['agent']['boundary_max'] = [1.0] * 3
-                elif self.task_name == 'PandaReachJoints-v3':
-                    self.config['agent']['boundary_max'] = [1.0] * 7
-                elif self.task_name == 'PandaReachJointsDense-v3':
-                    self.config['agent']['boundary_max'] = [1.0] * 7
-                elif self.task_name == 'PandaPush-v3':
-                    self.config['agent']['boundary_max'] = [1.0] * 3
-                elif self.task_name == 'PandaSlide-v3':
-                    self.config['agent']['boundary_max'] = [1.0] * 3
-            
-            # RLBENCH JOINT
-            elif env_name == "rlbench_joint":
-                if self.task_name == "reach_target_no_distractors":
-                    self.config['agent']['boundary_max'] = [1.0] * 6
-                    
-            # # RLBENCH
-            # elif env_name == "rlbench":
-            #     if self.task_name == "stack_blocks":
-            #         if self.action_space == "pick_and_place_2d":
-            #             self.config['agent']['boundary_max'] = [0.35,0.3,0.35,0.3]
-            #         elif self.action_space == "pick_and_place_2d_z90":
-            #             self.config['agent']['boundary_min'] = [0.35,0.3,1.0,0.35,0.3,1.0]
-            #         elif self.action_space == "pick_and_place_3d":
-            #             self.config['agent']['boundary_max'] = [0.35,0.3,0.86,0.35,0.3,0.86]
-            #         elif self.action_space == "pick_and_place_3d_quat":
-            #             self.config['agent']['boundary_max'] = [0.35,0.3,0.86,1,1,1,1,0.35,0.3,0.86,1,1,1,1]
-            #         elif self.action_space == "pick_and_place_3d_z90":
-            #             self.config['agent']['boundary_max'] = [0.35,0.3,0.86,1.0,0.35,0.3,0.86,1.0]
+            self.config['agent']['boundary_max'] = self.config_tasks[env_name][self.task_name]['boundary_max']
 
     def print_logfile(self,message,level = "info", terminal = True):
         if terminal:
