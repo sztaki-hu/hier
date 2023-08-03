@@ -120,12 +120,54 @@ gympanda:
     boundary_min: [-1.0, -1.0, -1.0]
     boundary_max: [+1.0, +1.0, +1.0]
 
+  PandaPushDense-v3:
+    max_ep_len: 50
+    obs_dim: 21
+    act_dim: 3
+    boundary_min: [-1.0, -1.0, -1.0]
+    boundary_max: [+1.0, +1.0, +1.0]
+
+  PandaPushJoints-v3:
+    max_ep_len: 50
+    obs_dim: 21
+    act_dim: 7
+    boundary_min: [-1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0]
+    boundary_max: [+1.0, +1.0, +1.0, +1.0, +1.0, +1.0, +1.0]
+
+  PandaPushJointsDense-v3:
+    max_ep_len: 50
+    obs_dim: 21
+    act_dim: 7
+    boundary_min: [-1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0]
+    boundary_max: [+1.0, +1.0, +1.0, +1.0, +1.0, +1.0, +1.0]
+
   PandaSlide-v3:
     max_ep_len: 50
     obs_dim: 21
     act_dim: 3
     boundary_min: [-1.0, -1.0, -1.0]
     boundary_max: [+1.0, +1.0, +1.0]
+  
+  PandaSlideDense-v3:
+    max_ep_len: 50
+    obs_dim: 21
+    act_dim: 3
+    boundary_min: [-1.0, -1.0, -1.0]
+    boundary_max: [+1.0, +1.0, +1.0]
+
+  PandaSlideJoints-v3:
+    max_ep_len: 50
+    obs_dim: 21
+    act_dim: 7
+    boundary_min: [-1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0]
+    boundary_max: [+1.0, +1.0, +1.0, +1.0, +1.0, +1.0, +1.0]
+
+  PandaSlideJointsDense-v3:
+    max_ep_len: 50
+    obs_dim: 21
+    act_dim: 7
+    boundary_min: [-1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0]
+    boundary_max: [+1.0, +1.0, +1.0, +1.0, +1.0, +1.0, +1.0]
 
 gym_mod:
   Hopper-v4:
