@@ -2,6 +2,7 @@ import numpy as np
 import torch
 import time
 import collections
+import random
 
 from tqdm import tqdm
 
@@ -51,6 +52,10 @@ class SamplerTrainerTester:
         self.loss_q_dq = collections.deque(maxlen=10)
         self.loss_pi_dq = collections.deque(maxlen=10)
 
+        self.her_active = config['buffer']['her']['active']
+        self.her_goal_selection_strategy = config['buffer']['her']['goal_selection_strategy']
+        self.her_n_sampled_goal = config['buffer']['her']['n_sampled_goal']
+
         
         """
         Trainer
@@ -95,7 +100,21 @@ class SamplerTrainerTester:
     
     # def get_action(self, o, deterministic=False):
     #     return self.agent.ac.act(torch.as_tensor(o, dtype=torch.float32), deterministic)
-     
+    
+    def get_new_goals(self, episode, ep_t):
+        if self.her_goal_selection_strategy == 'final':
+            new_goals = []
+            _, _, _, o2, _ = episode[-1]
+            for _ in range(self.her_n_sampled_goal):
+                new_goals.append(self.env.get_goal_state_from_obs(o2))
+            return new_goals
+        elif self.her_goal_selection_strategy == 'future':
+            new_goals = []
+            for _ in range(self.her_n_sampled_goal):
+                rand_future_transition = random.randint(ep_t, len(episode)-1)
+                _, _, _, o2, _ = episode[rand_future_transition]
+                new_goals.append(self.env.get_goal_state_from_obs(o2))
+            return new_goals
 
     def test_agent(self):
         ep_rets = []
@@ -143,6 +162,7 @@ class SamplerTrainerTester:
         best_test_ep_ret = -float('inf')
 
         print("Training starts")
+        episode = []
 
         # Main loop: collect experience in env and update/log each epoch
         for t in tqdm(range(total_steps), desc ="Training: ", leave=True):
@@ -171,8 +191,8 @@ class SamplerTrainerTester:
             # that isn't based on the agent's state)
             d = False if ep_len==self.max_ep_len else d
 
-            # Store experience to replay buffer
-            replay_buffer.store(o, a, r, o2, d)
+            # Save transition
+            episode.append((o, a, r, o2, d))
 
             # Super critical, easy to overlook step: make sure to update 
             # most recent observation!
@@ -180,6 +200,21 @@ class SamplerTrainerTester:
 
             # End of trajectory handling
             if d or (ep_len == self.max_ep_len):
+                
+                for (o, a, r, o2, d) in episode:
+                    replay_buffer.store(o, a, r, o2, d)
+                
+                if self.her_active and truncated:
+                    ep_t = 0
+                    for (o, a, r, o2, d) in episode:
+                        new_goals = self.get_new_goals(episode,ep_t)
+                        for new_goal in new_goals:
+                            o_new = self.env.change_goal_in_obs(o, new_goal)
+                            o2_new = self.env.change_goal_in_obs(o2, new_goal)
+                            r_new, d_new = self.env.her_get_reward_and_done(o2_new) 
+                            replay_buffer.store(o_new, a, r_new, o2_new, d_new)
+                        ep_t += 1
+
                 # logger.store(EpRet=ep_ret, EpLen=ep_len)
                 # self.logger.tb_writer_add_scalar("train/ep_ret", ep_ret, t)
                 # self.logger.tb_writer_add_scalar("train/ep_len", ep_len, t)

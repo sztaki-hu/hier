@@ -41,16 +41,19 @@ def main():
     current_dir = dirname(abspath(__file__))
     exp_list = load_yaml(os.path.join(current_dir,args.explist))
 
-    agents = exp_list['agent_list']
-    envs = list(exp_list['task_list'].keys())
+    agents = exp_list['agents']
+    envs = list(exp_list['tasks'].keys())
+    her_strategies = exp_list['her_strategies']
 
     for env in envs:
-        for task in exp_list['task_list'][env]:
+        for task in exp_list['tasks'][env]:
             for agent in agents:
-                exp = {}
-                exp['env'] = env
-                exp['task'] = task
-                exp['agent'] = agent
+                for her_strategy in her_strategies:
+                    exp = {}
+                    exp['env'] = env
+                    exp['task'] = task
+                    exp['agent'] = agent
+                    exp['her_strategy'] = her_strategy
                 
 
                 # Init logger ###############################################x

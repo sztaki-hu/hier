@@ -32,6 +32,7 @@ class Logger:
             self.config['environment']['name'] = exp['env']
             self.config['environment']['task']['name'] = exp['task']
             self.config['agent']['type'] = exp['agent']
+            self.config['buffer']['her']['goal_selection_strategy'] = exp['her_strategy']
         
         self.config['general']['current_dir'] = current_dir
 

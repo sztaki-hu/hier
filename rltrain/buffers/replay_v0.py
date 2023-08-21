@@ -33,3 +33,12 @@ class ReplayBuffer:
                      rew=self.rew_buf[idxs],
                      done=self.done_buf[idxs])
         return {k: torch.as_tensor(v, dtype=torch.float32) for k,v in batch.items()}
+    
+    def get_all(self):
+        idxs = np.arange(self.size, dtype=int)
+        batch = dict(obs=self.obs_buf[idxs],
+                     obs2=self.obs2_buf[idxs],
+                     act=self.act_buf[idxs],
+                     rew=self.rew_buf[idxs],
+                     done=self.done_buf[idxs])
+        return {k: torch.as_tensor(v, dtype=torch.float32) for k,v in batch.items()}

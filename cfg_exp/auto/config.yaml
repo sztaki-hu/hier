@@ -1,5 +1,5 @@
 general:
-  exp_name: 0726_X_testauto_3
+  exp_name: 0821_X_test
   logdir: logs
   demodir: demos
   seed: 0
@@ -25,10 +25,10 @@ environment:
 
 agent:
   type: input
-  hidden_sizes: [256,256]
+  hidden_sizes: [256,256,256]
   boundary_min: auto
   boundary_max: auto
-  gamma: 0.99 
+  gamma: 0.95 
   sac:
     n_step: 1
     polyak: 0.995
@@ -44,16 +44,20 @@ agent:
     act_noise: 0.1
 
 buffer:
-  replay_buffer_size: 100000
+  replay_buffer_size: 1000000
+  her:
+    active: true
+    goal_selection_strategy: input
+    n_sampled_goal: 4
 
 sampler:
   start_steps: 10000
   max_ep_len: auto
 
 trainer:
-  steps_per_epoch: 250
-  epochs: 2
-  batch_size: 100
+  steps_per_epoch: 5000
+  epochs: 100
+  batch_size: 256
   update_after: 1000
   update_every: 50
 

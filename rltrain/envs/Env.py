@@ -73,6 +73,15 @@ class Env:
     def get_max_return(self):
         return None
     
+    def get_goal_state_from_obs(self, o):
+        return None
+
+    def change_goal_in_obs(self, o, goal):
+        return None
+    
+    def her_get_reward_and_done(self,o):
+        return None, None
+    
 
     
   
