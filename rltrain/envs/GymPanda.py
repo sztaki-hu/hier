@@ -14,14 +14,14 @@ class GymPanda(Env):
         return o    
 
 
-    def init_state_valid(self, o):
-        if self.task_name == 'PandaPush-v3':
-            o_goal = o[-3:]
-            o_obj = o[6:9]  
-            if np.allclose(o_goal, o_obj, rtol=0.0, atol=0.05, equal_nan=False):
-                return False
+    # def init_state_valid(self, o):
+    #     if self.task_name == 'PandaPush-v3':
+    #         o_goal = o[-3:]
+    #         o_obj = o[6:9]  
+    #         if np.allclose(o_goal, o_obj, rtol=0.0, atol=0.05, equal_nan=False):
+    #             return False
         
-        return True  
+    #     return True  
     
     
     def step(self,action):
