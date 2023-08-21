@@ -10,7 +10,7 @@ from rltrain.utils.utils import init_cuda, print_torch_info
 from rltrain.logger.logger import Logger
 
 from rltrain.agents.builder import make_agent
-from rltrain.runners.uniprocess.sampler_trainer_tester_v2 import SamplerTrainerTester
+from rltrain.runners.sampler_trainer_tester import SamplerTrainerTester
 
 
 import datetime

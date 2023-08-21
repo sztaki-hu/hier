@@ -1,56 +1,62 @@
-import os
-import math
 import numpy as np
 import torch
+import time
+import collections
+import random
 
 from tqdm import tqdm
 
-from rltrain.buffers.replay import ReplayBuffer
-from rltrain.agents.agent import Agent
+from rltrain.envs.builder import make_env
 
 class SamplerTrainerTester:
 
-    def __init__(self, device,env,demo_buffer,logger,config):
+    def __init__(self,device,logger,config,main_args,config_framework):
+
         self.device = device
-        self.env = env
-        self.demo_buffer = demo_buffer
+        
         self.logger = logger
+        self.config = config
+        self.config_framework = config_framework
 
         self.seed = config['general']['seed'] 
+        self.agent_type = config['agent']['type']
+
         self.steps_per_epoch = config['trainer']['steps_per_epoch'] 
         self.epochs = config['trainer']['epochs'] 
 
+        self.replay_size = int(config['buffer']['replay_buffer_size']) 
         self.batch_size = config['trainer']['batch_size'] 
-        self.start_steps = config['sampler']['start_steps'] 
+        
         self.update_after = config['trainer']['update_after'] 
         self.update_every = config['trainer']['update_every'] 
-        self.update_factor = config['trainer']['update_factor'] 
-        self.num_test_episodes = config['tester']['num_test_episodes'] 
-        self.max_ep_len = config['sampler']['max_ep_len'] 
-        self.num_log_loss_points = config['logger']['num_log_loss_points'] 
 
         self.obs_dim = config['environment']['obs_dim']
         self.act_dim = config['environment']['act_dim']
         self.boundary_min = np.array(config['agent']['boundary_min'])[:self.act_dim]
         self.boundary_max = np.array(config['agent']['boundary_max'])[:self.act_dim]
 
-        torch.manual_seed(self.seed)
-        np.random.seed(self.seed)
-
-        self.max_avg_test_return = - 100000
-
-        self.replay_size = int(config['buffer']['replay_buffer_size']) 
-        self.replay_buffer = ReplayBuffer(obs_dim=self.obs_dim, act_dim=self.act_dim, size=self.replay_size)
-
         self.demo_use = config['demo']['demo_use']  
-        self.demo_ratio = config['demo']['demo_ratio']
 
-        if self.demo_use:
-            self.demo_batch_size = int(self.batch_size * self.demo_ratio)
-            self.replay_batch_size = self.batch_size - self.demo_batch_size
+        self.start_steps = config['sampler']['start_steps']
+        self.max_ep_len = config['sampler']['max_ep_len']
+        self.num_test_episodes = config['tester']['num_test_episodes']
 
-        self.agent = Agent(device,config)
+        self.model_save_freq = config['logger']['model']['save']['freq']
+        self.model_save_best_after = config['logger']['model']['save']['best_after']
+        self.model_save_mode = config['logger']['model']['save']['mode']
 
+        self.logname = self.config['general']['exp_name'] + "_" + self.config['environment']['task']['name'] + "_" + self.config['agent']['type'] + "_" + str(main_args.trainid)
+
+        self.train_ep_ret_dq = collections.deque(maxlen=10)
+        self.train_ep_len_dq = collections.deque(maxlen=10)
+        self.loss_q_dq = collections.deque(maxlen=10)
+        self.loss_pi_dq = collections.deque(maxlen=10)
+
+        self.her_active = config['buffer']['her']['active']
+        self.her_goal_selection_strategy = config['buffer']['her']['goal_selection_strategy']
+        self.her_n_sampled_goal = config['buffer']['her']['n_sampled_goal']
+
+        
         """
         Trainer
 
@@ -79,9 +85,6 @@ class SamplerTrainerTester:
                 between gradient descent updates. Note: Regardless of how long 
                 you wait between updates, the ratio of env steps to gradient steps 
                 is locked to 1.
-            
-            update_factor: The ration of gradient steps to env steps (overriding 
-                the previous lock to 1).  
 
             num_test_episodes (int): Number of episodes to test the deterministic
                 policy at the end of each epoch.
@@ -93,143 +96,93 @@ class SamplerTrainerTester:
             save_freq (int): How often (in terms of gap between epochs) to save
                 the current policy and value function.
 
-        """
+        """ 
     
-    def create_demos(self):
-        if self.demo_buffer is not None:
-            for _ in tqdm(range(self.demo_num), desc ="Loading demos: ", colour="green"):  
-                o = self.env.reset()
-                a = o
-                try:
-                    o2, r, d, info = self.env.step(a)
-                    if r > 0:
-                        self.demo_buffer.store(o, a, r, o2, d)
-                    else:
-                        tqdm.write("The demonstration is not successful, thus it is not added") 
-                except:
-                    tqdm.write("Error in simulation, this demonstration is not added")         
-            self.logger.save_demos(self.demo_name, self.demo_buffer)
-        # batch = self.demo_buffer.sample_batch(self.batch_size) 
-        # print(batch)
-        # print(self.demo_buffer.ptr)
+    # def get_action(self, o, deterministic=False):
+    #     return self.agent.ac.act(torch.as_tensor(o, dtype=torch.float32), deterministic)
     
-    def load_demos(self):
-        self.demo_buffer = self.logger.load_demos(self.demo_name)
-        # batch = self.demo_buffer.sample_batch(self.batch_size) 
-        # print(batch)
+    def get_new_goals(self, episode, ep_t):
+        if self.her_goal_selection_strategy == 'final':
+            new_goals = []
+            _, _, _, o2, _ = episode[-1]
+            for _ in range(self.her_n_sampled_goal):
+                new_goals.append(self.env.get_goal_state_from_obs(o2))
+            return new_goals
+        elif self.her_goal_selection_strategy == 'future':
+            new_goals = []
+            for _ in range(self.her_n_sampled_goal):
+                rand_future_transition = random.randint(ep_t, len(episode)-1)
+                _, _, _, o2, _ = episode[rand_future_transition]
+                new_goals.append(self.env.get_goal_state_from_obs(o2))
+            return new_goals
 
-    def eval_range(self,epoch):
-        if self.act_dim != 1: return
-        inputs_np = np.linspace(self.boundary_min[0], self.boundary_max[0], num=10, endpoint=True)
-        inputs = torch.from_numpy(inputs_np.astype(np.float32)).to(self.device)
-        inputs = inputs.view(-1,1)
-
-        outputs, _ = self.agent.ac.pi(inputs, deterministic = True, with_logprob = False)
-        outputs_np = outputs.cpu().detach().numpy().flatten()
-
-        data = np.vstack((inputs_np, outputs_np)).T
-        self.logger.save_eval_range(data, epoch)
-    
-    def display_agent(self,model_name, num):
-        path = self.logger.get_model_path(model_name)
-        self.agent.load_weights(path)
-
-        avg_return = self.test_agent(verbose = True)
-
-        print("########################################")
-        print("avg return: " + str(avg_return))
-    
-    def test_agent(self, epoch = None, verbose = False):
-        sum_return = 0
-        for j in tqdm(range(self.num_test_episodes), desc ="Testing: ", leave=False):
-            o, d, ep_ret, ep_len = self.env.reset(), False, 0, 0
+    def test_agent(self):
+        ep_rets = []
+        ep_lens = []
+        success_num = 0.0
+        for j in range(self.num_test_episodes):
+            [o, info], d, ep_ret, ep_len = self.env.reset_with_init_check(), False, 0, 0
             while not(d or (ep_len == self.max_ep_len)):
                 # Take deterministic actions at test time 
-                try:
+                if self.agent_type == 'sac':
                     a = self.agent.get_action(o, True)
-                    o, r, d, _ = self.env.step(a)
-                    ep_ret += r
-                    ep_len += 1
-                except:
-                    tqdm.write("Error in simulation (test time), thus reseting the environment")
-                    break               
-            sum_return += ep_ret
-            if verbose:
-                tqdm.write("------------------------")
-                tqdm.write("Obs: " + str(o) + " | Act: " + str(a))
-                tqdm.write("Ep Ret: " + str(ep_ret) + " | Ep Len: " + str(ep_len))
-        avg_return = sum_return / float(self.num_test_episodes)
-        if epoch is not None:
-            self.eval_range(epoch)
-        return avg_return
-    
-    def sample_batch(self):
-        if self.demo_use == False:
-            batch = self.replay_buffer.sample_batch(self.batch_size)    
-        else:
-            replay_batch = self.replay_buffer.sample_batch(self.replay_batch_size)
-            demo_batch = self.demo_buffer.sample_batch(self.demo_batch_size) 
-            batch = dict(obs=torch.cat((replay_batch['obs'], demo_batch['obs']), 0),
-                        obs2=torch.cat((replay_batch['obs2'], demo_batch['obs2']), 0),
-                        act=torch.cat((replay_batch['act'], demo_batch['act']), 0),
-                        rew=torch.cat((replay_batch['rew'], demo_batch['rew']), 0),
-                        done=torch.cat((replay_batch['done'], demo_batch['done']), 0))
-        return batch
-
-    def start(self):
+                elif self.agent_type == 'td3':
+                    a = self.agent.get_action(o, 0)
+                o, r, terminated, truncated, info = self.env.step(a)
+                d = terminated or truncated
+                ep_ret += r
+                ep_len += 1
+            ep_rets.append(ep_ret)
+            ep_lens.append(ep_len)
+            if info['is_success'] == True: success_num += 1
         
+        ep_ret_avg = sum(ep_rets) / len(ep_rets)
+        ep_len_avg = sum(ep_lens) / len(ep_lens)
+        success_rate = success_num / self.num_test_episodes
+        
+        return ep_ret_avg, ep_len_avg, success_rate
+            
+
+    def start(self,agent,replay_buffer):
+
+        self.env = make_env(self.config, self.config_framework)
+        
+        self.agent = agent
+
+        init_invalid_num = 0
+        reset_num = 0
+
         # Prepare for interaction with environment
         total_steps = self.steps_per_epoch * self.epochs
-        first_update = self.update_every * math.ceil(self.update_after / self.update_every)
-        self.save_freq = int(((total_steps - first_update) * self.update_factor) / self.num_log_loss_points)
-        self.save_freq = max(self.save_freq,1)
+        #start_time = time.time()
+        [o, reset_info], ep_ret, ep_len = self.env.reset_with_init_check(), 0, 0
+        init_invalid_num += reset_info['init_invalid_num']
+        reset_num += reset_info['reset_num']
+
+        best_test_ep_ret = -float('inf')
+
+        print("Training starts")
+        episode = []
     
-        o, ep_ret, ep_len = self.env.reset(), 0, 0
-
         # Main loop: collect experience in env and update/log each epoch
-        episode_iter = 0
-        env_error_num = 0
-        sum_ep_len = 0
-        sum_ep_ret = 0
-        update_iter = 0
-        log_loss_iter = 1
-
-        epoch = 0
-        avg_test_return = self.test_agent(epoch)
-        log_text = "AVG test return: " + str(epoch) + ". epoch : " + str(avg_test_return)
-        print(log_text) 
-        self.logger.tb_writer_add_scalar("test/average_return", avg_test_return, epoch)
-
-        pbar = tqdm(total = total_steps, desc ="Training: ", colour="green")
-        t = 0
-        while t < total_steps:
+        for t in tqdm(range(total_steps), desc ="Training: ", leave=True):
             
-            #tqdm.write(str(t)) 
-            # tqdm.write("o: " + str(o))
-
             # Until start_steps have elapsed, randomly sample actions
             # from a uniform distribution for better exploration. Afterwards, 
             # use the learned policy. 
             if t > self.start_steps:
-                a = self.agent.get_action(o)
+                if self.agent_type == 'sac':
+                    a = self.agent.get_action(o, False) 
+                elif self.agent_type == 'td3':
+                    a = self.agent.get_action(o, self.agent.act_noise)
+                # a = self.get_action(o)
             else:
-                a = self.agent.get_random_action()
+                a = self.env.random_sample()
+                # a = self.env.env.action_space.sample()
 
             # Step the env
-            #tqdm.write("Action: "+str(a))
-            try:
-                o2, r, d, info = self.env.step(a)
-            except:
-                tqdm.write("Error in simulation, thus reseting the environment")
-                tqdm.write("a: " + str(a)) 
-                env_error_num += 1
-                o, ep_ret, ep_len = self.env.reset(), 0, 0   
-                continue
-
-            # tqdm.write("o2: " + str(o2)) 
-            # tqdm.write("r: " + str(r)) 
-            # tqdm.write("d: " + str(d)) 
-        
+            o2, r, terminated, truncated, info = self.env.step(a)
+            d = terminated or truncated
             ep_ret += r
             ep_len += 1
 
@@ -238,48 +191,86 @@ class SamplerTrainerTester:
             # that isn't based on the agent's state)
             d = False if ep_len==self.max_ep_len else d
 
-            # Store experience to replay buffer
-            self.replay_buffer.store(o, a, r, o2, d)
+            # Save transition
+            episode.append((o, a, r, o2, d))
 
             # Super critical, easy to overlook step: make sure to update 
             # most recent observation!
             o = o2
 
             # End of trajectory handling
-            if d or (ep_len == self.max_ep_len):               
-                episode_iter += 1
-                sum_ep_len += sum_ep_len
-                sum_ep_ret += ep_ret
-                o, ep_ret, ep_len = self.env.reset(), 0, 0
+            if d or (ep_len == self.max_ep_len):
                 
+                for (o, a, r, o2, d) in episode:
+                    replay_buffer.store(o, a, r, o2, d)
+                
+                if self.her_active and truncated:
+                    ep_t = 0
+                    for (o, a, r, o2, d) in episode:
+                        new_goals = self.get_new_goals(episode,ep_t)
+                        for new_goal in new_goals:
+                            o_new = self.env.change_goal_in_obs(o, new_goal)
+                            o2_new = self.env.change_goal_in_obs(o2, new_goal)
+                            r_new, d_new = self.env.her_get_reward_and_done(o2_new) 
+                            replay_buffer.store(o_new, a, r_new, o2_new, d_new)
+                        ep_t += 1
+                episode = []
+
+                # logger.store(EpRet=ep_ret, EpLen=ep_len)
+                # self.logger.tb_writer_add_scalar("train/ep_ret", ep_ret, t)
+                # self.logger.tb_writer_add_scalar("train/ep_len", ep_len, t)
+                self.train_ep_ret_dq.append(ep_ret)
+                self.train_ep_len_dq.append(ep_len)
+                [o, reset_info], ep_ret, ep_len = self.env.reset_with_init_check(), 0, 0
+                init_invalid_num += reset_info['init_invalid_num']
+                reset_num += reset_info['reset_num']
 
             # Update handling
             if t >= self.update_after and t % self.update_every == 0:
-                for j in tqdm(range(self.update_every * self.update_factor), desc ="Updating weights: ", leave=False):
-                    update_iter += 1
-                    batch = self.sample_batch()
-                    loss_q, loss_pi = self.agent.update(data=batch)
-                    if update_iter % self.save_freq == 0:
-                        self.logger.tb_save_train_data(loss_q,loss_pi,sum_ep_len,sum_ep_ret,episode_iter,env_error_num,t,log_loss_iter)
-                        sum_ep_len = 0
-                        sum_ep_ret = 0
-                        episode_iter = 0
-                        log_loss_iter += 1
+                for j in range(self.update_every):
+                    batch = replay_buffer.sample_batch(self.batch_size)
+                    #print(batch)
+                    ret_loss_q, ret_loss_pi = self.agent.update(batch, j)
+                    self.loss_q_dq.append(ret_loss_q)
+                    if ret_loss_pi != None: self.loss_pi_dq.append(ret_loss_pi)
 
             # End of epoch handling
             if (t+1) % self.steps_per_epoch == 0:
-                epoch = (t+1) // self.steps_per_epoch                
-                
-                avg_test_return = self.test_agent(epoch)
-                log_text = "AVG test return: " + str(epoch) + ". epoch ("+ str(t+1) + " transitions) : " + str(avg_test_return)
-                tqdm.write(log_text) 
-                self.logger.tb_writer_add_scalar("test/average_return", avg_test_return, epoch)
-                
-            
 
-                if avg_test_return > self.max_avg_test_return: 
-                    self.max_avg_test_return = avg_test_return
-                    self.logger.save_model(self.agent.ac.pi.state_dict(),epoch)
-            
-            t += 1           
-            pbar.update(1)   
+                epoch = (t+1) // self.steps_per_epoch
+
+                # Test the performance of the deterministic version of the agent.
+                test_ep_ret, test_ep_len, test_success_rate = self.test_agent()
+
+                self.logger.tb_writer_add_scalar("test/ep_ret", test_ep_ret, epoch)
+                self.logger.tb_writer_add_scalar("test/ep_len", test_ep_len, epoch)
+                self.logger.tb_writer_add_scalar("test/success_rate", test_success_rate, epoch)
+
+                best_model_changed = False
+                if epoch > self.model_save_best_after:
+                    if test_ep_ret > best_test_ep_ret:
+                        best_test_ep_ret = test_ep_ret
+                        best_model_changed = True
+                
+                self.logger.tb_writer_add_scalar("test/best_ep_ret", best_test_ep_ret, epoch)
+
+                # Save model 
+                if (epoch % self.model_save_freq == 0) or (epoch == self.epochs) or best_model_changed:
+                    model_path = self.logger.get_model_save_path(epoch)
+                    self.agent.save_model(model_path,self.model_save_mode)
+                    message = self.logname +  " | Epoch: " + str(epoch) + " | test ep ret: " + str(test_ep_ret) + " | test ep len: " + str(test_ep_len) + " | test success rate: " + str(test_success_rate)
+                    if best_model_changed: message += " *"
+                    tqdm.write("[info] " + message)
+                    #logger.save_state({'env': env}, None)       
+
+                self.logger.tb_writer_add_scalar("train/train_ep_ret", np.mean(self.train_ep_ret_dq), t)
+                self.logger.tb_writer_add_scalar("train/train_ep_len", np.mean(self.train_ep_len_dq), t)
+                self.logger.tb_writer_add_scalar('train/loss_q', np.mean(self.loss_q_dq), t)
+                self.logger.tb_writer_add_scalar("train/loss_pi", np.mean(self.loss_pi_dq), t)
+
+                invalid_init_ratio = float(init_invalid_num) / reset_num 
+                self.logger.tb_writer_add_scalar("train/invalid_init_ratio", invalid_init_ratio, t)
+
+        self.logger.tb_close()
+   
+    
