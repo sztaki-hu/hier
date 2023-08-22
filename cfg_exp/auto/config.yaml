@@ -10,9 +10,9 @@ hardware:
   cpu_max: [32,32,32]
 
 environment:
-  name: gympanda
+  name: input
   task: 
-    name: PandaReach-v3
+    name: input
     params: []
   headless: True
   obs_dim: auto
@@ -24,7 +24,7 @@ environment:
     reward_shaping_type: sparse
 
 agent:
-  type: td3
+  type: input
   hidden_sizes: [256,256,256]
   boundary_min: auto
   boundary_max: auto
@@ -45,7 +45,7 @@ agent:
 buffer:
   replay_buffer_size: 1e6
   her:
-    goal_selection_strategy: future_once
+    goal_selection_strategy: input
     n_sampled_goal: 4
 
 sampler:
