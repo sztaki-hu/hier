@@ -5,7 +5,7 @@ import numpy as np
 import torch
 import argparse
 
-from rltrain.buffers.replay_v0 import ReplayBuffer
+from rltrain.buffers.replay import ReplayBuffer
 
 from rltrain.utils.utils import init_cuda, print_torch_info
 from rltrain.logger.logger import Logger
@@ -45,48 +45,47 @@ def main():
     envs = list(exp_list['tasks'].keys())
     her_strategies = exp_list['her_strategies']
 
-    for env in envs:
-        for task in exp_list['tasks'][env]:
-            for agent in agents:
+    for env_name in envs:
+        for task_name in exp_list['tasks'][env_name]:
+            for agent_type in agents:
                 for her_strategy in her_strategies:
                     exp = {}
-                    exp['env'] = env
-                    exp['task'] = task
-                    exp['agent'] = agent
+                    exp['env'] = env_name
+                    exp['task'] = task_name
+                    exp['agent'] = agent_type
                     exp['her_strategy'] = her_strategy
-                
 
-                # Init logger ###############################################x
-                logger = Logger(current_dir = current_dir, main_args = args, display_mode = False, tb_layout = False, exp = exp)
+                    # Init logger ###############################################x
+                    logger = Logger(current_dir = current_dir, main_args = args, display_mode = False, tb_layout = False, exp = exp)
 
-                config = logger.get_config()
+                    config = logger.get_config()
 
-                config_framework = logger.get_config_framework()
-                
-                # Init CUDA and torch and np ##################################
-                init_cuda(config['hardware']['gpu'][args.trainid],config['hardware']['cpu_min'][args.trainid],config['hardware']['cpu_max'][args.trainid])
+                    config_framework = logger.get_config_framework()
+                    
+                    # Init CUDA and torch and np ##################################
+                    init_cuda(config['hardware']['gpu'][args.trainid],config['hardware']['cpu_min'][args.trainid],config['hardware']['cpu_max'][args.trainid])
 
-                print_torch_info(logger)
+                    print_torch_info(logger)
 
-                device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-                logger.print_logfile(device)
+                    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+                    logger.print_logfile(device)
 
-                torch.set_num_threads(torch.get_num_threads())
+                    torch.set_num_threads(torch.get_num_threads())
 
-                torch.manual_seed(config['general']['seed'])
-                np.random.seed(config['general']['seed'])
+                    torch.manual_seed(config['general']['seed'])
+                    np.random.seed(config['general']['seed'])
 
-                
-                replay_buffer = ReplayBuffer(
-                        obs_dim=int(config['environment']['obs_dim']), 
-                        act_dim=int(config['environment']['act_dim']), 
-                        size=int(config['buffer']['replay_buffer_size']))
-                
-                agent = make_agent(0,device,config,config_framework)
+                    
+                    replay_buffer = ReplayBuffer(
+                            obs_dim=int(config['environment']['obs_dim']), 
+                            act_dim=int(config['environment']['act_dim']), 
+                            size=int(float(config['buffer']['replay_buffer_size'])))
+                    
+                    agent = make_agent(device,config,config_framework)
 
-                samplerTrainerTester = SamplerTrainerTester(device,logger,config,args,config_framework)
+                    samplerTrainerTester = SamplerTrainerTester(device,logger,config,args,config_framework)
 
-                samplerTrainerTester.start(agent,replay_buffer)
+                    samplerTrainerTester.start(agent,replay_buffer)
 
 if __name__ == '__main__':
     main()

@@ -11,7 +11,6 @@ class Env:
 
         # General
         self.task_name = self.config['environment']['task']['name']
-        self.action_space = config['agent']['action_space']
         self.max_ep_len = config['sampler']['max_ep_len']
         self.t = 0           
 

@@ -4,7 +4,7 @@ import numpy as np
 import torch
 import argparse
 
-from rltrain.buffers.replay_v0 import ReplayBuffer
+from rltrain.buffers.replay import ReplayBuffer
 
 from rltrain.utils.utils import init_cuda, print_torch_info
 from rltrain.logger.logger import Logger
@@ -54,14 +54,13 @@ def main():
     replay_buffer = ReplayBuffer(
             obs_dim=int(config['environment']['obs_dim']), 
             act_dim=int(config['environment']['act_dim']), 
-            size=int(config['buffer']['replay_buffer_size']))
+            size=int(float(config['buffer']['replay_buffer_size'])))
     
-    agent = make_agent(0,device,config,config_framework)
+    agent = make_agent(device,config,config_framework)
 
     samplerTrainerTester = SamplerTrainerTester(device,logger,config,args,config_framework)
 
     samplerTrainerTester.start(agent,replay_buffer)
-
 
 
 if __name__ == '__main__':

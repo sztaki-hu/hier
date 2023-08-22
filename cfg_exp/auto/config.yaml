@@ -1,5 +1,5 @@
 general:
-  exp_name: 0821_X_test
+  exp_name: 0822_X
   logdir: logs
   demodir: demos
   seed: 0
@@ -10,30 +10,29 @@ hardware:
   cpu_max: [32,32,32]
 
 environment:
-  name: input
+  name: gympanda
   task: 
-    name: input
+    name: PandaReach-v3
     params: []
   headless: True
   obs_dim: auto
   act_dim: auto
+  camera: False
   reward:
     reward_scalor: 1
     reward_bonus: 0.1
     reward_shaping_type: sparse
 
-
 agent:
-  type: input
+  type: td3
   hidden_sizes: [256,256,256]
   boundary_min: auto
   boundary_max: auto
   gamma: 0.95 
   sac:
-    n_step: 1
     polyak: 0.995
-    lr: [0.001]
-    alpha: [0.2]
+    lr: 0.001
+    alpha: 0.2
   td3:
     target_noise: 0.2
     noise_clip: 0.5
@@ -44,29 +43,33 @@ agent:
     act_noise: 0.1
 
 buffer:
-  replay_buffer_size: 1000000
+  replay_buffer_size: 1e6
   her:
-    active: true
-    goal_selection_strategy: input
+    goal_selection_strategy: future_once
     n_sampled_goal: 4
 
 sampler:
-  start_steps: 10000
+  start_steps: 1e4
   max_ep_len: auto
 
 trainer:
-  steps_per_epoch: 5000
-  epochs: 100
+  total_timesteps: 5e5
   batch_size: 256
-  update_after: 1000
+  update_after: 1e2
   update_every: 50
 
-tester:
-  num_test_episodes: 10
+eval:
+  freq: 5e3
+  num_episodes: 20
+  
 
 logger:
+  rollout:
+    stats_window_size: 100
+  train:
+    stats_window_size: 1
   model:
     save:
       mode: pi
+      best_start_t: 0.3
       freq: 5
-      best_after: 30

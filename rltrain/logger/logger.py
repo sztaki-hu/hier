@@ -1,181 +1,98 @@
 import os
-import logging
 import numpy as np
-import torch
 import yaml
+import time
+import logging
 from PIL import Image
 from torch.utils.tensorboard import SummaryWriter
-
-import pandas as pd
 
 
 class Logger:
     # init method or constructor
     def __init__(self, current_dir, main_args, display_mode = False, tb_layout = False, exp = None):
 
+        # Load config and set up main variables
         self.current_dir = current_dir
         self.trainid = str(main_args.trainid)
-
-        print(main_args)
-        
-        if display_mode == False:       
-            self.config_path = os.path.join(current_dir,main_args.config)
-        else:
-            self.config_path = os.path.join(current_dir,main_args.config,self.trainid,"config.yaml")
-     
-        print(current_dir)
-        print(self.config_path)
-        
+        self.config_path = os.path.join(current_dir,main_args.config) if display_mode == False else os.path.join(current_dir,main_args.config,self.trainid,"config.yaml")             
         self.config = self.load_yaml(self.config_path)
+        self.config_framework = self.load_yaml(os.path.join(current_dir,'cfg_framework','config_framework.yaml'))
+        self.config_tasks = self.load_yaml(os.path.join(current_dir,'cfg_framework','config_tasks.yaml'))
+        self.config['general']['current_dir'] = current_dir
 
+        # Replace 'input' values of config file if it is main_auto.py 
         if exp != None:
             self.config['environment']['name'] = exp['env']
             self.config['environment']['task']['name'] = exp['task']
             self.config['agent']['type'] = exp['agent']
             self.config['buffer']['her']['goal_selection_strategy'] = exp['her_strategy']
         
-        self.config['general']['current_dir'] = current_dir
-
-        self.config_framework = self.load_yaml(os.path.join(current_dir,'cfg_framework','config_framework.yaml'))
-        self.config_tasks = self.load_yaml(os.path.join(current_dir,'cfg_framework','config_tasks.yaml'))
-
-        self.logdir = self.config['general']['logdir']
-        self.logname = self.config['general']['exp_name'] + "_" + self.config['environment']['task']['name'] + "_" + self.config['agent']['type'] 
-
+        # Compute and replace auto values
+        self.compute_and_replace_auto_values()
+        
+        # Demos
         self.demodir = self.config['general']['demodir']
+
+        # Create logname
+        self.logdir = self.config['general']['logdir']
+        self.logname = '_'.join((self.config['general']['exp_name'],
+                                 self.config['environment']['task']['name'],
+                                 self.config['agent']['type'],
+                                 self.config['buffer']['her']['goal_selection_strategy'],
+                                 str(int(time.time()))))
+
+        # Create log folders and files
+        if display_mode == False: 
+            
+            # Experiment folder
+            self.create_folder(os.path.join(self.current_dir,self.logdir, self.logname,self.trainid))
+
+            # Save config
+            self.save_yaml(os.path.join(self.current_dir, self.logdir,self.logname,"config.yaml"),self.config)
+            
+            # Backup model folder
+            self.create_folder(os.path.join(self.current_dir,self.logdir, self.logname,self.trainid,"model_backup"))    
+
+            # Tensorboard
+            self.writer = SummaryWriter(log_dir = os.path.join(self.current_dir,self.logdir,self.logname,self.trainid,"runs"))     
         
-        
+        # Printout logging
         log_file_path = os.path.join(self.current_dir,self.logdir, self.logname,self.trainid,'logs.log')
         if os.path.isfile(log_file_path):
             os.remove(log_file_path) 
-        
-        self.create_folder(os.path.join(self.current_dir,self.logdir, self.logname,self.trainid))
 
         logging.basicConfig(filename=log_file_path,level=logging.DEBUG)
         self.pylogger = logging.getLogger('mylogger')
 
-        cfg_rlbench = {'path' : self.config_path}
-        self.create_folder(os.path.join(self.current_dir, "cfg_rlbench"))
+        # Set up RLBench path
+        # cfg_rlbench = {'path' : self.config_path}
+        # self.create_folder(os.path.join(self.current_dir, "cfg_rlbench"))
+        # self.save_yaml(os.path.join(self.current_dir, "cfg_rlbench" ,"config.yaml"),cfg_rlbench)
 
-        self.handle_ancient_versions()
-
-        self.check_config_values()
-
-        self.compute_and_replace_auto_values()
-
-        self.save_yaml(os.path.join(self.current_dir, "cfg_rlbench" ,"config.yaml"),cfg_rlbench)
-
-        # cfg_rlbench_2 = self.load_yaml(os.path.join(self.current_dir, "cfg_rlbench" ,"config.yaml"))
-        # print(cfg_rlbench_2)
-        # print(cfg_rlbench_2['path'])
-
-        self.create_folder(os.path.join(self.current_dir,self.logdir, self.logname,self.trainid)) 
-
-        self.heatmap_bool = self.config['logger']['heatmap']['bool']
-        self.agent_num = int(self.config['agent']['agent_num'])
-        if self.agent_num > 1: assert self.config['general']['sync'] == True
-
-        if display_mode == False: 
-            for agent_id in range(self.agent_num):
-                    self.create_folder(os.path.join(self.current_dir,self.logdir, self.logname,self.trainid,"model_backup",str(agent_id)))
-                #self.create_folder(os.path.join(self.current_dir,self.logdir, self.logname,self.trainid,"replay_buffer_backup"))
-                #self.create_folder(os.path.join(self.current_dir, self.logdir, self.logname,self.trainid,"plots_raw_data"))              
-            self.save_yaml(os.path.join(self.current_dir, self.logdir,self.logname,self.trainid,"config.yaml"),self.config)
-
-        self.writer = SummaryWriter(log_dir = os.path.join(self.current_dir,self.logdir,self.logname,self.trainid,"runs"))
-        if tb_layout == True:
-            train_ret_list = []
-            train_ep_len_list = []
-            train_pi_loss_list = []
-            train_q_loss_list = []
-            train_success_list = []
-            test_ret_list = []
-            test_success_list = []
-            for i in range(self.agent_num):
-                train_ret_list.append("train/train_ret_"+str(i))
-                train_ep_len_list.append("train/train_ep_len_"+str(i))
-                train_pi_loss_list.append("train/loss_pi_"+str(i))
-                train_q_loss_list.append("train/loss_q_"+str(i))
-                train_success_list.append("train/train_success_"+str(i))
-                test_ret_list.append("test/test_ret_"+str(i))
-                test_success_list.append("test/test_success_"+str(i))
-          
-            layout = {
-                "agents train": {
-                    "train_ret": ["Multiline", train_ret_list],
-                    "train_ep_len": ["Multiline", train_ep_len_list],
-                    "train_pi_loss": ["Multiline", train_pi_loss_list],
-                    "train_q_loss": ["Multiline", train_q_loss_list],     
-                    "train_success": ["Multiline", train_success_list],             
-                },
-                "agents test": {        
-                    "test_ret": ["Multiline", test_ret_list],
-                    "test_success": ["Multiline", test_success_list], 
-                },
-            }
-
-            self.writer.add_custom_scalars(layout)
-    
-    def handle_ancient_versions(self):
-        if "agent_num" not in self.config['agent']: 
-            self.config['agent']['agent_num'] = 1
-        if "sampler_num" not in self.config['sampler']: 
-            self.config['sampler']['sampler_num'] = 1
-        if "buffer_num" not in self.config['buffer']: 
-            self.config['buffer']['buffer_num'] = 1
-        if 'tester2' not in self.config:
-            self.config['tester2'] = {}
-            self.config['tester2']['bool'] = True
-            self.config['tester2']['env_name'] = 'rlbench'
-            self.config['tester2']['num_test2_episodes'] = max(int(self.config['tester']['num_test_episodes']/10),1)        
-        if "action_space" not in self.config['agent']:
-            self.config['agent']['action_space'] = 'none'
-        if "state_space" not in self.config['environment']:
-            self.config['environment']['state_space'] = 'none'
-        if "heatmap" not in self.config['logger']:
-            self.config['logger']['heatmap'] = {}
-            self.config['logger']['heatmap']['bool'] = False
-        if "demo" not in self.config:
-            self.config['demo'] = {}
-            self.config['demo']['demo_use'] = False
-        if "model" not in self.config['logger']:
-            self.config['logger']['model'] = {}
-            self.config['logger']['model']['save'] = {}
-            self.config['logger']['model']['save']['freq'] = 1
-            self.config['logger']['model']['save']['best_after'] = 0
-            self.config['logger']['model']['save']['mode'] = "pi"
-
-    def check_config_values(self):
-        assert self.config['buffer']['buffer_num'] >= 1
-        assert self.config['agent']['agent_num'] >= 1
-        assert self.config['agent']['agent_num'] >= self.config['buffer']['buffer_num']
 
     def compute_and_replace_auto_values(self):
         env_name = self.config['environment']['name']
-        self.task_name = self.config['environment']['task']['name']
-        self.task_params = self.config['environment']['task']['params']
-        self.action_space = self.config['agent']['action_space']
-        self.state_space = self.config['environment']['state_space']
+        task_name = self.config['environment']['task']['name']
 
         ## MAX_EP_LEN
         if self.config['sampler']['max_ep_len'] == "auto":  
-            self.config['sampler']['max_ep_len'] = self.config_tasks[env_name][self.task_name]['max_ep_len']               
+            self.config['sampler']['max_ep_len'] = self.config_tasks[env_name][task_name]['max_ep_len']               
 
         ## OBS DIM
         if self.config['environment']['obs_dim'] == "auto":
-            self.config['environment']['obs_dim']  = self.config_tasks[env_name][self.task_name]['obs_dim']
+            self.config['environment']['obs_dim']  = self.config_tasks[env_name][task_name]['obs_dim']
 
         ## ACT DIM
         if self.config['environment']['act_dim'] == "auto":
-            self.config['environment']['act_dim'] = self.config_tasks[env_name][self.task_name]['act_dim']
+            self.config['environment']['act_dim'] = self.config_tasks[env_name][task_name]['act_dim']
         
         ## BOUNDARY MIN
         if self.config['agent']['boundary_min'] == "auto":
-            self.config['agent']['boundary_min'] = self.config_tasks[env_name][self.task_name]['boundary_min']
+            self.config['agent']['boundary_min'] = self.config_tasks[env_name][task_name]['boundary_min']
         
         ## BOUNDARY MAX
         if self.config['agent']['boundary_max'] == "auto":
-            self.config['agent']['boundary_max'] = self.config_tasks[env_name][self.task_name]['boundary_max']
+            self.config['agent']['boundary_max'] = self.config_tasks[env_name][task_name]['boundary_max']
 
     def print_logfile(self,message,level = "info", terminal = True):
         if terminal:
@@ -188,29 +105,16 @@ class Logger:
             self.pylogger.error(str(message))
         else:
             self.pylogger.info(str(message))
-
-    def get_model_epoch(self,epoch,agent_id = 0):
-        models = self.list_model_dir(agent_id)
-        
-        for model in models:
-            end_ptr = model.find('_pi',6)
-            if end_ptr > 6:
-                model_num = int(model[6:end_ptr])    
-                if model_num == epoch:
-                    return model[:end_ptr]
-        return None       
-
-    def list_model_dir(self, agent_id = 0):
-        return os.listdir(os.path.join(self.current_dir,self.logdir, self.logname,self.trainid,"model_backup",str(agent_id)))
-
-    def get_model_path(self,name, agent_id = 0):
-        return os.path.join(self.current_dir,self.logdir, self.logname,self.trainid,"model_backup",str(agent_id),name)
+    
+    # Config
 
     def get_config(self):
         return self.config
     
     def get_config_framework(self):
         return self.config_framework
+    
+    # TB
     
     def tb_writer_add_scalar(self,name,value,iter):
         self.writer.add_scalar(name, value, iter)
@@ -220,24 +124,14 @@ class Logger:
     
     def tb_writer_add_image(self,name,img, iter, dataformats='HWC'):
         self.writer.add_image(name, img, iter, dataformats=dataformats)
+    
+    # Models
+    
+    def get_model_save_path(self,epoch):
+        return os.path.join(self.current_dir, self.logdir, self.logname,self.trainid,"model_backup","model_" + str(epoch))
+    
+    # Demos
 
-    def save_model(self,model,epoch,agent_id = 0):
-        model_path = os.path.join(self.current_dir, self.logdir, self.logname,self.trainid,"model_backup",str(agent_id),"model_" + str(epoch))
-        torch.save(model, model_path)
-    
-    def get_model_save_path(self,epoch,agent_id = 0):
-        return os.path.join(self.current_dir, self.logdir, self.logname,self.trainid,"model_backup",str(agent_id),"model_" + str(epoch))
-
-    
-    # def save_replay_buffer(self, replay_buffer, epoch):
-    #     path = os.path.join(self.current_dir, self.logdir, self.logname,self.trainid,"replay_buffer_backup","buffer_" + str(epoch)+".yaml")
-    #     replay_buffer_copy = replay_buffer
-    #     self.save_yaml(path, replay_buffer_copy)
-    
-    # def load_replay_buffer(self,epoch):
-    #     path = os.path.join(self.current_dir, self.logdir, self.logname,self.trainid,"replay_buffer_backup","buffer_" + str(epoch)+".yaml")
-    #     return self.load_yaml(path)
-        
     def demo_exists(self,name):
         return os.path.isfile(os.path.join(self.current_dir, self.demodir, name + ".yaml"))
 
@@ -250,151 +144,6 @@ class Logger:
     
     def remove_old_demo(self,name):
         os.remove(os.path.join(self.current_dir,self.demodir,name + ".yaml")) 
-    
-    # def compose_heatmap_color_image(self,heatmap_raw):
-    #     #sample_num = np.sum(heatmap_raw)
-    #     heatmap_rescaled = cv2.normalize(heatmap_raw, None, 0, 255, cv2.NORM_MINMAX, cv2.CV_8U)
-    #     heatmap_img = cv2.applyColorMap(heatmap_rescaled, cv2.COLORMAP_JET)
-
-        
-    
-    def tb_save_train_data_v2(self,
-                              loss_q,
-                              loss_pi,
-                              train_ret,
-                              train_ep_len,
-                              train_ep_success,
-                              env_error_num,
-                              out_of_bounds_num,
-                              reward_bonus_num,
-                              demo_ratio,
-                              heatmap_bool_pick,
-                              heatmap_bool_place,
-                              t,
-                              actual_time,
-                              update_iter):
-        self.tb_writer_add_scalar("train/loss_q", loss_q, update_iter)
-        self.tb_writer_add_scalar("train/loss_p", loss_pi, update_iter)
-        self.tb_writer_add_scalar("train/train_ret", train_ret, t)
-        self.tb_writer_add_scalar("train/train_ep_len", train_ep_len, t)
-        self.tb_writer_add_scalar("train/train_ep_success", train_ep_success, t)
-        env_error_num_ratio = (env_error_num / float(t))
-        self.tb_writer_add_scalar("train/env_error_ratio", env_error_num_ratio, update_iter)
-        out_of_bounds_ratio = (out_of_bounds_num / float(t))
-        self.tb_writer_add_scalar("train/out_of_bounds_ratio", out_of_bounds_ratio, update_iter) 
-        rel_time = 1000 * (actual_time / float(t))
-        self.tb_writer_add_scalar("train/time_sec_1000_transitions", rel_time, t)
-        reward_bonus_ratio = (reward_bonus_num / float(t))
-        self.tb_writer_add_scalar("train/reward_bonus_ratio", reward_bonus_ratio, t)
-        self.tb_writer_add_scalar("train/demo_ratio", demo_ratio, t)
-
-        if self.heatmap_bool:
-            # heatmap_bool_pick_ratio = heatmap_bool_pick / np.sum(heatmap_bool_pick)
-            # heatmap_bool_place_ratio = heatmap_bool_place / np.sum(heatmap_bool_place)
-
-            # heatmap_bool_pick_diff = heatmap_bool_pick - self.heatmap_bool_pick_old
-            # heatmap_bool_place_diff = heatmap_bool_place - self.heatmap_bool_place_old
-
-            # self.heatmap_bool_pick_old = np.copy(heatmap_bool_pick)
-            # self.heatmap_bool_place_old = np.copy(heatmap_bool_place)
-
-            heatmap_bool_pick_norm = heatmap_bool_pick / np.max(heatmap_bool_pick)
-            heatmap_bool_place_norm = heatmap_bool_place / np.max(heatmap_bool_place)
-
-            # heatmap_bool_pick_diff_norm = heatmap_bool_pick_diff / np.max(heatmap_bool_pick_diff)
-            # heatmap_bool_place_diff_norm = heatmap_bool_place_diff / np.max(heatmap_bool_place_diff)
-
-            self.tb_writer_add_image("sampler/hetmap_pick_all",heatmap_bool_pick_norm, t, dataformats='HW')
-            self.tb_writer_add_image("sampler/hetmap_place_all",heatmap_bool_place_norm, t, dataformats='HW')
-
-            # self.tb_writer_add_image("sampler/hetmap_pick_last",heatmap_bool_pick_diff_norm, t, dataformats='HW')
-            # self.tb_writer_add_image("sampler/hetmap_place_last",heatmap_bool_place_diff_norm, t, dataformats='HW')
-    
-    def np2dict(self,data_np):
-        data = {}
-        for agent_id in range(data_np.shape[0]):
-            data["agent_" + str(agent_id)]= data_np[agent_id]        
-        return data
-
-    def tb_save_train_data_v3(self,
-                              loss_q_np,
-                              loss_pi_np,
-                              train_ret_np,
-                              train_ep_len_np,
-                              train_ep_success_np,
-                              env_error_num,
-                              out_of_bounds_num,
-                              reward_bonus_num,
-                              demo_ratio,
-                              heatmap_pick,
-                              heatmap_place,
-                              t,
-                              actual_time,
-                              update_iter):
-        
-        for i in range(self.agent_num):
-            self.writer.add_scalar("train/train_ret_"+ str(i), train_ret_np[i], t)
-            self.writer.add_scalar("train/train_ep_len_"+ str(i), train_ep_len_np[i], t)
-            self.writer.add_scalar('train/loss_q_'+ str(i), loss_q_np[i], update_iter)
-            self.writer.add_scalar("train/loss_pi_"+ str(i), loss_pi_np[i], update_iter)
-            self.writer.add_scalar("train/train_success_"+ str(i), train_ep_success_np[i], t)
-
-        env_error_num_ratio = (env_error_num / float(t))
-        self.tb_writer_add_scalar("train_glob/env_error_ratio", env_error_num_ratio, update_iter)
-        out_of_bounds_ratio = (out_of_bounds_num / float(t))
-        self.tb_writer_add_scalar("train_glob/out_of_bounds_ratio", out_of_bounds_ratio, update_iter) 
-        rel_time = 1000 * (actual_time / float(t))
-        self.tb_writer_add_scalar("train_glob/time_sec_1000_transitions", rel_time, t)
-        reward_bonus_ratio = (reward_bonus_num / float(t))
-        self.tb_writer_add_scalar("train_glob/reward_bonus_ratio", reward_bonus_ratio, t)
-        self.tb_writer_add_scalar("train_glob/demo_ratio", demo_ratio, t)
-
-        if self.heatmap_bool:
-
-            heatmap_pick_norm = heatmap_pick / np.max(heatmap_pick)
-            heatmap_place_norm = heatmap_place / np.max(heatmap_place)
-
-            self.tb_writer_add_image("sampler/hetmap_pick_all",heatmap_pick_norm, t, dataformats='HW')
-            self.tb_writer_add_image("sampler/hetmap_place_all",heatmap_place_norm, t, dataformats='HW')
-
-     
-    
-    def tb_save_train_data(self,loss_q,loss_pi,sum_ep_len,sum_ep_ret,episode_iter,env_error_num,t,log_loss_iter):
-        self.tb_writer_add_scalar("train/loss_q", loss_q, log_loss_iter)
-        self.tb_writer_add_scalar("train/loss_p", loss_pi, log_loss_iter)
-        if episode_iter > 0 :
-            avg_sum_ep_len = sum_ep_len / float(episode_iter)
-            avg_sum_ep_ret = sum_ep_ret / float(episode_iter)
-        else:
-            avg_sum_ep_len = 0
-            avg_sum_ep_ret = 0
-        env_error_num_percentage = (env_error_num / t) * 100
-        self.tb_writer_add_scalar("train/avg_return_since_last_epoch", avg_sum_ep_ret, log_loss_iter)
-        self.tb_writer_add_scalar("train/avg_episode_length_since_last_epoch", avg_sum_ep_len, log_loss_iter)
-        self.tb_writer_add_scalar("train/env_error_%", env_error_num_percentage, log_loss_iter) 
-
-    def save_eval_range(self,data,epoch):
-        name = self.logname + "_plot_range_" + str(epoch)
-        dir = os.path.join(self.current_dir, self.logdir, self.logname,self.trainid,"plots_raw_data")
-
-        with open(os.path.join(dir,name + ".npy" ),'wb') as f:
-            np.save(f, data)    
-        
-        # plot = True
-        # if plot == True:
-        #     import matplotlib.pyplot as plt
-
-        #     inputs_np = data[:,0]
-        #     outputs_np = data[:,1]
-
-        #     plt.plot(inputs_np,inputs_np, color = "blue", label="ground-truth")
-        #     plt.plot(inputs_np,outputs_np, color = "orange",label="prediction")
-        #     #plt.title("Results in range " +  args.trainname)
-        #     plt.title("Results in range - " + str(epoch))
-        #     plt.legend()
-        #     plt.savefig(os.path.join(dir,name + ".png" ))
-        #     #plt.show()
-        #     plt.clf()
 
     # File management ##############################################################
     def create_folder(self,path):
@@ -413,16 +162,6 @@ class Logger:
             with open(file) as f:
                 return yaml.load(f, Loader=yaml.UnsafeLoader)
         return None
-
-    def save_test2(self,df,test2env):
-
-        self.create_folder(os.path.join(self.current_dir, "csv_to_plot"))
-
-        exp_name = str(self.config['general']['exp_name']) + "_" + str(self.trainid)
-        file_name = os.path.join(self.current_dir,"csv_to_plot","test_epochs_"+exp_name+"_"+test2env+".csv")
-
-        #df.to_excel(file_name) 
-        df.to_csv(file_name,index=False)
 
     # Save Images, Ground-Truth #####################################################
 

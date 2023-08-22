@@ -8,7 +8,7 @@ import rltrain.agents.td3.core as core
 
 class Agent:
 
-    def __init__(self,agent_id,device,config):
+    def __init__(self,device,config):
 
         self.device = device
         self.actor_critic=core.MLPActorCritic

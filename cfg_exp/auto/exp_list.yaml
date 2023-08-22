@@ -1,5 +1,5 @@
 agents: ['sac','td3']
-her_strategies: ['final','future']
+her_strategies: ['noher','final','future']
 tasks:
   gympanda: ['PandaReach-v3','PandaPush-v3','PandaSlide-v3']
 

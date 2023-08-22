@@ -21,40 +21,48 @@ class SamplerTrainerTester:
         self.seed = config['general']['seed'] 
         self.agent_type = config['agent']['type']
 
-        self.steps_per_epoch = config['trainer']['steps_per_epoch'] 
-        self.epochs = config['trainer']['epochs'] 
+        self.total_timesteps = int(float(config["trainer"]["total_timesteps"]))
+        self.eval_freq=max(int(float(config["eval"]["freq"])), 1)
 
-        self.replay_size = int(config['buffer']['replay_buffer_size']) 
         self.batch_size = config['trainer']['batch_size'] 
         
-        self.update_after = config['trainer']['update_after'] 
-        self.update_every = config['trainer']['update_every'] 
+        self.update_after = float(config['trainer']['update_after']) 
+        self.update_every = int(float(config['trainer']['update_every'])) 
 
         self.obs_dim = config['environment']['obs_dim']
         self.act_dim = config['environment']['act_dim']
         self.boundary_min = np.array(config['agent']['boundary_min'])[:self.act_dim]
         self.boundary_max = np.array(config['agent']['boundary_max'])[:self.act_dim]
 
-        self.demo_use = config['demo']['demo_use']  
-
-        self.start_steps = config['sampler']['start_steps']
+        self.start_steps = float(config['sampler']['start_steps'])
         self.max_ep_len = config['sampler']['max_ep_len']
-        self.num_test_episodes = config['tester']['num_test_episodes']
+        self.eval_num_episodes = config['eval']['num_episodes']
 
         self.model_save_freq = config['logger']['model']['save']['freq']
-        self.model_save_best_after = config['logger']['model']['save']['best_after']
+        self.model_save_best_start_t = config['logger']['model']['save']['best_start_t'] * self.total_timesteps
         self.model_save_mode = config['logger']['model']['save']['mode']
 
-        self.logname = self.config['general']['exp_name'] + "_" + self.config['environment']['task']['name'] + "_" + self.config['agent']['type'] + "_" + str(main_args.trainid)
+        # Rollout
+        self.rollout_stats_window_size = int(config['logger']['rollout']['stats_window_size'])
+        self.ep_rew_dq = collections.deque(maxlen=self.rollout_stats_window_size) 
+        self.ep_len_dq = collections.deque(maxlen=self.rollout_stats_window_size)
+        self.ep_success_dq = collections.deque(maxlen=self.rollout_stats_window_size)
 
-        self.train_ep_ret_dq = collections.deque(maxlen=10)
-        self.train_ep_len_dq = collections.deque(maxlen=10)
-        self.loss_q_dq = collections.deque(maxlen=10)
-        self.loss_pi_dq = collections.deque(maxlen=10)
+        # Train
+        self.train_stats_window_size = int(config['logger']['train']['stats_window_size'])
+        self.loss_q_dq = collections.deque(maxlen=self.train_stats_window_size)
+        self.loss_pi_dq = collections.deque(maxlen=self.train_stats_window_size)
 
-        self.her_active = config['buffer']['her']['active']
+        # HER
         self.her_goal_selection_strategy = config['buffer']['her']['goal_selection_strategy']
+        self.her_active = False if self.her_goal_selection_strategy == "noher" else True
         self.her_n_sampled_goal = config['buffer']['her']['n_sampled_goal']
+
+        self.print_out_name = '_'.join((self.config['general']['exp_name'],
+                                        self.config['environment']['task']['name'],
+                                        self.config['agent']['type'],
+                                        self.her_goal_selection_strategy,
+                                        str(main_args.trainid)))
 
         
         """
@@ -108,7 +116,7 @@ class SamplerTrainerTester:
             for _ in range(self.her_n_sampled_goal):
                 new_goals.append(self.env.get_goal_state_from_obs(o2))
             return new_goals
-        elif self.her_goal_selection_strategy == 'future':
+        elif self.her_goal_selection_strategy == 'future' or self.her_goal_selection_strategy == 'future_once':
             new_goals = []
             for _ in range(self.her_n_sampled_goal):
                 rand_future_transition = random.randint(ep_t, len(episode)-1)
@@ -120,7 +128,7 @@ class SamplerTrainerTester:
         ep_rets = []
         ep_lens = []
         success_num = 0.0
-        for j in range(self.num_test_episodes):
+        for j in range(self.eval_num_episodes):
             [o, info], d, ep_ret, ep_len = self.env.reset_with_init_check(), False, 0, 0
             while not(d or (ep_len == self.max_ep_len)):
                 # Take deterministic actions at test time 
@@ -137,10 +145,10 @@ class SamplerTrainerTester:
             if info['is_success'] == True: success_num += 1
         
         ep_ret_avg = sum(ep_rets) / len(ep_rets)
-        ep_len_avg = sum(ep_lens) / len(ep_lens)
-        success_rate = success_num / self.num_test_episodes
+        mean_ep_length = sum(ep_lens) / len(ep_lens)
+        success_rate = success_num / self.eval_num_episodes
         
-        return ep_ret_avg, ep_len_avg, success_rate
+        return ep_ret_avg, mean_ep_length, success_rate
             
 
     def start(self,agent,replay_buffer):
@@ -152,20 +160,21 @@ class SamplerTrainerTester:
         init_invalid_num = 0
         reset_num = 0
 
-        # Prepare for interaction with environment
-        total_steps = self.steps_per_epoch * self.epochs
-        #start_time = time.time()
         [o, reset_info], ep_ret, ep_len = self.env.reset_with_init_check(), 0, 0
         init_invalid_num += reset_info['init_invalid_num']
         reset_num += reset_info['reset_num']
 
-        best_test_ep_ret = -float('inf')
+        best_eval_ep_ret = -float('inf')
 
-        print("Training starts")
+        print("Training starts: " + self.print_out_name)
         episode = []
-    
+        epoch = 0
+        time0 = time.time()
+        time_start = time0
+        t0 = 0
+
         # Main loop: collect experience in env and update/log each epoch
-        for t in tqdm(range(total_steps), desc ="Training: ", leave=True):
+        for t in tqdm(range(self.total_timesteps), desc ="Training: ", leave=True):
             
             # Until start_steps have elapsed, randomly sample actions
             # from a uniform distribution for better exploration. Afterwards, 
@@ -186,6 +195,8 @@ class SamplerTrainerTester:
             ep_ret += r
             ep_len += 1
 
+            self.ep_success_dq.append(1.0) if info['is_success'] == True else self.ep_success_dq.append(0.0) 
+
             # Ignore the "done" signal if it comes from hitting the time
             # horizon (that is, when it's an artificial terminal signal
             # that isn't based on the agent's state)
@@ -205,22 +216,31 @@ class SamplerTrainerTester:
                     replay_buffer.store(o, a, r, o2, d)
                 
                 if self.her_active and truncated:
-                    ep_t = 0
-                    for (o, a, r, o2, d) in episode:
-                        new_goals = self.get_new_goals(episode,ep_t)
-                        for new_goal in new_goals:
-                            o_new = self.env.change_goal_in_obs(o, new_goal)
-                            o2_new = self.env.change_goal_in_obs(o2, new_goal)
-                            r_new, d_new = self.env.her_get_reward_and_done(o2_new) 
-                            replay_buffer.store(o_new, a, r_new, o2_new, d_new)
-                        ep_t += 1
+                    if self.her_goal_selection_strategy == 'future_once':
+                        new_goals = self.get_new_goals(episode,0)
+                        for (o, a, r, o2, d) in episode:                  
+                            for new_goal in new_goals:
+                                o_new = self.env.change_goal_in_obs(o, new_goal)
+                                o2_new = self.env.change_goal_in_obs(o2, new_goal)
+                                r_new, d_new = self.env.her_get_reward_and_done(o2_new) 
+                                replay_buffer.store(o_new, a, r_new, o2_new, d_new)
+                    else:
+                        ep_t = 0
+                        for (o, a, r, o2, d) in episode:
+                            new_goals = self.get_new_goals(episode,ep_t)
+                            for new_goal in new_goals:
+                                o_new = self.env.change_goal_in_obs(o, new_goal)
+                                o2_new = self.env.change_goal_in_obs(o2, new_goal)
+                                r_new, d_new = self.env.her_get_reward_and_done(o2_new) 
+                                replay_buffer.store(o_new, a, r_new, o2_new, d_new)
+                            ep_t += 1
                 episode = []
 
                 # logger.store(EpRet=ep_ret, EpLen=ep_len)
                 # self.logger.tb_writer_add_scalar("train/ep_ret", ep_ret, t)
                 # self.logger.tb_writer_add_scalar("train/ep_len", ep_len, t)
-                self.train_ep_ret_dq.append(ep_ret)
-                self.train_ep_len_dq.append(ep_len)
+                self.ep_rew_dq.append(ep_ret)
+                self.ep_len_dq.append(ep_len)
                 [o, reset_info], ep_ret, ep_len = self.env.reset_with_init_check(), 0, 0
                 init_invalid_num += reset_info['init_invalid_num']
                 reset_num += reset_info['reset_num']
@@ -235,41 +255,54 @@ class SamplerTrainerTester:
                     if ret_loss_pi != None: self.loss_pi_dq.append(ret_loss_pi)
 
             # End of epoch handling
-            if (t+1) % self.steps_per_epoch == 0:
+            if (t+1) % self.eval_freq == 0:
 
-                epoch = (t+1) // self.steps_per_epoch
+                epoch +=1
 
                 # Test the performance of the deterministic version of the agent.
-                test_ep_ret, test_ep_len, test_success_rate = self.test_agent()
+                eval_mean_reward, eval_mean_ep_length, eval_success_rate = self.test_agent()
 
-                self.logger.tb_writer_add_scalar("test/ep_ret", test_ep_ret, epoch)
-                self.logger.tb_writer_add_scalar("test/ep_len", test_ep_len, epoch)
-                self.logger.tb_writer_add_scalar("test/success_rate", test_success_rate, epoch)
+                self.logger.tb_writer_add_scalar("eval/mean_reward", eval_mean_reward, t)
+                self.logger.tb_writer_add_scalar("eval/mean_ep_length", eval_mean_ep_length, t)
+                self.logger.tb_writer_add_scalar("eval/success_rate", eval_success_rate, t)
 
                 best_model_changed = False
-                if epoch > self.model_save_best_after:
-                    if test_ep_ret > best_test_ep_ret:
-                        best_test_ep_ret = test_ep_ret
+                if t > self.model_save_best_start_t:
+                    if eval_mean_reward > best_eval_ep_ret:
+                        best_eval_ep_ret = eval_mean_reward
                         best_model_changed = True
-                
-                self.logger.tb_writer_add_scalar("test/best_ep_ret", best_test_ep_ret, epoch)
 
                 # Save model 
-                if (epoch % self.model_save_freq == 0) or (epoch == self.epochs) or best_model_changed:
+                if (epoch % self.model_save_freq == 0) or best_model_changed:
                     model_path = self.logger.get_model_save_path(epoch)
                     self.agent.save_model(model_path,self.model_save_mode)
-                    message = self.logname +  " | Epoch: " + str(epoch) + " | test ep ret: " + str(test_ep_ret) + " | test ep len: " + str(test_ep_len) + " | test success rate: " + str(test_success_rate)
+                    message = self.print_out_name +  " | t: " + str(t) +  " | epoch: " + str(epoch) + " | eval_mean_reward: " + str(eval_mean_reward) + " | eval_mean_ep_length: " + str(eval_mean_ep_length) + " | eval_success_rate: " + str(eval_success_rate)
                     if best_model_changed: message += " *"
                     tqdm.write("[info] " + message)
                     #logger.save_state({'env': env}, None)       
 
-                self.logger.tb_writer_add_scalar("train/train_ep_ret", np.mean(self.train_ep_ret_dq), t)
-                self.logger.tb_writer_add_scalar("train/train_ep_len", np.mean(self.train_ep_len_dq), t)
-                self.logger.tb_writer_add_scalar('train/loss_q', np.mean(self.loss_q_dq), t)
-                self.logger.tb_writer_add_scalar("train/loss_pi", np.mean(self.loss_pi_dq), t)
+                # ROLLOUT
+                self.logger.tb_writer_add_scalar("rollout/ep_rew_mean", np.mean(self.ep_rew_dq), t)
+                self.logger.tb_writer_add_scalar("rollout/ep_len_mean", np.mean(self.ep_len_dq), t)
+                self.logger.tb_writer_add_scalar("rollout/success_rate", np.mean(self.ep_success_dq), t)
 
-                invalid_init_ratio = float(init_invalid_num) / reset_num 
-                self.logger.tb_writer_add_scalar("train/invalid_init_ratio", invalid_init_ratio, t)
+                # TRAIN
+                self.logger.tb_writer_add_scalar('train/critic_loss', np.mean(self.loss_q_dq), t)
+                self.logger.tb_writer_add_scalar("train/actor_loss", np.mean(self.loss_pi_dq), t)
+
+                # invalid_init_ratio = float(init_invalid_num) / reset_num 
+                # self.logger.tb_writer_add_scalar("train/invalid_init_ratio", invalid_init_ratio, t)
+
+                # TIME
+                time1 = time.time()
+                time_delta = time1 - time0
+                fps =  (t-t0) / time_delta
+
+                self.logger.tb_writer_add_scalar('time/fps', fps, t)
+                self.logger.tb_writer_add_scalar('time/all', time1 - time_start, t)
+
+                time0 = time1
+                t0 = t
 
         self.logger.tb_close()
    

@@ -7,17 +7,16 @@ import itertools
 import rltrain.agents.sac.core as core
 
 class Agent:
-    def __init__(self,agent_id,device,config):
+    def __init__(self,device,config):
 
         self.device = device
         self.actor_critic=core.MLPActorCritic
         self.seed = config['general']['seed'] 
         self.gamma = config['agent']['gamma'] 
         
-        self.n_step = config['agent']['sac']['n_step'] 
         self.polyak = config['agent']['sac']['polyak'] 
-        self.lr = config['agent']['sac']['lr'][agent_id]
-        self.alpha = config['agent']['sac']['alpha'][agent_id]
+        self.lr = config['agent']['sac']['lr']
+        self.alpha = config['agent']['sac']['alpha']
 
         self.obs_dim = config['environment']['obs_dim']
         self.act_dim = config['environment']['act_dim']
@@ -135,17 +134,12 @@ class Agent:
     # Set up function for computing SAC Q-losses
     def compute_loss_q(self, data):
         o, a, r, o2, d = data['obs'], data['act'], data['rew'], data['obs2'], data['done']
-        r_nstep, o_nstep, d_nstep,n_nstep = data['rew_nstep'], data['obs_nstep'], data['done_nstep'], data['n_nstep']
 
         o = o.float().to(self.device)
         a = a.to(self.device)
         r = r.to(self.device)
         o2 = o2.float().to(self.device)
         d = d.to(self.device)
-        r_nstep = r_nstep.to(self.device)
-        o_nstep = o_nstep.float().to(self.device)
-        d_nstep = d_nstep.to(self.device)
-        n_nstep = n_nstep.to(self.device)
 
         q1 = self.ac.q1(o,a)
         q2 = self.ac.q2(o,a)
@@ -153,23 +147,22 @@ class Agent:
         # Bellman backup for Q functions
         with torch.no_grad():
             # Target actions come from *current* policy
-            a_nstep, logp_a_nstep = self.ac.pi(o_nstep)
+            a2, logp_a2 = self.ac.pi(o2)
 
             # Target Q-values
-            q1_pi_targ = self.ac_targ.q1(o_nstep, a_nstep)
-            q2_pi_targ = self.ac_targ.q2(o_nstep, a_nstep)
+            q1_pi_targ = self.ac_targ.q1(o2, a2)
+            q2_pi_targ = self.ac_targ.q2(o2, a2)
             q_pi_targ = torch.min(q1_pi_targ, q2_pi_targ)
-
-            backup = r_nstep + self.gamma**(n_nstep+1) * (1 - d_nstep) * (q_pi_targ - self.alpha * logp_a_nstep)
+            backup = r + self.gamma * (1 - d) * (q_pi_targ - self.alpha * logp_a2)
 
         # MSE loss against Bellman backup
         loss_q1 = ((q1 - backup)**2).mean()
         loss_q2 = ((q2 - backup)**2).mean()
-        loss_q = loss_q1 + loss_q2     
+        loss_q = loss_q1 + loss_q2
 
         # Useful info for logging
         q_info = dict(Q1Vals=q1.cpu().detach().numpy(),
-                    Q2Vals=q2.cpu().detach().numpy())
+                      Q2Vals=q2.cpu().detach().numpy())
 
         return loss_q, q_info
 
@@ -192,7 +185,7 @@ class Agent:
 
         return loss_pi, pi_info
 
-    def update(self, data):
+    def update(self, data, placeholder):
 
         self.pivot += 1
 
