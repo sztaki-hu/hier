@@ -195,8 +195,6 @@ class SamplerTrainerTester:
             ep_ret += r
             ep_len += 1
 
-            self.ep_success_dq.append(1.0) if info['is_success'] == True else self.ep_success_dq.append(0.0) 
-
             # Ignore the "done" signal if it comes from hitting the time
             # horizon (that is, when it's an artificial terminal signal
             # that isn't based on the agent's state)
@@ -211,6 +209,8 @@ class SamplerTrainerTester:
 
             # End of trajectory handling
             if d or (ep_len == self.max_ep_len):
+
+                self.ep_success_dq.append(1.0) if info['is_success'] == True else self.ep_success_dq.append(0.0) 
                 
                 for (o, a, r, o2, d) in episode:
                     replay_buffer.store(o, a, r, o2, d)
