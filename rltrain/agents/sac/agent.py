@@ -14,8 +14,8 @@ class Agent:
         self.seed = config['general']['seed'] 
         self.gamma = config['agent']['gamma'] 
         
-        self.polyak = config['agent']['sac']['polyak'] 
-        self.lr = config['agent']['sac']['lr']
+        self.polyak = config['agent']['polyak'] 
+        self.lr = config['agent']['learning_rate']
         self.alpha = config['agent']['sac']['alpha']
 
         self.obs_dim = config['environment']['obs_dim']

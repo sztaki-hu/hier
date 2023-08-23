@@ -17,10 +17,10 @@ class Agent:
         
         self.target_noise = config['agent']['td3']['target_noise'] 
         self.noise_clip = config['agent']['td3']['noise_clip'] 
-        self.pi_lr = config['agent']['td3']['pi_lr']  
-        self.q_lr = config['agent']['td3']['q_lr'] 
+        self.pi_lr = config['agent']['learning_rate']  # pi_lr and q_lr are the same bc of SB3 implementation
+        self.q_lr = config['agent']['learning_rate']  # pi_lr and q_lr are the same bc of SB3 implementation
         self.policy_delay = config['agent']['td3']['policy_delay'] 
-        self.polyak = config['agent']['td3']['polyak'] 
+        self.polyak = config['agent']['polyak'] 
         self.act_noise = config['agent']['td3']['act_noise'] 
 
         self.obs_dim = config['environment']['obs_dim']

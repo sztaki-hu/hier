@@ -1,5 +1,7 @@
 import os
 import torch
+import yaml
+
 
 # Init CUDA ##############################################################
 
@@ -22,3 +24,15 @@ def print_torch_info(logger):
         logger.print_logfile(torch.cuda.device_count())
         logger.print_logfile(torch.cuda.get_device_name(0))
     logger.print_logfile("Torch threads: " + str(torch.get_num_threads()))
+
+# SAVE LOAD YAML ##############################################################
+
+def save_yaml(path, data):
+    with open(path, "w") as f:
+        yaml.dump(data, f, default_flow_style=False)
+
+def load_yaml(file):
+    if file is not None:
+        with open(file) as f:
+            return yaml.load(f, Loader=yaml.UnsafeLoader)
+    return None

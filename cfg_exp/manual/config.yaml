@@ -24,48 +24,45 @@ environment:
     reward_shaping_type: sparse
 
 agent:
-  type: sac
+  type: td3
   hidden_sizes: [256,256,256]
   boundary_min: auto
   boundary_max: auto
   gamma: 0.95 
+  polyak: 0.995
+  learning_rate: 0.001
   sac:
-    polyak: 0.995
-    lr: 0.001
-    alpha: 0.2
+    alpha: 0.1 # spinningup do not have "auto" option
   td3:
     target_noise: 0.2
     noise_clip: 0.5
-    pi_lr : 0.001 
-    q_lr : 0.001
     policy_delay : 2
-    polyak : 0.995
     act_noise: 0.1
 
 buffer:
   replay_buffer_size: 1e6
   her:
-    goal_selection_strategy: future_once
+    goal_selection_strategy: future # in SB3 only the orginal ones are implemented
     n_sampled_goal: 4
 
 sampler:
-  start_steps: 1e4
+  start_steps: 0 # in SB3 we cannot set it
   max_ep_len: auto
 
 trainer:
-  total_timesteps: 5e5
+  total_timesteps: 5e2
   batch_size: 256
   update_after: 1e2
   update_every: 50
 
 eval:
-  freq: 5e3
+  freq: 5e1
   num_episodes: 20
   
 
 logger:
   rollout:
-    stats_window_size: 100
+    stats_window_size: 10
   train:
     stats_window_size: 1
   model:

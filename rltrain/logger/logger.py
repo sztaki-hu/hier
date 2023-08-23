@@ -38,8 +38,7 @@ class Logger:
         self.logname = '_'.join((self.config['general']['exp_name'],
                                  self.config['environment']['task']['name'],
                                  self.config['agent']['type'],
-                                 self.config['buffer']['her']['goal_selection_strategy'],
-                                 str(int(time.time()))))
+                                 self.config['buffer']['her']['goal_selection_strategy']))
 
         # Create log folders and files
         if display_mode == False: 
