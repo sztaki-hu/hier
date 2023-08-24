@@ -123,6 +123,19 @@ class SamplerTrainerTester:
                 _, _, _, o2, _ = episode[rand_future_transition]
                 new_goals.append(self.env.get_goal_state_from_obs(o2))
             return new_goals
+        elif self.her_goal_selection_strategy == 'near':
+            new_goals = []
+            for _ in range(self.her_n_sampled_goal):
+                rand_future_transition = random.randint(ep_t, min(len(episode)-1,ep_t+5))
+                _, _, _, o2, _ = episode[rand_future_transition]
+                new_goals.append(self.env.get_goal_state_from_obs(o2))
+            return new_goals
+        elif self.her_goal_selection_strategy == 'next':
+            new_goals = []
+            for _ in range(self.her_n_sampled_goal):
+                _, _, _, o2, _ = episode[ep_t]
+                new_goals.append(self.env.get_goal_state_from_obs(o2))
+            return new_goals
 
     def test_agent(self):
         ep_rets = []
@@ -235,6 +248,10 @@ class SamplerTrainerTester:
                                 replay_buffer.store(o_new, a, r_new, o2_new, d_new)
                             ep_t += 1
                 episode = []
+
+                # print("-------------------")
+                # print(replay_buffer.get_all())
+                # assert False
 
                 # logger.store(EpRet=ep_ret, EpLen=ep_len)
                 # self.logger.tb_writer_add_scalar("train/ep_ret", ep_ret, t)
