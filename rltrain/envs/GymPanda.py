@@ -11,7 +11,26 @@ class GymPanda(Env):
     def reset(self):
         o_dict, _ = self.env.reset()
         o = np.concatenate((o_dict['observation'], o_dict['desired_goal']))
-        return o    
+        return o   
+
+    def save_state(self):
+
+        robot_joints = np.array([self.env.robot.get_joint_angle(joint=i) for i in range(7)]) 
+        desired_goal = self.env.task.goal
+        object_position = self.env.task.get_achieved_goal()
+
+        return robot_joints,desired_goal,object_position
+
+    
+    def restore_state(self,robot_joints,desired_goal,object_position=None):
+        
+        self.reset()
+
+        self.env.robot.set_joint_angles(robot_joints)
+        self.env.task.sim.set_base_pose("target", desired_goal, np.array([0.0, 0.0, 0.0, 1.0]))
+    
+        if self.task_name == 'PandaPush-v3' or self.task_name == 'PandaSlide-v3':
+            self.env.task.sim.set_base_pose("object", object_position, np.array([0.0, 0.0, 0.0, 1.0]))
 
 
     # def init_state_valid(self, o):
@@ -32,8 +51,9 @@ class GymPanda(Env):
        
         r = r * self.reward_scalor
 
-
-        return o, r, terminated, truncated, info
+        return o, r, terminated, truncated, info 
+    
+    # HER ##############################################
     
     def get_goal_state_from_obs(self, o):
         if self.task_name == 'PandaReach-v3':
@@ -46,24 +66,25 @@ class GymPanda(Env):
             o2 = o.copy()
             return o2[6:9]
 
+
     def change_goal_in_obs(self, o, goal):
         o2 = o.copy()
         o2[-3:] = goal.copy()
         return o2
     
     def her_get_reward_and_done(self,o):
-        o_goal = o[-3:]
-        if self.task_name == 'PandaReach-v3': 
-            o_cond = o[:3] 
-        elif self.task_name == 'PandaPush-v3':
-            o_cond = o[6:9] 
-        elif self.task_name == 'PandaSlide-v3':
-            o_cond = o[6:9] 
+        desired_goal = o[-3:]
+        achieved_goal = self.get_goal_state_from_obs(o)
+
+        r = self.env.task.compute_reward(achieved_goal, desired_goal, {})
+        d = 1 if r == 0 else 0
+        return r,d
+    
+
+
+
             
-        if np.allclose(o_goal, o_cond, rtol=0.0, atol=0.01, equal_nan=False):
-            return 0,1
-        else:
-            return -1,0
+
         
     
     

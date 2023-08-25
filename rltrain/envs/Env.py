@@ -21,13 +21,19 @@ class Env:
 
         # Create taskenv
         self.env = make_task(config,config_framework)
-        self.env._max_episode_steps = self.max_ep_len
+        self.env._max_episode_steps = int(float(self.max_ep_len))
 
         self.reset() 
     
     def reset(self):
         o, _ = self.env.reset()
         return o       
+    
+    def save_state(self):
+        return None,None,None
+
+    def restore_state(self,robot_joints,desired_goal,object_position=None):
+        return     
     
     def shuttdown(self):
         self.reset()
