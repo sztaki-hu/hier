@@ -126,8 +126,11 @@ class Logger:
     
     # Models
     
-    def get_model_save_path(self,epoch):
-        return os.path.join(self.current_dir, self.logdir, self.logname,self.trainid,"model_backup","model_" + str(epoch))
+    def get_model_save_path(self,epoch,best_model=False):
+        if best_model == False:
+            return os.path.join(self.current_dir, self.logdir, self.logname,self.trainid,"model_backup","model_" + str(epoch))
+        else:
+            return os.path.join(self.current_dir, self.logdir, self.logname,self.trainid,"model_backup","model_best_model")
     
     # Demos
 

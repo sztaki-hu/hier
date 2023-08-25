@@ -7,6 +7,7 @@ import random
 from tqdm import tqdm
 
 from rltrain.envs.builder import make_env
+from rltrain.algos.her import HER
 
 class SamplerTrainerTester:
 
@@ -62,9 +63,7 @@ class SamplerTrainerTester:
                                         self.config['environment']['task']['name'],
                                         self.config['agent']['type'],
                                         self.her_goal_selection_strategy,
-                                        str(main_args.trainid)))
-
-        
+                                        str(main_args.trainid)))   
         """
         Trainer
 
@@ -105,37 +104,7 @@ class SamplerTrainerTester:
                 the current policy and value function.
 
         """ 
-    
-    # def get_action(self, o, deterministic=False):
-    #     return self.agent.ac.act(torch.as_tensor(o, dtype=torch.float32), deterministic)
-    
-    def get_new_goals(self, episode, ep_t):
-        if self.her_goal_selection_strategy == 'final':
-            new_goals = []
-            _, _, _, o2, _ = episode[-1]
-            for _ in range(self.her_n_sampled_goal):
-                new_goals.append(self.env.get_goal_state_from_obs(o2))
-            return new_goals
-        elif self.her_goal_selection_strategy == 'future' or self.her_goal_selection_strategy == 'future_once':
-            new_goals = []
-            for _ in range(self.her_n_sampled_goal):
-                rand_future_transition = random.randint(ep_t, len(episode)-1)
-                _, _, _, o2, _ = episode[rand_future_transition]
-                new_goals.append(self.env.get_goal_state_from_obs(o2))
-            return new_goals
-        elif self.her_goal_selection_strategy == 'near':
-            new_goals = []
-            for _ in range(self.her_n_sampled_goal):
-                rand_future_transition = random.randint(ep_t, min(len(episode)-1,ep_t+5))
-                _, _, _, o2, _ = episode[rand_future_transition]
-                new_goals.append(self.env.get_goal_state_from_obs(o2))
-            return new_goals
-        elif self.her_goal_selection_strategy == 'next':
-            new_goals = []
-            for _ in range(self.her_n_sampled_goal):
-                _, _, _, o2, _ = episode[ep_t]
-                new_goals.append(self.env.get_goal_state_from_obs(o2))
-            return new_goals
+        
 
     def test_agent(self):
         ep_rets = []
@@ -166,7 +135,10 @@ class SamplerTrainerTester:
 
     def start(self,agent,replay_buffer):
 
+    
         self.env = make_env(self.config, self.config_framework)
+
+        self.HER = HER(self.config,self.env,replay_buffer)
         
         self.agent = agent
 
@@ -227,35 +199,15 @@ class SamplerTrainerTester:
                 
                 for (o, a, r, o2, d) in episode:
                     replay_buffer.store(o, a, r, o2, d)
-                
-                if self.her_active and truncated:
-                    if self.her_goal_selection_strategy == 'future_once':
-                        new_goals = self.get_new_goals(episode,0)
-                        for (o, a, r, o2, d) in episode:                  
-                            for new_goal in new_goals:
-                                o_new = self.env.change_goal_in_obs(o, new_goal)
-                                o2_new = self.env.change_goal_in_obs(o2, new_goal)
-                                r_new, d_new = self.env.her_get_reward_and_done(o2_new) 
-                                replay_buffer.store(o_new, a, r_new, o2_new, d_new)
-                    else:
-                        ep_t = 0
-                        for (o, a, r, o2, d) in episode:
-                            new_goals = self.get_new_goals(episode,ep_t)
-                            for new_goal in new_goals:
-                                o_new = self.env.change_goal_in_obs(o, new_goal)
-                                o2_new = self.env.change_goal_in_obs(o2, new_goal)
-                                r_new, d_new = self.env.her_get_reward_and_done(o2_new) 
-                                replay_buffer.store(o_new, a, r_new, o2_new, d_new)
-                            ep_t += 1
+                          
+                if self.her_active and truncated:  self.HER.add_virtial_experience(episode)
+                    
                 episode = []
 
                 # print("-------------------")
                 # print(replay_buffer.get_all())
                 # assert False
 
-                # logger.store(EpRet=ep_ret, EpLen=ep_len)
-                # self.logger.tb_writer_add_scalar("train/ep_ret", ep_ret, t)
-                # self.logger.tb_writer_add_scalar("train/ep_len", ep_len, t)
                 self.ep_rew_dq.append(ep_ret)
                 self.ep_len_dq.append(ep_len)
                 [o, reset_info], ep_ret, ep_len = self.env.reset_with_init_check(), 0, 0
@@ -288,15 +240,18 @@ class SamplerTrainerTester:
                     if eval_mean_reward > best_eval_ep_ret:
                         best_eval_ep_ret = eval_mean_reward
                         best_model_changed = True
+                
+                if best_model_changed:
+                    model_path = self.logger.get_model_save_path(epoch,best_model=True)
+                    self.agent.save_model(model_path,self.model_save_mode)
+                    msg_end = " *" if best_model_changed else " "
 
                 # Save model 
-                if (epoch % self.model_save_freq == 0) or best_model_changed:
+                if epoch % self.model_save_freq == 0:
                     model_path = self.logger.get_model_save_path(epoch)
                     self.agent.save_model(model_path,self.model_save_mode)
-                    message = self.print_out_name +  " | t: " + str(t) +  " | epoch: " + str(epoch) + " | eval_mean_reward: " + str(eval_mean_reward) + " | eval_mean_ep_length: " + str(eval_mean_ep_length) + " | eval_success_rate: " + str(eval_success_rate)
-                    if best_model_changed: message += " *"
-                    tqdm.write("[info] " + message)
-                    #logger.save_state({'env': env}, None)       
+                    message = self.print_out_name +  " | t: " + str(t) +  " | epoch: " + str(epoch) + " | eval_mean_reward: " + str(eval_mean_reward) + " | eval_mean_ep_length: " + str(eval_mean_ep_length) + " | eval_success_rate: " + str(eval_success_rate) + msg_end
+                    tqdm.write("[info] " + message)     
 
                 # ROLLOUT
                 self.logger.tb_writer_add_scalar("rollout/ep_rew_mean", np.mean(self.ep_rew_dq), t)
