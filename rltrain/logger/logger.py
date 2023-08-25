@@ -14,7 +14,7 @@ class Logger:
         # Load config and set up main variables
         self.current_dir = current_dir
         self.trainid = str(main_args.trainid)
-        self.config_path = os.path.join(current_dir,main_args.config) if display_mode == False else os.path.join(current_dir,main_args.config,self.trainid,"config.yaml")             
+        self.config_path = os.path.join(current_dir,main_args.config) if display_mode == False else os.path.join(current_dir,main_args.config,"config.yaml")             
         self.config = self.load_yaml(self.config_path)
         self.config_framework = self.load_yaml(os.path.join(current_dir,'cfg_framework','config_framework.yaml'))
         self.config_tasks = self.load_yaml(os.path.join(current_dir,'cfg_framework','config_tasks.yaml'))
