@@ -7,7 +7,7 @@ import random
 from tqdm import tqdm
 
 from rltrain.envs.builder import make_env
-from rltrain.algos.her import HER
+from rltrain.algos.her_rs import HER
 
 class SamplerTrainerTester:
 
@@ -104,7 +104,13 @@ class SamplerTrainerTester:
                 the current policy and value function.
 
         """ 
-        
+    
+    def get_state_to_load(self,episode):
+        rand_transition = random.randint(0, len(episode)-1)
+        o, _, _, _, _ , rj = episode[rand_transition]
+        get_obj_pos = self.env.get_achieved_goal_from_obs(o)
+        desired_goal = self.env.get_desired_goal_from_obs(o)
+        return rj,desired_goal,get_obj_pos,o
 
     def test_agent(self):
         ep_rets = []
@@ -155,10 +161,13 @@ class SamplerTrainerTester:
 
         print("Training starts: " + self.print_out_name)
         episode = []
+        episode_main = []
         epoch = 0
         time0 = time.time()
         time_start = time0
         t0 = 0
+        max_branches = 10
+        branch_index = 0
 
         # Main loop: collect experience in env and update/log each epoch
         for t in tqdm(range(self.total_timesteps), desc ="Training: ", leave=True):
@@ -188,7 +197,8 @@ class SamplerTrainerTester:
             d = False if ep_len==self.max_ep_len else d
 
             # Save transition
-            episode.append((o, a, r, o2, d))
+            rj = self.env.get_robot_joints()
+            episode.append((o, a, r, o2, d, rj))
 
             # Super critical, easy to overlook step: make sure to update 
             # most recent observation!
@@ -197,14 +207,14 @@ class SamplerTrainerTester:
             # End of trajectory handling
             if d or (ep_len == self.max_ep_len):
 
+                if branch_index == 0: episode_main = episode.copy()
+
                 self.ep_success_dq.append(1.0) if info['is_success'] == True else self.ep_success_dq.append(0.0) 
                 
-                for (o, a, r, o2, d) in episode:
-                    replay_buffer.store(o, a, r, o2, d)
+                for (o, a, r, o2, d, rj) in episode:
+                    replay_buffer.store(o, a, r, o2, d, rj)
                           
                 if self.her_active and truncated:  self.HER.add_virtial_experience(episode)
-                    
-                episode = []
 
                 # print("-------------------")
                 # print(replay_buffer.get_all())
@@ -212,9 +222,20 @@ class SamplerTrainerTester:
 
                 self.ep_rew_dq.append(ep_ret)
                 self.ep_len_dq.append(ep_len)
+
                 [o, reset_info], ep_ret, ep_len = self.env.reset_with_init_check(), 0, 0
                 init_invalid_num += reset_info['init_invalid_num']
                 reset_num += reset_info['reset_num']
+
+                if branch_index < max_branches:
+                    robot_joints,desired_goal,object_position,o = self.get_state_to_load(episode_main) 
+                    self.env.load_state(robot_joints,desired_goal,object_position)
+                    branch_index += 1
+                else:
+                    branch_index = 0
+                    episode_main = []
+
+                episode = []
 
             # Update handling
             if t >= self.update_after and t % self.update_every == 0:

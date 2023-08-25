@@ -37,7 +37,7 @@ class Eval:
         success_num = 0.0
         for j in range(num_display_episode):
             [o, info], d, ep_ret, ep_len = self.env.reset_with_init_check(), False, 0, 0
-            goal = self.env.get_goal_state_from_obs(o)
+            goal = self.env.get_desired_goal_from_obs(o)
             while not(d or (ep_len == self.max_ep_len)):
                 # Take deterministic actions at test time 
                 if self.agent_type == 'sac':

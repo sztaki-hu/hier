@@ -32,7 +32,7 @@ class Env:
     def save_state(self):
         return None,None,None
 
-    def restore_state(self,robot_joints,desired_goal,object_position=None):
+    def load_state(self,robot_joints,desired_goal,object_position=None):
         return     
     
     def shuttdown(self):
@@ -78,7 +78,10 @@ class Env:
     def get_max_return(self):
         return None
     
-    def get_goal_state_from_obs(self, o):
+    def get_achieved_goal_from_obs(self, o):
+        return None
+    
+    def get_desired_goal_from_obs(self,o):
         return None
 
     def change_goal_in_obs(self, o, goal):

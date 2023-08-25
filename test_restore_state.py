@@ -38,6 +38,6 @@ for i in range(200):
 
     if terminated or truncated:
         observation = env.reset()
-        env.restore_state(robot_joints,desired_goal,object_position)
+        env.load_state(robot_joints,desired_goal,object_position)
 
 env.shuttdown()

@@ -21,12 +21,14 @@ class GymPanda(Env):
 
         return robot_joints,desired_goal,object_position
 
+    def get_robot_joints(self):
+        return np.array([self.env.robot.get_joint_angle(joint=i) for i in range(7)]) 
+
     
-    def restore_state(self,robot_joints,desired_goal,object_position=None):
-        
-        self.reset()
+    def load_state(self,robot_joints,desired_goal,object_position=None):
 
         self.env.robot.set_joint_angles(robot_joints)
+        self.env.task.goal = desired_goal
         self.env.task.sim.set_base_pose("target", desired_goal, np.array([0.0, 0.0, 0.0, 1.0]))
     
         if self.task_name == 'PandaPush-v3' or self.task_name == 'PandaSlide-v3':
@@ -55,7 +57,7 @@ class GymPanda(Env):
     
     # HER ##############################################
     
-    def get_goal_state_from_obs(self, o):
+    def get_achieved_goal_from_obs(self, o):
         if self.task_name == 'PandaReach-v3':
             o2 = o.copy()
             return o2[:3]
@@ -66,6 +68,8 @@ class GymPanda(Env):
             o2 = o.copy()
             return o2[6:9]
 
+    def get_desired_goal_from_obs(self,o):
+        return o[-3:].copy()
 
     def change_goal_in_obs(self, o, goal):
         o2 = o.copy()
@@ -73,8 +77,8 @@ class GymPanda(Env):
         return o2
     
     def her_get_reward_and_done(self,o):
-        desired_goal = o[-3:]
-        achieved_goal = self.get_goal_state_from_obs(o)
+        desired_goal = self.get_desired_goal_from_obs(o)
+        achieved_goal = self.get_achieved_goal_from_obs(o)
 
         r = self.env.task.compute_reward(achieved_goal, desired_goal, {})
         d = 1 if r == 0 else 0
