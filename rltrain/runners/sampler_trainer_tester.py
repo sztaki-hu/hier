@@ -241,16 +241,20 @@ class SamplerTrainerTester:
                         best_eval_ep_ret = eval_mean_reward
                         best_model_changed = True
                 
+                # Save model 
                 if best_model_changed:
                     model_path = self.logger.get_model_save_path(epoch,best_model=True)
                     self.agent.save_model(model_path,self.model_save_mode)
-                    msg_end = " *" if best_model_changed else " "
-
-                # Save model 
+                    
+                
                 if epoch % self.model_save_freq == 0:
                     model_path = self.logger.get_model_save_path(epoch)
                     self.agent.save_model(model_path,self.model_save_mode)
-                    message = self.print_out_name +  " | t: " + str(t) +  " | epoch: " + str(epoch) + " | eval_mean_reward: " + str(eval_mean_reward) + " | eval_mean_ep_length: " + str(eval_mean_ep_length) + " | eval_success_rate: " + str(eval_success_rate) + msg_end
+                
+                # Print out
+                if (epoch % self.model_save_freq == 0) or best_model_changed:
+                    message = self.print_out_name +  " | t: " + str(t) +  " | epoch: " + str(epoch) + " | eval_mean_reward: " + str(eval_mean_reward) + " | eval_mean_ep_length: " + str(eval_mean_ep_length) + " | eval_success_rate: " + str(eval_success_rate)
+                    if best_model_changed: message += " *" 
                     tqdm.write("[info] " + message)     
 
                 # ROLLOUT
