@@ -27,12 +27,13 @@ class GymPanda(Env):
     
     def load_state(self,robot_joints,desired_goal,object_position=None):
 
-        self.env.robot.set_joint_angles(robot_joints)
-        self.env.task.goal = desired_goal
-        self.env.task.sim.set_base_pose("target", desired_goal, np.array([0.0, 0.0, 0.0, 1.0]))
+        if robot_joints is not None: self.env.robot.set_joint_angles(robot_joints)
+        if desired_goal is not None:
+            self.env.task.goal = desired_goal
+            self.env.task.sim.set_base_pose("target", desired_goal, np.array([0.0, 0.0, 0.0, 1.0]))
     
         if self.task_name == 'PandaPush-v3' or self.task_name == 'PandaSlide-v3':
-            self.env.task.sim.set_base_pose("object", object_position, np.array([0.0, 0.0, 0.0, 1.0]))
+            if object_position is not None: self.env.task.sim.set_base_pose("object", object_position, np.array([0.0, 0.0, 0.0, 1.0]))
 
 
     # def init_state_valid(self, o):
@@ -54,6 +55,25 @@ class GymPanda(Env):
         r = r * self.reward_scalor
 
         return o, r, terminated, truncated, info 
+    
+    # Curriculum Learning ##############################
+
+    def get_init_ranges(self):
+        dict = {}
+        dict['goal_range_low'] = self.env.task.goal_range_low
+        dict['goal_range_high'] = self.env.task.goal_range_high
+        dict['obj_range_low'] = self.env.task.obj_range_low
+        dict['obj_range_high'] = self.env.task.obj_range_high
+        dict['object_size'] = self.env.task.object_size
+        return dict
+    
+    def get_obs(self):  
+        robot_obs = self.env.robot.get_obs().astype(np.float32)  # robot state
+        task_obs = self.env.task.get_obs().astype(np.float32)  # object position, velococity, etc...
+        observation = np.concatenate([robot_obs, task_obs])
+        o = np.concatenate((observation, self.env.task.get_goal().astype(np.float32)))
+        return o
+        
     
     # HER ##############################################
     

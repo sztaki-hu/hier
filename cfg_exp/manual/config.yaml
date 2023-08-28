@@ -1,5 +1,5 @@
 general:
-  exp_name: 0822_X
+  exp_name: 0828_X
   logdir: logs
   demodir: demos
   seed: 0
@@ -12,7 +12,7 @@ hardware:
 environment:
   name: gympanda
   task: 
-    name: PandaReach-v3
+    name: PandaPush-v3
     params: []
   headless: True
   obs_dim: auto
@@ -24,11 +24,11 @@ environment:
     reward_shaping_type: sparse
 
 agent:
-  type: td3
+  type: sac
   hidden_sizes: [256,256,256]
   boundary_min: auto
   boundary_max: auto
-  gamma: 0.95 
+  gamma: 0.95
   polyak: 0.995
   learning_rate: 0.001
   sac:
@@ -42,21 +42,23 @@ agent:
 buffer:
   replay_buffer_size: 1e6
   her:
-    goal_selection_strategy: future # in SB3 only the orginal ones are implemented
+    goal_selection_strategy: final # in SB3 only the orginal ones are implemented
     n_sampled_goal: 4
+    env_check: true
 
 sampler:
-  start_steps: 0 # in SB3 we cannot set it
+  start_steps: 10000 # in SB3 we cannot set it
   max_ep_len: auto
 
 trainer:
-  total_timesteps: 5e2
+  mode: normal
+  total_timesteps: 5e5
   batch_size: 256
   update_after: 1e2
   update_every: 50
 
 eval:
-  freq: 5e1
+  freq: 1e4
   num_episodes: 20
   
 
@@ -68,5 +70,5 @@ logger:
   model:
     save:
       mode: pi
-      best_start_t: 0.3
-      freq: 5
+      best_start_t: 0.0
+      freq: 20

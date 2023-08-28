@@ -90,6 +90,9 @@ class Env:
     def her_get_reward_and_done(self,o):
         return None, None
     
+    def get_init_ranges(self):
+        return None
+    
 
     
   
