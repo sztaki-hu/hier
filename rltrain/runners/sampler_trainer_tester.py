@@ -160,8 +160,12 @@ class SamplerTrainerTester:
         time_start = time0
         t0 = 0
 
+        time_monitor = np.zeros(4)
+
         # Main loop: collect experience in env and update/log each epoch
         for t in tqdm(range(self.total_timesteps), desc ="Training: ", leave=True):
+
+            time_m0 = time.time()
             
             # Until start_steps have elapsed, randomly sample actions
             # from a uniform distribution for better exploration. Afterwards, 
@@ -194,6 +198,8 @@ class SamplerTrainerTester:
             # most recent observation!
             o = o2
 
+            time_monitor[0] += time.time() - time_m0
+
             # End of trajectory handling
             if d or (ep_len == self.max_ep_len):
 
@@ -201,8 +207,12 @@ class SamplerTrainerTester:
                 
                 for (o, a, r, o2, d) in episode:
                     replay_buffer.store(o, a, r, o2, d)
-                          
+
+                time_m0 = time.time()    
+
                 if self.her_active and truncated:  self.HER.add_virtial_experience(episode)
+
+                time_monitor[1] += time.time() - time_m0
                     
                 episode = []
 
@@ -218,6 +228,7 @@ class SamplerTrainerTester:
 
             # Update handling
             if t >= self.update_after and t % self.update_every == 0:
+                time_m0 = time.time()
                 if replay_buffer.size > 0:
                     for j in range(self.update_every):
                         batch = replay_buffer.sample_batch(self.batch_size)
@@ -225,9 +236,12 @@ class SamplerTrainerTester:
                         ret_loss_q, ret_loss_pi = self.agent.update(batch, j)
                         self.loss_q_dq.append(ret_loss_q)
                         if ret_loss_pi != None: self.loss_pi_dq.append(ret_loss_pi)
+                time_monitor[2] += time.time() - time_m0
 
             # End of epoch handling
             if (t+1) % self.eval_freq == 0:
+                
+                time_m0 = time.time()
 
                 epoch +=1
 
@@ -272,6 +286,8 @@ class SamplerTrainerTester:
                 # invalid_init_ratio = float(init_invalid_num) / reset_num 
                 # self.logger.tb_writer_add_scalar("train/invalid_init_ratio", invalid_init_ratio, t)
 
+                time_monitor[3] += time.time() - time_m0
+
                 # TIME
                 time1 = time.time()
                 time_delta = time1 - time0
@@ -279,6 +295,11 @@ class SamplerTrainerTester:
 
                 self.logger.tb_writer_add_scalar('time/fps', fps, t)
                 self.logger.tb_writer_add_scalar('time/all', time1 - time_start, t)
+
+                self.logger.tb_writer_add_scalar('time/sampling', time_monitor[0], t)
+                self.logger.tb_writer_add_scalar('time/HER', time_monitor[1], t)
+                self.logger.tb_writer_add_scalar('time/update', time_monitor[2], t)
+                self.logger.tb_writer_add_scalar('time/eval', time_monitor[3], t)
 
                 time0 = time1
                 t0 = t
