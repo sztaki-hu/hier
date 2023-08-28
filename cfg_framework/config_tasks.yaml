@@ -29,10 +29,10 @@ gym:
 
   Hopper-v4:
     max_ep_len: 1000
-    obs_dim: 8
-    act_dim: 2
-    boundary_min: [-1.0, -1.0]
-    boundary_max: [+1.0, +1.0]
+    obs_dim: 11
+    act_dim: 3
+    boundary_min: [-1.0, -1.0, -1.0]
+    boundary_max: [+1.0, +1.0, -1.0]
 
   HalfCheetah-v4:
     max_ep_len: 1000
