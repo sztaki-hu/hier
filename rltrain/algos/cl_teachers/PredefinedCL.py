@@ -7,6 +7,8 @@ class PredefinedCL:
         self.env = env
         self.replay_buffer = replay_buffer
 
+        self.task_name = self.config['environment']['task']['name']
+
         self.total_timesteps = config['trainer']['total_timesteps']
         self.init_ranges = self.env.get_init_ranges()
 
@@ -23,29 +25,37 @@ class PredefinedCL:
         self.obj_range_low[2] = self.object_size / 2.0
         self.obj_range_high[2] = self.object_size / 2.0
 
-        self.goal_mu = (self.goal_range_low  + self.goal_range_high) / 2.0
-        self.obj_mu = (self.obj_range_low + self.obj_range_high) / 2.0
+        self.goal_range_center = (self.goal_range_low  + self.goal_range_high) / 2.0
+        self.obj_range_center = (self.obj_range_low + self.obj_range_high) / 2.0
 
-        self.goal_mu[1] -= 0.05
-        self.obj_mu[1] += 0.05
-        self.goal_mu[2] = self.object_size / 2.0
-        self.obj_mu[2] = self.object_size / 2.0
 
-    
+        if self.task_name == 'PandaPush-v3':
+            self.goal_range_center[1] -= 0.05
+            self.obj_range_center[1] += 0.05
+        self.goal_range_center[2] = self.object_size / 2.0
+        self.obj_range_center[2] = self.object_size / 2.0
+
+        self.goal_range_half = (self.goal_range_high - self.goal_range_low) / 2.0
+        self.obj_range_half = (self.obj_range_high - self.obj_range_low) / 2.0
+
+    def get_range(self,t):
+        t_ratio = t / float(self.total_timesteps )
+
+        goal_low = self.goal_range_center - self.goal_range_half * t_ratio
+        goal_high = self.goal_range_center + self.goal_range_half * t_ratio
+        obj_low = self.obj_range_center - self.obj_range_half * t_ratio
+        obj_high = self.obj_range_center + self.obj_range_half * t_ratio
+        return goal_low, goal_high, obj_low, obj_high
+
     def reset_env(self,t):
 
+        goal_low, goal_high, obj_low, obj_high = self.get_range(t)
+
+        desired_goal = np.random.uniform(goal_low, goal_high)
+        object_position =  np.random.uniform(obj_low, obj_high)
+
         self.env.reset()
-
-        t_ratio = t / float(self.total_timesteps)
-        if t_ratio <  0.2:
-            self.env.load_state(robot_joints= None, desired_goal = self.goal_mu, object_position = self.obj_mu)
-        elif t_ratio < 0.8:
-            sigma = np.array([t_ratio/5.0,t_ratio/5.0,0.0])
-
-            desired_goal = np.clip(np.random.normal(self.goal_mu, sigma), self.goal_range_low, self.goal_range_high)
-            object_position = np.clip(np.random.normal(self.obj_mu, sigma), self.obj_range_low, self.obj_range_high)
-
-            self.env.load_state(robot_joints= None, desired_goal = desired_goal, object_position = object_position)
+        self.env.load_state(robot_joints= None, desired_goal = desired_goal, object_position = object_position)
         
         return self.env.get_obs()
     
