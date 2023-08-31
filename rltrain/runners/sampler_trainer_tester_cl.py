@@ -60,11 +60,7 @@ class SamplerTrainerTester:
         self.her_active = False if self.her_goal_selection_strategy == "noher" else True
         self.her_n_sampled_goal = config['buffer']['her']['n_sampled_goal']
 
-        self.print_out_name = '_'.join((self.config['general']['exp_name'],
-                                        self.config['environment']['task']['name'],
-                                        self.config['agent']['type'],
-                                        self.her_goal_selection_strategy,
-                                        str(main_args.trainid)))   
+        self.print_out_name = '_'.join((self.logger.logname,str(main_args.trainid)))   
         """
         Trainer
 

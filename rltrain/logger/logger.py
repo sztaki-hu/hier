@@ -26,19 +26,27 @@ class Logger:
             self.config['environment']['task']['name'] = exp['task']
             self.config['agent']['type'] = exp['agent']
             self.config['buffer']['her']['goal_selection_strategy'] = exp['her_strategy']
+            self.config['trainer']['cl']['pacing_profile'] = exp['cl_pacing_profile']
         
         # Compute and replace auto values
         self.compute_and_replace_auto_values()
+
+        # Handle older versions
+        self.handle_older_versions()
         
         # Demos
         self.demodir = self.config['general']['demodir']
+
+        if self.config['trainer']['mode'] != 'cl': self.config['trainer']['cl']['pacing_profile'] = 'nocl'
+        if self.config['trainer']['cl']['pacing_profile'] == 'nocl': self.config['trainer']['mode'] = 'normal'
 
         # Create logname
         self.logdir = self.config['general']['logdir']
         self.logname = '_'.join((self.config['general']['exp_name'],
                                  self.config['environment']['task']['name'],
                                  self.config['agent']['type'],
-                                 self.config['buffer']['her']['goal_selection_strategy']))
+                                 self.config['buffer']['her']['goal_selection_strategy'],
+                                 self.config['trainer']['cl']['pacing_profile']))
 
         # Create log folders and files
         if display_mode == False: 
@@ -68,6 +76,10 @@ class Logger:
         # self.create_folder(os.path.join(self.current_dir, "cfg_rlbench"))
         # self.save_yaml(os.path.join(self.current_dir, "cfg_rlbench" ,"config.yaml"),cfg_rlbench)
 
+    def handle_older_versions(self):
+        if "cl" not in self.config['trainer']: 
+            self.config['trainer']['cl'] = {}
+            self.config['trainer']['cl']['pacing_profile'] = "linear"
 
     def compute_and_replace_auto_values(self):
         env_name = self.config['environment']['name']

@@ -1,5 +1,6 @@
 import numpy as np
 import random
+import math
 
 class PredefinedCL:
     def __init__(self,config, env, replay_buffer):
@@ -8,8 +9,11 @@ class PredefinedCL:
         self.replay_buffer = replay_buffer
 
         self.task_name = self.config['environment']['task']['name']
+        self.cl_pacing_profile = self.config['trainer']['cl']['pacing_profile']
+        self.cl_pacing_sat = self.config['trainer']['cl']['pacing_sat']
+     
 
-        self.total_timesteps = config['trainer']['total_timesteps']
+        self.total_timesteps = float(config['trainer']['total_timesteps'])
         self.init_ranges = self.env.get_init_ranges()
 
         print(self.init_ranges )
@@ -37,10 +41,15 @@ class PredefinedCL:
 
         self.goal_range_half = (self.goal_range_high - self.goal_range_low) / 2.0
         self.obj_range_half = (self.obj_range_high - self.obj_range_low) / 2.0
-
+ 
     def get_range(self,t):
-        t_ratio = t / float(self.total_timesteps )
-
+        if self.cl_pacing_profile == "linear":
+            t_ratio = min(1.0,t / float(self.total_timesteps * self.cl_pacing_sat))
+        elif self.cl_pacing_profile == "sqrt":
+            t_ratio = min(1.0,math.sqrt(t / float(self.total_timesteps * self.cl_pacing_sat)))
+        elif self.cl_pacing_profile == "quad":
+            t_ratio = min(1.0,math.pow(t / float(self.total_timesteps * self.cl_pacing_sat),2))
+        
         goal_low = self.goal_range_center - self.goal_range_half * t_ratio
         goal_high = self.goal_range_center + self.goal_range_half * t_ratio
         obj_low = self.obj_range_center - self.obj_range_half * t_ratio
@@ -49,7 +58,9 @@ class PredefinedCL:
 
     def reset_env(self,t):
 
+  
         goal_low, goal_high, obj_low, obj_high = self.get_range(t)
+
 
         desired_goal = np.random.uniform(goal_low, goal_high)
         object_position =  np.random.uniform(obj_low, obj_high)
