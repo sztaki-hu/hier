@@ -60,7 +60,8 @@ class SamplerTrainerTester:
         self.her_n_sampled_goal = config['buffer']['her']['n_sampled_goal'] 
 
         # CL
-        if config['trainer']['cl']: self.cl_mode = config['trainer']['cl']['type']
+        self.cl_mode = config['trainer']['cl']['type']
+        self.cl_ep_success_dq = collections.deque(maxlen=config['trainer']['cl']['selfpaced']['window_size']) if self.cl_mode == 'selfpaced' else None
 
         # Log
         self.print_out_name = '_'.join((self.logger.exp_name,str(main_args.trainid)))  
@@ -206,7 +207,9 @@ class SamplerTrainerTester:
             # End of trajectory handling
             if d or (ep_len == self.max_ep_len):
 
-                self.ep_success_dq.append(1.0) if info['is_success'] == True else self.ep_success_dq.append(0.0) 
+                ep_succes = 1.0 if info['is_success'] == True else 0.0
+                self.ep_success_dq.append(ep_succes)
+                if self.cl_mode == 'selfpaced': self.cl_ep_success_dq.append(ep_succes)
                 
                 for (o, a, r, o2, d) in episode:
                     replay_buffer.store(o, a, r, o2, d)

@@ -63,6 +63,7 @@ trainer:
       pacing_sat: 0.8 
     selfpaced:
       conv_cond: 0.9
+      window_size: 10
       step: 0.1
 
 eval:
