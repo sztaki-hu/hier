@@ -1,6 +1,6 @@
-agents: ['sac','td3']
-her_strategies: ['noher','final','future']
+agents: ['sac']
+her_strategies: ['final']
+cl: ['nocl','linear','sqrt','quad','selfpaced']
 tasks:
-  gympanda: ['PandaReach-v3','PandaPush-v3','PandaSlide-v3']
-
+  gympanda: ['PandaSlide-v3']
     

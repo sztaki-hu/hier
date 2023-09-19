@@ -8,7 +8,6 @@ from tqdm import tqdm
 
 from rltrain.envs.builder import make_env
 from rltrain.algos.her import HER
-from rltrain.algos.cl_teachers.PredefinedCL import PredefinedCL
 
 class SamplerTrainerTester:
 
@@ -58,9 +57,15 @@ class SamplerTrainerTester:
         # HER
         self.her_goal_selection_strategy = config['buffer']['her']['goal_selection_strategy']
         self.her_active = False if self.her_goal_selection_strategy == "noher" else True
-        self.her_n_sampled_goal = config['buffer']['her']['n_sampled_goal']
+        self.her_n_sampled_goal = config['buffer']['her']['n_sampled_goal'] 
 
-        self.print_out_name = '_'.join((self.logger.logname,str(main_args.trainid)))   
+        # CL
+        if config['trainer']['cl']: self.cl_mode = config['trainer']['cl']['type']
+
+        # Log
+        self.print_out_name = '_'.join((self.logger.exp_name,str(main_args.trainid)))  
+
+
         """
         Trainer
 
@@ -139,14 +144,21 @@ class SamplerTrainerTester:
 
         self.HER = HER(self.config,self.env,replay_buffer)
 
-        self.CL = PredefinedCL(self.config, self.env, replay_buffer)
+        if self.cl_mode == 'predefined':
+            from rltrain.algos.cl_teachers.PredefinedCL import PredefinedCL as CL
+        elif self.cl_mode == 'selfpaced':
+            from rltrain.algos.cl_teachers.SelfPacedCL import SelfPacedCL as CL
+        else:
+            assert False
+
+        self.CL = CL(self.config, self.env, replay_buffer)
         
         self.agent = agent
 
         init_invalid_num = 0
         reset_num = 0
 
-        o, ep_ret, ep_len = self.CL.reset_env(0), 0, 0
+        o, ep_ret, ep_len = self.CL.reset_env(0,None), 0, 0
 
         best_eval_ep_ret = -float('inf')
 
@@ -209,7 +221,7 @@ class SamplerTrainerTester:
 
                 self.ep_rew_dq.append(ep_ret)
                 self.ep_len_dq.append(ep_len)
-                o, ep_ret, ep_len = self.CL.reset_env(t), 0, 0
+                o, ep_ret, ep_len = self.CL.reset_env(t,self.ep_success_dq), 0, 0
 
 
             # Update handling
@@ -264,6 +276,8 @@ class SamplerTrainerTester:
                 # TRAIN
                 self.logger.tb_writer_add_scalar('train/critic_loss', np.mean(self.loss_q_dq), t)
                 self.logger.tb_writer_add_scalar("train/actor_loss", np.mean(self.loss_pi_dq), t)
+
+                self.logger.tb_writer_add_scalar("cl/ratio", self.CL.t_ratio, t)
 
                 # invalid_init_ratio = float(init_invalid_num) / reset_num 
                 # self.logger.tb_writer_add_scalar("train/invalid_init_ratio", invalid_init_ratio, t)

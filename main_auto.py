@@ -42,19 +42,19 @@ def main():
     agents = exp_list['agents']
     envs = list(exp_list['tasks'].keys())
     her_strategies = exp_list['her_strategies']
-    cl_pacing_profiles = exp_list['cl_pacing_profile']
+    cl_types = exp_list['cl']
 
     for env_name in envs:
         for task_name in exp_list['tasks'][env_name]:
             for agent_type in agents:
                 for her_strategy in her_strategies:
-                    for cl_pacing_profile in cl_pacing_profiles:
+                    for cl_type in cl_types:
                         exp = {}
                         exp['env'] = env_name
                         exp['task'] = task_name
                         exp['agent'] = agent_type
                         exp['her_strategy'] = her_strategy
-                        exp['cl_pacing_profile'] = cl_pacing_profile
+                        exp['cl'] = cl_type
 
                         # Init logger ###############################################x
                         logger = Logger(current_dir = current_dir, main_args = args, display_mode = False, tb_layout = False, exp = exp)

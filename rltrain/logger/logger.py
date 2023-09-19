@@ -26,45 +26,48 @@ class Logger:
             self.config['environment']['task']['name'] = exp['task']
             self.config['agent']['type'] = exp['agent']
             self.config['buffer']['her']['goal_selection_strategy'] = exp['her_strategy']
-            self.config['trainer']['cl']['pacing_profile'] = exp['cl_pacing_profile']
+
+            if exp['cl'] == 'nocl': self.config['trainer']['mode'] = 'normal'
+            if exp['cl'] in ['linear','sqrt','quad']:        
+                self.config['trainer']['type'] = 'predefined'         
+                self.config['trainer']['cl']['predefined']['pacing_profile'] = exp['cl']
+            if exp['cl'] == 'selfpaced': self.config['trainer']['cl']['type'] = 'selfpaced'
+
+            exp_name = self.config['general']['exp_name']
+            for key in list(exp.keys()):
+                if key != 'env':
+                    exp_name += "_"
+                    exp_name += exp[key]         
+            self.config['general']['exp_name'] = exp_name
+        
+        # Lognames
+        self.logdir = self.config['general']['logdir']
+        self.exp_name = self.config['general']['exp_name']
+        print(self.config['general']['exp_name'])
         
         # Compute and replace auto values
         self.compute_and_replace_auto_values()
-
-        # Handle older versions
-        self.handle_older_versions()
         
         # Demos
         self.demodir = self.config['general']['demodir']
-
-        if self.config['trainer']['mode'] != 'cl': self.config['trainer']['cl']['pacing_profile'] = 'nocl'
-        if self.config['trainer']['cl']['pacing_profile'] == 'nocl': self.config['trainer']['mode'] = 'normal'
-
-        # Create logname
-        self.logdir = self.config['general']['logdir']
-        self.logname = '_'.join((self.config['general']['exp_name'],
-                                 self.config['environment']['task']['name'],
-                                 self.config['agent']['type'],
-                                 self.config['buffer']['her']['goal_selection_strategy'],
-                                 self.config['trainer']['cl']['pacing_profile']))
 
         # Create log folders and files
         if display_mode == False: 
             
             # Experiment folder
-            self.create_folder(os.path.join(self.current_dir,self.logdir, self.logname,self.trainid))
+            self.create_folder(os.path.join(self.current_dir,self.logdir, self.exp_name,self.trainid))
 
             # Save config
-            self.save_yaml(os.path.join(self.current_dir, self.logdir,self.logname,"config.yaml"),self.config)
+            self.save_yaml(os.path.join(self.current_dir, self.logdir,self.exp_name,"config.yaml"),self.config)
             
             # Backup model folder
-            self.create_folder(os.path.join(self.current_dir,self.logdir, self.logname,self.trainid,"model_backup"))    
+            self.create_folder(os.path.join(self.current_dir,self.logdir, self.exp_name,self.trainid,"model_backup"))    
 
             # Tensorboard
-            self.writer = SummaryWriter(log_dir = os.path.join(self.current_dir,self.logdir,self.logname,self.trainid,"runs"))     
+            self.writer = SummaryWriter(log_dir = os.path.join(self.current_dir,self.logdir,self.exp_name,self.trainid,"runs"))     
         
         # Printout logging
-        log_file_path = os.path.join(self.current_dir,self.logdir, self.logname,self.trainid,'logs.log')
+        log_file_path = os.path.join(self.current_dir,self.logdir, self.exp_name,self.trainid,'logs.log')
         if os.path.isfile(log_file_path):
             os.remove(log_file_path) 
 
@@ -75,11 +78,6 @@ class Logger:
         # cfg_rlbench = {'path' : self.config_path}
         # self.create_folder(os.path.join(self.current_dir, "cfg_rlbench"))
         # self.save_yaml(os.path.join(self.current_dir, "cfg_rlbench" ,"config.yaml"),cfg_rlbench)
-
-    def handle_older_versions(self):
-        if "cl" not in self.config['trainer']: 
-            self.config['trainer']['cl'] = {}
-            self.config['trainer']['cl']['pacing_profile'] = "linear"
 
     def compute_and_replace_auto_values(self):
         env_name = self.config['environment']['name']
@@ -140,9 +138,9 @@ class Logger:
     
     def get_model_save_path(self,epoch,best_model=False):
         if best_model == False:
-            return os.path.join(self.current_dir, self.logdir, self.logname,self.trainid,"model_backup","model_" + str(epoch))
+            return os.path.join(self.current_dir, self.logdir, self.exp_name,self.trainid,"model_backup","model_" + str(epoch))
         else:
-            return os.path.join(self.current_dir, self.logdir, self.logname,self.trainid,"model_backup","model_best_model")
+            return os.path.join(self.current_dir, self.logdir, self.exp_name,self.trainid,"model_backup","model_best_model")
     
     # Demos
 
