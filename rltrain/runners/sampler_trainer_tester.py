@@ -281,6 +281,8 @@ class SamplerTrainerTester:
                 self.logger.tb_writer_add_scalar('train/critic_loss', np.mean(self.loss_q_dq), t)
                 self.logger.tb_writer_add_scalar("train/actor_loss", np.mean(self.loss_pi_dq), t)
 
+                self.logger.tb_writer_add_scalar("cl/ratio", 1.0, t)
+
                 # invalid_init_ratio = float(init_invalid_num) / reset_num 
                 # self.logger.tb_writer_add_scalar("train/invalid_init_ratio", invalid_init_ratio, t)
 
