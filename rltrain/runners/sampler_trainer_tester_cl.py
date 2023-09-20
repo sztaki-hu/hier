@@ -150,7 +150,9 @@ class SamplerTrainerTester:
         elif self.cl_mode == 'selfpaced':
             from rltrain.algos.cl_teachers.SelfPacedCL import SelfPacedCL as CL
         else:
+            print(self.cl_mode)
             assert False
+            return -1   
 
         self.CL = CL(self.config, self.env, replay_buffer)
         

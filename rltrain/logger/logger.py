@@ -32,10 +32,13 @@ class Logger:
             self.config['buffer']['her']['goal_selection_strategy'] = exp['her_strategy']
 
             if exp['cl'] == 'nocl': self.config['trainer']['mode'] = 'normal'
-            if exp['cl'] in ['linear','sqrt','quad']:        
-                self.config['trainer']['type'] = 'predefined'         
+            if exp['cl'] in ['linear','sqrt','quad']:     
+                self.config['trainer']['mode'] = 'cl'     
+                self.config['trainer']['cl']['type'] = 'predefined'         
                 self.config['trainer']['cl']['predefined']['pacing_profile'] = exp['cl']
-            if exp['cl'] == 'selfpaced': self.config['trainer']['cl']['type'] = 'selfpaced'
+            if exp['cl'] == 'selfpaced': 
+                self.config['trainer']['mode'] = 'cl'   
+                self.config['trainer']['cl']['type'] = 'selfpaced'
 
             exp_name = self.config['general']['exp_name']
             for key in list(exp.keys()):
