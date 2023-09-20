@@ -14,11 +14,13 @@ from torch.utils.tensorboard import SummaryWriter
 
 class Logger:
     # init method or constructor
-    def __init__(self, current_dir, main_args, display_mode = False, tb_layout = False, exp = None):
+    def __init__(self, current_dir, main_args, display_mode = False, exp = None):
+
+        if display_mode: self.seed_id = str(main_args.seedid)
 
         # Load config and set up main variables
         self.current_dir = current_dir
-        self.config_path = os.path.join(current_dir,main_args.config) if display_mode == False else os.path.join(current_dir,main_args.config,"config.yaml")             
+        self.config_path = os.path.join(current_dir,main_args.config) if display_mode == False else os.path.join(current_dir,main_args.config,self.seed_id,"config.yaml")             
         self.config = self.load_yaml(self.config_path)
         self.config_framework = self.load_yaml(os.path.join(current_dir,'cfg_framework','config_framework.yaml'))
         self.config_tasks = self.load_yaml(os.path.join(current_dir,'cfg_framework','config_tasks.yaml'))
@@ -59,10 +61,11 @@ class Logger:
         self.demodir = self.config['general']['demodir']
 
         # Create log folders and files
+        self.exp_folder = os.path.join(self.current_dir,self.logdir, self.exp_name)
+
         if display_mode == False: 
             
-            # Exp folder and get seed id
-            self.exp_folder = os.path.join(self.current_dir,self.logdir, self.exp_name)
+            # Exp folder and get seed id    
             self.create_folder(os.path.join(self.exp_folder))
             self.seed_id = str(len(os.listdir(self.exp_folder)))
             self.create_folder(os.path.join(self.exp_folder,self.seed_id))

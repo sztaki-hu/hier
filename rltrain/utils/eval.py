@@ -25,6 +25,7 @@ class Eval:
 
         # Load model
         path = self.logger.get_model_save_path(model_name)
+
         self.agent.load_weights(path,mode="pi",eval=True)
 
         # Create Env

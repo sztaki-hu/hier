@@ -61,7 +61,7 @@ def main():
                             exp['cl'] = cl_type
 
                             # Init logger ###############################################x
-                            logger = Logger(current_dir = current_dir, main_args = args, display_mode = False, tb_layout = False, exp = exp)
+                            logger = Logger(current_dir = current_dir, main_args = args, display_mode = False, exp = exp)
 
                             config = logger.get_config()
 

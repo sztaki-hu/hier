@@ -21,22 +21,21 @@ import torch
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--config", default="logs/0823_B_PandaPush-v3_sac_final/" ,help="Path of the config file")
-    parser.add_argument("--trainid", type=int, default=0 ,help="Train ID")
+    parser.add_argument("--config", default="logs/0920_Z/" ,help="Path of the config file")
+    parser.add_argument("--hwid", type=int, default=0 ,help="Hardware id")
+    parser.add_argument("--seedid", type=int, default=0 ,help="seedid")
     # Example: python3 main.py --configfile /cfg/alma.yaml 0
     args = parser.parse_args()
 
     # Init logger 
     current_dir = dirname(abspath(__file__))
-    config_path = os.path.join(current_dir,args.config)
 
-    logger = Logger(current_dir = current_dir, main_args = args, display_mode = True, tb_layout = False)
+    logger = Logger(current_dir = current_dir, main_args = args, display_mode = True)
     config = logger.get_config()
     config_framework = logger.get_config_framework()
 
     # Init CUDA
-    hw_train_id = 0
-    init_cuda(config['hardware']['gpu'][hw_train_id],config['hardware']['cpu_min'][hw_train_id],config['hardware']['cpu_max'][hw_train_id])
+    init_cuda(config['hardware']['gpu'][args.hwid],config['hardware']['cpu_min'][args.hwid],config['hardware']['cpu_max'][args.hwid])
 
     print_torch_info(logger)
 
@@ -52,7 +51,7 @@ if __name__ == '__main__':
     tester = Eval(agent,logger,config,config_framework)
 
     # Test Agent
-    tester.eval_agent(model_name=46,num_display_episode=100, headless=False, time_delay = 0.05)
+    tester.eval_agent(model_name="best_model",num_display_episode=10, headless=False, time_delay = 0.05)
 
 
     

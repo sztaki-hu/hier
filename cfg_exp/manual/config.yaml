@@ -1,5 +1,5 @@
 general:
-  exp_name: 0920_X
+  exp_name: 0920_Z
   logdir: logs
   demodir: demos
   seed: random
@@ -52,7 +52,7 @@ sampler:
 
 trainer:
   mode: cl # normal / cl
-  total_timesteps: 5e2
+  total_timesteps: 5e5
   batch_size: 256
   update_after: 1e2
   update_every: 50
@@ -67,7 +67,7 @@ trainer:
       step: 0.1
 
 eval:
-  freq: 5e1
+  freq: 1e4
   num_episodes: 20
   
 

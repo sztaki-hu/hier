@@ -33,7 +33,7 @@ def main():
         # Init logger ###############################################x
         current_dir = dirname(abspath(__file__))
 
-        logger = Logger(current_dir = current_dir, main_args = args, display_mode = False, tb_layout = False)
+        logger = Logger(current_dir = current_dir, main_args = args, display_mode = False)
         config = logger.get_config()
 
         config_framework = logger.get_config_framework()
