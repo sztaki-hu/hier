@@ -60,7 +60,7 @@ class SamplerTrainerTester:
         self.her_n_sampled_goal = config['buffer']['her']['n_sampled_goal']
 
         # Log
-        self.print_out_name = '_'.join((self.logger.exp_name,str(main_args.trainid)))  
+        self.print_out_name = '_'.join((self.logger.exp_name,str(self.logger.seed_id)))  
           
         """
         Trainer

@@ -2,6 +2,7 @@ import os
 import numpy as np
 import yaml
 import time
+import random
 import logging
 import pandas as pd
 from collections import defaultdict
@@ -17,7 +18,6 @@ class Logger:
 
         # Load config and set up main variables
         self.current_dir = current_dir
-        self.trainid = str(main_args.trainid)
         self.config_path = os.path.join(current_dir,main_args.config) if display_mode == False else os.path.join(current_dir,main_args.config,"config.yaml")             
         self.config = self.load_yaml(self.config_path)
         self.config_framework = self.load_yaml(os.path.join(current_dir,'cfg_framework','config_framework.yaml'))
@@ -61,21 +61,24 @@ class Logger:
         # Create log folders and files
         if display_mode == False: 
             
-            # Experiment folder
-            self.create_folder(os.path.join(self.current_dir,self.logdir, self.exp_name,self.trainid))
+            # Exp folder and get seed id
+            self.exp_folder = os.path.join(self.current_dir,self.logdir, self.exp_name)
+            self.create_folder(os.path.join(self.exp_folder))
+            self.seed_id = str(len(os.listdir(self.exp_folder)))
+            self.create_folder(os.path.join(self.exp_folder,self.seed_id))
 
             # Save config
-            self.save_yaml(os.path.join(self.current_dir, self.logdir,self.exp_name,"config.yaml"),self.config)
+            self.save_yaml(os.path.join(self.exp_folder,self.seed_id,"config.yaml"),self.config)
             
             # Backup model folder
-            self.create_folder(os.path.join(self.current_dir,self.logdir, self.exp_name,self.trainid,"model_backup"))    
+            self.create_folder(os.path.join(self.exp_folder,self.seed_id,"model_backup"))    
 
             # Tensorboard
-            self.tb_logdir = os.path.join(self.current_dir,self.logdir,self.exp_name,self.trainid,"runs")
+            self.tb_logdir = os.path.join(self.exp_folder,self.seed_id,"runs")
             self.writer = SummaryWriter(log_dir = self.tb_logdir)     
         
         # Printout logging
-        log_file_path = os.path.join(self.current_dir,self.logdir, self.exp_name,self.trainid,'logs.log')
+        log_file_path = os.path.join(self.exp_folder,self.seed_id,'logs.log')
         if os.path.isfile(log_file_path):
             os.remove(log_file_path) 
 
@@ -110,6 +113,9 @@ class Logger:
         ## BOUNDARY MAX
         if self.config['agent']['boundary_max'] == "auto":
             self.config['agent']['boundary_max'] = self.config_tasks[env_name][task_name]['boundary_max']
+        
+        if self.config['general']['seed'] == 'random': self.config['general']['seed'] = random.randint(0,1000)
+
 
     def print_logfile(self,message,level = "info", terminal = True):
         if terminal:
@@ -146,9 +152,9 @@ class Logger:
     
     def get_model_save_path(self,epoch,best_model=False):
         if best_model == False:
-            return os.path.join(self.current_dir, self.logdir, self.exp_name,self.trainid,"model_backup","model_" + str(epoch))
+            return os.path.join(self.exp_folder,self.seed_id,"model_backup","model_" + str(epoch))
         else:
-            return os.path.join(self.current_dir, self.logdir, self.exp_name,self.trainid,"model_backup","model_best_model")
+            return os.path.join(self.exp_folder,self.seed_id,"model_backup","model_best_model")
     
     # Demos
 

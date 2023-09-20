@@ -27,20 +27,17 @@ args = parser.parse_args()
 
 plotdata_list = ['eval_success_rate',"rollout_success_rate","cl_ratio"]
 
-
-
 create_folder(os.path.join(current_dir, args.outdir))
 
 exps = []
 
-
 # General
-exp_id = "0920_X"
+exp_id = "0920_X2"
 taskname = 'Push'
 her = "final"
-exps.append({"exp_name": exp_id+"_Panda"+taskname+"-v3_sac_"+her+"_linear", "seed_num":2, "color": "blue", "plot_name": "linear"})
-exps.append({"exp_name": exp_id+"_Panda"+taskname+"-v3_sac_"+her+"_selfpaced", "seed_num":2, "color": "green", "plot_name": "selfpaced"})
-#exps.append({"exp_name": exp_id+"_Panda"+taskname+"-v3_sac_"+her+"_nocl", "seed_num":2, "color": "purple", "plot_name": "nocl"})
+exps.append({"exp_name": exp_id+"_Panda"+taskname+"-v3_sac_"+her+"_linear", "seed_num":3, "color": "blue", "plot_name": "linear"})
+exps.append({"exp_name": exp_id+"_Panda"+taskname+"-v3_sac_"+her+"_selfpaced", "seed_num":3, "color": "green", "plot_name": "selfpaced"})
+exps.append({"exp_name": exp_id+"_Panda"+taskname+"-v3_sac_"+her+"_nocl", "seed_num":3, "color": "purple", "plot_name": "nocl"})
 
 exp_test_color_list = []
 for i in range(len(exps)):

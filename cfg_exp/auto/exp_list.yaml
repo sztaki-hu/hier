@@ -1,6 +1,21 @@
-agents: ['sac']
-her_strategies: ['final']
-cl: ['nocl','linear','sqrt','quad','selfpaced']
-tasks:
-  gympanda: ['PandaSlide-v3']
+process_0:
+  agents: ['sac']
+  her_strategies: ['final']
+  cl: ['nocl','linear','selfpaced']
+  tasks:
+    gympanda: ['PandaPush-v3']
+
+process_1:
+  agents: ['td3']
+  her_strategies: ['final']
+  cl: ['nocl','linear','selfpaced']
+  tasks:
+    gympanda: ['PandaSlide-v3']
+
+process_2:
+  agents: ['sac']
+  her_strategies: ['future']
+  cl: ['nocl','linear','selfpaced']
+  tasks:
+    gympanda: ['PandaPush-v3']
     

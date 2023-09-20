@@ -64,7 +64,7 @@ class SamplerTrainerTester:
         self.cl_ep_success_dq = collections.deque(maxlen=config['trainer']['cl']['selfpaced']['window_size']) if self.cl_mode == 'selfpaced' else None
 
         # Log
-        self.print_out_name = '_'.join((self.logger.exp_name,str(main_args.trainid)))  
+        self.print_out_name = '_'.join((self.logger.exp_name,str(self.logger.seed_id)))  
 
 
         """

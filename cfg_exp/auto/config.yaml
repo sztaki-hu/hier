@@ -1,8 +1,8 @@
 general:
-  exp_name: 0919_A
+  exp_name: 0920_Y
   logdir: logs
   demodir: demos
-  seed: 0
+  seed: random
 
 hardware:
   gpu: [0,1,2] 
@@ -51,8 +51,8 @@ sampler:
   max_ep_len: auto
 
 trainer:
-  mode: cl
-  total_timesteps: 5e5
+  mode: input
+  total_timesteps: 5e2
   batch_size: 256
   update_after: 1e2
   update_every: 50
@@ -67,7 +67,7 @@ trainer:
       step: 0.1
 
 eval:
-  freq: 1e4
+  freq: 5e1
   num_episodes: 20
   
 
