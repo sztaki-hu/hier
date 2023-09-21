@@ -41,10 +41,10 @@ class CL:
         self.obj_range_half = (self.obj_range_high - self.obj_range_low) / 2.0
     
     def get_range(self):        
-        goal_low = self.goal_range_center - self.goal_range_half * self.t_ratio
-        goal_high = self.goal_range_center + self.goal_range_half * self.t_ratio
-        obj_low = self.obj_range_center - self.obj_range_half * self.t_ratio
-        obj_high = self.obj_range_center + self.obj_range_half * self.t_ratio
+        goal_low = self.goal_range_center - self.goal_range_half * self.cl_ratio
+        goal_high = self.goal_range_center + self.goal_range_half * self.cl_ratio
+        obj_low = self.obj_range_center - self.obj_range_half * self.cl_ratio
+        obj_high = self.obj_range_center + self.obj_range_half * self.cl_ratio
         return goal_low, goal_high, obj_low, obj_high
 
     def reset_env(self,t):

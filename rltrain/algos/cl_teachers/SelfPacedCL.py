@@ -11,16 +11,16 @@ class SelfPacedCL(CL):
         # SELFPACED
         self.cl_conv_cond = self.config['trainer']['cl']['selfpaced']['conv_cond']
         self.cl_step = self.config['trainer']['cl']['selfpaced']['step']
-        self.t_ratio = self.cl_step 
+        self.cl_ratio = self.cl_step 
         self.cl_ep_success_dq = collections.deque(maxlen=config['trainer']['cl']['selfpaced']['window_size'])
 
         self.clear_cl_ep_success_dq()
    
     def update_ratio(self,t):
         success_rate = np.mean(self.cl_ep_success_dq) if t > 0 else 0
-        if (self.t_ratio < 1.0) and (success_rate > self.cl_conv_cond):
-            self.t_ratio += self.cl_step
-            self.t_ratio = min(self.t_ratio,1.0)
+        if (self.cl_ratio < 1.0) and (success_rate > self.cl_conv_cond):
+            self.cl_ratio += self.cl_step
+            self.cl_ratio = min(self.cl_ratio,1.0)
             self.clear_cl_ep_success_dq()
     
     def clear_cl_ep_success_dq(self):
