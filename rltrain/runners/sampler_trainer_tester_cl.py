@@ -9,6 +9,8 @@ from tqdm import tqdm
 from rltrain.envs.builder import make_env
 from rltrain.algos.her import HER
 
+CL_TYPES = ['predefined','selfpaced','controldiscrete']
+
 class SamplerTrainerTester:
 
     def __init__(self,device,logger,config,main_args,config_framework):
@@ -65,6 +67,7 @@ class SamplerTrainerTester:
         # Log
         self.print_out_name = '_'.join((self.logger.exp_name,str(self.logger.seed_id)))  
 
+        assert self.cl_mode in CL_TYPES
 
         """
         Trainer
@@ -147,6 +150,8 @@ class SamplerTrainerTester:
             from rltrain.algos.cl_teachers.PredefinedCL import PredefinedCL as CL
         elif self.cl_mode == 'selfpaced':
             from rltrain.algos.cl_teachers.SelfPacedCL import SelfPacedCL as CL
+        elif self.cl_mode == 'controldiscrete':
+            from rltrain.algos.cl_teachers.ControlDiscreteCL import ControlDiscreteCL as CL
         else:
             print(self.cl_mode)
             assert False
@@ -280,7 +285,7 @@ class SamplerTrainerTester:
                 self.logger.tb_writer_add_scalar('train/critic_loss', np.mean(self.loss_q_dq), t)
                 self.logger.tb_writer_add_scalar("train/actor_loss", np.mean(self.loss_pi_dq), t)
 
-                self.logger.tb_writer_add_scalar("cl/ratio", self.CL.t_ratio, t)
+                self.logger.tb_writer_add_scalar("cl/ratio", self.CL.cl_ratio, t)
 
                 # invalid_init_ratio = float(init_invalid_num) / reset_num 
                 # self.logger.tb_writer_add_scalar("train/invalid_init_ratio", invalid_init_ratio, t)

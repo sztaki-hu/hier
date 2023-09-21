@@ -1,5 +1,5 @@
 general:
-  exp_name: 0920_Z
+  exp_name: 0921_X
   logdir: logs
   demodir: demos
   seed: random
@@ -57,14 +57,22 @@ trainer:
   update_after: 1e2
   update_every: 50
   cl:
-    type: selfpaced # predefined / selfpaced
+    type: controldiscrete # predefined / selfpaced / controldiscrete 
     predefined:
-      pacing_profile: linear 
+      pacing_profile: linear  # linear / sqrt / quad
       pacing_sat: 0.8 
     selfpaced:
       conv_cond: 0.9
       window_size: 10
       step: 0.1
+    controldiscrete:
+      target: 0.8
+      step: 0.01
+    # controlpd:
+    #   target_profile: linear
+    #   target_sat: 0.75
+    #   p: 0.01
+    #   d: 0
 
 eval:
   freq: 1e4
