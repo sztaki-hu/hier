@@ -33,7 +33,7 @@ def main():
     parser.add_argument("--config", default="cfg_exp/auto/config.yaml" ,help="Path of the config file")
     parser.add_argument("--explist", default="cfg_exp/auto/exp_list.yaml" ,help="Path of the config file")
     parser.add_argument("--hwid", type=int, default=0 ,help="Hardware id")
-    parser.add_argument("--seednum", type=int, default=2 ,help="seednum")
+    parser.add_argument("--seednum", type=int, default=3 ,help="seednum")
     parser.add_argument("--processid", type=int, default=0 ,help="processid")
     args = parser.parse_args()
 
