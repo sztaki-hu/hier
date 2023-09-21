@@ -61,8 +61,7 @@ class SamplerTrainerTester:
 
         # CL
         self.cl_mode = config['trainer']['cl']['type']
-        self.cl_ep_success_dq = collections.deque(maxlen=config['trainer']['cl']['selfpaced']['window_size']) if self.cl_mode == 'selfpaced' else None
-
+       
         # Log
         self.print_out_name = '_'.join((self.logger.exp_name,str(self.logger.seed_id)))  
 
@@ -107,7 +106,6 @@ class SamplerTrainerTester:
                 the current policy and value function.
 
         """ 
-        
 
     def test_agent(self):
         ep_rets = []
@@ -161,7 +159,7 @@ class SamplerTrainerTester:
         init_invalid_num = 0
         reset_num = 0
 
-        o, ep_ret, ep_len = self.CL.reset_env(0,None), 0, 0
+        o, ep_ret, ep_len = self.CL.reset_env(0), 0, 0
 
         best_eval_ep_ret = -float('inf')
 
@@ -211,7 +209,7 @@ class SamplerTrainerTester:
 
                 ep_succes = 1.0 if info['is_success'] == True else 0.0
                 self.ep_success_dq.append(ep_succes)
-                if self.cl_mode == 'selfpaced': self.cl_ep_success_dq.append(ep_succes)
+                if self.cl_mode == 'selfpaced': self.CL.cl_ep_success_dq.append(ep_succes)
                 
                 for (o, a, r, o2, d) in episode:
                     replay_buffer.store(o, a, r, o2, d)
@@ -226,7 +224,7 @@ class SamplerTrainerTester:
 
                 self.ep_rew_dq.append(ep_ret)
                 self.ep_len_dq.append(ep_len)
-                o, ep_ret, ep_len = self.CL.reset_env(t,self.ep_success_dq), 0, 0
+                o, ep_ret, ep_len = self.CL.reset_env(t), 0, 0
 
 
             # Update handling

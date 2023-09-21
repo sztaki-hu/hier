@@ -1,6 +1,4 @@
 import numpy as np
-import random
-import math
 
 class CL:
     def __init__(self,config, env, replay_buffer):
@@ -13,21 +11,11 @@ class CL:
         # TASK
         self.task_name = self.config['environment']['task']['name']
 
-        # PREDEFINED
-        self.cl_pacing_profile = self.config['trainer']['cl']['predefined']['pacing_profile']
-        self.cl_pacing_sat = self.config['trainer']['cl']['predefined']['pacing_sat']
-        self.t_ratio = 0
-
-        # SELFPACED
-        self.cl_conv_cond = self.config['trainer']['cl']['selfpaced']['conv_cond']
-        self.cl_step = self.config['trainer']['cl']['selfpaced']['step']
-        self.t_ratio = self.cl_step 
-     
         # INIT
         self.total_timesteps = float(config['trainer']['total_timesteps'])
         self.init_ranges = self.env.get_init_ranges()
 
-        print(self.init_ranges )
+        print(self.init_ranges)
        
         self.goal_range_low = self.init_ranges['goal_range_low']
         self.goal_range_high = self.init_ranges['goal_range_high']
@@ -59,9 +47,9 @@ class CL:
         obj_high = self.obj_range_center + self.obj_range_half * self.t_ratio
         return goal_low, goal_high, obj_low, obj_high
 
-    def reset_env(self,t,ep_success_dq):
+    def reset_env(self,t):
 
-        self.update_ratio(t,ep_success_dq)
+        self.update_ratio(t)
         goal_low, goal_high, obj_low, obj_high = self.get_range()
         
         desired_goal = np.random.uniform(goal_low, goal_high)
@@ -72,7 +60,7 @@ class CL:
         
         return self.env.get_obs()
 
-    def update_ratio(self,t,ep_success_dq):
+    def update_ratio(self,t):
         pass
     
 
