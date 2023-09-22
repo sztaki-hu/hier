@@ -290,6 +290,8 @@ class SamplerTrainerTester:
 
                 self.logger.tb_writer_add_scalar("cl/ratio", self.CL.cl_ratio, t)
 
+                if self.cl_mode == 'examplebyexample': self.logger.tb_writer_add_scalar("cl/same_setup_num", np.mean(self.CL.same_setup_num_dq), t)
+
                 # invalid_init_ratio = float(init_invalid_num) / reset_num 
                 # self.logger.tb_writer_add_scalar("train/invalid_init_ratio", invalid_init_ratio, t)
 
