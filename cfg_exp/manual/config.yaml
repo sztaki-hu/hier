@@ -57,7 +57,7 @@ trainer:
   update_after: 1e2
   update_every: 50
   cl:
-    type: controldiscrete # predefined / selfpaced / selfpaceddual / controldiscrete / examplebyexample
+    type: examplebyexample # predefined / selfpaced / selfpaceddual / controldiscrete / examplebyexample
     predefined:
       pacing_profile: linear  # linear / sqrt / quad
       pacing_sat: 0.8 
@@ -71,9 +71,14 @@ trainer:
       window_size: 20
       step: 0.05
     controldiscrete:
-      target: 0.8
+      target_profile: const # const / const_sin / linear / sqrt / quad
+      target_sat: 0.8 
+      target_sat_value: 0.8
       step: 0.01
       window_size: 20
+      const_sin:
+        amp: 0.05
+        freq_divide: 50
     examplebyexample:
       conv_cond: 0.8
       window_size: 20

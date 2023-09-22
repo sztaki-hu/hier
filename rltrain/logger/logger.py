@@ -34,19 +34,20 @@ class Logger:
             self.config['buffer']['her']['goal_selection_strategy'] = exp['her_strategy']
 
             if exp['cl'] == 'nocl': self.config['trainer']['mode'] = 'normal'
-            if exp['cl'] in ['linear','sqrt','quad']:     
+            if exp['cl'] in ['predefined_linear','predefined_sqrt','predefined_quad']:     
                 self.config['trainer']['mode'] = 'cl'     
                 self.config['trainer']['cl']['type'] = 'predefined'         
-                self.config['trainer']['cl']['predefined']['pacing_profile'] = exp['cl']
+                self.config['trainer']['cl']['predefined']['pacing_profile'] = exp['cl'][11:]
             if exp['cl'] == 'selfpaced': 
                 self.config['trainer']['mode'] = 'cl'   
                 self.config['trainer']['cl']['type'] = 'selfpaced'
             if exp['cl'] == 'selfpaceddual': 
                 self.config['trainer']['mode'] = 'cl'   
                 self.config['trainer']['cl']['type'] = 'selfpaceddual'
-            if exp['cl'] == 'controldiscrete': 
-                self.config['trainer']['mode'] = 'cl'   
-                self.config['trainer']['cl']['type'] = 'controldiscrete'
+            if exp['cl'] in ['controldiscrete_const','controldiscrete_const_sin','controldiscrete_linear','controldiscrete_sqrt','controldiscrete_quad']:     
+                self.config['trainer']['mode'] = 'cl'     
+                self.config['trainer']['cl']['type'] = 'controldiscrete'         
+                self.config['trainer']['cl']['controldiscrete']['target_profile'] = exp['cl'][16:]
             if exp['cl'] == 'examplebyexample': 
                 self.config['trainer']['mode'] = 'cl'   
                 self.config['trainer']['cl']['type'] = 'examplebyexample'

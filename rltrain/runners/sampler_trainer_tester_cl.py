@@ -67,6 +67,7 @@ class SamplerTrainerTester:
         # Log
         self.print_out_name = '_'.join((self.logger.exp_name,str(self.logger.seed_id)))  
 
+        print(self.cl_mode)
         assert self.cl_mode in CL_TYPES
 
         """
