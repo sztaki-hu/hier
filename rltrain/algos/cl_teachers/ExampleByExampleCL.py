@@ -32,7 +32,7 @@ class ExampleByExampleCL(CL):
                     goal_low, goal_high, obj_low, obj_high = self.get_range()
                     self.desired_goal = np.random.uniform(goal_low, goal_high)
                     self.object_position =  np.random.uniform(obj_low, obj_high)
-                    self.cl_dequeu_maxlen.clear()
+                    self.cl_ep_success_dq.clear()
                     self.same_setup_num_dq.append(self.same_setup_num)
                     self.same_setup_num = 0
                 
