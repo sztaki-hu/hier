@@ -20,7 +20,7 @@ def create_folder(path):
         print(path + ' folder already exists!')
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--plotid", default="test01" ,help="Id of plot")
+parser.add_argument("--plotid", default="0921_A_push" ,help="Id of plot")
 parser.add_argument("--outdir", default="plots" ,help="Path of the output folder")
 parser.add_argument("--show", default=False ,help="Id of plot")
 args = parser.parse_args()
@@ -28,16 +28,26 @@ args = parser.parse_args()
 plotdata_list = ['eval_success_rate',"rollout_success_rate","cl_ratio"]
 
 create_folder(os.path.join(current_dir, args.outdir))
+create_folder(os.path.join(current_dir, args.outdir, args.plotid))
 
 exps = []
 
 # General
-exp_id = "0920_X2"
+# exp_id = "0920_Y"
+# taskname = 'Push'
+# her = "final"
+# exps.append({"exp_name": exp_id+"_Panda"+taskname+"-v3_sac_"+her+"_linear", "seed_num":2, "color": "blue", "plot_name": "linear"})
+# exps.append({"exp_name": exp_id+"_Panda"+taskname+"-v3_sac_"+her+"_selfpaced", "seed_num":2, "color": "green", "plot_name": "selfpaced"})
+# exps.append({"exp_name": exp_id+"_Panda"+taskname+"-v3_sac_"+her+"_quad", "seed_num":2, "color": "purple", "plot_name": "quad"})
+
+
 taskname = 'Push'
 her = "final"
-exps.append({"exp_name": exp_id+"_Panda"+taskname+"-v3_sac_"+her+"_linear", "seed_num":3, "color": "blue", "plot_name": "linear"})
-exps.append({"exp_name": exp_id+"_Panda"+taskname+"-v3_sac_"+her+"_selfpaced", "seed_num":3, "color": "green", "plot_name": "selfpaced"})
-exps.append({"exp_name": exp_id+"_Panda"+taskname+"-v3_sac_"+her+"_nocl", "seed_num":3, "color": "purple", "plot_name": "nocl"})
+exps.append({"exp_name": "0921_A_Panda"+taskname+"-v3_sac_"+her+"_linear", "seed_num":3, "color": "blue", "plot_name": "linear"})
+exps.append({"exp_name": "0921_A_Panda"+taskname+"-v3_sac_"+her+"_selfpaced", "seed_num":3, "color": "orange", "plot_name": "selfpaced"})
+exps.append({"exp_name": "0921_A_Panda"+taskname+"-v3_sac_"+her+"_controldiscrete", "seed_num":3, "color": "purple", "plot_name": "controldiscrete"})
+
+
 
 exp_test_color_list = []
 for i in range(len(exps)):
@@ -94,7 +104,7 @@ for plotdata in plotdata_list:
     plt.ylabel(plotdata)
     plt.title(plotdata)
     figname = args.plotid + "_" + plotdata + '_.png'
-    plt.savefig(os.path.join(current_dir, args.outdir, figname), bbox_inches='tight')
+    plt.savefig(os.path.join(current_dir, args.outdir, args.plotid, figname), bbox_inches='tight')
     if args.show: plt.show()
 
     # SD plot ###################################
@@ -108,6 +118,6 @@ for plotdata in plotdata_list:
     plt.ylabel(plotdata)
     plt.title(plotdata + " with sd")
     figname = args.plotid + '_'+plotdata+'_std.png'
-    plt.savefig(os.path.join(current_dir, args.outdir, figname),bbox_inches='tight')
+    plt.savefig(os.path.join(current_dir, args.outdir, args.plotid, figname),bbox_inches='tight')
     if args.show: plt.show()
 
