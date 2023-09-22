@@ -57,23 +57,26 @@ trainer:
   update_after: 1e2
   update_every: 50
   cl:
-    type: input # predefined / selfpaced / controldiscrete / selfpaceddual
+    type: input # predefined / selfpaced / selfpaceddual / controldiscrete / examplebyexample
     predefined:
       pacing_profile: linear  # linear / sqrt / quad
       pacing_sat: 0.8 
     selfpaced:
-      conv_cond: 0.9
-      window_size: 10
+      conv_cond: 0.8
+      window_size: 20
       step: 0.05
     selfpaceddual:
-      upper_cond: 0.9
-      lower_cond: 0.1
-      window_size: 10
+      upper_cond: 0.8
+      lower_cond: 0.2
+      window_size: 20
       step: 0.05
     controldiscrete:
       target: 0.8
       step: 0.01
-      window_size: 10
+      window_size: 20
+    examplebyexample:
+      conv_cond: 0.8
+      window_size: 20
     # controlpd:
     #   target_profile: linear
     #   target_sat: 0.75

@@ -8,7 +8,7 @@ class SelfPacedDualCL(CL):
     def __init__(self, config, env, replay_buffer):
         super(SelfPacedDualCL, self).__init__(config, env, replay_buffer)
 
-        # SELFPACED
+        # SELFPACED DUAL
         self.cl_upper_cond = self.config['trainer']['cl']['selfpaceddual']['upper_cond']
         self.cl_lower_cond = self.config['trainer']['cl']['selfpaceddual']['lower_cond']
         self.cl_step = self.config['trainer']['cl']['selfpaced']['step']

@@ -47,6 +47,9 @@ class Logger:
             if exp['cl'] == 'controldiscrete': 
                 self.config['trainer']['mode'] = 'cl'   
                 self.config['trainer']['cl']['type'] = 'controldiscrete'
+            if exp['cl'] == 'examplebyexample': 
+                self.config['trainer']['mode'] = 'cl'   
+                self.config['trainer']['cl']['type'] = 'examplebyexample'
 
             exp_name = self.config['general']['exp_name']
             for key in list(exp.keys()):

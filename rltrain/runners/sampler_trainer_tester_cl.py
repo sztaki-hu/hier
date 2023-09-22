@@ -9,7 +9,7 @@ from tqdm import tqdm
 from rltrain.envs.builder import make_env
 from rltrain.algos.her import HER
 
-CL_TYPES = ['predefined','selfpaced','selfpaceddual','controldiscrete']
+CL_TYPES = ['predefined','selfpaced','selfpaceddual','controldiscrete', 'examplebyexample']
 
 class SamplerTrainerTester:
 
@@ -154,6 +154,8 @@ class SamplerTrainerTester:
             from rltrain.algos.cl_teachers.SelfPacedDualCL import SelfPacedDualCL as CL
         elif self.cl_mode == 'controldiscrete':
             from rltrain.algos.cl_teachers.ControlDiscreteCL import ControlDiscreteCL as CL
+        elif self.cl_mode == 'examplebyexample':
+            from rltrain.algos.cl_teachers.ExampleByExampleCL import ExampleByExampleCL as CL
         else:
             print(self.cl_mode)
             assert False
@@ -273,7 +275,7 @@ class SamplerTrainerTester:
                 
                 # Print out
                 if (epoch % self.model_save_freq == 0) or best_model_changed:
-                    message = self.print_out_name +  " | t: " + str(t) +  " | epoch: " + str(epoch) + " | eval_mean_reward: " + str(eval_mean_reward) + " | eval_mean_ep_length: " + str(eval_mean_ep_length) + " | eval_success_rate: " + str(eval_success_rate)
+                    message = self.print_out_name +  " | t: " + str(t) +  " | epoch: " + str(epoch) + " | eval_mean_reward: " + str(eval_mean_reward) + " | eval_mean_ep_length: " + str(eval_mean_ep_length) + " | eval_success_rate: " + str(eval_success_rate) + " | cl_ratio: " + str(self.CL.cl_ratio)
                     if best_model_changed: message += " *" 
                     tqdm.write("[info] " + message)     
 
