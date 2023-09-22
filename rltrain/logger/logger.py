@@ -41,6 +41,9 @@ class Logger:
             if exp['cl'] == 'selfpaced': 
                 self.config['trainer']['mode'] = 'cl'   
                 self.config['trainer']['cl']['type'] = 'selfpaced'
+            if exp['cl'] == 'selfpaceddual': 
+                self.config['trainer']['mode'] = 'cl'   
+                self.config['trainer']['cl']['type'] = 'selfpaceddual'
             if exp['cl'] == 'controldiscrete': 
                 self.config['trainer']['mode'] = 'cl'   
                 self.config['trainer']['cl']['type'] = 'controldiscrete'

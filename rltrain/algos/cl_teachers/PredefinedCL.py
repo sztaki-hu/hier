@@ -15,6 +15,7 @@ class PredefinedCL(CL):
         self.cl_pacing_profile = self.config['trainer']['cl']['predefined']['pacing_profile']
         self.cl_pacing_sat = self.config['trainer']['cl']['predefined']['pacing_sat']
         self.cl_ratio = 0
+        self.store_success_rate = False
 
         assert self.cl_pacing_profile in PACING_PROFILES
  

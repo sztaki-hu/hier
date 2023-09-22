@@ -9,7 +9,7 @@ from tqdm import tqdm
 from rltrain.envs.builder import make_env
 from rltrain.algos.her import HER
 
-CL_TYPES = ['predefined','selfpaced','controldiscrete']
+CL_TYPES = ['predefined','selfpaced','selfpaceddual','controldiscrete']
 
 class SamplerTrainerTester:
 
@@ -150,6 +150,8 @@ class SamplerTrainerTester:
             from rltrain.algos.cl_teachers.PredefinedCL import PredefinedCL as CL
         elif self.cl_mode == 'selfpaced':
             from rltrain.algos.cl_teachers.SelfPacedCL import SelfPacedCL as CL
+        elif self.cl_mode == 'selfpaceddual':
+            from rltrain.algos.cl_teachers.SelfPacedDualCL import SelfPacedDualCL as CL
         elif self.cl_mode == 'controldiscrete':
             from rltrain.algos.cl_teachers.ControlDiscreteCL import ControlDiscreteCL as CL
         else:
@@ -214,7 +216,7 @@ class SamplerTrainerTester:
 
                 ep_succes = 1.0 if info['is_success'] == True else 0.0
                 self.ep_success_dq.append(ep_succes)
-                if self.cl_mode == 'selfpaced': self.CL.cl_ep_success_dq.append(ep_succes)
+                if self.CL.store_success_rate: self.CL.cl_ep_success_dq.append(ep_succes)
                 
                 for (o, a, r, o2, d) in episode:
                     replay_buffer.store(o, a, r, o2, d)
@@ -230,7 +232,6 @@ class SamplerTrainerTester:
                 self.ep_rew_dq.append(ep_ret)
                 self.ep_len_dq.append(ep_len)
                 o, ep_ret, ep_len = self.CL.reset_env(t), 0, 0
-
 
             # Update handling
             if t >= self.update_after and t % self.update_every == 0:
