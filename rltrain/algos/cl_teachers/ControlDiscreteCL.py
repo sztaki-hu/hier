@@ -18,6 +18,7 @@ class ControlDiscreteCL(CL):
         self.cl_step = self.config['trainer']['cl']['controldiscrete']['step']
         self.cl_dequeu_maxlen = config['trainer']['cl']['controldiscrete']['window_size']
         self.cl_ratio = 0 
+        self.cl_ratio_discard = 0
         self.cl_ep_success_dq = collections.deque(maxlen=self.cl_dequeu_maxlen)
         self.store_success_rate = True 
 
@@ -31,7 +32,7 @@ class ControlDiscreteCL(CL):
 
         assert self.cl_target_profile in TARGET_PROFILES
    
-    def update_ratio(self,t):  
+    def update_cl(self,t):  
         success_rate = np.mean(self.cl_ep_success_dq) if t > 0 else 0
         if self.get_target(t) > success_rate: 
             self.cl_ratio -= self.cl_step
@@ -51,6 +52,7 @@ class ControlDiscreteCL(CL):
             return min(self.cl_target_sat_value,math.sqrt(t / self.divide_sqrt))
         elif self.cl_target_profile == "quad":
             return min(self.cl_target_sat_value,math.pow((t / self.divide_quad),2))
+        self.cl_ratio_discard = max(0.0, self.cl_ratio - self.cl_ratio_discard_lag)
 
            
     

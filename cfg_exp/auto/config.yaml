@@ -58,6 +58,9 @@ trainer:
   update_every: 50
   cl:
     type: input # predefined / selfpaced / selfpaceddual / controldiscrete / examplebyexample
+    range_growth_mode: input # simple / discard / balancediscard
+    ratio_discard_lag: 0.1 # Only if 'range_growth_mode' is 'discard' or 'balancediscard'
+    balancediscard_ratio: 0.8  # Only if 'range_growth_mode' is 'balancediscard'
     predefined:
       pacing_profile: input  # linear / sqrt / quad
       pacing_sat: 0.8 

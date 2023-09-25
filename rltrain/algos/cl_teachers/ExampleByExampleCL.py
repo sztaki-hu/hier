@@ -21,7 +21,7 @@ class ExampleByExampleCL(CL):
     def update_setup(self,t):
         if t == 0:
             self.cl_ratio = 0.0 
-            goal_low, goal_high, obj_low, obj_high = self.get_range()
+            goal_low, goal_high, obj_low, obj_high = self.get_range(self.cl_ratio)
             self.desired_goal = np.random.uniform(goal_low, goal_high)
             self.object_position =  np.random.uniform(obj_low, obj_high)    
             self.cl_ratio = 1.0 
@@ -29,7 +29,7 @@ class ExampleByExampleCL(CL):
         elif len(self.cl_ep_success_dq) == self.cl_dequeu_maxlen: 
                 success_rate = np.mean(self.cl_ep_success_dq)
                 if success_rate > self.cl_conv_cond:
-                    goal_low, goal_high, obj_low, obj_high = self.get_range()
+                    goal_low, goal_high, obj_low, obj_high = self.get_range(self.cl_ratio)
                     self.desired_goal = np.random.uniform(goal_low, goal_high)
                     self.object_position =  np.random.uniform(obj_low, obj_high)
                     self.cl_ep_success_dq.clear()

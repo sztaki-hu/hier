@@ -32,6 +32,7 @@ class Logger:
             self.config['environment']['task']['name'] = exp['task']
             self.config['agent']['type'] = exp['agent']
             self.config['buffer']['her']['goal_selection_strategy'] = exp['her_strategy']
+            self.config['trainer']['cl']['range_growth_mode'] = exp['cl_range_growth_mode']
 
             if exp['cl'] == 'nocl': self.config['trainer']['mode'] = 'normal'
             if exp['cl'] in ['predefined_linear','predefined_sqrt','predefined_quad']:     
