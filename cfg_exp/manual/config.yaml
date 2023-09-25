@@ -5,9 +5,9 @@ general:
   seed: random
 
 hardware:
-  gpu: [0,1,2] 
-  cpu_min: [1,1,1]
-  cpu_max: [32,32,32]
+  gpu: [0,1,2,3] 
+  cpu_min: [1,1,1,1]
+  cpu_max: [32,32,32,32]
 
 environment:
   name: gympanda
