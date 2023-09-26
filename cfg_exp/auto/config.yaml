@@ -1,5 +1,5 @@
 general:
-  exp_name: 0922_X
+  exp_name: 0926_X
   logdir: logs
   demodir: demos
   seed: random
@@ -40,7 +40,7 @@ agent:
     act_noise: 0.1
 
 buffer:
-  replay_buffer_size: 1e6
+  replay_buffer_size: input
   her:
     goal_selection_strategy: input # in SB3 only the orginal ones are implemented
     n_sampled_goal: 4

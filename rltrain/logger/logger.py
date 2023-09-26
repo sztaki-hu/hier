@@ -33,6 +33,7 @@ class Logger:
             self.config['agent']['type'] = exp['agent']
             self.config['buffer']['her']['goal_selection_strategy'] = exp['her_strategy']
             self.config['trainer']['cl']['range_growth_mode'] = exp['cl_range_growth_mode']
+            self.config['buffer']['replay_buffer_size'] = exp['replay_buffer_size']
 
             if exp['cl'] == 'nocl': self.config['trainer']['mode'] = 'normal'
             if exp['cl'] in ['predefined_linear','predefined_sqrt','predefined_quad']:     
