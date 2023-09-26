@@ -1,5 +1,5 @@
 general:
-  exp_name: 0922_X
+  exp_name: 0926_X
   logdir: logs
   demodir: demos
   seed: random
@@ -44,7 +44,7 @@ buffer:
   her:
     goal_selection_strategy: final # in SB3 only the orginal ones are implemented
     n_sampled_goal: 4
-    env_check: true
+    state_check: true
 
 sampler:
   start_steps: 10000 # in SB3 we cannot set it
@@ -101,6 +101,8 @@ logger:
     stats_window_size: 10
   train:
     stats_window_size: 1
+  state_change:
+    stats_window_size: 100
   model:
     save:
       mode: pi

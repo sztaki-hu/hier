@@ -73,6 +73,15 @@ class GymPanda(Env):
         observation = np.concatenate([robot_obs, task_obs])
         o = np.concatenate((observation, self.env.task.get_goal().astype(np.float32)))
         return o
+    
+    def is_diff_state(self,o_start,o_end,threshold = 0.01):
+
+        obj_start_pos = self.get_achieved_goal_from_obs(o_start)
+        obj_end_pos = self.get_achieved_goal_from_obs(o_end)
+
+        distance =  np.linalg.norm(obj_start_pos - obj_end_pos, axis=-1)
+    
+        return bool(np.array(distance > threshold, dtype=np.float32))
         
     
     # HER ##############################################

@@ -1,4 +1,5 @@
 import time
+import numpy as np
 
 from rltrain.envs.builder import make_task
 
@@ -93,6 +94,8 @@ class Env:
     def get_init_ranges(self):
         return None
     
+    def is_diff_state(self,o1,o2,threshold = 0.01):
+        return None
 
     
   

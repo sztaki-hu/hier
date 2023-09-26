@@ -11,7 +11,7 @@ class HER:
         self.her_goal_selection_strategy = config['buffer']['her']['goal_selection_strategy']
         self.her_active = False if self.her_goal_selection_strategy == "noher" else True
         self.her_n_sampled_goal = config['buffer']['her']['n_sampled_goal']
-        self.her_env_check = config['buffer']['her']['env_check'] if "env_check" in config['buffer']['her'] else False
+        self.her_state_check = config['buffer']['her']['state_check'] if "state_check" in config['buffer']['her'] else False
     
     def get_new_goals(self, episode, ep_t):
         if self.her_goal_selection_strategy == 'final':
@@ -41,7 +41,7 @@ class HER:
                 new_goals.append(self.env.get_achieved_goal_from_obs(o2))
             return new_goals
     
-    def env_check(self,episode):
+    def state_changed_check(self,episode):
         o_start, _, _, _, _ = episode[0]
         obj_start_pos = self.env.get_achieved_goal_from_obs(o_start)
 
@@ -55,10 +55,10 @@ class HER:
     
     def add_virtial_experience(self,episode):
 
-        env_changed = True
-        if self.her_env_check: env_changed = self.env_check(episode)
+        state_changed = True
+        if self.her_state_check: state_changed = self.state_changed_check(episode)
 
-        if env_changed:
+        if state_changed:
             if self.her_goal_selection_strategy == 'future_once':
                 new_goals = self.get_new_goals(episode,0)
                 for (o, a, r, o2, d) in episode:                  

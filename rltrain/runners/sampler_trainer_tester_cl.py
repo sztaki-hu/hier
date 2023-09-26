@@ -51,6 +51,10 @@ class SamplerTrainerTester:
         self.ep_len_dq = collections.deque(maxlen=self.rollout_stats_window_size)
         self.ep_success_dq = collections.deque(maxlen=self.rollout_stats_window_size)
 
+        # State change
+        self.state_change_stats_window_size = int(config['logger']['state_change']['stats_window_size'])
+        self.ep_state_changed_dq = collections.deque(maxlen=self.state_change_stats_window_size)
+
         # Train
         self.train_stats_window_size = int(config['logger']['train']['stats_window_size'])
         self.loss_q_dq = collections.deque(maxlen=self.train_stats_window_size)
@@ -115,8 +119,10 @@ class SamplerTrainerTester:
         ep_rets = []
         ep_lens = []
         success_num = 0.0
+        state_changed_num = 0
         for j in range(self.eval_num_episodes):
             [o, info], d, ep_ret, ep_len = self.env_eval.reset_with_init_check(), False, 0, 0
+            o_init = o.copy()
             while not(d or (ep_len == self.max_ep_len)):
                 # Take deterministic actions at test time 
                 if self.agent_type == 'sac':
@@ -126,16 +132,18 @@ class SamplerTrainerTester:
                 o, r, terminated, truncated, info = self.env_eval.step(a)
                 d = terminated or truncated
                 ep_ret += r
-                ep_len += 1
+                ep_len += 1                   
             ep_rets.append(ep_ret)
             ep_lens.append(ep_len)
             if info['is_success'] == True: success_num += 1
+            if self.env_eval.is_diff_state(o_init,o,threshold = 0.01): state_changed_num += 1   
         
         ep_ret_avg = sum(ep_rets) / len(ep_rets)
         mean_ep_length = sum(ep_lens) / len(ep_lens)
         success_rate = success_num / self.eval_num_episodes
+        state_change_rate = state_changed_num / self.eval_num_episodes
         
-        return ep_ret_avg, mean_ep_length, success_rate
+        return ep_ret_avg, mean_ep_length, success_rate,state_change_rate
             
 
     def start(self,agent,replay_buffer):
@@ -223,8 +231,10 @@ class SamplerTrainerTester:
                 
                 for (o, a, r, o2, d) in episode:
                     replay_buffer.store(o, a, r, o2, d)
-                          
-                if self.her_active and truncated:  self.HER.add_virtial_experience(episode)
+                
+                if self.her_active and truncated: self.HER.add_virtial_experience(episode)
+
+                self.ep_state_changed_dq.append(1.0) if self.env.is_diff_state(episode[0][0],episode[-1][0],threshold = 0.01) else self.ep_state_changed_dq.append(0.0)
                     
                 episode = []
 
@@ -252,11 +262,12 @@ class SamplerTrainerTester:
                 epoch +=1
 
                 # Test the performance of the deterministic version of the agent.
-                eval_mean_reward, eval_mean_ep_length, eval_success_rate = self.test_agent()
+                eval_mean_reward, eval_mean_ep_length, eval_success_rate, eval_state_change_rate = self.test_agent()
 
                 self.logger.tb_writer_add_scalar("eval/mean_reward", eval_mean_reward, t)
                 self.logger.tb_writer_add_scalar("eval/mean_ep_length", eval_mean_ep_length, t)
                 self.logger.tb_writer_add_scalar("eval/success_rate", eval_success_rate, t)
+                self.logger.tb_writer_add_scalar("eval/state_change_rate", eval_state_change_rate, t)
 
                 best_model_changed = False
                 if t > self.model_save_best_start_t:
@@ -284,6 +295,9 @@ class SamplerTrainerTester:
                 self.logger.tb_writer_add_scalar("rollout/ep_rew_mean", np.mean(self.ep_rew_dq), t)
                 self.logger.tb_writer_add_scalar("rollout/ep_len_mean", np.mean(self.ep_len_dq), t)
                 self.logger.tb_writer_add_scalar("rollout/success_rate", np.mean(self.ep_success_dq), t)
+
+                # STATE CHANGED
+                self.logger.tb_writer_add_scalar("rollout/state_changed", np.mean(self.ep_state_changed_dq), t)
 
                 # TRAIN
                 self.logger.tb_writer_add_scalar('train/critic_loss', np.mean(self.loss_q_dq), t)
