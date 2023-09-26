@@ -32,7 +32,8 @@ class GymPanda(Env):
             self.env.task.goal = desired_goal
             self.env.task.sim.set_base_pose("target", desired_goal, np.array([0.0, 0.0, 0.0, 1.0]))
     
-        if self.task_name == 'PandaPush-v3' or self.task_name == 'PandaSlide-v3':
+        
+        if self.task_name in ['PandaPush-v3','PandaPushDense-v3','PandaSlide-v3','PandaSlideDense-v3']:
             if object_position is not None: self.env.task.sim.set_base_pose("object", object_position, np.array([0.0, 0.0, 0.0, 1.0]))
 
 
@@ -87,13 +88,13 @@ class GymPanda(Env):
     # HER ##############################################
     
     def get_achieved_goal_from_obs(self, o):
-        if self.task_name == 'PandaReach-v3':
+        if self.task_name in ['PandaReach-v3','PandaReachDense-v3']:
             o2 = o.copy()
             return o2[:3]
-        elif self.task_name == 'PandaPush-v3':
+        elif self.task_name in ['PandaPush-v3','PandaPushDense-v3']:
             o2 = o.copy()
             return o2[6:9]
-        elif self.task_name == 'PandaSlide-v3':
+        elif self.task_name in ['PandaSlide-v3','PandaSlideDense-v3']:
             o2 = o.copy()
             return o2[6:9]
 
@@ -110,7 +111,7 @@ class GymPanda(Env):
         achieved_goal = self.get_achieved_goal_from_obs(o)
 
         r = self.env.task.compute_reward(achieved_goal, desired_goal, {})
-        d = 1 if r == 0 else 0
+        d = 1.0 if self.env.task.is_success(achieved_goal, desired_goal) else 0.0
         return r,d
     
 

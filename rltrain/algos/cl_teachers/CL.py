@@ -34,7 +34,7 @@ class CL:
         self.goal_range_center = (self.goal_range_low  + self.goal_range_high) / 2.0
         self.obj_range_center = (self.obj_range_low + self.obj_range_high) / 2.0
 
-        if self.task_name == 'PandaPush-v3':
+        if self.task_name in ['PandaPush-v3','PandaPushDense-v3']:
             self.goal_range_center[1] -= 0.05
             self.obj_range_center[1] += 0.05
         self.goal_range_center[2] = self.object_size / 2.0
