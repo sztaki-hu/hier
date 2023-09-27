@@ -42,12 +42,11 @@ class HER:
             return new_goals
     
     def state_changed_check(self,episode):
-        o_start, _, _, _, _ = episode[0]
-        obj_start_pos = self.env.get_achieved_goal_from_obs(o_start)
 
-        o_end, _, _, _, _ = episode[-1]
-        obj_end_pos = self.env.get_achieved_goal_from_obs(o_end)
+        o_start_index = min(len(episode)-1,self.env.get_first_stable_state_index())
 
+        obj_start_pos = self.env.get_achieved_goal_from_obs(episode[o_start_index][0])
+        obj_end_pos = self.env.get_achieved_goal_from_obs(episode[-1][0])
 
         distance =  np.linalg.norm(obj_start_pos - obj_end_pos, axis=-1)
     

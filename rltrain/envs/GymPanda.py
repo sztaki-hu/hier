@@ -83,6 +83,14 @@ class GymPanda(Env):
         distance =  np.linalg.norm(obj_start_pos - obj_end_pos, axis=-1)
     
         return bool(np.array(distance > threshold, dtype=np.float32))
+
+    def get_first_stable_state_index(self):
+        if self.task_name in ['PandaReach-v3','PandaReachDense-v3']:
+            return 0
+        elif self.task_name in ['PandaPush-v3','PandaPushDense-v3']:
+            return 0
+        elif self.task_name in ['PandaSlide-v3','PandaSlideDense-v3']:
+            return 5
         
     
     # HER ##############################################

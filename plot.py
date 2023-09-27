@@ -20,12 +20,12 @@ def create_folder(path):
         print(path + ' folder already exists!')
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--plotid", default="0921_A_push" ,help="Id of plot")
+parser.add_argument("--plotid", default="0926_B_push" ,help="Id of plot")
 parser.add_argument("--outdir", default="plots" ,help="Path of the output folder")
 parser.add_argument("--show", default=False ,help="Id of plot")
 args = parser.parse_args()
 
-plotdata_list = ['eval_success_rate',"rollout_success_rate","cl_ratio"]
+plotdata_list = ['eval_success_rate',"rollout_success_rate","cl_ratio","rollout_state_changed","eval_state_change_rate"]
 
 create_folder(os.path.join(current_dir, args.outdir))
 create_folder(os.path.join(current_dir, args.outdir, args.plotid))
@@ -41,12 +41,36 @@ exps = []
 # exps.append({"exp_name": exp_id+"_Panda"+taskname+"-v3_sac_"+her+"_quad", "seed_num":2, "color": "purple", "plot_name": "quad"})
 
 
+# taskname = 'Push'
+# her = "final"
+# exps.append({"exp_name": "0924_A_Panda"+taskname+"-v3_sac_"+her+"_controldiscrete_const", "seed_num":3, "color": "navy", "plot_name": "controldiscrete_const"})
+# exps.append({"exp_name": "0924_A_Panda"+taskname+"-v3_sac_"+her+"_controldiscrete_linear", "seed_num":3, "color": "blue", "plot_name": "controldiscrete_linear"})
+# exps.append({"exp_name": "0924_A_Panda"+taskname+"-v3_sac_"+her+"_controldiscrete_quad", "seed_num":3, "color": "royalblue", "plot_name": "controldiscrete_quad"})
+# exps.append({"exp_name": "0924_A_Panda"+taskname+"-v3_sac_"+her+"_controldiscrete_sqrt", "seed_num":3, "color": "deepskyblue", "plot_name": "controldiscrete_sqrt"})
+# exps.append({"exp_name": "0924_A_Panda"+taskname+"-v3_sac_"+her+"_predefined_linear", "seed_num":3, "color": "green", "plot_name": "predefined_linear"})
+# exps.append({"exp_name": "0924_A_Panda"+taskname+"-v3_sac_"+her+"_predefined_quad", "seed_num":3, "color": "limegreen", "plot_name": "predefined_quad"})
+# exps.append({"exp_name": "0924_A_Panda"+taskname+"-v3_sac_"+her+"_predefined_sqrt", "seed_num":3, "color": "seagreen", "plot_name": "predefined_sqrt"})
+# exps.append({"exp_name": "0924_A_Panda"+taskname+"-v3_sac_"+her+"_nocl", "seed_num":3, "color": "brown", "plot_name": "nocl"})
+
+# taskname = 'Slide'
+# her = "final"
+# exps.append({"exp_name": "0924_A_Panda"+taskname+"-v3_sac_"+her+"_controldiscrete_const", "seed_num":3, "color": "navy", "plot_name": "controldiscrete_const; buffer=1e6"})
+# exps.append({"exp_name": "0924_A_Panda"+taskname+"-v3_sac_"+her+"_predefined_linear", "seed_num":3, "color": "green", "plot_name": "predefined_linear; buffer=1e6"})
+# exps.append({"exp_name": "0925_A_Panda"+taskname+"-v3_sac_"+her+"_controldiscrete_const", "seed_num":3, "color": "navy", "plot_name": "controldiscrete_const; buffer=1e5"})
+# exps.append({"exp_name": "0925_A_Panda"+taskname+"-v3_sac_"+her+"_predefined_linear", "seed_num":3, "color": "green", "plot_name": "predefined_linear; buffer=1e5"})
+# exps.append({"exp_name": "0925_B_Panda"+taskname+"-v3_sac_"+her+"_controldiscrete_const_balancediscard", "seed_num":3, "color": "purple", "plot_name": "controldiscrete_const_balancediscard; buffer=1e5"})
+# exps.append({"exp_name": "0925_B_Panda"+taskname+"-v3_sac_"+her+"_predefined_linear_balancediscard", "seed_num":3, "color": "orange", "plot_name": "predefined_linear_balancediscard; buffer=1e5"})
+# exps.append({"exp_name": "0925_B_Panda"+taskname+"-v3_sac_"+her+"_controldiscrete_const_discard", "seed_num":3, "color": "violet", "plot_name": "controldiscrete_const_discard; buffer=1e5"})
+# exps.append({"exp_name": "0925_B_Panda"+taskname+"-v3_sac_"+her+"_predefined_linear_discard", "seed_num":3, "color": "yellow", "plot_name": "predefined_linear_discard; buffer=1e5"})
+
 taskname = 'Push'
 her = "final"
-exps.append({"exp_name": "0921_A_Panda"+taskname+"-v3_sac_"+her+"_linear", "seed_num":3, "color": "blue", "plot_name": "linear"})
-exps.append({"exp_name": "0921_A_Panda"+taskname+"-v3_sac_"+her+"_selfpaced", "seed_num":3, "color": "orange", "plot_name": "selfpaced"})
-exps.append({"exp_name": "0921_A_Panda"+taskname+"-v3_sac_"+her+"_controldiscrete", "seed_num":3, "color": "purple", "plot_name": "controldiscrete"})
-
+exps.append({"exp_name": "0926_B_Panda"+taskname+"-v3_sac_"+her+"_controldiscrete_const"+"_simple_1e5", "seed_num":3, "color": "navy", "plot_name": "controldiscrete_const"})
+exps.append({"exp_name": "0926_B_Panda"+taskname+"-v3_sac_"+her+"_predefined_linear"+"_simple_1e5", "seed_num":3, "color": "green", "plot_name": "predefined_linear"})
+exps.append({"exp_name": "0926_B_Panda"+taskname+"-v3_sac_"+her+"_controldiscrete_const_sin"+"_simple_1e5", "seed_num":3, "color": "purple", "plot_name": "controldiscrete_const_sin"})
+exps.append({"exp_name": "0926_B_Panda"+taskname+"Dense-v3_sac_"+her+"_controldiscrete_const"+"_simple_1e5", "seed_num":3, "color": "blue", "plot_name": "controldiscrete_const; dense"})
+exps.append({"exp_name": "0926_B_Panda"+taskname+"Dense-v3_sac_"+her+"_predefined_linear"+"_simple_1e5", "seed_num":3, "color": "orange", "plot_name": "predefined_linear; dense"})
+exps.append({"exp_name": "0926_B_Panda"+taskname+"Dense-v3_sac_"+her+"_controldiscrete_const_sin"+"_simple_1e5", "seed_num":3, "color": "pink", "plot_name": "controldiscrete_const_sin; dense"})
 
 
 exp_test_color_list = []

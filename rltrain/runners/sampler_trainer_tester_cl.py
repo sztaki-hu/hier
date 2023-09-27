@@ -234,7 +234,8 @@ class SamplerTrainerTester:
                 
                 if self.her_active and truncated: self.HER.add_virtial_experience(episode)
 
-                self.ep_state_changed_dq.append(1.0) if self.env.is_diff_state(episode[0][0],episode[-1][0],threshold = 0.01) else self.ep_state_changed_dq.append(0.0)
+                o_start_index = min(len(episode)-1,self.env.get_first_stable_state_index())
+                self.ep_state_changed_dq.append(1.0) if self.env.is_diff_state(episode[o_start_index][0],episode[-1][0],threshold = 0.01) else self.ep_state_changed_dq.append(0.0)
                     
                 episode = []
 
