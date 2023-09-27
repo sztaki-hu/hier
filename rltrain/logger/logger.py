@@ -14,7 +14,7 @@ from torch.utils.tensorboard import SummaryWriter
 
 class Logger:
     # init method or constructor
-    def __init__(self, current_dir, main_args, display_mode = False, exp = None):
+    def __init__(self, current_dir, main_args, display_mode = False, exp = None, exp_in_name = None):
 
         if display_mode: self.seed_id = str(main_args.seedid)
 
@@ -34,6 +34,7 @@ class Logger:
             self.config['buffer']['her']['goal_selection_strategy'] = exp['her_strategy']
             self.config['trainer']['cl']['range_growth_mode'] = exp['cl_range_growth_mode']
             self.config['buffer']['replay_buffer_size'] = exp['replay_buffer_size']
+            self.config['environment']['reward']['reward_bonus'] = exp['reward_bonus']
 
             if exp['cl'] == 'nocl': self.config['trainer']['mode'] = 'normal'
             if exp['cl'] in ['predefined_linear','predefined_sqrt','predefined_quad']:     
@@ -56,9 +57,16 @@ class Logger:
 
             exp_name = self.config['general']['exp_name']
             for key in list(exp.keys()):
-                if key != 'env':
+                print(key)
+                if exp_in_name[key]:
                     exp_name += "_"
-                    exp_name += exp[key]         
+                    if type(exp[key]) == float:
+                        str_num = str(exp[key])
+                        str_num = str_num.replace('.','')
+                        str_num = "rb" + str_num
+                        exp_name += str_num
+                    else:
+                        exp_name += exp[key]         
             self.config['general']['exp_name'] = exp_name
         
         # Lognames
