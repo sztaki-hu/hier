@@ -40,22 +40,12 @@ class HER:
                 _, _, _, o2, _ = episode[ep_t]
                 new_goals.append(self.env.get_achieved_goal_from_obs(o2))
             return new_goals
-    
-    def state_changed_check(self,episode):
 
-        o_start_index = min(len(episode)-1,self.env.get_first_stable_state_index())
-
-        obj_start_pos = self.env.get_achieved_goal_from_obs(episode[o_start_index][0])
-        obj_end_pos = self.env.get_achieved_goal_from_obs(episode[-1][0])
-
-        distance =  np.linalg.norm(obj_start_pos - obj_end_pos, axis=-1)
-    
-        return bool(np.array(distance > 0.01, dtype=np.float32))
     
     def add_virtial_experience(self,episode):
 
         state_changed = True
-        if self.her_state_check: state_changed = self.state_changed_check(episode)
+        if self.her_state_check: state_changed = self.env.is_diff_state(episode[0][0], episode[-1][0])
 
         if state_changed:
             if self.her_goal_selection_strategy == 'future_once':

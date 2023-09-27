@@ -125,6 +125,7 @@ class SamplerTrainerTester:
         for j in range(self.eval_num_episodes):
             [o, info], d, ep_ret, ep_len = self.env_eval.reset_with_init_check(), False, 0, 0
             o_init = o.copy()
+            self.env_eval.ep_o_start = o.copy()
             while not(d or (ep_len == self.max_ep_len)):
                 # Take deterministic actions at test time 
                 if self.agent_type == 'sac':
@@ -180,6 +181,7 @@ class SamplerTrainerTester:
         reset_num = 0
 
         o, ep_ret, ep_len = self.CL.reset_env(0), 0, 0
+        self.env.ep_o_start = o.copy()
 
         best_eval_ep_ret = -float('inf')
 
@@ -238,9 +240,8 @@ class SamplerTrainerTester:
                     virtual_experience_added = self.HER.add_virtial_experience(episode)
                     self.virtual_experience_dq.append(virtual_experience_added)
 
-                o_start_index = min(len(episode)-1,self.env.get_first_stable_state_index())
-                self.ep_state_changed_dq.append(1.0) if self.env.is_diff_state(episode[o_start_index][0],episode[-1][0],threshold = 0.01) else self.ep_state_changed_dq.append(0.0)
-                    
+                self.ep_state_changed_dq.append(1.0) if self.env.is_diff_state(episode[0][0],episode[-1][0],threshold = 0.01) else self.ep_state_changed_dq.append(0.0)
+
                 episode = []
 
                 # print("-------------------")
@@ -250,6 +251,7 @@ class SamplerTrainerTester:
                 self.ep_rew_dq.append(ep_ret)
                 self.ep_len_dq.append(ep_len)
                 o, ep_ret, ep_len = self.CL.reset_env(t), 0, 0
+                self.env.ep_o_start = o.copy()
 
             # Update handling
             if t >= self.update_after and t % self.update_every == 0:

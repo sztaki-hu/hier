@@ -53,6 +53,8 @@ class GymPanda(Env):
 
         o = np.concatenate((o_dict['observation'], o_dict['desired_goal']))
        
+        if self.reward_shaping_type == 'state_change_bonus':
+            if self.is_diff_state(self.ep_o_start,o): r += self.reward_bonus
         r = r * self.reward_scalor
 
         return o, r, terminated, truncated, info 
@@ -75,22 +77,22 @@ class GymPanda(Env):
         o = np.concatenate((observation, self.env.task.get_goal().astype(np.float32)))
         return o
     
-    def is_diff_state(self,o_start,o_end,threshold = 0.01):
+    def is_diff_state(self, o_start, o_end, dim = 2, threshold = 0.01):
 
         obj_start_pos = self.get_achieved_goal_from_obs(o_start)
         obj_end_pos = self.get_achieved_goal_from_obs(o_end)
 
-        distance =  np.linalg.norm(obj_start_pos - obj_end_pos, axis=-1)
+        distance =  np.linalg.norm(obj_start_pos[:dim] - obj_end_pos[:dim], axis=-1)
     
         return bool(np.array(distance > threshold, dtype=np.float32))
 
-    def get_first_stable_state_index(self):
-        if self.task_name in ['PandaReach-v3','PandaReachDense-v3']:
-            return 0
-        elif self.task_name in ['PandaPush-v3','PandaPushDense-v3']:
-            return 0
-        elif self.task_name in ['PandaSlide-v3','PandaSlideDense-v3']:
-            return 5
+    # def get_first_stable_state_index(self):
+    #     if self.task_name in ['PandaReach-v3','PandaReachDense-v3']:
+    #         return 0
+    #     elif self.task_name in ['PandaPush-v3','PandaPushDense-v3']:
+    #         return 0
+    #     elif self.task_name in ['PandaSlide-v3','PandaSlideDense-v3']:
+    #         return 5
         
     
     # HER ##############################################

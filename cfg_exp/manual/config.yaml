@@ -1,5 +1,5 @@
 general:
-  exp_name: 0926_X
+  exp_name: 0927_X
   logdir: logs
   demodir: demos
   seed: random
@@ -10,9 +10,9 @@ hardware:
   cpu_max: [32,32,32,32]
 
 environment:
-  name: gympanda
+  name: gympanda # gympanda
   task: 
-    name: PandaPush-v3
+    name: PandaPush-v3 # PandaReach-v3 / PandaPush-v3 / PandaSlide-v3 (and dense versions)
     params: []
   headless: True
   obs_dim: auto
@@ -21,7 +21,7 @@ environment:
   reward:
     reward_scalor: 1
     reward_bonus: 0.1
-    reward_shaping_type: sparse
+    reward_shaping_type: sparse # sparse / state_change_bonus
 
 agent:
   type: sac

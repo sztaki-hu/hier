@@ -3,6 +3,8 @@ import numpy as np
 
 from rltrain.envs.builder import make_task
 
+REWARD_TYPES = ['sparse','state_change_bonus']
+
 class Env:
 
     def __init__(self,config,config_framework):
@@ -23,6 +25,8 @@ class Env:
         # Create taskenv
         self.env = make_task(config,config_framework)
         self.env._max_episode_steps = int(float(self.max_ep_len))
+
+        assert self.reward_shaping_type in REWARD_TYPES
 
         self.reset() 
     
