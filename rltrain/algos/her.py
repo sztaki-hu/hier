@@ -76,3 +76,5 @@ class HER:
                         r_new, d_new = self.env.her_get_reward_and_done(o2_new) 
                         self.replay_buffer.store(o_new, a, r_new, o2_new, d_new)
                     ep_t += 1
+        
+        return state_changed

@@ -64,6 +64,8 @@ class SamplerTrainerTester:
         self.her_goal_selection_strategy = config['buffer']['her']['goal_selection_strategy']
         self.her_active = False if self.her_goal_selection_strategy == "noher" else True
         self.her_n_sampled_goal = config['buffer']['her']['n_sampled_goal'] 
+        self.virtual_experience_dq = collections.deque(maxlen=self.rollout_stats_window_size)
+        
 
         # CL
         self.cl_mode = config['trainer']['cl']['type']
@@ -232,7 +234,9 @@ class SamplerTrainerTester:
                 for (o, a, r, o2, d) in episode:
                     replay_buffer.store(o, a, r, o2, d)
                 
-                if self.her_active and truncated: self.HER.add_virtial_experience(episode)
+                if self.her_active and truncated: 
+                    virtual_experience_added = self.HER.add_virtial_experience(episode)
+                    self.virtual_experience_dq.append(virtual_experience_added)
 
                 o_start_index = min(len(episode)-1,self.env.get_first_stable_state_index())
                 self.ep_state_changed_dq.append(1.0) if self.env.is_diff_state(episode[o_start_index][0],episode[-1][0],threshold = 0.01) else self.ep_state_changed_dq.append(0.0)
@@ -303,6 +307,10 @@ class SamplerTrainerTester:
                 # TRAIN
                 self.logger.tb_writer_add_scalar('train/critic_loss', np.mean(self.loss_q_dq), t)
                 self.logger.tb_writer_add_scalar("train/actor_loss", np.mean(self.loss_pi_dq), t)
+
+                # HER
+                self.logger.tb_writer_add_scalar("her/virtual_experience_added", np.mean(self.virtual_experience_dq), t)
+                
 
                 self.logger.tb_writer_add_scalar("cl/ratio", self.CL.cl_ratio, t)
 
