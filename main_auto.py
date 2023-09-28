@@ -78,7 +78,7 @@ def main():
                                         exp['replay_buffer_size'] = replay_buffer_size
                                         exp_in_name['replay_buffer_size'] = False
                                         exp['reward_bonus'] = reward_bonus
-                                        exp_in_name['reward_bonus'] = True
+                                        exp_in_name['reward_bonus'] = False
 
                                         # Init logger ###############################################x
                                         logger = Logger(current_dir = current_dir, main_args = args, display_mode = False, exp = exp, exp_in_name = exp_in_name)

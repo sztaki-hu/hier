@@ -49,8 +49,6 @@ class Agent:
 
         self.ac_targ = deepcopy(self.ac)
 
-        self.pivot = -1
-
         # Freeze target networks with respect to optimizers (only update via polyak averaging)
         for p in self.ac_targ.parameters():
             p.requires_grad = False
@@ -69,6 +67,11 @@ class Agent:
         # print("Optimizer's state_dict:")
         # for var_name in self.pi_optimizer.state_dict():
         #     print(var_name, "\t", self.pi_optimizer.state_dict()[var_name])
+
+        if config['general']['init_weights']['bool']:
+            self.init_weights_path = config['general']['init_weights']['path']
+            self.init_weights_mode = config['general']['init_weights']['mode']
+            self.load_weights(self.init_weights_path, mode=self.init_weights_mode, eval=False)
 
         """
         Soft Actor-Critic (SAC)
@@ -186,8 +189,6 @@ class Agent:
         return loss_pi, pi_info
 
     def update(self, data, placeholder):
-
-        self.pivot += 1
 
         # First run one gradient descent step for Q1 and Q2
         self.q_optimizer.zero_grad()

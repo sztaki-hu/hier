@@ -68,6 +68,11 @@ class Agent:
         self.pi_optimizer = Adam(self.ac.pi.parameters(), lr=self.pi_lr)
         self.q_optimizer = Adam(self.q_params, lr=self.q_lr)
 
+        if config['general']['init_weights']['bool']:
+            self.init_weights_path = config['general']['init_weights']['path']
+            self.init_weights_mode = config['general']['init_weights']['mode']
+            self.load_weights(self.init_weights_path, mode=self.init_weights_mode, eval=False)
+
 
     # Set up function for computing TD3 Q-losses
     def compute_loss_q(self, data):

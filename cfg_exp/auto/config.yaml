@@ -1,8 +1,12 @@
 general:
-  exp_name: 0927_X
+  exp_name: 0928_X
   logdir: logs
   demodir: demos
   seed: random
+  init_weights:
+    bool: True
+    mode: all # all / pi
+    path: logs/0928_X_PandaPush-v3_sac_controldiscrete_const/0/model_backup/model_best_model
 
 hardware:
   gpu: [0,1,2,3] 
