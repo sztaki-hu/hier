@@ -21,9 +21,9 @@ import torch
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--config", default="logs/0920_Z/" ,help="Path of the config file")
+    parser.add_argument("--config", default="logs/0928_A_PandaSlide-v3_sac_controldiscrete_const" ,help="Path of the config file")
     parser.add_argument("--hwid", type=int, default=0 ,help="Hardware id")
-    parser.add_argument("--seedid", type=int, default=0 ,help="seedid")
+    parser.add_argument("--seedid", type=int, default=5 ,help="seedid") #1
     # Example: python3 main.py --configfile /cfg/alma.yaml 0
     args = parser.parse_args()
 
@@ -51,7 +51,7 @@ if __name__ == '__main__':
     tester = Eval(agent,logger,config,config_framework)
 
     # Test Agent
-    tester.eval_agent(model_name="best_model",num_display_episode=10, headless=False, time_delay = 0.05)
+    tester.eval_agent(model_name="best_model",num_display_episode=20, headless=False, time_delay = 0.05, current_dir = current_dir)
 
 
     

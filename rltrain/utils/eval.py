@@ -24,10 +24,11 @@ class Eval:
         self.agent_type = config['agent']['type']  
 
     
-    def eval_agent(self,model_name=90,num_display_episode=10, headless=True, time_delay=0.02):
+    def eval_agent(self,model_name=90,num_display_episode=10, headless=True, time_delay=0.02, current_dir = None):
 
         # Load model
         path = self.logger.get_model_save_path(model_name)
+        #path = os.path.join(current_dir,'logs/0928_A_PandaPush-v3_sac_controldiscrete_const/3/model_backup/model_best_model')
 
         self.agent.load_weights(path,mode="pi",eval=True)
 
