@@ -102,7 +102,7 @@ trainer:
 
 eval:
   freq: 1e4
-  num_episodes: 20
+  num_episodes: 100
   
 
 logger:
