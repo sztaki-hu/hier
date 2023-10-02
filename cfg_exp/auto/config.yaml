@@ -1,5 +1,5 @@
 general:
-  exp_name: 0928_X
+  exp_name: 1002_X
   logdir: logs
   demodir: demos
   seed: random
@@ -55,13 +55,12 @@ sampler:
   max_ep_len: auto
 
 trainer:
-  mode: input
   total_timesteps: 5e5
   batch_size: 256
   update_after: 1e2
   update_every: 50
   cl:
-    type: input # predefined / selfpaced / selfpaceddual / controldiscrete / examplebyexample
+    type: input # nocl / predefined / selfpaced / selfpaceddual / controldiscrete / examplebyexample
     range_growth_mode: input # simple / discard / balancediscard
     ratio_discard_lag: 0.1 # Only if 'range_growth_mode' is 'discard' or 'balancediscard'
     balancediscard_ratio: 0.8  # Only if 'range_growth_mode' is 'balancediscard'

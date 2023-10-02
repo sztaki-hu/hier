@@ -48,6 +48,9 @@ class CL:
         self.cl_ratio_discard_lag = self.config['trainer']['cl']['ratio_discard_lag']
 
         assert self.cl_range_growth_mode in RANGE_GROWTH_MODES
+
+        self.cl_ratio = 1
+        self.store_success_rate = False
     
     def reset_env(self,t):
 

@@ -36,23 +36,19 @@ class Logger:
             self.config['buffer']['replay_buffer_size'] = exp['replay_buffer_size']
             self.config['environment']['reward']['reward_bonus'] = exp['reward_bonus']
 
-            if exp['cl'] == 'nocl': self.config['trainer']['mode'] = 'normal'
-            if exp['cl'] in ['predefined_linear','predefined_sqrt','predefined_quad']:     
-                self.config['trainer']['mode'] = 'cl'     
+            if exp['cl'] == 'nocl': 
+                self.config['trainer']['cl']['type'] = 'nocl'
+            elif exp['cl'] in ['predefined_linear','predefined_sqrt','predefined_quad']:       
                 self.config['trainer']['cl']['type'] = 'predefined'         
                 self.config['trainer']['cl']['predefined']['pacing_profile'] = exp['cl'][11:]
-            if exp['cl'] == 'selfpaced': 
-                self.config['trainer']['mode'] = 'cl'   
+            elif exp['cl'] == 'selfpaced': 
                 self.config['trainer']['cl']['type'] = 'selfpaced'
-            if exp['cl'] == 'selfpaceddual': 
-                self.config['trainer']['mode'] = 'cl'   
+            elif exp['cl'] == 'selfpaceddual': 
                 self.config['trainer']['cl']['type'] = 'selfpaceddual'
-            if exp['cl'] in ['controldiscrete_const','controldiscrete_const_sin','controldiscrete_linear','controldiscrete_sqrt','controldiscrete_quad']:     
-                self.config['trainer']['mode'] = 'cl'     
+            elif exp['cl'] in ['controldiscrete_const','controldiscrete_const_sin','controldiscrete_linear','controldiscrete_sqrt','controldiscrete_quad']:     
                 self.config['trainer']['cl']['type'] = 'controldiscrete'         
                 self.config['trainer']['cl']['controldiscrete']['target_profile'] = exp['cl'][16:]
-            if exp['cl'] == 'examplebyexample': 
-                self.config['trainer']['mode'] = 'cl'   
+            elif exp['cl'] == 'examplebyexample': 
                 self.config['trainer']['cl']['type'] = 'examplebyexample'
 
             exp_name = self.config['general']['exp_name']

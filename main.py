@@ -10,6 +10,7 @@ from rltrain.utils.utils import init_cuda, print_torch_info
 from rltrain.logger.logger import Logger
 
 from rltrain.agents.builder import make_agent
+from rltrain.runners.sampler_trainer_tester import SamplerTrainerTester
 
 import datetime
 timestamp = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
@@ -57,13 +58,6 @@ def main():
                 size=int(float(config['buffer']['replay_buffer_size'])))
         
         agent = make_agent(device,config,config_framework)
-
-        if config['trainer']['mode'] == "normal":
-            from rltrain.runners.sampler_trainer_tester import SamplerTrainerTester
-        elif config['trainer']['mode'] == "rs":
-            from rltrain.runners.sampler_trainer_tester_rs import SamplerTrainerTester
-        elif config['trainer']['mode'] == "cl":
-            from rltrain.runners.sampler_trainer_tester_cl import SamplerTrainerTester
         
         samplerTrainerTester = SamplerTrainerTester(device,logger,config,args,config_framework)
 
