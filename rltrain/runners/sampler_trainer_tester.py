@@ -251,7 +251,7 @@ class SamplerTrainerTester:
                     replay_buffer.store(o, a, r, o2, d)
                 
                 # Highlights
-                self.HL.store_episode(episode)
+                if info['is_success']: self.HL.store_episode(episode)
 
                 # HER
                 if self.her_active and truncated: 

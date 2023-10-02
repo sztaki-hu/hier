@@ -52,7 +52,7 @@ buffer:
   highlights:
     bool: True
     batch_ratio: input
-    buffer_size: 1e4
+    buffer_size: 5e4
     mode: fix_th # fix_th
     fix_th:
       threshold: 15
