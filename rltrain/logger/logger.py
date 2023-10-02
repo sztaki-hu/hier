@@ -14,7 +14,7 @@ from torch.utils.tensorboard import SummaryWriter
 
 class Logger:
     # init method or constructor
-    def __init__(self, current_dir, main_args, display_mode = False, exp = None, exp_in_name = None):
+    def __init__(self, current_dir, main_args, display_mode = False, exp = None):
 
         if display_mode: self.seed_id = str(main_args.seedid)
 
@@ -28,41 +28,42 @@ class Logger:
 
         # Replace 'input' values of config file if it is main_auto.py 
         if exp != None:
-            self.config['environment']['name'] = exp['env']
-            self.config['environment']['task']['name'] = exp['task']
-            self.config['agent']['type'] = exp['agent']
-            self.config['buffer']['her']['goal_selection_strategy'] = exp['her_strategy']
-            self.config['trainer']['cl']['range_growth_mode'] = exp['cl_range_growth_mode']
-            self.config['buffer']['replay_buffer_size'] = exp['replay_buffer_size']
-            self.config['environment']['reward']['reward_bonus'] = exp['reward_bonus']
+            self.config['environment']['name'] = exp['main']['env']
+            self.config['environment']['task']['name'] = exp['main']['task']
+            self.config['agent']['type'] = exp['main']['agent']
+            self.config['buffer']['her']['goal_selection_strategy'] = exp['main']['her_strategy']
+            self.config['trainer']['cl']['range_growth_mode'] = exp['main']['cl_range_growth_mode']
+            self.config['buffer']['replay_buffer_size'] = exp['main']['replay_buffer_size']
+            self.config['environment']['reward']['reward_bonus'] = exp['main']['reward_bonus']
+            self.config['buffer']['highlights']['batch_ratio'] = exp['main']['highlights_batch_ratio']
 
-            if exp['cl'] == 'nocl': 
+            if exp['main']['cl'] == 'nocl': 
                 self.config['trainer']['cl']['type'] = 'nocl'
-            elif exp['cl'] in ['predefined_linear','predefined_sqrt','predefined_quad']:       
+            elif exp['main']['cl'] in ['predefined_linear','predefined_sqrt','predefined_quad']:       
                 self.config['trainer']['cl']['type'] = 'predefined'         
-                self.config['trainer']['cl']['predefined']['pacing_profile'] = exp['cl'][11:]
-            elif exp['cl'] == 'selfpaced': 
+                self.config['trainer']['cl']['predefined']['pacing_profile'] = exp['main']['cl'][11:]
+            elif exp['main']['cl'] == 'selfpaced': 
                 self.config['trainer']['cl']['type'] = 'selfpaced'
-            elif exp['cl'] == 'selfpaceddual': 
+            elif exp['main']['cl'] == 'selfpaceddual': 
                 self.config['trainer']['cl']['type'] = 'selfpaceddual'
-            elif exp['cl'] in ['controldiscrete_const','controldiscrete_const_sin','controldiscrete_linear','controldiscrete_sqrt','controldiscrete_quad']:     
+            elif exp['main']['cl'] in ['controldiscrete_const','controldiscrete_const_sin','controldiscrete_linear','controldiscrete_sqrt','controldiscrete_quad']:     
                 self.config['trainer']['cl']['type'] = 'controldiscrete'         
-                self.config['trainer']['cl']['controldiscrete']['target_profile'] = exp['cl'][16:]
-            elif exp['cl'] == 'examplebyexample': 
+                self.config['trainer']['cl']['controldiscrete']['target_profile'] = exp['main']['cl'][16:]
+            elif exp['main']['cl'] == 'examplebyexample': 
                 self.config['trainer']['cl']['type'] = 'examplebyexample'
 
             exp_name = self.config['general']['exp_name']
-            for key in list(exp.keys()):
+            for key in list(exp['main'].keys()):
                 print(key)
-                if exp_in_name[key]:
+                if exp['exp_in_name'][key]:
                     exp_name += "_"
-                    if type(exp[key]) == float:
-                        str_num = str(exp[key])
+                    if type(exp['main'][key]) == float:
+                        str_num = str(exp['main'][key])
                         str_num = str_num.replace('.','')
-                        str_num = "rb" + str_num
+                        str_num = exp['exp_abb'][key] + str_num
                         exp_name += str_num
                     else:
-                        exp_name += exp[key]         
+                        exp_name += exp['main'][key]         
             self.config['general']['exp_name'] = exp_name
         
         # Lognames

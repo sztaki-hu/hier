@@ -51,7 +51,7 @@ buffer:
     state_check: true
   highlights:
     bool: True
-    batch_ratio: 0.1
+    batch_ratio: input
     buffer_size: 1e4
     mode: fix_th # fix_th
     fix_th:
