@@ -4,7 +4,7 @@ general:
   demodir: demos
   seed: random
   init_weights:
-    bool: True
+    bool: False
     path: logs/0928_X_PandaPush-v3_sac_controldiscrete_const/0/model_backup/model_best_model
 
 hardware:
@@ -48,6 +48,13 @@ buffer:
     goal_selection_strategy: final # in SB3 only the orginal ones are implemented
     n_sampled_goal: 4
     state_check: true
+  highlights:
+    bool: True
+    batch_ratio: 0.1
+    buffer_size: 1e4
+    mode: fix_th # fix_th
+    fix_th:
+      threshold: 15
 
 sampler:
   start_steps: 10000 # in SB3 we cannot set it

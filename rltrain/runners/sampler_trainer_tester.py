@@ -8,6 +8,7 @@ from tqdm import tqdm
 
 from rltrain.envs.builder import make_env
 from rltrain.algos.her import HER
+from rltrain.algos.highlights.Highlights import Highlights
 
 CL_TYPES = ['nocl','predefined','selfpaced','selfpaceddual','controldiscrete', 'examplebyexample']
 
@@ -68,12 +69,17 @@ class SamplerTrainerTester:
         
         # CL
         self.cl_mode = config['trainer']['cl']['type']
+        print(self.cl_mode)
+        assert self.cl_mode in CL_TYPES
+
+        # Highlights
+        self.highlights_batch_size =  int(config['trainer']['batch_size'] * config['buffer']['highlights']['batch_ratio'])
+        self.replay_batch_size =  int(config['trainer']['batch_size'] - self.highlights_batch_size)
        
         # Log
         self.print_out_name = '_'.join((self.logger.exp_name,str(self.logger.seed_id)))  
 
-        print(self.cl_mode)
-        assert self.cl_mode in CL_TYPES
+        
 
         """
         Trainer
@@ -151,12 +157,16 @@ class SamplerTrainerTester:
     def start(self,agent,replay_buffer):
 
     
+        # Env train
         self.env = make_env(self.config, self.config_framework)
 
+        # Env eval
         self.env_eval = make_env(self.config, self.config_framework)
 
+        # HER
         self.HER = HER(self.config,self.env,replay_buffer)
 
+        # CL
         if self.cl_mode == 'nocl':
             from rltrain.algos.cl_teachers.NoCL import NoCL as CL
         elif self.cl_mode == 'predefined':
@@ -175,23 +185,26 @@ class SamplerTrainerTester:
             return -1   
 
         self.CL = CL(self.config, self.env, replay_buffer)
-        
+
+        # Highlights
+        self.HL = Highlights(self.config)
+
+        # Agent        
         self.agent = agent
 
-        init_invalid_num = 0
-        reset_num = 0
-
+        # Env reset
         o, ep_ret, ep_len = self.CL.reset_env(0), 0, 0
         self.env.ep_o_start = o.copy()
 
+        # Init variables
         best_eval_ep_ret = -float('inf')
-
-        print("Training starts: " + self.print_out_name)
         episode = []
         epoch = 0
         time0 = time.time()
         time_start = time0
         t0 = 0
+
+        print("Training starts: " + self.print_out_name)
 
         # Main loop: collect experience in env and update/log each epoch
         for t in tqdm(range(self.total_timesteps), desc ="Training: ", leave=True):
@@ -237,6 +250,10 @@ class SamplerTrainerTester:
                 for (o, a, r, o2, d) in episode:
                     replay_buffer.store(o, a, r, o2, d)
                 
+                # Highlights
+                self.HL.store_episode(episode)
+
+                # HER
                 if self.her_active and truncated: 
                     virtual_experience_added = self.HER.add_virtial_experience(episode)
                     self.virtual_experience_dq.append(virtual_experience_added)
@@ -244,21 +261,27 @@ class SamplerTrainerTester:
                 self.ep_state_changed_dq.append(1.0) if self.env.is_diff_state(episode[0][0],episode[-1][0],threshold = 0.01) else self.ep_state_changed_dq.append(0.0)
 
                 episode = []
-
-                # print("-------------------")
-                # print(replay_buffer.get_all())
-                # assert False
-
                 self.ep_rew_dq.append(ep_ret)
                 self.ep_len_dq.append(ep_len)
+
+                # CL 
                 o, ep_ret, ep_len = self.CL.reset_env(t), 0, 0
                 self.env.ep_o_start = o.copy()
 
             # Update handling
             if t >= self.update_after and t % self.update_every == 0:
                 if replay_buffer.size > 0:
-                    for j in range(self.update_every):
-                        batch = replay_buffer.sample_batch(self.batch_size)
+                    for j in range(self.update_every):           
+                        if self.HL.highlights_active and self.HL.highlights_replay_buffer.size > 0:
+                            replay_batch = replay_buffer.sample_batch(self.replay_batch_size)
+                            highlights_batch = self.HL.highlights_replay_buffer.sample_batch(self.highlights_batch_size)
+                            batch = dict(obs=torch.cat((replay_batch['obs'], highlights_batch['obs']), 0),
+                                            obs2=torch.cat((replay_batch['obs2'], highlights_batch['obs2']), 0),
+                                            act=torch.cat((replay_batch['act'], highlights_batch['act']), 0),
+                                            rew=torch.cat((replay_batch['rew'], highlights_batch['rew']), 0),
+                                            done=torch.cat((replay_batch['done'], highlights_batch['done']), 0))
+                        else:     
+                            batch = replay_buffer.sample_batch(self.batch_size)  
                         #print(batch)
                         ret_loss_q, ret_loss_pi = self.agent.update(batch, j)
                         self.loss_q_dq.append(ret_loss_q)
@@ -314,13 +337,12 @@ class SamplerTrainerTester:
                 # HER
                 self.logger.tb_writer_add_scalar("her/virtual_experience_added", np.mean(self.virtual_experience_dq), t)
                 
-
+                # CL
                 self.logger.tb_writer_add_scalar("cl/ratio", self.CL.cl_ratio, t)
-
                 if self.cl_mode == 'examplebyexample': self.logger.tb_writer_add_scalar("cl/same_setup_num", np.mean(self.CL.same_setup_num_dq), t)
 
-                # invalid_init_ratio = float(init_invalid_num) / reset_num 
-                # self.logger.tb_writer_add_scalar("train/invalid_init_ratio", invalid_init_ratio, t)
+                # HL
+                self.logger.tb_writer_add_scalar("hl/highlights_buffer_size", self.HL.highlights_replay_buffer.size, t)
 
                 # TIME
                 time1 = time.time()
