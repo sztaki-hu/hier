@@ -42,7 +42,12 @@ class Eval:
         heatmap_res = 10
         heatmap_obj = np.zeros((heatmap_res, heatmap_res),dtype=int)
         heatmap_goal = np.zeros((heatmap_res, heatmap_res),dtype=int)  
+        bar_dist = np.zeros((heatmap_res),dtype=int) 
+        bar_angle = np.zeros((heatmap_res),dtype=int)
+
         init_ranges = self.env.get_init_ranges()
+
+        print(init_ranges)
 
         obj_range_low = init_ranges['obj_range_low']
         obj_range_high = init_ranges['obj_range_high']
@@ -54,12 +59,15 @@ class Eval:
         
         bins_goal = []
         for i in range(2): bins_goal.append(np.linspace(goal_range_low[i], goal_range_high[i], num=heatmap_res+1, retstep=False))
+        
+        bins_dist = np.linspace(0.0, 0.8, num=heatmap_res+1, retstep=False)
+        bins_angle = np.linspace(-90.0, 90.0, num=heatmap_res+1, retstep=False)
 
         # Start Eval
         ep_rets = []
         ep_lens = []
         success_num = 0.0
-        for j in range(num_display_episode):
+        for j in tqdm(range(num_display_episode), desc ="Eval: ", leave=True):
             [o, info], d, ep_ret, ep_len = self.env.reset_with_init_check(), False, 0, 0
             self.env.ep_o_start = o.copy()
             
@@ -70,6 +78,16 @@ class Eval:
             obj_dig_y = min(max(np.digitize(obj_init[1], bins_obj[1]) - 1,0),heatmap_res - 1)
             goal_dig_x = min(max(np.digitize(goal[0], bins_goal[0]) - 1,0),heatmap_res - 1)
             goal_dig_y = min(max(np.digitize(goal[1], bins_goal[1]) - 1,0),heatmap_res - 1)
+
+            distance =  np.linalg.norm(obj_init[:2] - goal[:2], axis=-1)
+            distance_dig = min(max(np.digitize(distance, bins_dist) - 1,0),heatmap_res - 1)
+
+            delta_y = goal[1] - obj_init[1]
+            delta_x = goal[0] - obj_init[0]
+            angle = math.degrees(math.atan(delta_y/delta_x))
+            #tqdm.write(str(angle))
+            angle_dig = min(max(np.digitize(angle, bins_angle) - 1,0),heatmap_res - 1)
+
             
             while not(d or (ep_len == self.max_ep_len)):
                 # Take deterministic actions at test time 
@@ -88,13 +106,16 @@ class Eval:
                 success_num += 1
                 heatmap_obj[obj_dig_x][obj_dig_y] += 1
                 heatmap_goal[goal_dig_x][goal_dig_y] += 1
+                bar_dist[distance_dig] += 1
+                bar_angle[angle_dig] += 1
             else:
                 heatmap_obj[obj_dig_x][obj_dig_y] -= 1
                 heatmap_goal[goal_dig_x][goal_dig_y] -= 1
+                bar_dist[distance_dig] -= 1
+                bar_angle[angle_dig] -= 1
 
-
-            print("--------------------------------")
-            print("ep_ret: " + str(ep_ret) + " | ep_len : " + str(ep_len) + " | Success: " + str(info['is_success']) + " | Goal: " + str(goal))
+            # print("--------------------------------")
+            # print("ep_ret: " + str(ep_ret) + " | ep_len : " + str(ep_len) + " | Success: " + str(info['is_success']) + " | Goal: " + str(goal))
         
 
         # Shutdown environment
@@ -114,7 +135,7 @@ class Eval:
         im = ax.imshow(heatmap_obj, cmap=plt.cm.RdBu)
         plt.title("Init object position")
 
-        # Loop over data dimensions and create text annotations.
+        # HEATMAP OBJ
         for i in range(heatmap_res):
             for j in range(heatmap_res):
                 text = ax.text(j, i, heatmap_obj[i, j],
@@ -127,7 +148,7 @@ class Eval:
         im = ax.imshow(heatmap_goal, cmap=plt.cm.RdBu)
         plt.title("Goal position")
 
-        # Loop over data dimensions and create text annotations.
+        # HEATMAP GOAL
         for i in range(heatmap_res):
             for j in range(heatmap_res):
                 text = ax.text(j, i, heatmap_goal[i, j],
@@ -135,6 +156,30 @@ class Eval:
 
         plt.savefig(os.path.join(current_dir,outdir,"goal_heatmap.png"))
         plt.show()
+
+        # BAR DISTANCE
+        barlist = plt.bar(bins_dist[:-1], bar_dist, color ='lightskyblue', width = (0.8/(heatmap_res*1.2)))
+
+        for i in range(bar_dist.shape[0]):
+            if bar_dist[i] < 0: barlist[i].set_color('lightcoral')
+        
+        plt.title("Obj - goal distance")
+        plt.savefig(os.path.join(current_dir,outdir,"dist_bar.png"))
+        plt.show()
+        plt.clf()
+        plt.cla()
+
+        # BAR ANGLE
+        barlist = plt.bar(bins_angle[:-1], bar_angle, color ='lightskyblue', width = (180.0/(heatmap_res*1.2)))
+
+        for i in range(bar_angle.shape[0]):
+            if bar_angle[i] < 0: barlist[i].set_color('lightcoral')
+        
+        plt.title("Obj - goal angle")
+        plt.savefig(os.path.join(current_dir,outdir,"angle_bar.png"))
+        plt.show()
+        plt.clf()
+        plt.cla()
     
     def save_video(self,model_name="best_model",num_display_episode=10, current_dir = None, outdir = "vids", save_name = "video.png"):
 
@@ -155,7 +200,7 @@ class Eval:
         images = []
         success_list = []
 
-        for _ in tqdm(range(num_display_episode), desc ="Training: ", leave=True):
+        for _ in tqdm(range(num_display_episode), desc ="Create video: ", leave=True):
 
             [o_dict, info], d, ep_ret, ep_len = env.reset(), False, 0, 0
             o = np.concatenate((o_dict['observation'], o_dict['desired_goal']))

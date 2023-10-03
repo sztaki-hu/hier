@@ -61,7 +61,7 @@ if __name__ == '__main__':
     tester = Eval(agent,logger,config,config_framework)
 
     # Test Agent
-    tester.eval_agent(model_name="best_model",num_display_episode=1000, headless=True, time_delay = 0.05, current_dir = current_dir, outdir = "eval")
+    tester.eval_agent(model_name="best_model",num_display_episode=500, headless=True, time_delay = 0.05, current_dir = current_dir, outdir = "eval")
 
 
     
