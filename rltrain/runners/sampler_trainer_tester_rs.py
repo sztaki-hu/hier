@@ -265,7 +265,7 @@ class SamplerTrainerTester:
                 
                 # Save model 
                 if best_model_changed:
-                    model_path = self.logger.get_model_save_path(epoch,best_model=True)
+                    model_path = self.logger.get_model_save_path("best_model")
                     self.agent.save_model(model_path,self.model_save_mode)
                     
                 

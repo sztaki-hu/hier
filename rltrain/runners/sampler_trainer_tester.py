@@ -308,7 +308,7 @@ class SamplerTrainerTester:
                 
                 # Save model 
                 if best_model_changed:
-                    model_path = self.logger.get_model_save_path(epoch,best_model=True)
+                    model_path = self.logger.get_model_save_path("best_model")
                     self.agent.save_model(model_path,"all")
                     
                 
@@ -318,7 +318,7 @@ class SamplerTrainerTester:
                 
                 # Print out
                 if (epoch % self.model_save_freq == 0) or best_model_changed:
-                    message = self.print_out_name +  " | t: " + str(t) +  " | epoch: " + str(epoch) + " | eval_mean_reward: " + str(eval_mean_reward) + " | eval_mean_ep_length: " + str(eval_mean_ep_length) + " | eval_success_rate: " + str(eval_success_rate) + " | cl_ratio: " + str(self.CL.cl_ratio)
+                    message = self.print_out_name +  " | t: " + str(t) +  " | epoch: " + str(epoch) + " | eval_mean_reward: " + str(eval_mean_reward) + " | eval_mean_ep_length: " + str(eval_mean_ep_length) + " | eval_success_rate: " + str(eval_success_rate) + " | cl_ratio: " + str(round(self.CL.cl_ratio, 2))
                     if best_model_changed: message += " *" 
                     tqdm.write("[info] " + message)     
 

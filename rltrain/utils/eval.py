@@ -29,6 +29,7 @@ class Eval:
         # Load model
         path = self.logger.get_model_save_path(model_name)
         #path = os.path.join(current_dir,'logs/0928_A_PandaPush-v3_sac_controldiscrete_const/3/model_backup/model_best_model')
+        print(path)
 
         self.agent.load_weights(path,mode="pi",eval=True)
 
