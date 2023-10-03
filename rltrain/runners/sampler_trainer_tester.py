@@ -197,7 +197,7 @@ class SamplerTrainerTester:
         self.env.ep_o_start = o.copy()
 
         # Init variables
-        best_eval_ep_ret = -float('inf')
+        best_eval_success_rate = -float('inf')
         episode = []
         epoch = 0
         time0 = time.time()
@@ -302,8 +302,8 @@ class SamplerTrainerTester:
 
                 best_model_changed = False
                 if t > self.model_save_best_start_t:
-                    if eval_mean_reward > best_eval_ep_ret:
-                        best_eval_ep_ret = eval_mean_reward
+                    if eval_success_rate > best_eval_success_rate:
+                        best_eval_success_rate = eval_success_rate
                         best_model_changed = True
                 
                 # Save model 
