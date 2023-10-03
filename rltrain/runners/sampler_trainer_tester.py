@@ -10,7 +10,7 @@ from rltrain.envs.builder import make_env
 from rltrain.algos.her import HER
 from rltrain.algos.highlights.Highlights import Highlights
 
-CL_TYPES = ['nocl','predefined','selfpaced','selfpaceddual','controldiscrete', 'examplebyexample']
+CL_TYPES = ['nocl','predefined','predefinedtwostage','selfpaced','selfpaceddual','controldiscrete', 'examplebyexample']
 
 class SamplerTrainerTester:
 
@@ -171,6 +171,8 @@ class SamplerTrainerTester:
             from rltrain.algos.cl_teachers.NoCL import NoCL as CL
         elif self.cl_mode == 'predefined':
             from rltrain.algos.cl_teachers.PredefinedCL import PredefinedCL as CL
+        elif self.cl_mode == 'predefinedtwostage':
+            from rltrain.algos.cl_teachers.PredefinedTwostageCL import PredefinedTwostageCL as CL
         elif self.cl_mode == 'selfpaced':
             from rltrain.algos.cl_teachers.SelfPacedCL import SelfPacedCL as CL
         elif self.cl_mode == 'selfpaceddual':
@@ -183,6 +185,8 @@ class SamplerTrainerTester:
             print(self.cl_mode)
             assert False
             return -1   
+
+        
 
         self.CL = CL(self.config, self.env, replay_buffer)
 

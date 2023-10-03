@@ -1,5 +1,5 @@
 general:
-  exp_name: 1002_X
+  exp_name: 1003_X
   logdir: logs
   demodir: demos
   seed: random
@@ -66,13 +66,20 @@ trainer:
   update_after: 1e2
   update_every: 50
   cl:
-    type: examplebyexample # nocl / predefined / selfpaced / selfpaceddual / controldiscrete / examplebyexample
+    type: examplebyexample # nocl / predefined / predefinedtwostage / selfpaced / selfpaceddual / controldiscrete / examplebyexample
     range_growth_mode: simple # simple / discard / balancediscard
     ratio_discard_lag: 0.1 # Only if 'range_growth_mode' is 'discard' or 'balancediscard'
     balancediscard_ratio: 0.8  # Only if 'range_growth_mode' is 'balancediscard'
     predefined:
       pacing_profile: linear  # linear / sqrt / quad
       pacing_sat: 0.8 
+    predefinedtwostage:
+      pacing_profile: linear  # linear / sqrt / quad
+      change_stage: 0.5
+      stage1: # goal
+        pacing_sat: 0.4
+      stage2: # obj
+        pacing_sat: 0.9
     selfpaced:
       conv_cond: 0.8
       window_size: 20

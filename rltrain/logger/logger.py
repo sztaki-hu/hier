@@ -42,6 +42,9 @@ class Logger:
             elif exp['main']['cl'] in ['predefined_linear','predefined_sqrt','predefined_quad']:       
                 self.config['trainer']['cl']['type'] = 'predefined'         
                 self.config['trainer']['cl']['predefined']['pacing_profile'] = exp['main']['cl'][11:]
+            elif exp['main']['cl'] in ['predefinedtwostage_linear','predefinedtwostage_sqrt','predefinedtwostage_quad']:       
+                self.config['trainer']['cl']['type'] = 'predefinedtwostage'         
+                self.config['trainer']['cl']['predefinedtwostage']['pacing_profile'] = exp['main']['cl'][19:]
             elif exp['main']['cl'] == 'selfpaced': 
                 self.config['trainer']['cl']['type'] = 'selfpaced'
             elif exp['main']['cl'] == 'selfpaceddual': 
