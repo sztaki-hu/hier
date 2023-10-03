@@ -4,6 +4,7 @@ import numpy as np
 import torch
 import time
 import gymnasium as gym
+import matplotlib.pyplot as plt
 
 from tqdm import tqdm
 from numpngw import write_apng  # pip install numpngw
@@ -24,7 +25,7 @@ class Eval:
         self.agent_type = config['agent']['type']  
 
     
-    def eval_agent(self,model_name=90,num_display_episode=10, headless=True, time_delay=0.02, current_dir = None):
+    def eval_agent(self,model_name=90,num_display_episode=10, headless=True, time_delay=0.02, current_dir = None, outdir = "eval"):
 
         # Load model
         path = self.logger.get_model_save_path(model_name)
@@ -37,6 +38,23 @@ class Eval:
         self.config['environment']['headless'] = headless
         self.env = make_env(self.config,self.config_framework)
 
+        # Init heatmap
+        heatmap_res = 10
+        heatmap_obj = np.zeros((heatmap_res, heatmap_res),dtype=int)
+        heatmap_goal = np.zeros((heatmap_res, heatmap_res),dtype=int)  
+        init_ranges = self.env.get_init_ranges()
+
+        obj_range_low = init_ranges['obj_range_low']
+        obj_range_high = init_ranges['obj_range_high']
+        goal_range_low = init_ranges['goal_range_low']
+        goal_range_high = init_ranges['goal_range_high']
+        
+        bins_obj = []
+        for i in range(2): bins_obj.append(np.linspace(obj_range_low[i], obj_range_high[i], num=heatmap_res+1, retstep=False))
+        
+        bins_goal = []
+        for i in range(2): bins_goal.append(np.linspace(goal_range_low[i], goal_range_high[i], num=heatmap_res+1, retstep=False))
+
         # Start Eval
         ep_rets = []
         ep_lens = []
@@ -44,7 +62,15 @@ class Eval:
         for j in range(num_display_episode):
             [o, info], d, ep_ret, ep_len = self.env.reset_with_init_check(), False, 0, 0
             self.env.ep_o_start = o.copy()
+            
+            obj_init = self.env.get_achieved_goal_from_obs(o)
             goal = self.env.get_desired_goal_from_obs(o)
+
+            obj_dig_x = min(max(np.digitize(obj_init[0], bins_obj[0]) - 1,0),heatmap_res - 1)
+            obj_dig_y = min(max(np.digitize(obj_init[1], bins_obj[1]) - 1,0),heatmap_res - 1)
+            goal_dig_x = min(max(np.digitize(goal[0], bins_goal[0]) - 1,0),heatmap_res - 1)
+            goal_dig_y = min(max(np.digitize(goal[1], bins_goal[1]) - 1,0),heatmap_res - 1)
+            
             while not(d or (ep_len == self.max_ep_len)):
                 # Take deterministic actions at test time 
                 if self.agent_type == 'sac':
@@ -58,10 +84,22 @@ class Eval:
                 if headless == False: time.sleep(time_delay)
             ep_rets.append(ep_ret)
             ep_lens.append(ep_len)
-            if info['is_success'] == True: success_num += 1
+            if info['is_success'] == True: 
+                success_num += 1
+                heatmap_obj[obj_dig_x][obj_dig_y] += 1
+                heatmap_goal[goal_dig_x][goal_dig_y] += 1
+            else:
+                heatmap_obj[obj_dig_x][obj_dig_y] -= 1
+                heatmap_goal[goal_dig_x][goal_dig_y] -= 1
+
+
             print("--------------------------------")
             print("ep_ret: " + str(ep_ret) + " | ep_len : " + str(ep_len) + " | Success: " + str(info['is_success']) + " | Goal: " + str(goal))
         
+
+        # Shutdown environment
+        self.env.shuttdown() 
+
         ep_ret_avg = sum(ep_rets) / len(ep_rets)
         mean_ep_length = sum(ep_lens) / len(ep_lens)
         success_rate = success_num / num_display_episode
@@ -72,8 +110,31 @@ class Eval:
         print("success_rate: " + str(success_rate))
         print("#########################################")
         
-        # Shutdown environment
-        self.env.shuttdown() 
+        fig, ax = plt.subplots()
+        im = ax.imshow(heatmap_obj, cmap=plt.cm.RdBu)
+        plt.title("Init object position")
+
+        # Loop over data dimensions and create text annotations.
+        for i in range(heatmap_res):
+            for j in range(heatmap_res):
+                text = ax.text(j, i, heatmap_obj[i, j],
+                            ha="center", va="center", color="white")
+
+        plt.savefig(os.path.join(current_dir,outdir,"init_obj_heatmap.png"))
+        plt.show()
+
+        fig, ax = plt.subplots()
+        im = ax.imshow(heatmap_goal, cmap=plt.cm.RdBu)
+        plt.title("Goal position")
+
+        # Loop over data dimensions and create text annotations.
+        for i in range(heatmap_res):
+            for j in range(heatmap_res):
+                text = ax.text(j, i, heatmap_goal[i, j],
+                            ha="center", va="center", color="white")
+
+        plt.savefig(os.path.join(current_dir,outdir,"goal_heatmap.png"))
+        plt.show()
     
     def save_video(self,model_name="best_model",num_display_episode=10, current_dir = None, outdir = "vids", save_name = "video.png"):
 

@@ -18,17 +18,27 @@ timestamp = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
 
 import torch
 
+def create_folder(path):
+    if not os.path.exists(path):
+        os.makedirs(path)
+        print(path + ' folder is created!')
+    else:
+        print(path + ' folder already exists!')
+
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--config", default="logs/0928_A_PandaSlide-v3_sac_controldiscrete_const" ,help="Path of the config file")
+    parser.add_argument("--config", default="logs/1002_C_PandaSlide-v3_sac_predefined_linear_rb025_hbr05" ,help="Path of the config file")
     parser.add_argument("--hwid", type=int, default=0 ,help="Hardware id")
-    parser.add_argument("--seedid", type=int, default=5 ,help="seedid") #1
+    parser.add_argument("--seedid", type=int, default=2 ,help="seedid")
+    parser.add_argument("--outdir", default="eval" ,help="Path of the output folder")
     # Example: python3 main.py --configfile /cfg/alma.yaml 0
     args = parser.parse_args()
 
     # Init logger 
     current_dir = dirname(abspath(__file__))
+
+    create_folder(os.path.join(current_dir, args.outdir))
 
     logger = Logger(current_dir = current_dir, main_args = args, display_mode = True)
     config = logger.get_config()
@@ -51,7 +61,7 @@ if __name__ == '__main__':
     tester = Eval(agent,logger,config,config_framework)
 
     # Test Agent
-    tester.eval_agent(model_name="best_model",num_display_episode=20, headless=False, time_delay = 0.05, current_dir = current_dir)
+    tester.eval_agent(model_name="best_model",num_display_episode=1000, headless=True, time_delay = 0.05, current_dir = current_dir, outdir = "eval")
 
 
     
