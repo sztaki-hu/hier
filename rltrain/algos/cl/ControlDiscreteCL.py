@@ -2,7 +2,7 @@ import numpy as np
 import collections
 import math
 
-from rltrain.algos.cl_teachers.CL import CL
+from rltrain.algos.cl.CL import CL
 
 TARGET_PROFILES = ['const','const_sin','linear','sqrt','quad']
 
@@ -19,8 +19,8 @@ class ControlDiscreteCL(CL):
         self.cl_dequeu_maxlen = config['trainer']['cl']['controldiscrete']['window_size']
         self.cl_ratio = 0 
         self.cl_ratio_discard = 0
-        self.cl_ep_success_dq = collections.deque(maxlen=self.cl_dequeu_maxlen)
-        self.store_success_rate = True 
+        self.cl_rollout_success_dq = collections.deque(maxlen=self.cl_dequeu_maxlen)
+        self.store_rollout_success_rate = True
 
         self.divide_linear = float(self.total_timesteps * self.cl_target_sat / self.cl_target_sat_value)
         self.divide_sqrt = float(self.total_timesteps * self.cl_target_sat / math.pow(self.cl_target_sat_value,2))
@@ -33,7 +33,7 @@ class ControlDiscreteCL(CL):
         assert self.cl_target_profile in TARGET_PROFILES
    
     def update_cl(self,t):  
-        success_rate = np.mean(self.cl_ep_success_dq) if t > 0 else 0
+        success_rate = np.mean(self.cl_rollout_success_dq) if t > 0 else 0
         if self.get_target(t) > success_rate: 
             self.cl_ratio -= self.cl_step
             self.cl_ratio = max(self.cl_ratio,0.0)

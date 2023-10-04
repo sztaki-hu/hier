@@ -7,10 +7,9 @@ import random
 from tqdm import tqdm
 
 from rltrain.envs.builder import make_env
+from rltrain.algos.cl.builder import make_cl
 from rltrain.algos.her import HER
 from rltrain.algos.highlights.Highlights import Highlights
-
-CL_TYPES = ['nocl','predefined','predefinedtwostage','selfpaced','selfpaceddual','controldiscrete', 'examplebyexample']
 
 class SamplerTrainerTester:
 
@@ -69,8 +68,6 @@ class SamplerTrainerTester:
         
         # CL
         self.cl_mode = config['trainer']['cl']['type']
-        print(self.cl_mode)
-        assert self.cl_mode in CL_TYPES
 
         # Highlights
         self.highlights_batch_size =  int(config['trainer']['batch_size'] * config['buffer']['highlights']['batch_ratio'])
@@ -167,28 +164,7 @@ class SamplerTrainerTester:
         self.HER = HER(self.config,self.env,replay_buffer)
 
         # CL
-        if self.cl_mode == 'nocl':
-            from rltrain.algos.cl_teachers.NoCL import NoCL as CL
-        elif self.cl_mode == 'predefined':
-            from rltrain.algos.cl_teachers.PredefinedCL import PredefinedCL as CL
-        elif self.cl_mode == 'predefinedtwostage':
-            from rltrain.algos.cl_teachers.PredefinedTwostageCL import PredefinedTwostageCL as CL
-        elif self.cl_mode == 'selfpaced':
-            from rltrain.algos.cl_teachers.SelfPacedCL import SelfPacedCL as CL
-        elif self.cl_mode == 'selfpaceddual':
-            from rltrain.algos.cl_teachers.SelfPacedDualCL import SelfPacedDualCL as CL
-        elif self.cl_mode == 'controldiscrete':
-            from rltrain.algos.cl_teachers.ControlDiscreteCL import ControlDiscreteCL as CL
-        elif self.cl_mode == 'examplebyexample':
-            from rltrain.algos.cl_teachers.ExampleByExampleCL import ExampleByExampleCL as CL
-        else:
-            print(self.cl_mode)
-            assert False
-            return -1   
-
-        
-
-        self.CL = CL(self.config, self.env, replay_buffer)
+        self.CL = make_cl(self.config, self.env, replay_buffer)
 
         # Highlights
         self.HL = Highlights(self.config)
@@ -249,7 +225,7 @@ class SamplerTrainerTester:
 
                 ep_succes = 1.0 if info['is_success'] == True else 0.0
                 self.ep_success_dq.append(ep_succes)
-                if self.CL.store_success_rate: self.CL.cl_ep_success_dq.append(ep_succes)
+                if self.CL.store_rollout_success_rate: self.CL.cl_rollout_success_dq.append(ep_succes)
                 
                 for (o, a, r, o2, d) in episode:
                     replay_buffer.store(o, a, r, o2, d)
@@ -298,6 +274,8 @@ class SamplerTrainerTester:
 
                 # Test the performance of the deterministic version of the agent.
                 eval_mean_reward, eval_mean_ep_length, eval_success_rate, eval_state_change_rate = self.test_agent()
+
+                if self.CL.store_eval_success_rate: self.CL.cl_eval_success_dq.append(eval_success_rate)
 
                 self.logger.tb_writer_add_scalar("eval/mean_reward", eval_mean_reward, t)
                 self.logger.tb_writer_add_scalar("eval/mean_ep_length", eval_mean_ep_length, t)

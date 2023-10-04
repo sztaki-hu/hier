@@ -45,6 +45,9 @@ class Logger:
             elif exp['main']['cl'] in ['predefinedtwostage_linear','predefinedtwostage_sqrt','predefinedtwostage_quad']:       
                 self.config['trainer']['cl']['type'] = 'predefinedtwostage'         
                 self.config['trainer']['cl']['predefinedtwostage']['pacing_profile'] = exp['main']['cl'][19:]
+            elif exp['main']['cl'] in ['predefinedthreestage_linear','predefinedthreestage_sqrt','predefinedthreestage_quad']:       
+                self.config['trainer']['cl']['type'] = 'predefinedthreestage'         
+                self.config['trainer']['cl']['predefinedthreestage']['pacing_profile'] = exp['main']['cl'][21:]
             elif exp['main']['cl'] == 'selfpaced': 
                 self.config['trainer']['cl']['type'] = 'selfpaced'
             elif exp['main']['cl'] == 'selfpaceddual': 
@@ -52,6 +55,8 @@ class Logger:
             elif exp['main']['cl'] in ['controldiscrete_const','controldiscrete_const_sin','controldiscrete_linear','controldiscrete_sqrt','controldiscrete_quad']:     
                 self.config['trainer']['cl']['type'] = 'controldiscrete'         
                 self.config['trainer']['cl']['controldiscrete']['target_profile'] = exp['main']['cl'][16:]
+            elif exp['main']['cl'] == 'controldiscreteadaptive': 
+                self.config['trainer']['cl']['type'] = 'controldiscreteadaptive'
             elif exp['main']['cl'] == 'examplebyexample': 
                 self.config['trainer']['cl']['type'] = 'examplebyexample'
 

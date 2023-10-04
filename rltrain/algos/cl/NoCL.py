@@ -2,7 +2,7 @@ import numpy as np
 import random
 import math
 
-from rltrain.algos.cl_teachers.CL import CL
+from rltrain.algos.cl.CL import CL
 
 
 class NoCL(CL):

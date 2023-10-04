@@ -1,7 +1,7 @@
 import numpy as np
 import collections
 
-from rltrain.algos.cl_teachers.CL import CL
+from rltrain.algos.cl.CL import CL
 
 class SelfPacedCL(CL):
 
@@ -14,16 +14,16 @@ class SelfPacedCL(CL):
         self.cl_dequeu_maxlen = config['trainer']['cl']['selfpaced']['window_size']
         self.cl_ratio = 0 
         self.cl_ratio_discard = 0
-        self.cl_ep_success_dq = collections.deque(maxlen=self.cl_dequeu_maxlen)
-        self.store_success_rate = True
+        self.cl_rollout_success_dq = collections.deque(maxlen=self.cl_dequeu_maxlen)
+        self.store_rollout_success_rate = True
    
     def update_cl(self,t):
-        if len(self.cl_ep_success_dq) == self.cl_dequeu_maxlen:          
-            success_rate = np.mean(self.cl_ep_success_dq)
+        if len(self.cl_rollout_success_dq) == self.cl_dequeu_maxlen:          
+            success_rate = np.mean(self.cl_rollout_success_dq)
             if success_rate > self.cl_conv_cond:
                 self.cl_ratio += self.cl_step
                 self.cl_ratio = min(self.cl_ratio,1.0)
-                self.cl_ep_success_dq.clear()
+                self.cl_rollout_success_dq.clear()
                 self.cl_ratio_discard = max(0.0, self.cl_ratio - self.cl_ratio_discard_lag)
     
 

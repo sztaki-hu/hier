@@ -1,5 +1,5 @@
 general:
-  exp_name: 1003_X
+  exp_name: 1004_X
   logdir: logs
   demodir: demos
   seed: random
@@ -24,8 +24,8 @@ environment:
   camera: False
   reward:
     reward_scalor: 1
-    reward_bonus: 0.1
-    reward_shaping_type: sparse # sparse / state_change_bonus
+    reward_bonus: input
+    reward_shaping_type: state_change_bonus # sparse / state_change_bonus
 
 agent:
   type: input
@@ -62,12 +62,12 @@ sampler:
   max_ep_len: auto
 
 trainer:
-  total_timesteps: 5e5
+  total_timesteps: 1e6
   batch_size: 256
   update_after: 1e2
   update_every: 50
   cl:
-    type: input # nocl / predefined / predefinedtwostage / selfpaced / selfpaceddual / controldiscrete / examplebyexample
+    type: input # nocl / predefined / predefinedtwostage / predefinedthreestage / selfpaced / selfpaceddual / controldiscrete / controldiscreteadaptive/ examplebyexample
     range_growth_mode: input # simple / discard / balancediscard
     ratio_discard_lag: 0.1 # Only if 'range_growth_mode' is 'discard' or 'balancediscard'
     balancediscard_ratio: 0.8  # Only if 'range_growth_mode' is 'balancediscard'
@@ -81,6 +81,16 @@ trainer:
         pacing_sat: 0.4
       stage2: # obj
         pacing_sat: 0.9
+    predefinedthreestage:
+      pacing_profile: linear  # linear / sqrt / quad
+      change_stage12: 0.3
+      change_stage23: 0.6
+      stage1: # goal
+        pacing_sat: 0.2
+      stage2: # obj
+        pacing_sat: 0.5
+      stage3: # obj-goal
+        pacing_sat: 0.8
     selfpaced:
       conv_cond: 0.8
       window_size: 20
@@ -99,6 +109,11 @@ trainer:
       const_sin:
         amp: 0.05
         freq_divide: 50
+    controldiscreteadaptive:
+      target_plus_eval: 20
+      window_size_eval: 3
+      window_size_rollout: 20
+      step: 0.01
     examplebyexample:
       conv_cond: 0.8
       window_size: 20

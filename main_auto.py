@@ -86,7 +86,7 @@ def main():
                                             exp['exp_in_name']['reward_bonus'] = False
                                             exp['exp_abb']['reward_bonus'] = 'rb'
                                             exp['main']['highlights_batch_ratio'] = highlights_batch_ratio
-                                            exp['exp_in_name']['highlights_batch_ratio'] = True
+                                            exp['exp_in_name']['highlights_batch_ratio'] = False
                                             exp['exp_abb']['highlights_batch_ratio'] = 'hbr'
 
                                             # Init logger ###############################################x

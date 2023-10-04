@@ -2,51 +2,102 @@ process_0:
   agent: ['sac']
   her_strategy: ['final']
   cl: 
-    type: ['controldiscrete_const']
-    range_growth_mode: ['simple']
-  hl:
-    batch_ratio: [0.1]
-  task:
-    gympanda: ['PandaSlide-v3']
-  replay_buffer_size: [1e6]
-  reward_bonus: [0.0]
-
-process_1:
-  agent: ['sac']
-  her_strategy: ['final']
-  cl: 
-    type: ['controldiscrete_const']
-    range_growth_mode: ['simple']
-  hl:
-    batch_ratio: [0.25]
-  task:
-    gympanda: ['PandaSlide-v3']
-  replay_buffer_size: [1e6]
-  reward_bonus: [0.0]
-
-process_2:
-  agent: ['sac']
-  her_strategy: ['final']
-  cl: 
-    type: ['controldiscrete_const']
+    type: ['nocl','predefined_linear']
     range_growth_mode: ['simple']
   hl:
     batch_ratio: [0.5]
   task:
     gympanda: ['PandaSlide-v3']
   replay_buffer_size: [1e6]
-  reward_bonus: [0.0]
+  reward_bonus: [0.1]
+
+process_1:
+  agent: ['sac']
+  her_strategy: ['final']
+  cl: 
+    type: ['predefinedtwostage_linear','predefinedthreestage_linear']
+    range_growth_mode: ['simple']
+  hl:
+    batch_ratio: [0.5]
+  task:
+    gympanda: ['PandaSlide-v3']
+  replay_buffer_size: [1e6]
+  reward_bonus: [0.1]
+
+process_2:
+  agent: ['sac']
+  her_strategy: ['final']
+  cl: 
+    type: ['controldiscrete_linear','controldiscreteadaptive']
+    range_growth_mode: ['simple']
+  hl:
+    batch_ratio: [0.5]
+  task:
+    gympanda: ['PandaSlide-v3']
+  replay_buffer_size: [1e6]
+  reward_bonus: [0.1]
 
 process_3:
   agent: ['sac']
   her_strategy: ['final']
   cl: 
-    type: ['controldiscrete_const']
+    type: ['predefinedtwostage_quad','predefinedthreestage_quad']
     range_growth_mode: ['simple']
   hl:
-    batch_ratio: [0.75]
+    batch_ratio: [0.5]
   task:
     gympanda: ['PandaSlide-v3']
   replay_buffer_size: [1e6]
-  reward_bonus: [0.0]
-    
+  reward_bonus: [0.1]
+
+process_4:
+  agent: ['sac']
+  her_strategy: ['final']
+  cl: 
+    type: ['nocl','predefined_linear']
+    range_growth_mode: ['simple']
+  hl:
+    batch_ratio: [0.5]
+  task:
+    gympanda: ['PandaPush-v3']
+  replay_buffer_size: [1e6]
+  reward_bonus: [0.1]
+
+process_5:
+  agent: ['sac']
+  her_strategy: ['final']
+  cl: 
+    type: ['predefinedtwostage_linear','predefinedthreestage_linear']
+    range_growth_mode: ['simple']
+  hl:
+    batch_ratio: [0.5]
+  task:
+    gympanda: ['PandaPush-v3']
+  replay_buffer_size: [1e6]
+  reward_bonus: [0.1]
+
+process_6:
+  agent: ['sac']
+  her_strategy: ['final']
+  cl: 
+    type: ['controldiscrete_linear','controldiscreteadaptive']
+    range_growth_mode: ['simple']
+  hl:
+    batch_ratio: [0.5]
+  task:
+    gympanda: ['PandaPush-v3']
+  replay_buffer_size: [1e6]
+  reward_bonus: [0.1]
+
+process_7:
+  agent: ['sac']
+  her_strategy: ['final']
+  cl: 
+    type: ['predefinedtwostage_quad','predefinedthreestage_quad']
+    range_growth_mode: ['simple']
+  hl:
+    batch_ratio: [0.5]
+  task:
+    gympanda: ['PandaPush-v3']
+  replay_buffer_size: [1e6]
+  reward_bonus: [0.1]

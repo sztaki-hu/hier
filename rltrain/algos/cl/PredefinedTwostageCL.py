@@ -2,7 +2,7 @@ import numpy as np
 import random
 import math
 
-from rltrain.algos.cl_teachers.CL import CL
+from rltrain.algos.cl.CL import CL
 
 PACING_PROFILES = ['linear','sqrt','quad']
 
@@ -18,7 +18,7 @@ class PredefinedTwostageCL(CL):
         self.cl_stage2_pacing_sat = self.config['trainer']['cl']['predefinedtwostage']['stage2']['pacing_sat']
         self.cl_ratio = 0
         self.cl_ratio_discard = 0
-        self.store_success_rate = False
+        self.store_rollout_success_rate = False
 
         self.cl_obj_ratio = 0
         self.cl_goal_ratio = 0
