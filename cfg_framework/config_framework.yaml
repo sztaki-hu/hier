@@ -5,7 +5,9 @@ task_list:
              'Hopper-v4','HalfCheetah-v4','Walker2d-v4','Ant-v4','Reacher-v4','Humanoid-v4','HumanoidStandup-v4','Pusher-v4']
   gympanda: ['PandaReach-v3','PandaReachDense-v3','PandaReachJoints-v3','PandaReachJointsDense-v3',
                 'PandaPush-v3','PandaPushDense-v3','PandaPushJoints-v3','PandaPushJointsDense-v3',
-                'PandaSlide-v3','PandaSlideDense-v3','PandaSlideJoints-v3','PandaSlideJointsDense-v3']
+                'PandaSlide-v3','PandaSlideDense-v3','PandaSlideJoints-v3','PandaSlideJointsDense-v3',
+                'PandaPickAndPlace-v3','PandaPickAndPlaceDense-v3','PandaPickAndPlaceJoint-v3','PandaPickAndPlaceJointDense-v3',
+                'PandaStack-v3','PandaStackDense-v3','PandaStackJoint-v3','PandaStackJointDense-v3']
   gym_mod: ['Hopper-v4']
   rlbench_joint: ['reach_target_no_distractors']
 

@@ -15,14 +15,10 @@ class ControlDiscreteAdaptiveCL(CL):
         self.cl_eval_dq_maxlen = self.config['trainer']['cl']['controldiscreteadaptive']['window_size_eval']
         self.cl_rollout_dq_maxlen = self.config['trainer']['cl']['controldiscreteadaptive']['window_size_rollout']
        
-        self.cl_ratio = 0 
-        self.cl_ratio_discard = 0
-
-        self.cl_eval_success_dq = collections.deque(maxlen=self.cl_eval_dq_maxlen)
-        self.cl_rollout_success_dq = collections.deque(maxlen=self.cl_rollout_dq_maxlen)
-
         self.store_rollout_success_rate = True
         self.store_eval_success_rate = True
+        self.cl_eval_success_dq = collections.deque(maxlen=self.cl_eval_dq_maxlen)
+        self.cl_rollout_success_dq = collections.deque(maxlen=self.cl_rollout_dq_maxlen) 
    
     def update_cl(self,t):  
         success_rate = np.mean(self.cl_rollout_success_dq) if len(self.cl_rollout_success_dq) > 0  else 0
@@ -31,9 +27,11 @@ class ControlDiscreteAdaptiveCL(CL):
         if target > success_rate: 
             self.cl_ratio -= self.cl_step
             self.cl_ratio = max(self.cl_ratio,0.0)
+            self.copy_cl_ratios_to_obj_and_goal()
         else:
             self.cl_ratio += self.cl_step
             self.cl_ratio = min(self.cl_ratio,1.0)
+            self.copy_cl_ratios_to_obj_and_goal()
     
 
 

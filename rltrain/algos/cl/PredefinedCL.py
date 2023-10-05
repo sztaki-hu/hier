@@ -14,9 +14,6 @@ class PredefinedCL(CL):
         # PREDEFINED
         self.cl_pacing_profile = self.config['trainer']['cl']['predefined']['pacing_profile']
         self.cl_pacing_sat = self.config['trainer']['cl']['predefined']['pacing_sat']
-        self.cl_ratio = 0
-        self.cl_ratio_discard = 0
-        self.store_rollout_success_rate = False
 
         assert self.cl_pacing_profile in PACING_PROFILES
  
@@ -28,6 +25,8 @@ class PredefinedCL(CL):
         elif self.cl_pacing_profile == "quad":
             self.cl_ratio = min(1.0,math.pow(t / float(self.total_timesteps * self.cl_pacing_sat),2))
         self.cl_ratio_discard = max(0.0, self.cl_ratio - self.cl_ratio_discard_lag)
+
+        self.copy_cl_ratios_to_obj_and_goal()
     
 
 

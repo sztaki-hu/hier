@@ -16,14 +16,6 @@ class PredefinedTwostageCL(CL):
         self.cl_change_stage = self.config['trainer']['cl']['predefinedtwostage']['change_stage']
         self.cl_stage1_pacing_sat = self.config['trainer']['cl']['predefinedtwostage']['stage1']['pacing_sat']
         self.cl_stage2_pacing_sat = self.config['trainer']['cl']['predefinedtwostage']['stage2']['pacing_sat']
-        self.cl_ratio = 0
-        self.cl_ratio_discard = 0
-        self.store_rollout_success_rate = False
-
-        self.cl_obj_ratio = 0
-        self.cl_goal_ratio = 0
-        self.cl_obj_ratio_discard  = 0
-        self.cl_goal_ratio_discard  = 0
 
         print(self.cl_pacing_profile )
         assert self.cl_pacing_profile in PACING_PROFILES
@@ -56,12 +48,7 @@ class PredefinedTwostageCL(CL):
             self.cl_obj_ratio_discard = max(0.0, self.cl_obj_ratio - self.cl_ratio_discard_lag)
             self.cl_ratio = self.cl_obj_ratio
     
-    def get_range(self,placeholder):        
-        goal_low = self.goal_range_center - self.goal_range_half * self.cl_goal_ratio
-        goal_high = self.goal_range_center + self.goal_range_half * self.cl_goal_ratio
-        obj_low = self.obj_range_center - self.obj_range_half * self.cl_obj_ratio
-        obj_high = self.obj_range_center + self.obj_range_half * self.cl_obj_ratio
-        return goal_low, goal_high, obj_low, obj_high
+ 
 
 
 

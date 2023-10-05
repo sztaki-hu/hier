@@ -26,7 +26,5 @@ def make_cl(config, env, replay_buffer):
         from rltrain.algos.cl.ControlDiscreteCL import ControlDiscreteCL as CL
     elif cl_mode == 'controldiscreteadaptive':
         from rltrain.algos.cl.ControlDiscreteAdaptiveCL import ControlDiscreteAdaptiveCL as CL
-    elif cl_mode == 'examplebyexample':
-        from rltrain.algos.cl.ExampleByExampleCL import ExampleByExampleCL as CL
 
     return CL(config, env, replay_buffer)

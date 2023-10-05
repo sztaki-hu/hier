@@ -168,6 +168,62 @@ gympanda:
     act_dim: 7
     boundary_min: [-1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0]
     boundary_max: [+1.0, +1.0, +1.0, +1.0, +1.0, +1.0, +1.0]
+  
+  PandaPickAndPlace-v3:
+    max_ep_len: 50
+    obs_dim: 22
+    act_dim: 4
+    boundary_min: [-1.0, -1.0, -1.0, -1.0]
+    boundary_max: [+1.0, +1.0, +1.0, +1.0]
+  
+  PandaPickAndPlaceDense-v3:
+    max_ep_len: 50
+    obs_dim: 22
+    act_dim: 4
+    boundary_min: [-1.0, -1.0, -1.0, -1.0]
+    boundary_max: [+1.0, +1.0, +1.0, +1.0]
+  
+  PandaPickAndPlaceJoint-v3:
+    max_ep_len: 50
+    obs_dim: 22
+    act_dim: 4
+    boundary_min: [-1.0, -1.0, -1.0, -1.0]
+    boundary_max: [+1.0, +1.0, +1.0, +1.0]
+  
+  PandaPickAndPlaceJointDense-v3:
+    max_ep_len: 50
+    obs_dim: 22
+    act_dim: 4
+    boundary_min: [-1.0, -1.0, -1.0, -1.0]
+    boundary_max: [+1.0, +1.0, +1.0, +1.0]
+  
+  PandaStack-v3:
+    max_ep_len: 50
+    obs_dim: 37
+    act_dim: 4
+    boundary_min: [-1.0, -1.0, -1.0, -1.0]
+    boundary_max: [+1.0, +1.0, +1.0, +1.0]
+  
+  PandaStackDense-v3:
+    max_ep_len: 50
+    obs_dim: 37
+    act_dim: 4
+    boundary_min: [-1.0, -1.0, -1.0, -1.0]
+    boundary_max: [+1.0, +1.0, +1.0, +1.0]
+  
+  PandaStackJoint-v3:
+    max_ep_len: 50
+    obs_dim: 37
+    act_dim: 4
+    boundary_min: [-1.0, -1.0, -1.0, -1.0]
+    boundary_max: [+1.0, +1.0, +1.0, +1.0]
+  
+  PandaStackJointDense-v3:
+    max_ep_len: 50
+    obs_dim: 37
+    act_dim: 4
+    boundary_min: [-1.0, -1.0, -1.0, -1.0]
+    boundary_max: [+1.0, +1.0, +1.0, +1.0]
 
 gym_mod:
   Hopper-v4:

@@ -17,10 +17,9 @@ class ControlDiscreteCL(CL):
         self.cl_target_sat_value = self.config['trainer']['cl']['controldiscrete']['target_sat_value']
         self.cl_step = self.config['trainer']['cl']['controldiscrete']['step']
         self.cl_dequeu_maxlen = config['trainer']['cl']['controldiscrete']['window_size']
-        self.cl_ratio = 0 
-        self.cl_ratio_discard = 0
-        self.cl_rollout_success_dq = collections.deque(maxlen=self.cl_dequeu_maxlen)
+      
         self.store_rollout_success_rate = True
+        self.cl_rollout_success_dq = collections.deque(maxlen=self.cl_dequeu_maxlen)
 
         self.divide_linear = float(self.total_timesteps * self.cl_target_sat / self.cl_target_sat_value)
         self.divide_sqrt = float(self.total_timesteps * self.cl_target_sat / math.pow(self.cl_target_sat_value,2))
@@ -37,9 +36,12 @@ class ControlDiscreteCL(CL):
         if self.get_target(t) > success_rate: 
             self.cl_ratio -= self.cl_step
             self.cl_ratio = max(self.cl_ratio,0.0)
+            self.copy_cl_ratios_to_obj_and_goal()
         else:
             self.cl_ratio += self.cl_step
             self.cl_ratio = min(self.cl_ratio,1.0)
+            self.copy_cl_ratios_to_obj_and_goal()
+            
     
     def get_target(self,t):
         if self.cl_target_profile == "const":
@@ -53,6 +55,7 @@ class ControlDiscreteCL(CL):
         elif self.cl_target_profile == "quad":
             return min(self.cl_target_sat_value,math.pow((t / self.divide_quad),2))
         self.cl_ratio_discard = max(0.0, self.cl_ratio - self.cl_ratio_discard_lag)
+
 
            
     
