@@ -1,103 +1,178 @@
+
+# ['PandaReach-v3','PandaPush-v3','PandaSlide-v3','PandaPickAndPlace-v3','PandaStack-v3']
+
 process_0:
-  agent: ['sac']
-  her_strategy: ['final']
+  agent: 
+    type: ['sac']
+  environment:
+    reward:
+      reward_bonus: [0.1]
+  buffer:
+    replay_buffer_size: [1e6]
+    her:
+      goal_selection_strategy: ['final']
+    highlights:
+      batch_ratio: [0.5]
+  trainer:
+    total_timesteps: [5e4]
+  # structure is differend than in the config file ##################################################x
+  task: 
+    gympanda: ['PandaReach-v3']
   cl: 
-    type: ['nocl','predefined_linear']
+    type: ['controldiscreteadaptive','controldiscrete_const','predefined_linear','nocl','predefinedtwostage_linear','predefinedthreestage_linear']
     range_growth_mode: ['simple']
-  hl:
-    batch_ratio: [0.5]
-  task:
-    gympanda: ['PandaSlide-v3']
-  replay_buffer_size: [1e6]
-  reward_bonus: [0.1]
+  ####################################################################################################
 
 process_1:
-  agent: ['sac']
-  her_strategy: ['final']
+  agent: 
+    type: ['sac']
+  environment:
+    reward:
+      reward_bonus: [0.1]
+  buffer:
+    replay_buffer_size: [1e6]
+    her:
+      goal_selection_strategy: ['final']
+    highlights:
+      batch_ratio: [0.5]
+  trainer:
+    total_timesteps: [5e5]
+  # structure is differend than in the config file ##################################################x
+  task: 
+    gympanda: ['PandaPush-v3']
   cl: 
-    type: ['predefinedtwostage_linear','predefinedthreestage_linear']
+    type: ['controldiscreteadaptive','controldiscrete_const','predefined_linear','nocl']
     range_growth_mode: ['simple']
-  hl:
-    batch_ratio: [0.5]
-  task:
-    gympanda: ['PandaSlide-v3']
-  replay_buffer_size: [1e6]
-  reward_bonus: [0.1]
+  ####################################################################################################
 
 process_2:
-  agent: ['sac']
-  her_strategy: ['final']
+  agent: 
+    type: ['sac']
+  environment:
+    reward:
+      reward_bonus: [0.1]
+  buffer:
+    replay_buffer_size: [1e6]
+    her:
+      goal_selection_strategy: ['final']
+    highlights:
+      batch_ratio: [0.5]
+  trainer:
+    total_timesteps: [5e5]
+  # structure is differend than in the config file ##################################################x
+  task: 
+    gympanda: ['PandaSlide-v3',]
   cl: 
-    type: ['controldiscrete_linear','controldiscreteadaptive']
+    type: ['controldiscreteadaptive','controldiscrete_const','predefined_linear','nocl']
     range_growth_mode: ['simple']
-  hl:
-    batch_ratio: [0.5]
-  task:
-    gympanda: ['PandaSlide-v3']
-  replay_buffer_size: [1e6]
-  reward_bonus: [0.1]
+  ####################################################################################################
 
 process_3:
-  agent: ['sac']
-  her_strategy: ['final']
+  agent: 
+    type: ['sac']
+  environment:
+    reward:
+      reward_bonus: [0.1]
+  buffer:
+    replay_buffer_size: [1e6]
+    her:
+      goal_selection_strategy: ['final']
+    highlights:
+      batch_ratio: [0.5]
+  trainer:
+    total_timesteps: [5e5]
+  # structure is differend than in the config file ##################################################x
+  task: 
+    gympanda: [PandaPickAndPlace-v3]
   cl: 
-    type: ['predefinedtwostage_quad','predefinedthreestage_quad']
+    type: ['controldiscreteadaptive','controldiscrete_const','predefined_linear','nocl']
     range_growth_mode: ['simple']
-  hl:
-    batch_ratio: [0.5]
-  task:
-    gympanda: ['PandaSlide-v3']
-  replay_buffer_size: [1e6]
-  reward_bonus: [0.1]
+  ####################################################################################################
 
 process_4:
-  agent: ['sac']
-  her_strategy: ['final']
+  agent: 
+    type: ['sac']
+  environment:
+    reward:
+      reward_bonus: [0.1]
+  buffer:
+    replay_buffer_size: [1e6]
+    her:
+      goal_selection_strategy: ['final']
+    highlights:
+      batch_ratio: [0.5]
+  trainer:
+    total_timesteps: [5e5]
+  # structure is differend than in the config file ##################################################x
+  task: 
+    gympanda: ['PandaStack-v3']
   cl: 
-    type: ['nocl','predefined_linear']
+    type: ['controldiscreteadaptive','controldiscrete_const','predefined_linear','nocl']
     range_growth_mode: ['simple']
-  hl:
-    batch_ratio: [0.5]
-  task:
-    gympanda: ['PandaPush-v3']
-  replay_buffer_size: [1e6]
-  reward_bonus: [0.1]
+  ####################################################################################################
 
 process_5:
-  agent: ['sac']
-  her_strategy: ['final']
+  agent: 
+    type: ['sac']
+  environment:
+    reward:
+      reward_bonus: [0.1]
+  buffer:
+    replay_buffer_size: [1e6]
+    her:
+      goal_selection_strategy: ['final']
+    highlights:
+      batch_ratio: [0.5]
+  trainer:
+    total_timesteps: [5e5]
+  # structure is differend than in the config file ##################################################x
+  task: 
+    gympanda: ['PandaPush-v3','PandaSlide-v3']
   cl: 
     type: ['predefinedtwostage_linear','predefinedthreestage_linear']
     range_growth_mode: ['simple']
-  hl:
-    batch_ratio: [0.5]
-  task:
-    gympanda: ['PandaPush-v3']
-  replay_buffer_size: [1e6]
-  reward_bonus: [0.1]
+  ####################################################################################################
 
 process_6:
-  agent: ['sac']
-  her_strategy: ['final']
+  agent: 
+    type: ['sac']
+  environment:
+    reward:
+      reward_bonus: [0.1]
+  buffer:
+    replay_buffer_size: [1e6]
+    her:
+      goal_selection_strategy: ['final']
+    highlights:
+      batch_ratio: [0.5]
+  trainer:
+    total_timesteps: [5e5]
+  # structure is differend than in the config file ##################################################x
+  task: 
+    gympanda: ['PandaPickAndPlace-v3','PandaStack-v3']
   cl: 
-    type: ['controldiscrete_linear','controldiscreteadaptive']
+    type: ['predefinedtwostage_linear','predefinedthreestage_linear']
     range_growth_mode: ['simple']
-  hl:
-    batch_ratio: [0.5]
-  task:
-    gympanda: ['PandaPush-v3']
-  replay_buffer_size: [1e6]
-  reward_bonus: [0.1]
+  ####################################################################################################
 
 process_7:
-  agent: ['sac']
-  her_strategy: ['final']
+  agent: 
+    type: ['sac']
+  environment:
+    reward:
+      reward_bonus: [0.1]
+  buffer:
+    replay_buffer_size: [1e6]
+    her:
+      goal_selection_strategy: ['final']
+    highlights:
+      batch_ratio: [0.5]
+  trainer:
+    total_timesteps: [5e5]
+  # structure is differend than in the config file ##################################################x
+  task: 
+    gympanda: ['PandaPush-v3','PandaSlide-v3']
   cl: 
-    type: ['predefinedtwostage_quad','predefinedthreestage_quad']
+    type: ['selfpaced','selfpaced_dual']
     range_growth_mode: ['simple']
-  hl:
-    batch_ratio: [0.5]
-  task:
-    gympanda: ['PandaPush-v3']
-  replay_buffer_size: [1e6]
-  reward_bonus: [0.1]
+  ####################################################################################################

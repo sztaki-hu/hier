@@ -28,14 +28,15 @@ class Logger:
 
         # Replace 'input' values of config file if it is main_auto.py 
         if exp != None:
+            self.config['agent']['type'] = exp['main']['agent']
             self.config['environment']['name'] = exp['main']['env']
             self.config['environment']['task']['name'] = exp['main']['task']
-            self.config['agent']['type'] = exp['main']['agent']
-            self.config['buffer']['her']['goal_selection_strategy'] = exp['main']['her_strategy']
-            self.config['trainer']['cl']['range_growth_mode'] = exp['main']['cl_range_growth_mode']
-            self.config['buffer']['replay_buffer_size'] = exp['main']['replay_buffer_size']
             self.config['environment']['reward']['reward_bonus'] = exp['main']['reward_bonus']
+            self.config['buffer']['her']['goal_selection_strategy'] = exp['main']['her_strategy']
+            self.config['buffer']['replay_buffer_size'] = exp['main']['replay_buffer_size']
             self.config['buffer']['highlights']['batch_ratio'] = exp['main']['highlights_batch_ratio']
+            self.config['trainer']['cl']['range_growth_mode'] = exp['main']['cl_range_growth_mode']
+            self.config['trainer']['total_timesteps'] = exp['main']['trainer_total_timesteps']
 
             if exp['main']['cl'] == 'nocl': 
                 self.config['trainer']['cl']['type'] = 'nocl'

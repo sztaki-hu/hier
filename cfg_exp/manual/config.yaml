@@ -1,5 +1,5 @@
 general:
-  exp_name: 1004_X
+  exp_name: 1005_X
   logdir: logs
   demodir: demos
   seed: random
@@ -61,35 +61,35 @@ sampler:
   max_ep_len: auto
 
 trainer:
-  total_timesteps: 1e6
+  total_timesteps: 5e5
   batch_size: 256
   update_after: 1e2
   update_every: 50
   cl:
-    type: examplebyexample # nocl / predefined / predefinedtwostage / predefinedthreestage / selfpaced / selfpaceddual / controldiscrete / controldiscreteadaptive/ examplebyexample
+    type: predefined # nocl / predefined / predefinedtwostage / predefinedthreestage / selfpaced / selfpaceddual / controldiscrete / controldiscreteadaptive/ examplebyexample
     range_growth_mode: simple # simple / discard / balancediscard
     ratio_discard_lag: 0.1 # Only if 'range_growth_mode' is 'discard' or 'balancediscard'
     balancediscard_ratio: 0.8  # Only if 'range_growth_mode' is 'balancediscard'
     predefined:
       pacing_profile: linear  # linear / sqrt / quad
-      pacing_sat: 0.8 
+      pacing_sat: 0.7 
     predefinedtwostage:
       pacing_profile: linear  # linear / sqrt / quad
       change_stage: 0.5
       stage1: # goal
         pacing_sat: 0.4
       stage2: # obj
-        pacing_sat: 0.9
+        pacing_sat: 0.7
     predefinedthreestage:
       pacing_profile: linear  # linear / sqrt / quad
-      change_stage12: 0.3
-      change_stage23: 0.6
+      change_stage12: 0.25
+      change_stage23: 0.5
       stage1: # goal
-        pacing_sat: 0.2
+        pacing_sat: 0.15
       stage2: # obj
-        pacing_sat: 0.5
+        pacing_sat: 0.4
       stage3: # obj-goal
-        pacing_sat: 0.8
+        pacing_sat: 0.7
     selfpaced:
       conv_cond: 0.8
       window_size: 20
@@ -100,7 +100,7 @@ trainer:
       window_size: 20
       step: 0.05
     controldiscrete:
-      target_profile: const # const / const_sin / linear / sqrt / quad
+      target_profile: const # const / linear / sqrt / quad
       target_sat: 0.8 
       target_sat_value: 0.8
       step: 0.01
@@ -109,18 +109,10 @@ trainer:
         amp: 0.05
         freq_divide: 50
     controldiscreteadaptive:
-      target_plus_eval: 20
+      target_plus_eval: 0.2
       window_size_eval: 3
       window_size_rollout: 20
       step: 0.01
-    examplebyexample:
-      conv_cond: 0.8
-      window_size: 20
-    # controlpd:
-    #   target_profile: linear
-    #   target_sat: 0.75
-    #   p: 0.01
-    #   d: 0
 
 eval:
   freq: 1e4
