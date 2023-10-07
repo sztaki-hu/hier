@@ -28,9 +28,10 @@ def create_folder(path):
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--config", default="logs/1002_C_PandaSlide-v3_sac_predefined_linear_rb025_hbr05" ,help="Path of the config file")
+    parser.add_argument("--config", default="logs/1005_A_PandaSlide-v3_sac_nocl" ,help="Path of the config file")
+    parser.add_argument("--figid", default="1005_A_PickAndPlace" ,help="Fig id")
     parser.add_argument("--hwid", type=int, default=0 ,help="Hardware id")
-    parser.add_argument("--seedid", type=int, default=2 ,help="seedid")
+    parser.add_argument("--seedid", type=int, default=0 ,help="seedid")
     parser.add_argument("--outdir", default="eval" ,help="Path of the output folder")
     # Example: python3 main.py --configfile /cfg/alma.yaml 0
     args = parser.parse_args()
@@ -39,6 +40,7 @@ if __name__ == '__main__':
     current_dir = dirname(abspath(__file__))
 
     create_folder(os.path.join(current_dir, args.outdir))
+    create_folder(os.path.join(current_dir, args.outdir, args.figid))
 
     logger = Logger(current_dir = current_dir, main_args = args, display_mode = True)
     config = logger.get_config()
@@ -61,7 +63,7 @@ if __name__ == '__main__':
     tester = Eval(agent,logger,config,config_framework)
 
     # Test Agent
-    tester.eval_agent(model_name="best_model",num_display_episode=500, headless=True, time_delay = 0.05, current_dir = current_dir, outdir = "eval")
+    tester.eval_agent(model_name="best_model",num_display_episode=10, headless=False, time_delay = 0.05, current_dir = current_dir, outdir = "eval", figid = args.figid)
 
 
     

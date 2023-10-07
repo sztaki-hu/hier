@@ -22,10 +22,10 @@ class SelfPacedCL(CL):
             if success_rate > self.cl_conv_cond:
                 self.cl_ratio += self.cl_step
                 self.cl_ratio = min(self.cl_ratio,1.0)
-                self.cl_rollout_success_dq.clear()
                 self.cl_ratio_discard = max(0.0, self.cl_ratio - self.cl_ratio_discard_lag)
-
                 self.copy_cl_ratios_to_obj_and_goal()
+
+                self.cl_rollout_success_dq.clear()
     
 
          

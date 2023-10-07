@@ -62,35 +62,35 @@ sampler:
   max_ep_len: auto
 
 trainer:
-  total_timesteps: 5e2
+  total_timesteps: input
   batch_size: 256
   update_after: 1e2
   update_every: 50
   cl:
-    type: input # nocl / predefined / predefinedtwostage / predefinedthreestage / selfpaced / selfpaceddual / controldiscrete / controldiscreteadaptive/ examplebyexample
+    type: input # nocl / nullcl / predefined / predefinedtwostage / predefinedthreestage / selfpaced / selfpaceddual / controldiscrete / controldiscreteadaptive
     range_growth_mode: input # simple / discard / balancediscard
     ratio_discard_lag: 0.1 # Only if 'range_growth_mode' is 'discard' or 'balancediscard'
     balancediscard_ratio: 0.8  # Only if 'range_growth_mode' is 'balancediscard'
     predefined:
       pacing_profile: input  # linear / sqrt / quad
-      pacing_sat: 0.7 
+      pacing_sat: 0.8
     predefinedtwostage:
       pacing_profile: input  # linear / sqrt / quad
       change_stage: 0.5
       stage1: # goal
         pacing_sat: 0.4
       stage2: # obj
-        pacing_sat: 0.7
+        pacing_sat: 0.8
     predefinedthreestage:
       pacing_profile: input  # linear / sqrt / quad
-      change_stage12: 0.25
-      change_stage23: 0.5
+      change_stage12: 0.3
+      change_stage23: 0.6
       stage1: # goal
-        pacing_sat: 0.15
+        pacing_sat: 0.2
       stage2: # obj
-        pacing_sat: 0.4
+        pacing_sat: 0.5
       stage3: # obj-goal
-        pacing_sat: 0.7
+        pacing_sat: 0.8
     selfpaced:
       conv_cond: 0.8
       window_size: 20
@@ -111,12 +111,13 @@ trainer:
         freq_divide: 50
     controldiscreteadaptive:
       target_plus_eval: 0.2
+      target_max: 0.9
       window_size_eval: 3
       window_size_rollout: 20
       step: 0.01
 
 eval:
-  freq: 1e4
+  freq: input
   num_episodes: 100
   
 

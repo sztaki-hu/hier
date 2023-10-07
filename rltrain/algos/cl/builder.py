@@ -12,6 +12,8 @@ def make_cl(config, env, replay_buffer):
     
     if cl_mode == 'nocl':
         from rltrain.algos.cl.NoCL import NoCL as CL
+    elif cl_mode == 'nullcl':
+        from rltrain.algos.cl.NullCL import NullCL as CL
     elif cl_mode == 'predefined':
         from rltrain.algos.cl.PredefinedCL import PredefinedCL as CL
     elif cl_mode == 'predefinedtwostage':

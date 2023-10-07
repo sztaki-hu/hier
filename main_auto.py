@@ -53,49 +53,54 @@ def main():
     highlights_batch_ratios = exp_list['buffer']['highlights']['batch_ratio']
     # Trainers
     trainer_set_of_total_timesteps = exp_list['trainer']['total_timesteps']
+    # Eval
+    eval_freqs = exp_list['eval']['freq']
     # Tasks
     envs = list(exp_list['task'].keys())
     # CLs
     cl_types = exp_list['cl']['type']
     cl_range_growth_modes = exp_list['cl']['range_growth_mode']
 
-    for env_name in envs:
-        for task_name in exp_list['task'][env_name]:
-            for agent_type in agents:
-                for her_strategy in her_strategies:
-                    for cl_type in cl_types:
-                        for cl_range_growth_mode in cl_range_growth_modes:
-                            for replay_buffer_size in replay_buffer_sizes:
-                                for reward_bonus in reward_bonuses:
-                                    for highlights_batch_ratio in highlights_batch_ratios:
-                                        for trainer_total_timesteps in trainer_set_of_total_timesteps:
-                                            for _ in range(args.seednum):
-                                                exp = {}
-                                                exp['main'] = {} 
-                                                exp['exp_in_name'] = {}
-                                                exp['exp_abb'] = {}
-                                                exp['main']['env'] = env_name
-                                                exp['exp_in_name']['env'] = False
-                                                exp['main']['task'] = task_name
-                                                exp['exp_in_name']['task'] = True
-                                                exp['main']['agent'] = agent_type
-                                                exp['exp_in_name']['agent'] = True
-                                                exp['main']['her_strategy'] = her_strategy
-                                                exp['exp_in_name']['her_strategy'] = False
-                                                exp['main']['cl'] = cl_type
-                                                exp['exp_in_name']['cl'] = True
-                                                exp['main']['cl_range_growth_mode'] = cl_range_growth_mode
-                                                exp['exp_in_name']['cl_range_growth_mode'] = False
-                                                exp['main']['replay_buffer_size'] = replay_buffer_size
-                                                exp['exp_in_name']['replay_buffer_size'] = False
-                                                exp['main']['reward_bonus'] = reward_bonus
-                                                exp['exp_in_name']['reward_bonus'] = False
-                                                exp['exp_abb']['reward_bonus'] = 'rb'
-                                                exp['main']['highlights_batch_ratio'] = highlights_batch_ratio
-                                                exp['exp_in_name']['highlights_batch_ratio'] = False
-                                                exp['exp_abb']['highlights_batch_ratio'] = 'hbr'
-                                                exp['main']['trainer_total_timesteps'] = trainer_total_timesteps
-                                                exp['exp_in_name']['trainer_total_timesteps'] = False
+    for _ in range(args.seednum):
+        for env_name in envs:
+            for task_name in exp_list['task'][env_name]:
+                for agent_type in agents:
+                    for her_strategy in her_strategies:
+                        for cl_type in cl_types:
+                            for cl_range_growth_mode in cl_range_growth_modes:
+                                for replay_buffer_size in replay_buffer_sizes:
+                                    for reward_bonus in reward_bonuses:
+                                        for highlights_batch_ratio in highlights_batch_ratios:
+                                            for trainer_total_timesteps in trainer_set_of_total_timesteps:   
+                                                for eval_freq in eval_freqs:                                     
+                                                    exp = {}
+                                                    exp['main'] = {} 
+                                                    exp['exp_in_name'] = {}
+                                                    exp['exp_abb'] = {}
+                                                    exp['main']['env'] = env_name
+                                                    exp['exp_in_name']['env'] = False
+                                                    exp['main']['task'] = task_name
+                                                    exp['exp_in_name']['task'] = True
+                                                    exp['main']['agent'] = agent_type
+                                                    exp['exp_in_name']['agent'] = True
+                                                    exp['main']['her_strategy'] = her_strategy
+                                                    exp['exp_in_name']['her_strategy'] = False
+                                                    exp['main']['cl'] = cl_type
+                                                    exp['exp_in_name']['cl'] = True
+                                                    exp['main']['cl_range_growth_mode'] = cl_range_growth_mode
+                                                    exp['exp_in_name']['cl_range_growth_mode'] = False
+                                                    exp['main']['replay_buffer_size'] = replay_buffer_size
+                                                    exp['exp_in_name']['replay_buffer_size'] = False
+                                                    exp['main']['reward_bonus'] = reward_bonus
+                                                    exp['exp_in_name']['reward_bonus'] = False
+                                                    exp['exp_abb']['reward_bonus'] = 'rb'
+                                                    exp['main']['highlights_batch_ratio'] = highlights_batch_ratio
+                                                    exp['exp_in_name']['highlights_batch_ratio'] = False
+                                                    exp['exp_abb']['highlights_batch_ratio'] = 'hbr'
+                                                    exp['main']['trainer_total_timesteps'] = trainer_total_timesteps
+                                                    exp['exp_in_name']['trainer_total_timesteps'] = False
+                                                    exp['main']['eval_freq'] = eval_freq
+                                                    exp['exp_in_name']['eval_freq'] = False
 
                                                 # Init logger ###############################################x
                                                 logger = Logger(current_dir = current_dir, main_args = args, display_mode = False, exp = exp)

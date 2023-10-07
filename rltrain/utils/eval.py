@@ -25,7 +25,7 @@ class Eval:
         self.agent_type = config['agent']['type']  
 
     
-    def eval_agent(self,model_name=90,num_display_episode=10, headless=True, time_delay=0.02, current_dir = None, outdir = "eval"):
+    def eval_agent(self,model_name=90,num_display_episode=10, headless=True, time_delay=0.02, current_dir = None, outdir = "eval", figid = "X"):
 
         # Load model
         path = self.logger.get_model_save_path(model_name)
@@ -102,7 +102,10 @@ class Eval:
                 if headless == False: time.sleep(time_delay)
             ep_rets.append(ep_ret)
             ep_lens.append(ep_len)
+            tqdm.write("Len: " + str(ep_len) + " | " + str(info['is_success']))
             if info['is_success'] == True: 
+                # tqdm.write("O: " + str(self.env.get_achieved_goal_from_obs(o)))
+                # tqdm.write("Goal: " + str(self.env.env.task.get_goal()))
                 success_num += 1
                 heatmap_obj[obj_dig_x][obj_dig_y] += 1
                 heatmap_goal[goal_dig_x][goal_dig_y] += 1
@@ -141,8 +144,10 @@ class Eval:
                 text = ax.text(j, i, heatmap_obj[i, j],
                             ha="center", va="center", color="white")
 
-        plt.savefig(os.path.join(current_dir,outdir,"init_obj_heatmap.png"))
-        plt.show()
+        plt.savefig(os.path.join(current_dir,outdir,figid, figid+"_init_obj_heatmap.png"))
+        #plt.show()
+        plt.clf()
+        plt.cla()
 
         fig, ax = plt.subplots()
         im = ax.imshow(heatmap_goal, cmap=plt.cm.RdBu)
@@ -154,8 +159,10 @@ class Eval:
                 text = ax.text(j, i, heatmap_goal[i, j],
                             ha="center", va="center", color="white")
 
-        plt.savefig(os.path.join(current_dir,outdir,"goal_heatmap.png"))
-        plt.show()
+        plt.savefig(os.path.join(current_dir,outdir,figid, figid+"_goal_heatmap.png"))
+        #plt.show()
+        plt.clf()
+        plt.cla()
 
         # BAR DISTANCE
         barlist = plt.bar(bins_dist[:-1], bar_dist, color ='lightskyblue', width = (0.8/(heatmap_res*1.2)))
@@ -164,8 +171,8 @@ class Eval:
             if bar_dist[i] < 0: barlist[i].set_color('lightcoral')
         
         plt.title("Obj - goal distance")
-        plt.savefig(os.path.join(current_dir,outdir,"dist_bar.png"))
-        plt.show()
+        plt.savefig(os.path.join(current_dir,outdir,figid,figid+"_dist_bar.png"))
+        #plt.show()
         plt.clf()
         plt.cla()
 
@@ -176,8 +183,8 @@ class Eval:
             if bar_angle[i] < 0: barlist[i].set_color('lightcoral')
         
         plt.title("Obj - goal angle")
-        plt.savefig(os.path.join(current_dir,outdir,"angle_bar.png"))
-        plt.show()
+        plt.savefig(os.path.join(current_dir,outdir,figid,figid+"_angle_bar.png"))
+        #plt.show()
         plt.clf()
         plt.cla()
     

@@ -37,6 +37,7 @@ class Logger:
             self.config['buffer']['highlights']['batch_ratio'] = exp['main']['highlights_batch_ratio']
             self.config['trainer']['cl']['range_growth_mode'] = exp['main']['cl_range_growth_mode']
             self.config['trainer']['total_timesteps'] = exp['main']['trainer_total_timesteps']
+            self.config['eval']['freq'] = exp['main']['eval_freq']
 
             if exp['main']['cl'] == 'nocl': 
                 self.config['trainer']['cl']['type'] = 'nocl'

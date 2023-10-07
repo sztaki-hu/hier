@@ -11,6 +11,7 @@ class ControlDiscreteAdaptiveCL(CL):
 
         # Control Discrete Adaptive
         self.cl_target_plus_eval = self.config['trainer']['cl']['controldiscreteadaptive']['target_plus_eval']
+        self.cl_target_max = self.config['trainer']['cl']['controldiscreteadaptive']['target_max']
         self.cl_step = self.config['trainer']['cl']['controldiscreteadaptive']['step']
         self.cl_eval_dq_maxlen = self.config['trainer']['cl']['controldiscreteadaptive']['window_size_eval']
         self.cl_rollout_dq_maxlen = self.config['trainer']['cl']['controldiscreteadaptive']['window_size_rollout']
@@ -20,10 +21,10 @@ class ControlDiscreteAdaptiveCL(CL):
         self.cl_eval_success_dq = collections.deque(maxlen=self.cl_eval_dq_maxlen)
         self.cl_rollout_success_dq = collections.deque(maxlen=self.cl_rollout_dq_maxlen) 
    
-    def update_cl(self,t):  
+    def update_cl(self,t):  # If eval success rate is too high (>0.8) than target (0.81+0.2=1.01) is nat reachable
         success_rate = np.mean(self.cl_rollout_success_dq) if len(self.cl_rollout_success_dq) > 0  else 0
         eval_success_rate = np.mean(self.cl_eval_success_dq) if len(self.cl_eval_success_dq) > 0 else 0
-        target = eval_success_rate + self.cl_target_plus_eval
+        target = min(self.cl_target_max, eval_success_rate + self.cl_target_plus_eval)
         if target > success_rate: 
             self.cl_ratio -= self.cl_step
             self.cl_ratio = max(self.cl_ratio,0.0)

@@ -63,9 +63,7 @@ class GymPanda(Env):
         else:
             print("Obj Num: " + str(self.obj_num))
             assert False
-
-                    
-
+      
     # def init_state_valid(self, o):
     #     if self.task_name == 'PandaPush-v3':
     #         o_goal = o[-3:]
@@ -83,10 +81,25 @@ class GymPanda(Env):
         o = np.concatenate((o_dict['observation'], o_dict['desired_goal']))
        
         if self.reward_shaping_type == 'state_change_bonus':
-            if self.is_diff_state(self.ep_o_start,o): r += self.reward_bonus
+            r += self.get_reward_bonus(o)
         r = r * self.reward_scalor
 
         return o, r, terminated, truncated, info 
+
+    def get_reward_bonus(self,o):
+        if self.task_name in ['PandaReach-v3','PandaReachDense-v3']:
+            return 0 
+        if self.task_name in ['PandaPush-v3','PandaPushDense-v3',
+                              'PandaSlide-v3','PandaSlideDense-v3']:
+            return self.reward_bonus if self.is_diff_state(self.ep_o_start,o) else 0.0
+        elif self.task_name in ['PandaPickAndPlace-v3','PandaPickAndPlaceDense-v3']:
+            return self.reward_bonus if self.get_achieved_goal_from_obs(o)[2] > 0.25 else 0.0 
+        elif self.task_name in ['PandaStack-v3','PandaStackDense-v3']:
+            return self.reward_bonus if self.get_achieved_goal_from_obs(o)[5] > 0.25 else 0.0 
+        else:
+            print(self.task_name)
+            assert False
+        
     
     # Curriculum Learning ##############################
 
