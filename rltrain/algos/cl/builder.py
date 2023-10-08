@@ -1,6 +1,6 @@
 
 
-CL_TYPES = ['nocl','predefined','predefinedtwostage','predefinedthreestage',
+CL_TYPES = ['nocl','nullcl','predefined','predefinedtwostage','predefinedthreestage',
             'selfpaced','selfpaceddual','controldiscrete', 'controldiscreteadaptive', 
             'examplebyexample']
 

@@ -41,6 +41,8 @@ class Logger:
 
             if exp['main']['cl'] == 'nocl': 
                 self.config['trainer']['cl']['type'] = 'nocl'
+            elif exp['main']['cl'] == 'nullcl': 
+                self.config['trainer']['cl']['type'] = 'nullcl'
             elif exp['main']['cl'] in ['predefined_linear','predefined_sqrt','predefined_quad']:       
                 self.config['trainer']['cl']['type'] = 'predefined'         
                 self.config['trainer']['cl']['predefined']['pacing_profile'] = exp['main']['cl'][11:]
