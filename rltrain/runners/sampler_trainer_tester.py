@@ -13,13 +13,15 @@ from rltrain.algos.highlights.Highlights import Highlights
 
 class SamplerTrainerTester:
 
-    def __init__(self,device,logger,config,main_args,config_framework):
+    def __init__(self,device,logger,config,main_args,config_framework,replay_buffer,agent):
 
         self.device = device
         
         self.logger = logger
         self.config = config
         self.config_framework = config_framework
+        self.replay_buffer = replay_buffer
+        self.agent = agent
 
         self.seed = config['general']['seed'] 
         self.agent_type = config['agent']['type']
@@ -75,6 +77,21 @@ class SamplerTrainerTester:
        
         # Log
         self.print_out_name = '_'.join((self.logger.exp_name,str(self.logger.seed_id)))  
+
+        # Env train
+        self.env = make_env(self.config, self.config_framework)
+
+        # Env eval
+        self.env_eval = make_env(self.config, self.config_framework)
+
+        # HER
+        self.HER = HER(self.config,self.env,self.replay_buffer)
+
+        # CL
+        self.CL = make_cl(self.config, self.env, self.replay_buffer)
+
+        # Highlights
+        self.HL = Highlights(self.config)
 
         
 
@@ -151,26 +168,7 @@ class SamplerTrainerTester:
         return ep_ret_avg, mean_ep_length, success_rate,state_change_rate
             
 
-    def start(self,agent,replay_buffer):
-
-    
-        # Env train
-        self.env = make_env(self.config, self.config_framework)
-
-        # Env eval
-        self.env_eval = make_env(self.config, self.config_framework)
-
-        # HER
-        self.HER = HER(self.config,self.env,replay_buffer)
-
-        # CL
-        self.CL = make_cl(self.config, self.env, replay_buffer)
-
-        # Highlights
-        self.HL = Highlights(self.config)
-
-        # Agent        
-        self.agent = agent
+    def start(self):
 
         # Env reset
         o, ep_ret, ep_len = self.CL.reset_env(0), 0, 0
@@ -228,7 +226,7 @@ class SamplerTrainerTester:
                 if self.CL.store_rollout_success_rate: self.CL.cl_rollout_success_dq.append(ep_succes)
                 
                 for (o, a, r, o2, d) in episode:
-                    replay_buffer.store(o, a, r, o2, d)
+                    self.replay_buffer.store(o, a, r, o2, d)
                 
                 # Highlights
                 if info['is_success']: self.HL.store_episode(episode)
@@ -250,10 +248,10 @@ class SamplerTrainerTester:
 
             # Update handling
             if t >= self.update_after and t % self.update_every == 0:
-                if replay_buffer.size > 0:
+                if self.replay_buffer.size > 0:
                     for j in range(self.update_every):           
                         if self.HL.highlights_active and self.HL.highlights_replay_buffer.size > 0:
-                            replay_batch = replay_buffer.sample_batch(self.replay_batch_size)
+                            replay_batch = self.replay_buffer.sample_batch(self.replay_batch_size)
                             highlights_batch = self.HL.highlights_replay_buffer.sample_batch(self.highlights_batch_size)
                             batch = dict(obs=torch.cat((replay_batch['obs'], highlights_batch['obs']), 0),
                                             obs2=torch.cat((replay_batch['obs2'], highlights_batch['obs2']), 0),
@@ -261,7 +259,7 @@ class SamplerTrainerTester:
                                             rew=torch.cat((replay_batch['rew'], highlights_batch['rew']), 0),
                                             done=torch.cat((replay_batch['done'], highlights_batch['done']), 0))
                         else:     
-                            batch = replay_buffer.sample_batch(self.batch_size)  
+                            batch = self.replay_buffer.sample_batch(self.batch_size)  
                         #print(batch)
                         ret_loss_q, ret_loss_pi = self.agent.update(batch, j)
                         self.loss_q_dq.append(ret_loss_q)

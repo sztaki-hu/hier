@@ -14,9 +14,10 @@ from torch.utils.tensorboard import SummaryWriter
 
 class Logger:
     # init method or constructor
-    def __init__(self, current_dir, main_args, display_mode = False, exp = None):
+    def __init__(self, current_dir, main_args, display_mode = False, exp = None, is_test_config = False):
 
         if display_mode: self.seed_id = str(main_args.seedid)
+        elif is_test_config: self.seed_id = "0"
 
         # Load config and set up main variables
         self.current_dir = current_dir
@@ -92,7 +93,7 @@ class Logger:
         # Create log folders and files
         self.exp_folder = os.path.join(self.current_dir,self.logdir, self.exp_name)
 
-        if display_mode == False: 
+        if display_mode == False and is_test_config == False: 
             
             # Exp folder and get seed id    
             self.create_folder(os.path.join(self.exp_folder))
@@ -109,13 +110,13 @@ class Logger:
             self.tb_logdir = os.path.join(self.exp_folder,self.seed_id,"runs")
             self.writer = SummaryWriter(log_dir = self.tb_logdir)     
         
-        # Printout logging
-        log_file_path = os.path.join(self.exp_folder,self.seed_id,'logs.log')
-        if os.path.isfile(log_file_path):
-            os.remove(log_file_path) 
+        # # Printout logging
+        # log_file_path = os.path.join(self.exp_folder,self.seed_id,'logs.log')
+        # if os.path.isfile(log_file_path):
+        #     os.remove(log_file_path) 
 
-        logging.basicConfig(filename=log_file_path,level=logging.DEBUG)
-        self.pylogger = logging.getLogger('mylogger')
+        # logging.basicConfig(filename=log_file_path,level=logging.DEBUG)
+        # self.pylogger = logging.getLogger('mylogger')
 
         # Set up RLBench path
         # cfg_rlbench = {'path' : self.config_path}
@@ -153,13 +154,17 @@ class Logger:
         if terminal:
             print("["+level+"]: " + str(message))
         if level == "debug":
-            self.pylogger.debug(str(message))
+            # self.pylogger.debug(str(message))
+            print(message)
         elif level == "warning":
-            self.pylogger.warning(str(message))
+            # self.pylogger.warning(str(message))
+            print(message)
         elif level == "error":
-            self.pylogger.error(str(message))
+            # self.pylogger.error(str(message))
+            print(message)
         else:
-            self.pylogger.info(str(message))
+            # self.pylogger.info(str(message))
+            print(message)
     
     # Config
 
