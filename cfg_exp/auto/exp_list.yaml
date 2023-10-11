@@ -1,27 +1,28 @@
-
-# ['PandaReach-v3','PandaPush-v3','PandaSlide-v3','PandaPickAndPlace-v3','PandaStack-v3']
-
 process_0:
   agent: 
     type: ['sac']
   environment:
     reward:
-      reward_bonus: [0.1]
+      reward_shaping_type: ['sparse'] # sparse / state_change_bonus
+      reward_bonus: [0.0]
   buffer:
     replay_buffer_size: [1e6]
     her:
-      goal_selection_strategy: ['final']
+      goal_selection_strategy: ['final'] # noher / final / future / future_once / near / next
     highlights:
+      mode: ['nohl','fix_th'] # nohl / fix_th
       batch_ratio: [0.5]
+    per:
+      mode: ['noper','proportional'] # noper / proportional
   trainer:
-    total_timesteps: [5e4]
+    total_timesteps: [5e5]
   eval:
-    freq: [1e3]
+    freq: [1e4]
   # structure is differend than in the config file ##################################################x
   task: 
-    gympanda: ['PandaReach-v3']
+    gympanda: ['PandaPush-v3'] # PandaReach-v3 / PandaPush-v3 / PandaSlide-v3 / PandaPickAndPlace-v3 / PandaStack-v3
   cl: 
-    type: ['controldiscreteadaptive','controldiscrete_const','predefined_linear','nocl','predefinedtwostage_linear','predefinedthreestage_linear']
+    type: ['controldiscrete_const'] # nocl / nullcl / predefined / predefinedtwostage / predefinedthreestage / selfpaced / selfpaceddual / controldiscrete / controldiscreteadaptive
     range_growth_mode: ['simple']
   ####################################################################################################
 
@@ -30,165 +31,137 @@ process_1:
     type: ['sac']
   environment:
     reward:
-      reward_bonus: [0.1]
+      reward_shaping_type: ['sparse'] # sparse / state_change_bonus
+      reward_bonus: [0.0]
   buffer:
     replay_buffer_size: [1e6]
     her:
-      goal_selection_strategy: ['final']
+      goal_selection_strategy: ['final'] # noher / final / future / future_once / near / next
     highlights:
+      mode: ['nohl','fix_th'] # nohl / fix_th
       batch_ratio: [0.5]
+    per:
+      mode: ['noper','proportional'] # noper / proportional
   trainer:
     total_timesteps: [5e5]
   eval:
     freq: [1e4]
   # structure is differend than in the config file ##################################################x
   task: 
-    gympanda: ['PandaPush-v3']
+    gympanda: ['PandaSlide-v3'] # PandaReach-v3 / PandaPush-v3 / PandaSlide-v3 / PandaPickAndPlace-v3 / PandaStack-v3
   cl: 
-    type: ['controldiscreteadaptive','controldiscrete_const','predefined_linear','nocl']
+    type: ['controldiscrete_const'] # nocl / nullcl / predefined / predefinedtwostage / predefinedthreestage / selfpaced / selfpaceddual / controldiscrete / controldiscreteadaptive
     range_growth_mode: ['simple']
   ####################################################################################################
 
-process_2:
+  process_2:
   agent: 
     type: ['sac']
   environment:
     reward:
-      reward_bonus: [0.1]
+      reward_shaping_type: ['sparse'] # sparse / state_change_bonus
+      reward_bonus: [0.0]
   buffer:
     replay_buffer_size: [1e6]
     her:
-      goal_selection_strategy: ['final']
+      goal_selection_strategy: ['final'] # noher / final / future / future_once / near / next
     highlights:
+      mode: ['nohl','fix_th'] # nohl / fix_th
       batch_ratio: [0.5]
+    per:
+      mode: ['noper','proportional'] # noper / proportional
   trainer:
     total_timesteps: [5e5]
   eval:
     freq: [1e4]
   # structure is differend than in the config file ##################################################x
   task: 
-    gympanda: ['PandaSlide-v3',]
+    gympanda: ['PandaPickAndPlace-v3'] # PandaReach-v3 / PandaPush-v3 / PandaSlide-v3 / PandaPickAndPlace-v3 / PandaStack-v3
   cl: 
-    type: ['controldiscreteadaptive','controldiscrete_const','predefined_linear','nocl']
+    type: ['controldiscrete_const'] # nocl / nullcl / predefined / predefinedtwostage / predefinedthreestage / selfpaced / selfpaceddual / controldiscrete / controldiscreteadaptive
     range_growth_mode: ['simple']
   ####################################################################################################
 
-process_3:
+  process_3:
   agent: 
-    type: ['sac']
+    type: ['td3']
   environment:
     reward:
-      reward_bonus: [0.1]
+      reward_shaping_type: ['sparse'] # sparse / state_change_bonus
+      reward_bonus: [0.0]
   buffer:
     replay_buffer_size: [1e6]
     her:
-      goal_selection_strategy: ['final']
+      goal_selection_strategy: ['final'] # noher / final / future / future_once / near / next
     highlights:
+      mode: ['nohl','fix_th'] # nohl / fix_th
       batch_ratio: [0.5]
+    per:
+      mode: ['noper','proportional'] # noper / proportional
   trainer:
     total_timesteps: [5e5]
   eval:
     freq: [1e4]
   # structure is differend than in the config file ##################################################x
   task: 
-    gympanda: [PandaPickAndPlace-v3]
+    gympanda: ['PandaPush-v3'] # PandaReach-v3 / PandaPush-v3 / PandaSlide-v3 / PandaPickAndPlace-v3 / PandaStack-v3
   cl: 
-    type: ['controldiscreteadaptive','controldiscrete_const','predefined_linear','nocl']
+    type: ['controldiscrete_const'] # nocl / nullcl / predefined / predefinedtwostage / predefinedthreestage / selfpaced / selfpaceddual / controldiscrete / controldiscreteadaptive
     range_growth_mode: ['simple']
   ####################################################################################################
 
 process_4:
   agent: 
-    type: ['sac']
+    type: ['td3']
   environment:
     reward:
-      reward_bonus: [0.1]
+      reward_shaping_type: ['sparse'] # sparse / state_change_bonus
+      reward_bonus: [0.0]
   buffer:
     replay_buffer_size: [1e6]
     her:
-      goal_selection_strategy: ['final']
+      goal_selection_strategy: ['final'] # noher / final / future / future_once / near / next
     highlights:
+      mode: ['nohl','fix_th'] # nohl / fix_th
       batch_ratio: [0.5]
+    per:
+      mode: ['noper','proportional'] # noper / proportional
   trainer:
     total_timesteps: [5e5]
   eval:
     freq: [1e4]
   # structure is differend than in the config file ##################################################x
   task: 
-    gympanda: ['PandaStack-v3']
+    gympanda: ['PandaSlide-v3'] # PandaReach-v3 / PandaPush-v3 / PandaSlide-v3 / PandaPickAndPlace-v3 / PandaStack-v3
   cl: 
-    type: ['controldiscreteadaptive','controldiscrete_const','predefined_linear','nocl']
+    type: ['controldiscrete_const'] # nocl / nullcl / predefined / predefinedtwostage / predefinedthreestage / selfpaced / selfpaceddual / controldiscrete / controldiscreteadaptive
     range_growth_mode: ['simple']
   ####################################################################################################
 
-process_5:
+  process_5:
   agent: 
-    type: ['sac']
+    type: ['td3']
   environment:
     reward:
-      reward_bonus: [0.1]
+      reward_shaping_type: ['sparse'] # sparse / state_change_bonus
+      reward_bonus: [0.0]
   buffer:
     replay_buffer_size: [1e6]
     her:
-      goal_selection_strategy: ['final']
+      goal_selection_strategy: ['final'] # noher / final / future / future_once / near / next
     highlights:
+      mode: ['nohl','fix_th'] # nohl / fix_th
       batch_ratio: [0.5]
+    per:
+      mode: ['noper','proportional'] # noper / proportional
   trainer:
     total_timesteps: [5e5]
   eval:
     freq: [1e4]
   # structure is differend than in the config file ##################################################x
   task: 
-    gympanda: ['PandaPush-v3','PandaSlide-v3']
+    gympanda: ['PandaPickAndPlace-v3'] # PandaReach-v3 / PandaPush-v3 / PandaSlide-v3 / PandaPickAndPlace-v3 / PandaStack-v3
   cl: 
-    type: ['predefinedtwostage_linear','predefinedthreestage_linear']
-    range_growth_mode: ['simple']
-  ####################################################################################################
-
-process_6:
-  agent: 
-    type: ['sac']
-  environment:
-    reward:
-      reward_bonus: [0.1]
-  buffer:
-    replay_buffer_size: [1e6]
-    her:
-      goal_selection_strategy: ['final']
-    highlights:
-      batch_ratio: [0.5]
-  trainer:
-    total_timesteps: [5e5]
-  eval:
-    freq: [1e4]
-  # structure is differend than in the config file ##################################################x
-  task: 
-    gympanda: ['PandaPickAndPlace-v3','PandaStack-v3']
-  cl: 
-    type: ['predefinedtwostage_linear','predefinedthreestage_linear']
-    range_growth_mode: ['simple']
-  ####################################################################################################
-
-process_7:
-  agent: 
-    type: ['sac']
-  environment:
-    reward:
-      reward_bonus: [0.1]
-  buffer:
-    replay_buffer_size: [1e6]
-    her:
-      goal_selection_strategy: ['final']
-    highlights:
-      batch_ratio: [0.5]
-  trainer:
-    total_timesteps: [5e5]
-  eval:
-    freq: [1e4]
-  # structure is differend than in the config file ##################################################x
-  task: 
-    gympanda: ['PandaPush-v3','PandaSlide-v3']
-  cl: 
-    type: ['selfpaced','selfpaceddual']
+    type: ['controldiscrete_const'] # nocl / nullcl / predefined / predefinedtwostage / predefinedthreestage / selfpaced / selfpaceddual / controldiscrete / controldiscreteadaptive
     range_growth_mode: ['simple']
   ####################################################################################################

@@ -29,17 +29,26 @@ class Logger:
 
         # Replace 'input' values of config file if it is main_auto.py 
         if exp != None:
-            self.config['agent']['type'] = exp['main']['agent']
+            # Task
             self.config['environment']['name'] = exp['main']['env']
             self.config['environment']['task']['name'] = exp['main']['task']
+            # Agent
+            self.config['agent']['type'] = exp['main']['agent']
+            # Env
+            self.config['environment']['reward']['reward_shaping_type'] = exp['main']['reward_shaping_type']
             self.config['environment']['reward']['reward_bonus'] = exp['main']['reward_bonus']
-            self.config['buffer']['her']['goal_selection_strategy'] = exp['main']['her_strategy']
+            # Buffer
             self.config['buffer']['replay_buffer_size'] = exp['main']['replay_buffer_size']
+            self.config['buffer']['her']['goal_selection_strategy'] = exp['main']['her_strategy']
+            self.config['buffer']['highlights']['mode'] = exp['main']['highlights_mode']
             self.config['buffer']['highlights']['batch_ratio'] = exp['main']['highlights_batch_ratio']
-            self.config['trainer']['cl']['range_growth_mode'] = exp['main']['cl_range_growth_mode']
+            self.config['buffer']['per']['mode'] = exp['main']['per_mode']
+            # Trainer
             self.config['trainer']['total_timesteps'] = exp['main']['trainer_total_timesteps']
+            # Eval
             self.config['eval']['freq'] = exp['main']['eval_freq']
-
+            # CL
+            self.config['trainer']['cl']['range_growth_mode'] = exp['main']['cl_range_growth_mode']    
             if exp['main']['cl'] == 'nocl': 
                 self.config['trainer']['cl']['type'] = 'nocl'
             elif exp['main']['cl'] == 'nullcl': 

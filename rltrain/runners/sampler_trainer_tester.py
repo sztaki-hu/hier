@@ -8,20 +8,20 @@ from tqdm import tqdm
 
 from rltrain.envs.builder import make_env
 from rltrain.algos.cl.builder import make_cl
+from rltrain.agents.builder import make_agent
+from rltrain.buffers.builder import make_per
 from rltrain.algos.her import HER
 from rltrain.algos.highlights.Highlights import Highlights
 
 class SamplerTrainerTester:
 
-    def __init__(self,device,logger,config,main_args,config_framework,replay_buffer,agent):
+    def __init__(self,device,logger,config,main_args,config_framework):
 
         self.device = device
         
         self.logger = logger
         self.config = config
         self.config_framework = config_framework
-        self.replay_buffer = replay_buffer
-        self.agent = agent
 
         self.seed = config['general']['seed'] 
         self.agent_type = config['agent']['type']
@@ -74,9 +74,18 @@ class SamplerTrainerTester:
         # Highlights
         self.highlights_batch_size =  int(config['trainer']['batch_size'] * config['buffer']['highlights']['batch_ratio'])
         self.replay_batch_size =  int(config['trainer']['batch_size'] - self.highlights_batch_size)
+
+
        
         # Log
         self.print_out_name = '_'.join((self.logger.exp_name,str(self.logger.seed_id)))  
+
+        # Replay Buffer
+        self.per_active = False if config['buffer']['per']['mode'] == 'noper' else True
+        self.replay_buffer = make_per(config)
+        
+        # Agent
+        self.agent = make_agent(device,config,config_framework)
 
         # Env train
         self.env = make_env(self.config, self.config_framework)
@@ -92,7 +101,7 @@ class SamplerTrainerTester:
 
         # Highlights
         self.HL = Highlights(self.config)
-
+        if self.HL.highlights_active == False: self.replay_batch_size = self.batch_size
         
 
         """
@@ -257,11 +266,16 @@ class SamplerTrainerTester:
                                             obs2=torch.cat((replay_batch['obs2'], highlights_batch['obs2']), 0),
                                             act=torch.cat((replay_batch['act'], highlights_batch['act']), 0),
                                             rew=torch.cat((replay_batch['rew'], highlights_batch['rew']), 0),
-                                            done=torch.cat((replay_batch['done'], highlights_batch['done']), 0))
+                                            done=torch.cat((replay_batch['done'], highlights_batch['done']), 0),
+                                            indices=torch.cat((replay_batch['indices'], highlights_batch['indices']), 0),
+                                            weights=torch.cat((replay_batch['weights'], highlights_batch['weights']), 0))
                         else:     
                             batch = self.replay_buffer.sample_batch(self.batch_size)  
-                        #print(batch)
-                        ret_loss_q, ret_loss_pi = self.agent.update(batch, j)
+
+                        ret_loss_q, ret_loss_pi, batch_priorities = self.agent.update(batch, j)
+                        if self.per_active: 
+                            batch_indices = batch['indices'].detach().cpu().numpy().astype(int)
+                            self.replay_buffer.update_priorities(batch_indices[:self.replay_batch_size], batch_priorities[:self.replay_batch_size])
                         self.loss_q_dq.append(ret_loss_q)
                         if ret_loss_pi != None: self.loss_pi_dq.append(ret_loss_pi)
 

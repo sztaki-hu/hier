@@ -1,5 +1,5 @@
 general:
-  exp_name: 1005_X
+  exp_name: 1011_X
   logdir: logs
   demodir: demos
   seed: random
@@ -25,7 +25,7 @@ environment:
   reward:
     reward_scalor: 1
     reward_bonus: input
-    reward_shaping_type: state_change_bonus # sparse / state_change_bonus
+    reward_shaping_type: input # sparse / state_change_bonus
 
 agent:
   type: input
@@ -46,16 +46,21 @@ agent:
 buffer:
   replay_buffer_size: input
   her:
-    goal_selection_strategy: input # in SB3 only the orginal ones are implemented
+    goal_selection_strategy: input # noher / final / future / future_once / near / next
     n_sampled_goal: 4
     state_check: true
+  per:
+    mode: input # noper / proportional
+    alpha: 0.6
+    beta_start: 0.4
+    beta_frames_ratio: 0.8
   highlights:
-    bool: True
+    mode: input # nohl / fix_th
     batch_ratio: input
     buffer_size: 5e4
-    mode: fix_th # fix_th
     fix_th:
       threshold: 15
+
 
 sampler:
   start_steps: 10000 # in SB3 we cannot set it
@@ -118,7 +123,7 @@ trainer:
 
 eval:
   freq: input
-  num_episodes: 100
+  num_episodes: 10
   
 
 logger:

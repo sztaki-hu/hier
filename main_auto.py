@@ -4,13 +4,11 @@ from os.path import dirname, abspath
 import numpy as np
 import torch
 import argparse
-
-from rltrain.buffers.replay import ReplayBuffer
+import itertools
 
 from rltrain.utils.utils import init_cuda, print_torch_info
 from rltrain.logger.logger import Logger
 
-from rltrain.agents.builder import make_agent
 from rltrain.runners.sampler_trainer_tester import SamplerTrainerTester
 
 import datetime
@@ -26,7 +24,6 @@ def load_yaml(file):
         with open(file) as f:
             return yaml.load(f, Loader=yaml.UnsafeLoader)
     return None
-    
 
 def main():
 
@@ -47,11 +44,15 @@ def main():
     # Agents
     agents = exp_list['agent']['type']
     # Envs
+    reward_shaping_types = exp_list['environment']['reward']['reward_shaping_type']
     reward_bonuses = exp_list['environment']['reward']['reward_bonus']
     # Buffers
-    her_strategies = exp_list['buffer']['her']['goal_selection_strategy']
     replay_buffer_sizes = exp_list['buffer']['replay_buffer_size']
+    her_strategies = exp_list['buffer']['her']['goal_selection_strategy']
+    highlights_modes = exp_list['buffer']['highlights']['mode']
     highlights_batch_ratios = exp_list['buffer']['highlights']['batch_ratio']
+    per_modes = exp_list['buffer']['per']['mode']
+    
     # Trainers
     trainer_set_of_total_timesteps = exp_list['trainer']['total_timesteps']
     # Eval
@@ -86,84 +87,124 @@ def main():
                 print("##################################################################")        
         
         for _ in range(seednum):
-            for env_name in envs:
+             for env_name in envs:
                 for task_name in exp_list['task'][env_name]:
-                    for agent_type in agents:
-                        for her_strategy in her_strategies:
-                            for cl_type in cl_types:
-                                for cl_range_growth_mode in cl_range_growth_modes:
-                                    for replay_buffer_size in replay_buffer_sizes:
-                                        for reward_bonus in reward_bonuses:
-                                            for highlights_batch_ratio in highlights_batch_ratios:
-                                                for trainer_total_timesteps in trainer_set_of_total_timesteps:   
-                                                    for eval_freq in eval_freqs:   
-                                                        try:                                  
-                                                            exp = {}
-                                                            exp['main'] = {} 
-                                                            exp['exp_in_name'] = {}
-                                                            exp['exp_abb'] = {}
-                                                            exp['main']['env'] = env_name
-                                                            exp['exp_in_name']['env'] = False
-                                                            exp['main']['task'] = task_name
-                                                            exp['exp_in_name']['task'] = True
-                                                            exp['main']['agent'] = agent_type
-                                                            exp['exp_in_name']['agent'] = True
-                                                            exp['main']['her_strategy'] = her_strategy
-                                                            exp['exp_in_name']['her_strategy'] = False
-                                                            exp['main']['cl'] = cl_type
-                                                            exp['exp_in_name']['cl'] = True
-                                                            exp['main']['cl_range_growth_mode'] = cl_range_growth_mode
-                                                            exp['exp_in_name']['cl_range_growth_mode'] = False
-                                                            exp['main']['replay_buffer_size'] = replay_buffer_size
-                                                            exp['exp_in_name']['replay_buffer_size'] = False
-                                                            exp['main']['reward_bonus'] = reward_bonus
-                                                            exp['exp_in_name']['reward_bonus'] = False
-                                                            exp['exp_abb']['reward_bonus'] = 'rb'
-                                                            exp['main']['highlights_batch_ratio'] = highlights_batch_ratio
-                                                            exp['exp_in_name']['highlights_batch_ratio'] = False
-                                                            exp['exp_abb']['highlights_batch_ratio'] = 'hbr'
-                                                            exp['main']['trainer_total_timesteps'] = trainer_total_timesteps
-                                                            exp['exp_in_name']['trainer_total_timesteps'] = False
-                                                            exp['main']['eval_freq'] = eval_freq
-                                                            exp['exp_in_name']['eval_freq'] = False
+                    for r in itertools.product(
+                            # Agents
+                            agents, 
+                            # Envs
+                            reward_shaping_types,
+                            reward_bonuses,
+                            # Buffers
+                            replay_buffer_sizes,
+                            her_strategies,
+                            highlights_modes,
+                            highlights_batch_ratios,
+                            per_modes,
+                            # Trainers
+                            trainer_set_of_total_timesteps,
+                            # Eval
+                            eval_freqs,
+                            # CL
+                            cl_types,
+                            cl_range_growth_modes,
+                            ):
+                        
+                        try:   
 
-                                                            # Init logger ###############################################x
-                                                            logger = Logger(current_dir = current_dir, main_args = args, display_mode = False, exp = exp, is_test_config = is_test_config)
+                            print(r)
 
-                                                            config = logger.get_config()
+                            # Agent
+                            agent_type              = r[0]
+                            # Env
+                            reward_shaping_type     = r[1]
+                            reward_bonus            = r[2]
+                            # Buffer
+                            replay_buffer_size      = r[3]
+                            her_strategy            = r[4]
+                            highlights_mode         = r[5]
+                            highlights_batch_ratio  = r[6]
+                            per_mode                = r[7]
+                            # Trainer
+                            trainer_total_timesteps = r[8]
+                            # Eval
+                            eval_freq               = r[9]
+                            # CL
+                            cl_type                 = r[10]
+                            cl_range_growth_mode    = r[11]                  
+                                                    
+                            exp = {}
+                            exp['main'] = {} 
+                            exp['exp_in_name'] = {}
+                            exp['exp_abb'] = {}
+                            # Task
+                            exp['main']['env'] = env_name
+                            exp['exp_in_name']['env'] = False
+                            exp['main']['task'] = task_name
+                            exp['exp_in_name']['task'] = True
+                            # Agent
+                            exp['main']['agent'] = agent_type
+                            exp['exp_in_name']['agent'] = True
+                            # Env
+                            exp['main']['reward_shaping_type'] = reward_shaping_type
+                            exp['exp_in_name']['reward_shaping_type'] = True
+                            exp['main']['reward_bonus'] = reward_bonus
+                            exp['exp_in_name']['reward_bonus'] = False
+                            exp['exp_abb']['reward_bonus'] = 'rb'
+                            # Buffer
+                            exp['main']['replay_buffer_size'] = replay_buffer_size
+                            exp['exp_in_name']['replay_buffer_size'] = False
+                            exp['main']['her_strategy'] = her_strategy
+                            exp['exp_in_name']['her_strategy'] = True
+                            exp['main']['highlights_mode'] = highlights_mode
+                            exp['exp_in_name']['highlights_mode'] = True
+                            exp['main']['highlights_batch_ratio'] = highlights_batch_ratio
+                            exp['exp_in_name']['highlights_batch_ratio'] = False
+                            exp['exp_abb']['highlights_batch_ratio'] = 'hbr'
+                            exp['main']['per_mode'] = per_mode
+                            exp['exp_in_name']['per_mode'] = True
+                            # Trainer
+                            exp['main']['trainer_total_timesteps'] = trainer_total_timesteps
+                            exp['exp_in_name']['trainer_total_timesteps'] = False
+                            # Eval
+                            exp['main']['eval_freq'] = eval_freq
+                            exp['exp_in_name']['eval_freq'] = False
+                            # CL
+                            exp['main']['cl'] = cl_type
+                            exp['exp_in_name']['cl'] = True
+                            exp['main']['cl_range_growth_mode'] = cl_range_growth_mode
+                            exp['exp_in_name']['cl_range_growth_mode'] = False
+                            
 
-                                                            config_framework = logger.get_config_framework()
-                                                            
-                                                            # Init CUDA and torch and np ##################################
-                                                            init_cuda(config['hardware']['gpu'][args.hwid],config['hardware']['cpu_min'][args.hwid],config['hardware']['cpu_max'][args.hwid])
+                            # Init logger ###############################################x
+                            logger = Logger(current_dir = current_dir, main_args = args, display_mode = False, exp = exp, is_test_config = is_test_config)
 
-                                                            print_torch_info(logger)
+                            config = logger.get_config()
 
-                                                            device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-                                                            logger.print_logfile(device)
+                            config_framework = logger.get_config_framework()
+                            
+                            # Init CUDA and torch and np ##################################
+                            init_cuda(config['hardware']['gpu'][args.hwid],config['hardware']['cpu_min'][args.hwid],config['hardware']['cpu_max'][args.hwid])
 
-                                                            torch.set_num_threads(torch.get_num_threads())
+                            print_torch_info(logger)
 
-                                                            torch.manual_seed(config['general']['seed'])
-                                                            np.random.seed(config['general']['seed'])
+                            device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+                            logger.print_logfile(device)
 
-                                                            
-                                                            replay_buffer = ReplayBuffer(
-                                                                    obs_dim=int(config['environment']['obs_dim']), 
-                                                                    act_dim=int(config['environment']['act_dim']), 
-                                                                    size=int(float(config['buffer']['replay_buffer_size'])))
-                                                            
-                                                            agent = make_agent(device,config,config_framework)
+                            torch.set_num_threads(torch.get_num_threads())
 
-                                                            samplerTrainerTester = SamplerTrainerTester(device,logger,config,args,config_framework,replay_buffer,agent)
+                            torch.manual_seed(config['general']['seed'])
+                            np.random.seed(config['general']['seed'])  
 
-                                                            if is_test_config == False: 
-                                                                samplerTrainerTester.start()
+                            samplerTrainerTester = SamplerTrainerTester(device,logger,config,args,config_framework,)
 
-                                                        except:
-                                                            config_file_is_valid = False
-                                                            error_exps.append(exp)
-                                                            print("Error")
+                            if is_test_config == False: 
+                                samplerTrainerTester.start()
+
+                        except:
+                            config_file_is_valid = False
+                            error_exps.append(exp)
+                            print("Error")
 
     if config_file_is_valid == False:
             print("##################################################################")

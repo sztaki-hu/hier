@@ -84,9 +84,11 @@ class Agent:
         o2 = o2.float().to(self.device)
         d = d.to(self.device)
 
-
         q1 = self.ac.q1(o,a)
         q2 = self.ac.q2(o,a)
+
+        weights_IS = data['weights']
+        weights_IS = weights_IS.to(self.device)
 
         # Bellman backup for Q functions
         with torch.no_grad():
@@ -107,15 +109,20 @@ class Agent:
             backup = r + self.gamma * (1 - d) * q_pi_targ
 
         # MSE loss against Bellman backup
-        loss_q1 = ((q1 - backup)**2).mean()
-        loss_q2 = ((q2 - backup)**2).mean()
+        loss_q1 = (((q1 - backup)**2)*weights_IS).mean()
+        loss_q2 = (((q2 - backup)**2)*weights_IS).mean()
         loss_q = loss_q1 + loss_q2
 
         # Useful info for logging
         loss_info = dict(Q1Vals=q1.cpu().detach().numpy(),
                         Q2Vals=q2.cpu().detach().numpy())
+        
+        # Priorities for PER
+        td_error1 = q1 - backup
+        td_error2 = q2 - backup
+        batch_priorities = abs(((td_error1 + td_error2)/2.0 + 1e-5).squeeze()).detach().cpu().numpy()
 
-        return loss_q, loss_info
+        return loss_q, batch_priorities, loss_info
 
     # Set up function for computing TD3 pi loss
     def compute_loss_pi(self,data):
@@ -129,7 +136,7 @@ class Agent:
     def update(self,data, timer):
         # First run one gradient descent step for Q1 and Q2
         self.q_optimizer.zero_grad()
-        loss_q, loss_info = self.compute_loss_q(data)
+        loss_q, batch_priorities, loss_info = self.compute_loss_q(data)
         loss_q.backward()
         self.q_optimizer.step()
 
@@ -165,7 +172,7 @@ class Agent:
                     p_targ.data.mul_(self.polyak)
                     p_targ.data.add_((1 - self.polyak) * p.data)
             
-        return ret_loss_q, ret_loss_pi
+        return ret_loss_q, ret_loss_pi, batch_priorities
     
     def get_action(self,o, noise_scale):
         o = torch.from_numpy(o).float().unsqueeze(0).to(self.device)

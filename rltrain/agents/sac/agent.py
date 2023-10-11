@@ -147,6 +147,9 @@ class Agent:
         q1 = self.ac.q1(o,a)
         q2 = self.ac.q2(o,a)
 
+        weights_IS = data['weights']
+        weights_IS = weights_IS.to(self.device)
+
         # Bellman backup for Q functions
         with torch.no_grad():
             # Target actions come from *current* policy
@@ -156,18 +159,23 @@ class Agent:
             q1_pi_targ = self.ac_targ.q1(o2, a2)
             q2_pi_targ = self.ac_targ.q2(o2, a2)
             q_pi_targ = torch.min(q1_pi_targ, q2_pi_targ)
-            backup = r + self.gamma * (1 - d) * (q_pi_targ - self.alpha * logp_a2)
+            backup = r + self.gamma * (1 - d) * (q_pi_targ - self.alpha * logp_a2) # Q_targets
 
         # MSE loss against Bellman backup
-        loss_q1 = ((q1 - backup)**2).mean()
-        loss_q2 = ((q2 - backup)**2).mean()
+        loss_q1 = (((q1 - backup)**2)*weights_IS).mean() # td_error1 = q1 - backup
+        loss_q2 = (((q2 - backup)**2)*weights_IS).mean() # td_error2 = q2 - backup
         loss_q = loss_q1 + loss_q2
 
         # Useful info for logging
         q_info = dict(Q1Vals=q1.cpu().detach().numpy(),
                       Q2Vals=q2.cpu().detach().numpy())
+        
+        # Priorities for PER
+        td_error1 = q1 - backup
+        td_error2 = q2 - backup
+        batch_priorities = abs(((td_error1 + td_error2)/2.0 + 1e-5).squeeze()).detach().cpu().numpy()
 
-        return loss_q, q_info
+        return loss_q, batch_priorities, q_info
 
     # Set up function for computing SAC pi loss
     def compute_loss_pi(self,data):
@@ -188,11 +196,11 @@ class Agent:
 
         return loss_pi, pi_info
 
-    def update(self, data, placeholder):
+    def update(self, data, placeholder = None):
 
         # First run one gradient descent step for Q1 and Q2
         self.q_optimizer.zero_grad()
-        loss_q, q_info = self.compute_loss_q(data)
+        loss_q, batch_priorities, _ = self.compute_loss_q(data)
         loss_q.backward()
         self.q_optimizer.step()
 
@@ -206,7 +214,7 @@ class Agent:
 
         # Next run one gradient descent step for pi.
         self.pi_optimizer.zero_grad()
-        loss_pi, pi_info = self.compute_loss_pi(data)
+        loss_pi, _ = self.compute_loss_pi(data)
         loss_pi.backward()
         self.pi_optimizer.step()
 
@@ -225,7 +233,7 @@ class Agent:
                 p_targ.data.mul_(self.polyak)
                 p_targ.data.add_((1 - self.polyak) * p.data)
         
-        return ret_loss_q, ret_loss_pi
+        return ret_loss_q, ret_loss_pi, batch_priorities
 
     def get_action(self, o, deterministic=False):
         o = torch.from_numpy(o).float().unsqueeze(0).to(self.device)

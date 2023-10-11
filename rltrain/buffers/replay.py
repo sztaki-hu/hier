@@ -31,7 +31,9 @@ class ReplayBuffer:
                      obs2=self.obs2_buf[idxs],
                      act=self.act_buf[idxs],
                      rew=self.rew_buf[idxs],
-                     done=self.done_buf[idxs])
+                     done=self.done_buf[idxs],
+                     indices = idxs,
+                     weights=np.ones(batch_size))
         return {k: torch.as_tensor(v, dtype=torch.float32) for k,v in batch.items()}
     
     def get_all(self):
@@ -42,3 +44,6 @@ class ReplayBuffer:
                      rew=self.rew_buf[idxs],
                      done=self.done_buf[idxs])
         return {k: torch.as_tensor(v, dtype=torch.float32) for k,v in batch.items()}
+    
+    def get_beta(self):
+        return 0.0

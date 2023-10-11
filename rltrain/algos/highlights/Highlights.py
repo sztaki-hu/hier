@@ -1,10 +1,10 @@
 from rltrain.buffers.replay import ReplayBuffer
 
-HIGHLIGHTS_MODES = ['fix_th']
+HIGHLIGHTS_MODES = ['nohl','fix_th']
 
 class Highlights:
     def __init__(self,config):
-        self.highlights_active = config['buffer']['highlights']['bool']
+        self.highlights_active = False if config['buffer']['highlights']['mode'] == 'nohl' else True
         self.highlights_batch_ratio = config['buffer']['highlights']['batch_ratio']
         self.highlights_buffer_size = config['buffer']['highlights']['buffer_size']
         self.highlights_mode = config['buffer']['highlights']['mode']

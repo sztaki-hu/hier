@@ -1,6 +1,8 @@
 import numpy as np
 import random
 
+HER_TYPE_LIST = ['noher', 'final', 'future', 'future_once', 'near', 'next']
+
 class HER:
     def __init__(self,config, env, replay_buffer):
         self.config = config
@@ -12,7 +14,8 @@ class HER:
         self.her_active = False if self.her_goal_selection_strategy == "noher" else True
         self.her_n_sampled_goal = config['buffer']['her']['n_sampled_goal']
         self.her_state_check = config['buffer']['her']['state_check'] if "state_check" in config['buffer']['her'] else False
-    
+        assert self.her_goal_selection_strategy in HER_TYPE_LIST
+
     def get_new_goals(self, episode, ep_t):
         if self.her_goal_selection_strategy == 'final':
             new_goals = []
