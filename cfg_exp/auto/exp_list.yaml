@@ -1,6 +1,6 @@
 process_0:
   agent: 
-    type: ['sac']
+    type: ['ddpg']
   environment:
     reward:
       reward_shaping_type: ['sparse'] # sparse / state_change_bonus
@@ -10,12 +10,12 @@ process_0:
     her:
       goal_selection_strategy: ['final'] # noher / final / future / future_once / near / next
     highlights:
-      mode: ['nohl','fix_th'] # nohl / fix_th
+      mode: ['nohl','fix'] # nohl / fix_th / ama
       batch_ratio: [0.5]
     per:
-      mode: ['noper','proportional'] # noper / proportional
+      mode: ['proportional'] # noper / proportional
   trainer:
-    total_timesteps: [5e5]
+    total_timesteps: [5e4]
   eval:
     freq: [1e4]
   # structure is differend than in the config file ##################################################x

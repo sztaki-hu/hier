@@ -1,4 +1,4 @@
-agent_list: ['sac','td3']
+agent_list: ['sac','td3','ddpg']
 env_list: ['gym','gympanda','gym_mod','rlbench_joint']
 task_list:
   gym: ['MountainCarContinuous-v0','InvertedPendulum-v4','InvertedDoublePendulum-v4','Swimmer-v4',

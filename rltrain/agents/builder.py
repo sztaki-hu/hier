@@ -1,3 +1,5 @@
+
+
 def make_agent(device,config,config_framework):
 
     agent_type = config['agent']['type']
@@ -9,5 +11,8 @@ def make_agent(device,config,config_framework):
         return Agent(device,config)
     elif agent_type == 'td3':
         from rltrain.agents.td3.agent import Agent
+        return Agent(device,config)
+    elif agent_type == 'ddpg':
+        from rltrain.agents.ddpg.agent import Agent
         return Agent(device,config)
    

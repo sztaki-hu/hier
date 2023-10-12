@@ -10,8 +10,8 @@ from rltrain.envs.builder import make_env
 from rltrain.algos.cl.builder import make_cl
 from rltrain.agents.builder import make_agent
 from rltrain.buffers.builder import make_per
+from rltrain.algos.highlights.builder import make_hl
 from rltrain.algos.her import HER
-from rltrain.algos.highlights.Highlights import Highlights
 
 class SamplerTrainerTester:
 
@@ -66,21 +66,12 @@ class SamplerTrainerTester:
         self.her_goal_selection_strategy = config['buffer']['her']['goal_selection_strategy']
         self.her_active = False if self.her_goal_selection_strategy == "noher" else True
         self.her_n_sampled_goal = config['buffer']['her']['n_sampled_goal'] 
-        self.virtual_experience_dq = collections.deque(maxlen=self.rollout_stats_window_size)
-        
-        # CL
-        self.cl_mode = config['trainer']['cl']['type']
+        self.virtual_experience_dq = collections.deque(maxlen=self.rollout_stats_window_size)     
 
-        # Highlights
-        self.highlights_batch_size =  int(config['trainer']['batch_size'] * config['buffer']['highlights']['batch_ratio'])
-        self.replay_batch_size =  int(config['trainer']['batch_size'] - self.highlights_batch_size)
-
-
-       
         # Log
         self.print_out_name = '_'.join((self.logger.exp_name,str(self.logger.seed_id)))  
 
-        # Replay Buffer
+        # Replay Buffer / PER (Prioritized Experience Replay)
         self.per_active = False if config['buffer']['per']['mode'] == 'noper' else True
         self.replay_buffer = make_per(config)
         
@@ -93,15 +84,19 @@ class SamplerTrainerTester:
         # Env eval
         self.env_eval = make_env(self.config, self.config_framework)
 
-        # HER
+        # HER (Hindsight Experience Replay)
         self.HER = HER(self.config,self.env,self.replay_buffer)
 
-        # CL
+        # CL (Curriculum Learning)
+        self.cl_mode = config['trainer']['cl']['type']
         self.CL = make_cl(self.config, self.env, self.replay_buffer)
 
-        # Highlights
-        self.HL = Highlights(self.config)
-        if self.HL.highlights_active == False: self.replay_batch_size = self.batch_size
+        # HL (Highlights)
+        self.highlights_batch_size =  int(config['trainer']['batch_size'] * config['buffer']['highlights']['batch_ratio'])
+        self.replay_batch_size =  int(config['trainer']['batch_size'] - self.highlights_batch_size)
+
+        self.HL = make_hl(self.config)
+        if self.HL.hl_active == False: self.replay_batch_size = self.batch_size
         
 
         """
@@ -158,7 +153,7 @@ class SamplerTrainerTester:
                 # Take deterministic actions at test time 
                 if self.agent_type == 'sac':
                     a = self.agent.get_action(o, True)
-                elif self.agent_type == 'td3':
+                elif self.agent_type in ['td3','ddpg']:
                     a = self.agent.get_action(o, 0)
                 o, r, terminated, truncated, info = self.env_eval.step(a)
                 d = terminated or truncated
@@ -202,7 +197,7 @@ class SamplerTrainerTester:
             if t > self.start_steps:
                 if self.agent_type == 'sac':
                     a = self.agent.get_action(o, False) 
-                elif self.agent_type == 'td3':
+                elif self.agent_type in ['td3','ddpg']:
                     a = self.agent.get_action(o, self.agent.act_noise)
                 # a = self.get_action(o)
             else:
@@ -259,9 +254,9 @@ class SamplerTrainerTester:
             if t >= self.update_after and t % self.update_every == 0:
                 if self.replay_buffer.size > 0:
                     for j in range(self.update_every):           
-                        if self.HL.highlights_active and self.HL.highlights_replay_buffer.size > 0:
+                        if self.HL.hl_active and self.HL.hl_replay_buffer.size > 0:
                             replay_batch = self.replay_buffer.sample_batch(self.replay_batch_size)
-                            highlights_batch = self.HL.highlights_replay_buffer.sample_batch(self.highlights_batch_size)
+                            highlights_batch = self.HL.hl_replay_buffer.sample_batch(self.highlights_batch_size)
                             batch = dict(obs=torch.cat((replay_batch['obs'], highlights_batch['obs']), 0),
                                             obs2=torch.cat((replay_batch['obs2'], highlights_batch['obs2']), 0),
                                             act=torch.cat((replay_batch['act'], highlights_batch['act']), 0),
@@ -336,7 +331,8 @@ class SamplerTrainerTester:
                 if self.cl_mode == 'examplebyexample': self.logger.tb_writer_add_scalar("cl/same_setup_num", np.mean(self.CL.same_setup_num_dq), t)
 
                 # HL
-                self.logger.tb_writer_add_scalar("hl/highlights_buffer_size", self.HL.highlights_replay_buffer.size, t)
+                self.logger.tb_writer_add_scalar("hl/highlights_buffer_size", self.HL.hl_replay_buffer.size, t)
+                self.logger.tb_writer_add_scalar("hl/highlights_threshold", self.HL.hl_threshold, t)
 
                 # TIME
                 time1 = time.time()

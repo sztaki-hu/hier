@@ -1,5 +1,5 @@
 general:
-  exp_name: 1011_X
+  exp_name: 1012_X
   logdir: logs
   demodir: demos
   seed: random
@@ -55,11 +55,15 @@ buffer:
     beta_start: 0.4
     beta_frames_ratio: 0.8
   highlights:
-    mode: input # nohl / fix_th
+    mode: input # nohl / fix / ama
     batch_ratio: input
     buffer_size: 5e4
-    fix_th:
+    fix:
       threshold: 15
+    ama: # adaptive moving average
+      threshold_start: 20
+      threshold_margin: 5
+      window: 20
 
 
 sampler:
@@ -123,7 +127,7 @@ trainer:
 
 eval:
   freq: input
-  num_episodes: 10
+  num_episodes: 100
   
 
 logger:

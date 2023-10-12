@@ -259,11 +259,11 @@ class Agent:
              # Optimizers
             self.pi_optimizer.load_state_dict(torch.load(path+"_pi_optim"))
             for g in self.pi_optimizer.param_groups:
-                g['lr'] = self.lr
+                g['lr'] = self.pi_lr
 
             self.q_optimizer.load_state_dict(torch.load(path+"_q_optim"))
             for g in self.q_optimizer.param_groups:
-                g['lr'] = self.lr
+                g['lr'] = self.q_lr
 
         elif mode == "pi":
             self.ac.pi.load_state_dict(torch.load(path+"_pi"))
