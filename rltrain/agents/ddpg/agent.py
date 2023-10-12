@@ -2,7 +2,6 @@ from copy import deepcopy
 import numpy as np
 import torch
 from torch.optim import Adam
-import gym
 import time
 
 import rltrain.agents.ddpg.core as core
