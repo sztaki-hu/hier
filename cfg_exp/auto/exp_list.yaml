@@ -1,6 +1,6 @@
 process_0:
   agent: 
-    type: ['ddpg']
+    type: ['sac','td3','ddpg']
   environment:
     reward:
       reward_shaping_type: ['sparse'] # sparse / state_change_bonus
@@ -8,14 +8,14 @@ process_0:
   buffer:
     replay_buffer_size: [1e6]
     her:
-      goal_selection_strategy: ['final'] # noher / final / future / future_once / near / next
+      goal_selection_strategy: ['noher','final'] # noher / final / future / future_once / near / next
     highlights:
-      mode: ['nohl','fix'] # nohl / fix_th / ama
-      batch_ratio: [0.5]
+      mode: ['nohl'] # nohl / fix_th / ama
+      batch_ratio: [0.0]
     per:
-      mode: ['proportional'] # noper / proportional
+      mode: ['noper'] # noper / proportional
   trainer:
-    total_timesteps: [5e4]
+    total_timesteps: [5e5]
   eval:
     freq: [1e4]
   # structure is differend than in the config file ##################################################x
@@ -28,7 +28,7 @@ process_0:
 
 process_1:
   agent: 
-    type: ['sac']
+    type: ['sac','td3','ddpg']
   environment:
     reward:
       reward_shaping_type: ['sparse'] # sparse / state_change_bonus
@@ -36,12 +36,12 @@ process_1:
   buffer:
     replay_buffer_size: [1e6]
     her:
-      goal_selection_strategy: ['final'] # noher / final / future / future_once / near / next
+      goal_selection_strategy: ['noher','final'] # noher / final / future / future_once / near / next
     highlights:
-      mode: ['nohl','fix_th'] # nohl / fix_th
-      batch_ratio: [0.5]
+      mode: ['nohl'] # nohl / fix_th / ama
+      batch_ratio: [0.0]
     per:
-      mode: ['noper','proportional'] # noper / proportional
+      mode: ['noper'] # noper / proportional
   trainer:
     total_timesteps: [5e5]
   eval:
@@ -56,7 +56,7 @@ process_1:
 
 process_2:
   agent: 
-    type: ['sac']
+    type: ['sac','td3','ddpg']
   environment:
     reward:
       reward_shaping_type: ['sparse'] # sparse / state_change_bonus
@@ -64,12 +64,12 @@ process_2:
   buffer:
     replay_buffer_size: [1e6]
     her:
-      goal_selection_strategy: ['final'] # noher / final / future / future_once / near / next
+      goal_selection_strategy: ['noher','final'] # noher / final / future / future_once / near / next
     highlights:
-      mode: ['nohl','fix_th'] # nohl / fix_th
-      batch_ratio: [0.5]
+      mode: ['nohl'] # nohl / fix_th / ama
+      batch_ratio: [0.0]
     per:
-      mode: ['noper','proportional'] # noper / proportional
+      mode: ['noper'] # noper / proportional
   trainer:
     total_timesteps: [5e5]
   eval:
@@ -84,7 +84,7 @@ process_2:
 
 process_3:
   agent: 
-    type: ['td3']
+    type: ['sac','td3','ddpg']
   environment:
     reward:
       reward_shaping_type: ['sparse'] # sparse / state_change_bonus
@@ -92,12 +92,12 @@ process_3:
   buffer:
     replay_buffer_size: [1e6]
     her:
-      goal_selection_strategy: ['final'] # noher / final / future / future_once / near / next
+      goal_selection_strategy: ['noher','final'] # noher / final / future / future_once / near / next
     highlights:
-      mode: ['nohl','fix_th'] # nohl / fix_th
-      batch_ratio: [0.5]
+      mode: ['nohl'] # nohl / fix_th / ama
+      batch_ratio: [0.0]
     per:
-      mode: ['noper','proportional'] # noper / proportional
+      mode: ['proportional'] # noper / proportional
   trainer:
     total_timesteps: [5e5]
   eval:
@@ -112,7 +112,7 @@ process_3:
 
 process_4:
   agent: 
-    type: ['td3']
+    type: ['sac','td3','ddpg']
   environment:
     reward:
       reward_shaping_type: ['sparse'] # sparse / state_change_bonus
@@ -120,12 +120,12 @@ process_4:
   buffer:
     replay_buffer_size: [1e6]
     her:
-      goal_selection_strategy: ['final'] # noher / final / future / future_once / near / next
+      goal_selection_strategy: ['noher','final'] # noher / final / future / future_once / near / next
     highlights:
-      mode: ['nohl','fix_th'] # nohl / fix_th
-      batch_ratio: [0.5]
+      mode: ['nohl'] # nohl / fix_th / ama
+      batch_ratio: [0.0]
     per:
-      mode: ['noper','proportional'] # noper / proportional
+      mode: ['proportional'] # noper / proportional
   trainer:
     total_timesteps: [5e5]
   eval:
@@ -140,7 +140,7 @@ process_4:
 
 process_5:
   agent: 
-    type: ['td3']
+    type: ['sac','td3','ddpg']
   environment:
     reward:
       reward_shaping_type: ['sparse'] # sparse / state_change_bonus
@@ -148,12 +148,12 @@ process_5:
   buffer:
     replay_buffer_size: [1e6]
     her:
-      goal_selection_strategy: ['final'] # noher / final / future / future_once / near / next
+      goal_selection_strategy: ['noher','final'] # noher / final / future / future_once / near / next
     highlights:
-      mode: ['nohl','fix_th'] # nohl / fix_th
-      batch_ratio: [0.5]
+      mode: ['nohl'] # nohl / fix_th / ama
+      batch_ratio: [0.0]
     per:
-      mode: ['noper','proportional'] # noper / proportional
+      mode: ['proportional'] # noper / proportional
   trainer:
     total_timesteps: [5e5]
   eval:
