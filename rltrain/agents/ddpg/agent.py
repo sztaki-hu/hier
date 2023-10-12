@@ -17,6 +17,8 @@ class Agent:
         self.pi_lr = config['agent']['learning_rate']  # pi_lr and q_lr are the same bc of SB3 implementation
         self.q_lr = config['agent']['learning_rate']  # pi_lr and q_lr are the same bc of SB3 implementation
 
+        self.act_noise = config['agent']['ddpg']['act_noise'] 
+
         self.obs_dim = config['environment']['obs_dim'] 
         self.act_dim = config['environment']['act_dim']
         self.boundary_min = np.array(config['agent']['boundary_min'])[:self.act_dim]

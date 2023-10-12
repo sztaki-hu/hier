@@ -42,6 +42,8 @@ agent:
     noise_clip: 0.5
     policy_delay : 2
     act_noise: 0.1
+  ddpg:
+    act_noise: 0.1
 
 buffer:
   replay_buffer_size: input
