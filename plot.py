@@ -20,128 +20,110 @@ def create_folder(path):
         print(path + ' folder already exists!')
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--plotid", default="0926_B_push" ,help="Id of plot")
+#parser.add_argument("--plotid", default="1004_A_slide" ,help="Id of plot")
 parser.add_argument("--outdir", default="plots" ,help="Path of the output folder")
 parser.add_argument("--show", default=False ,help="Id of plot")
 args = parser.parse_args()
 
-plotdata_list = ['eval_success_rate',"rollout_success_rate","cl_ratio","rollout_state_changed","eval_state_change_rate"]
+
+plotid = '1015_A'
+seednum = 3
+plotdata_list = ['eval_success_rate',"rollout_success_rate","cl_ratio","rollout_state_changed","eval_state_change_rate","hl_highlights_buffer_size"]
+taskname_list = ['Reach','Push','Slide','PickAndPlace','Stack']
+#taskname_list = ['Slide']
+#taskname_list = ['PickAndPlace']
 
 create_folder(os.path.join(current_dir, args.outdir))
-create_folder(os.path.join(current_dir, args.outdir, args.plotid))
 
-exps = []
-
-# General
-# exp_id = "0920_Y"
-# taskname = 'Push'
-# her = "final"
-# exps.append({"exp_name": exp_id+"_Panda"+taskname+"-v3_sac_"+her+"_linear", "seed_num":2, "color": "blue", "plot_name": "linear"})
-# exps.append({"exp_name": exp_id+"_Panda"+taskname+"-v3_sac_"+her+"_selfpaced", "seed_num":2, "color": "green", "plot_name": "selfpaced"})
-# exps.append({"exp_name": exp_id+"_Panda"+taskname+"-v3_sac_"+her+"_quad", "seed_num":2, "color": "purple", "plot_name": "quad"})
+algs = ['sac','td3','ddpg']
 
 
-# taskname = 'Push'
-# her = "final"
-# exps.append({"exp_name": "0924_A_Panda"+taskname+"-v3_sac_"+her+"_controldiscrete_const", "seed_num":3, "color": "navy", "plot_name": "controldiscrete_const"})
-# exps.append({"exp_name": "0924_A_Panda"+taskname+"-v3_sac_"+her+"_controldiscrete_linear", "seed_num":3, "color": "blue", "plot_name": "controldiscrete_linear"})
-# exps.append({"exp_name": "0924_A_Panda"+taskname+"-v3_sac_"+her+"_controldiscrete_quad", "seed_num":3, "color": "royalblue", "plot_name": "controldiscrete_quad"})
-# exps.append({"exp_name": "0924_A_Panda"+taskname+"-v3_sac_"+her+"_controldiscrete_sqrt", "seed_num":3, "color": "deepskyblue", "plot_name": "controldiscrete_sqrt"})
-# exps.append({"exp_name": "0924_A_Panda"+taskname+"-v3_sac_"+her+"_predefined_linear", "seed_num":3, "color": "green", "plot_name": "predefined_linear"})
-# exps.append({"exp_name": "0924_A_Panda"+taskname+"-v3_sac_"+her+"_predefined_quad", "seed_num":3, "color": "limegreen", "plot_name": "predefined_quad"})
-# exps.append({"exp_name": "0924_A_Panda"+taskname+"-v3_sac_"+her+"_predefined_sqrt", "seed_num":3, "color": "seagreen", "plot_name": "predefined_sqrt"})
-# exps.append({"exp_name": "0924_A_Panda"+taskname+"-v3_sac_"+her+"_nocl", "seed_num":3, "color": "brown", "plot_name": "nocl"})
+for taskname in taskname_list:
+    for alg in algs:
+    
+        logdir = plotid + "_Panda" + taskname + "_" + alg
+        create_folder(os.path.join(current_dir, args.outdir, logdir))
+        exps = []
 
-# taskname = 'Slide'
-# her = "final"
-# exps.append({"exp_name": "0924_A_Panda"+taskname+"-v3_sac_"+her+"_controldiscrete_const", "seed_num":3, "color": "navy", "plot_name": "controldiscrete_const; buffer=1e6"})
-# exps.append({"exp_name": "0924_A_Panda"+taskname+"-v3_sac_"+her+"_predefined_linear", "seed_num":3, "color": "green", "plot_name": "predefined_linear; buffer=1e6"})
-# exps.append({"exp_name": "0925_A_Panda"+taskname+"-v3_sac_"+her+"_controldiscrete_const", "seed_num":3, "color": "navy", "plot_name": "controldiscrete_const; buffer=1e5"})
-# exps.append({"exp_name": "0925_A_Panda"+taskname+"-v3_sac_"+her+"_predefined_linear", "seed_num":3, "color": "green", "plot_name": "predefined_linear; buffer=1e5"})
-# exps.append({"exp_name": "0925_B_Panda"+taskname+"-v3_sac_"+her+"_controldiscrete_const_balancediscard", "seed_num":3, "color": "purple", "plot_name": "controldiscrete_const_balancediscard; buffer=1e5"})
-# exps.append({"exp_name": "0925_B_Panda"+taskname+"-v3_sac_"+her+"_predefined_linear_balancediscard", "seed_num":3, "color": "orange", "plot_name": "predefined_linear_balancediscard; buffer=1e5"})
-# exps.append({"exp_name": "0925_B_Panda"+taskname+"-v3_sac_"+her+"_controldiscrete_const_discard", "seed_num":3, "color": "violet", "plot_name": "controldiscrete_const_discard; buffer=1e5"})
-# exps.append({"exp_name": "0925_B_Panda"+taskname+"-v3_sac_"+her+"_predefined_linear_discard", "seed_num":3, "color": "yellow", "plot_name": "predefined_linear_discard; buffer=1e5"})
+        
+        exps.append({"exp_name": "_".join(['1012_B', 'Panda'+taskname+'-v3',alg,'sparse','noher','nohl','noper','nocl']) , "seed_num":seednum, "color": "brown", "plot_name": alg})
+        exps.append({"exp_name": "_".join(['1012_B', 'Panda'+taskname+'-v3',alg,'sparse','final','nohl','noper','nocl']) , "seed_num":seednum, "color": "orange", "plot_name": alg + " HER"})
+        exps.append({"exp_name": "_".join(['1012_B', 'Panda'+taskname+'-v3',alg,'sparse','noher','nohl','proportional','nocl']) , "seed_num":seednum, "color": "olive", "plot_name":  alg +" PER"})
+        exps.append({"exp_name": "_".join(['1012_B', 'Panda'+taskname+'-v3',alg,'sparse','final','nohl','proportional','nocl']) , "seed_num":seednum, "color": "green", "plot_name":  alg +" HER+PER"})
+        #exps.append({"exp_name": "_".join(['1012_B', 'Panda'+taskname+'-v3',alg,'sparse','final','fix','proportional','controldiscreteadaptive']) , "seed_num":seednum, "color": "blue", "plot_name":  alg +" HER+PER+HiER(fix)+CL"})
+        #exps.append({"exp_name": "_".join(['1012_B', 'Panda'+taskname+'-v3',alg,'sparse','final','ama','proportional','controldiscreteadaptive']) , "seed_num":seednum, "color": "navy", "plot_name":  alg +" HER+PER+HiER(ama)+CL"})
+        exps.append({"exp_name": "_".join(['1015_A', 'Panda'+taskname+'-v3',alg,'sparse','noher','ama','noper','nocl']) , "seed_num":seednum, "color": "aqua", "plot_name":  alg +" HiER"})
+        exps.append({"exp_name": "_".join(['1015_A', 'Panda'+taskname+'-v3',alg,'sparse','noher','nohl','noper','controldiscreteadaptive']) , "seed_num":seednum, "color": "magenta", "plot_name":  alg +" CL"})
 
-taskname = 'Push'
-her = "final"
-exps.append({"exp_name": "0926_B_Panda"+taskname+"-v3_sac_"+her+"_controldiscrete_const"+"_simple_1e5", "seed_num":3, "color": "navy", "plot_name": "controldiscrete_const"})
-exps.append({"exp_name": "0926_B_Panda"+taskname+"-v3_sac_"+her+"_predefined_linear"+"_simple_1e5", "seed_num":3, "color": "green", "plot_name": "predefined_linear"})
-exps.append({"exp_name": "0926_B_Panda"+taskname+"-v3_sac_"+her+"_controldiscrete_const_sin"+"_simple_1e5", "seed_num":3, "color": "purple", "plot_name": "controldiscrete_const_sin"})
-exps.append({"exp_name": "0926_B_Panda"+taskname+"Dense-v3_sac_"+her+"_controldiscrete_const"+"_simple_1e5", "seed_num":3, "color": "blue", "plot_name": "controldiscrete_const; dense"})
-exps.append({"exp_name": "0926_B_Panda"+taskname+"Dense-v3_sac_"+her+"_predefined_linear"+"_simple_1e5", "seed_num":3, "color": "orange", "plot_name": "predefined_linear; dense"})
-exps.append({"exp_name": "0926_B_Panda"+taskname+"Dense-v3_sac_"+her+"_controldiscrete_const_sin"+"_simple_1e5", "seed_num":3, "color": "pink", "plot_name": "controldiscrete_const_sin; dense"})
+        exp_test_color_list = []
+        for i in range(len(exps)):
+            exp_test_color_list.append(exps[i]['color'])
 
+        for plotdata in plotdata_list:
 
-exp_test_color_list = []
-for i in range(len(exps)):
-    exp_test_color_list.append(exps[i]['color'])
+            dtypes = np.dtype(
+                [
+                    ("exp_name", str),
+                    ("seed", int),
+                    ("t", int),
+                    ("value", float),
+                    ("plot_name", str),
+                ]
+            )
+            data_pd = pd.DataFrame(np.empty(0, dtype=dtypes))
+            print(data_pd.dtypes)
 
-for plotdata in plotdata_list:
+            for i in range(len(exps)):
+                running_id = 0
+                for j in range(exps[i]['seed_num']):
+                    path = os.path.join(current_dir, "logs",exps[i]['exp_name'],str(j),'runs','csv',plotdata+'.csv')
+                    print(path)
+                    pivot = pd.read_csv(path)
 
-    dtypes = np.dtype(
-        [
-            ("exp_name", str),
-            ("seed", int),
-            ("t", int),
-            ("value", float),
-            ("plot_name", str),
-        ]
-    )
-    data_pd = pd.DataFrame(np.empty(0, dtype=dtypes))
-    print(data_pd.dtypes)
+                    column_names = list(pivot.columns)
+                    pivot = pivot.rename(columns={column_names[0]: 't', column_names[1]: "value"})
+                    pivot['exp_name'] = exps[i]['exp_name']
+                    pivot['plot_name'] = exps[i]['plot_name']
+                    pivot['seed'] = int(j)
+                    pivot = pivot[['exp_name','seed','t','value','plot_name']]
 
-    for i in range(len(exps)):
-        running_id = 0
-        for j in range(exps[i]['seed_num']):
-            path = os.path.join(current_dir, "logs",exps[i]['exp_name'],str(j),'runs','csv',plotdata+'.csv')
-            print(path)
-            pivot = pd.read_csv(path)
+                    data_pd = data_pd.append(pivot, ignore_index = True)
 
-            column_names = list(pivot.columns)
-            pivot = pivot.rename(columns={column_names[0]: 't', column_names[1]: "value"})
-            pivot['exp_name'] = exps[i]['exp_name']
-            pivot['plot_name'] = exps[i]['plot_name']
-            pivot['seed'] = int(j)
-            pivot = pivot[['exp_name','seed','t','value','plot_name']]
+                        
+            print(data_pd.to_string())
+            print(data_pd.head())
 
-            data_pd = data_pd.append(pivot, ignore_index = True)
+            # Separate plotting ########################## 
 
-                
-    print(data_pd.to_string())
-    print(data_pd.head())
+            fig, _ = plt.subplots(figsize=(10,8))
+            #exps_names = data_pd['exp_name'].unique()
 
-    # Separate plotting ########################## 
+            for i in range(len(exps)):
+                for j in range(exps[i]['seed_num']):
+                    pivot=data_pd[data_pd["exp_name"] == exps[i]['exp_name']]  
+                    pivot=pivot[pivot["seed"] == j]
+                    plt.plot(pivot['t'],pivot['value'],color=exps[i]['color'],label=exps[i]['plot_name']) if j == 0 else plt.plot(pivot['t'],pivot['value'],color=exps[i]['color'])
+                    
 
-    fig, _ = plt.subplots(figsize=(10,8))
-    #exps_names = data_pd['exp_name'].unique()
+            plt.legend(title='Labels', bbox_to_anchor=(1, 1.01), loc='upper left')
+            plt.xlabel("t")
+            plt.ylabel(plotdata)
+            plt.title(plotdata)
+            figname = plotid + "_" + plotdata + '_.png'
+            plt.savefig(os.path.join(current_dir, args.outdir, logdir, figname), bbox_inches='tight')
+            if args.show: plt.show()
 
-    for i in range(len(exps)):
-        for j in range(exps[i]['seed_num']):
-            pivot=data_pd[data_pd["exp_name"] == exps[i]['exp_name']]  
-            pivot=pivot[pivot["seed"] == j]
-            plt.plot(pivot['t'],pivot['value'],color=exps[i]['color'],label=exps[i]['plot_name']) if j == 0 else plt.plot(pivot['t'],pivot['value'],color=exps[i]['color'])
-            
+            # SD plot ###################################
 
-    plt.legend(title='Labels', bbox_to_anchor=(1, 1.01), loc='upper left')
-    plt.xlabel("t")
-    plt.ylabel(plotdata)
-    plt.title(plotdata)
-    figname = args.plotid + "_" + plotdata + '_.png'
-    plt.savefig(os.path.join(current_dir, args.outdir, args.plotid, figname), bbox_inches='tight')
-    if args.show: plt.show()
+            fig, _ = plt.subplots(figsize=(10,8))
 
-    # SD plot ###################################
+            sns.lineplot(data=data_pd, x="t", y="value", hue="plot_name", errorbar=('ci', 95), palette=exp_test_color_list)
 
-    fig, _ = plt.subplots(figsize=(10,8))
-
-    sns.lineplot(data=data_pd, x="t", y="value", hue="plot_name", errorbar=('ci', 95), palette=exp_test_color_list)
-
-    plt.legend(title='Labels', bbox_to_anchor=(1, 1.01), loc='upper left')
-    plt.xlabel("t")
-    plt.ylabel(plotdata)
-    plt.title(plotdata + " with sd")
-    figname = args.plotid + '_'+plotdata+'_std.png'
-    plt.savefig(os.path.join(current_dir, args.outdir, args.plotid, figname),bbox_inches='tight')
-    if args.show: plt.show()
+            plt.legend(title='Labels', bbox_to_anchor=(1, 1.01), loc='upper left')
+            plt.xlabel("t")
+            plt.ylabel(plotdata)
+            plt.title(plotdata + " with sd")
+            figname = plotid + '_'+plotdata+'_std.png'
+            plt.savefig(os.path.join(current_dir, args.outdir, logdir, figname),bbox_inches='tight')
+            if args.show: plt.show()
 
