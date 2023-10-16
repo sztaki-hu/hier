@@ -40,7 +40,7 @@ class RLBenchJoint(Env):
         
         self.task_env = self.env.get_task(self.env._string_to_task(self.task_name +'.py'))
 
-        self.reset_with_init_check()
+        self.reset()
 
     
     def reset(self):

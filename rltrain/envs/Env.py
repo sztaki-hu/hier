@@ -15,7 +15,8 @@ class Env:
         # General
         self.task_name = self.config['environment']['task']['name']
         self.max_ep_len = config['sampler']['max_ep_len']
-        self.t = 0           
+        self.t = 0         
+        self.obs = None  
 
         # Reward
         self.reward_shaping_type = config['environment']['reward']['reward_shaping_type']
@@ -32,6 +33,8 @@ class Env:
     
     def reset(self):
         o, _ = self.env.reset()
+        self.t = 0
+        self.obs = o.copy()
         return o       
     
     def save_state(self):
@@ -47,25 +50,6 @@ class Env:
     def init_state_valid(self, o):
         return True  
 
-    def reset_with_init_check(self):
-        init_invalid_num = 0
-        reset_num = 0
-        ## Reset Env
-        while True:
-            o = self.reset()
-            try:
-                o = self.reset()
-                reset_num += 1
-                if self.init_state_valid(o):
-                    info = {}
-                    info['init_invalid_num'] = init_invalid_num
-                    info['reset_num'] = reset_num
-                    return o, info
-                else:
-                    init_invalid_num+=0                
-            except:        
-                time.sleep(0.1) 
-
     def is_success(self):
         return False       
 
@@ -75,7 +59,13 @@ class Env:
 
         info['is_success'] = True if self.is_success() == True else False
 
+        self.obs = o.copy()
+
         return o, r, terminated, truncated, info
+
+    def get_obs(self):
+        return self.obs
+        
     
     def random_sample(self):
         return self.env.action_space.sample() 

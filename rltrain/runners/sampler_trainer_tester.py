@@ -46,6 +46,8 @@ class SamplerTrainerTester:
         self.model_save_freq = config['logger']['model']['save']['freq']
         self.model_save_best_start_t = config['logger']['model']['save']['best_start_t'] * self.total_timesteps
         self.model_save_mode = config['logger']['model']['save']['mode']
+        self.model_save_measure = config['logger']['model']['save']['measure']
+        assert self.model_save_measure in ['reward','success_rate']
 
         # Rollout
         self.rollout_stats_window_size = int(config['logger']['rollout']['stats_window_size'])
@@ -92,6 +94,7 @@ class SamplerTrainerTester:
         self.CL = make_cl(self.config, self.env, self.replay_buffer)
 
         # HL (Highlights)
+        self.highlights_include_test =  config['buffer']['highlights']['include_test']
         self.highlights_batch_size =  int(config['trainer']['batch_size'] * config['buffer']['highlights']['batch_ratio'])
         self.replay_batch_size =  int(config['trainer']['batch_size'] - self.highlights_batch_size)
 
@@ -145,20 +148,26 @@ class SamplerTrainerTester:
         ep_lens = []
         success_num = 0.0
         state_changed_num = 0
+        
         for j in range(self.eval_num_episodes):
-            [o, info], d, ep_ret, ep_len = self.env_eval.reset_with_init_check(), False, 0, 0
+            o, d, ep_ret, ep_len = self.env_eval.reset(), False, 0, 0
             o_init = o.copy()
             self.env_eval.ep_o_start = o.copy()
+            test_episode = []
             while not(d or (ep_len == self.max_ep_len)):
                 # Take deterministic actions at test time 
                 if self.agent_type == 'sac':
                     a = self.agent.get_action(o, True)
                 elif self.agent_type in ['td3','ddpg']:
                     a = self.agent.get_action(o, 0)
-                o, r, terminated, truncated, info = self.env_eval.step(a)
+                o2, r, terminated, truncated, info = self.env_eval.step(a)
                 d = terminated or truncated
+                # Save transition
+                test_episode.append((o, a, r, o2, d))
+                o = o2
                 ep_ret += r
-                ep_len += 1                   
+                ep_len += 1    
+            if self.highlights_include_test: self.HL.store_episode(test_episode,info['is_success'])               
             ep_rets.append(ep_ret)
             ep_lens.append(ep_len)
             if info['is_success'] == True: success_num += 1
@@ -179,7 +188,7 @@ class SamplerTrainerTester:
         self.env.ep_o_start = o.copy()
 
         # Init variables
-        best_eval_success_rate = -float('inf')
+        best_eval_measure = -float('inf')
         episode = []
         epoch = 0
         time0 = time.time()
@@ -233,7 +242,7 @@ class SamplerTrainerTester:
                     self.replay_buffer.store(o, a, r, o2, d)
                 
                 # Highlights
-                if info['is_success']: self.HL.store_episode(episode)
+                self.HL.store_episode(episode,info['is_success'])
 
                 # HER
                 if self.her_active and truncated: 
@@ -290,9 +299,13 @@ class SamplerTrainerTester:
                 self.logger.tb_writer_add_scalar("eval/state_change_rate", eval_state_change_rate, t)
 
                 best_model_changed = False
+                if self.model_save_measure == 'reward':
+                    eval_measure = eval_mean_reward 
+                elif self.model_save_measure == 'success_rate':
+                    eval_measure = eval_success_rate
                 if t > self.model_save_best_start_t:
-                    if eval_success_rate > best_eval_success_rate:
-                        best_eval_success_rate = eval_success_rate
+                    if eval_measure > best_eval_measure:
+                        best_eval_measure = eval_measure
                         best_model_changed = True
                 
                 # Save model 

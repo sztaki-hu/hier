@@ -12,6 +12,7 @@ class HL:
                 obs_dim=int(config['environment']['obs_dim']), 
                 act_dim=int(config['environment']['act_dim']), 
                 size=int(float(config['buffer']['highlights']['buffer_size'])))
+        self.hl_success_cond = config['buffer']['highlights']['success_cond']
             
-    def store_episode(self,episode):
+    def store_episode(self,episode, info_success):
         pass

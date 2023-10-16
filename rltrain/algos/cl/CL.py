@@ -19,104 +19,105 @@ class CL:
         self.init_ranges = self.env.get_init_ranges()
 
         print(self.init_ranges)
-       
-        self.obj_range_low = self.init_ranges['obj_range_low']
-        self.obj_range_high = self.init_ranges['obj_range_high']
-        self.object_size = self.init_ranges['object_size']
-        self.goal_range_low = self.init_ranges['goal_range_low']
-        self.goal_range_high = self.init_ranges['goal_range_high']
-        self.obj_num = self.init_ranges['obj_num'] 
-        self.goal_num = self.init_ranges['goal_num']
 
-        ###########################################################################
-        #   centers: [0, 0, object_size / 2]
-        ###########################################################################
-        if self.task_name in ['PandaReach-v3','PandaReachDense-v3']:
-            ###########################################################################
-            # PandaReach-v3:
-            #   goal_range:  [-0.15, -0.15, 0] --- [0.15, 0.15, 0.3]
-            ###########################################################################
-            #self.obj_range_center = (self.obj_range_low + self.obj_range_high) / 2.0
-            self.goal_range_center = (self.goal_range_low  + self.goal_range_high) / 2.0
+        if config['trainer']['cl']['type'] != 'nocl':
+            self.obj_range_low = self.init_ranges['obj_range_low']
+            self.obj_range_high = self.init_ranges['obj_range_high']
+            self.object_size = self.init_ranges['object_size']
+            self.goal_range_low = self.init_ranges['goal_range_low']
+            self.goal_range_high = self.init_ranges['goal_range_high']
+            self.obj_num = self.init_ranges['obj_num'] 
+            self.goal_num = self.init_ranges['goal_num']
 
+            ###########################################################################
+            #   centers: [0, 0, object_size / 2]
+            ###########################################################################
+            if self.task_name in ['PandaReach-v3','PandaReachDense-v3']:
+                ###########################################################################
+                # PandaReach-v3:
+                #   goal_range:  [-0.15, -0.15, 0] --- [0.15, 0.15, 0.3]
+                ###########################################################################
+                #self.obj_range_center = (self.obj_range_low + self.obj_range_high) / 2.0
+                self.goal_range_center = (self.goal_range_low  + self.goal_range_high) / 2.0
+
+                
+            elif self.task_name in ['PandaPush-v3','PandaPushDense-v3']:
+                ###########################################################################
+                # PandaPush-v3:
+                #   goal_range:  [-0.15, -0.15, 0] --- [0.15, 0.15, 0]
+                #   obj_range:   [-0.15, -0.15, 0] --- [0.15, 0.15, 0]
+                ###########################################################################
+                self.obj_range_center = (self.obj_range_low + self.obj_range_high) / 2.0
+                self.goal_range_center = (self.goal_range_low  + self.goal_range_high) / 2.0
+                # self.obj_range_center[1] += 0.05
+                # self.goal_range_center[1] -= 0.05
+                self.obj_range_center[2] = self.object_size / 2.0
+                self.goal_range_center[2] = self.object_size / 2.0
+            elif self.task_name in ['PandaSlide-v3','PandaSlideDense-v3']:
+                ###########################################################################
+                # PandaSlide-v3:
+                #   goal_range:  [-0.35, -0.15, 0] --- [0.35, 0.15, 0]
+                #   obj_range:   [-0.15, -0.15, 0] --- [0.15, 0.15, 0]
+                ###########################################################################
+                self.obj_range_center = (self.obj_range_low + self.obj_range_high) / 2.0
+                self.goal_range_center = (self.goal_range_low  + self.goal_range_high) / 2.0
+                self.obj_range_center[2] = self.object_size / 2.0
+                self.goal_range_center[2] = self.object_size / 2.0
+            elif self.task_name in ['PandaPickAndPlace-v3','PandaPickAndPlaceDense-v3']:
+                ###########################################################################
+                # PandaPickAndPlace-v3:
+                #   goal_range:  [-0.15, -0.15, 0] --- [0.15, 0.15, 0.2]
+                #   obj_range:   [-0.15, -0.15, 0] --- [0.15, 0.15, 0]
+                ###########################################################################
+                self.obj_range_center = (self.obj_range_low + self.obj_range_high) / 2.0
+                self.goal_range_center = (self.goal_range_low  + self.goal_range_high) / 2.0
+                self.obj_range_center[2] = self.object_size / 2.0
+                self.goal_range_center[2] = self.object_size / 2.0
+            elif self.task_name in ['PandaStack-v3','PandaStackDense-v3']:
+                ###########################################################################
+                # PandaStack-v3:
+                #   goal_range:  [-0.15, -0.15, 0] --- [0.15, 0.15, 0]
+                #   obj_range:   [-0.15, -0.15, 0] --- [0.15, 0.15, 0]
+                #   centers goal 2: [0, 0, 3 * object_size / 2]
+                ###########################################################################
+                obj1_range_center = (self.obj_range_low + self.obj_range_high) / 2.0
+                goal1_range_center = (self.goal_range_low  + self.goal_range_high) / 2.0     
+                obj1_range_center[2] = self.object_size / 2.0
+                goal1_range_center[2] = 3* self.object_size / 2.0
+
+                obj2_range_center = (self.obj_range_low + self.obj_range_high) / 2.0
+                goal2_range_center = (self.goal_range_low  + self.goal_range_high) / 2.0     
+                obj2_range_center[2] = self.object_size / 2.0
+                goal2_range_center[2] = 3* self.object_size / 2.0
+
+                self.obj_range_center = np.concatenate([obj1_range_center,obj2_range_center])
+                self.goal_range_center = np.concatenate([goal1_range_center,goal2_range_center])
             
-        elif self.task_name in ['PandaPush-v3','PandaPushDense-v3']:
-            ###########################################################################
-            # PandaPush-v3:
-            #   goal_range:  [-0.15, -0.15, 0] --- [0.15, 0.15, 0]
-            #   obj_range:   [-0.15, -0.15, 0] --- [0.15, 0.15, 0]
-            ###########################################################################
-            self.obj_range_center = (self.obj_range_low + self.obj_range_high) / 2.0
-            self.goal_range_center = (self.goal_range_low  + self.goal_range_high) / 2.0
-            # self.obj_range_center[1] += 0.05
-            # self.goal_range_center[1] -= 0.05
-            self.obj_range_center[2] = self.object_size / 2.0
-            self.goal_range_center[2] = self.object_size / 2.0
-        elif self.task_name in ['PandaSlide-v3','PandaSlideDense-v3']:
-            ###########################################################################
-            # PandaSlide-v3:
-            #   goal_range:  [-0.35, -0.15, 0] --- [0.35, 0.15, 0]
-            #   obj_range:   [-0.15, -0.15, 0] --- [0.15, 0.15, 0]
-            ###########################################################################
-            self.obj_range_center = (self.obj_range_low + self.obj_range_high) / 2.0
-            self.goal_range_center = (self.goal_range_low  + self.goal_range_high) / 2.0
-            self.obj_range_center[2] = self.object_size / 2.0
-            self.goal_range_center[2] = self.object_size / 2.0
-        elif self.task_name in ['PandaPickAndPlace-v3','PandaPickAndPlaceDense-v3']:
-            ###########################################################################
-            # PandaPickAndPlace-v3:
-            #   goal_range:  [-0.15, -0.15, 0] --- [0.15, 0.15, 0.2]
-            #   obj_range:   [-0.15, -0.15, 0] --- [0.15, 0.15, 0]
-            ###########################################################################
-            self.obj_range_center = (self.obj_range_low + self.obj_range_high) / 2.0
-            self.goal_range_center = (self.goal_range_low  + self.goal_range_high) / 2.0
-            self.obj_range_center[2] = self.object_size / 2.0
-            self.goal_range_center[2] = self.object_size / 2.0
-        elif self.task_name in ['PandaStack-v3','PandaStackDense-v3']:
-            ###########################################################################
-            # PandaStack-v3:
-            #   goal_range:  [-0.15, -0.15, 0] --- [0.15, 0.15, 0]
-            #   obj_range:   [-0.15, -0.15, 0] --- [0.15, 0.15, 0]
-            #   centers goal 2: [0, 0, 3 * object_size / 2]
-            ###########################################################################
-            obj1_range_center = (self.obj_range_low + self.obj_range_high) / 2.0
-            goal1_range_center = (self.goal_range_low  + self.goal_range_high) / 2.0     
-            obj1_range_center[2] = self.object_size / 2.0
-            goal1_range_center[2] = 3* self.object_size / 2.0
+            if self.obj_num == 0 and self.goal_num == 1:
+                self.obj_range_half = None
+                self.goal_range_half = (self.goal_range_high - self.goal_range_low) / 2.0    
+            elif self.obj_num == 1 and self.goal_num == 1:     
+                self.obj_range_half = (self.obj_range_high - self.obj_range_low) / 2.0
+                self.goal_range_half = (self.goal_range_high - self.goal_range_low) / 2.0 
+            elif self.obj_num == 2 and self.goal_num == 2:
+                obj1_range_half = (self.obj_range_high - self.obj_range_low) / 2.0
+                goal1_range_half = (self.goal_range_high - self.goal_range_low) / 2.0
+                
+                obj2_range_half = (self.obj_range_high - self.obj_range_low) / 2.0
+                goal2_range_half = (self.goal_range_high - self.goal_range_low) / 2.0
 
-            obj2_range_center = (self.obj_range_low + self.obj_range_high) / 2.0
-            goal2_range_center = (self.goal_range_low  + self.goal_range_high) / 2.0     
-            obj2_range_center[2] = self.object_size / 2.0
-            goal2_range_center[2] = 3* self.object_size / 2.0
+                self.obj_range_half = np.concatenate([obj1_range_half,obj2_range_half])
+                self.goal_range_half = np.concatenate([goal1_range_half,goal2_range_half])
+            else:
+                print("Obj Num: " + str(self.obj_num))
+                print("Goal Num: " + str(self.goal_num))
+                assert False
+                
+            self.cl_range_growth_mode = config['trainer']['cl']['range_growth_mode']
+            self.balancediscard_ratio = config['trainer']['cl']['balancediscard_ratio']
+            self.cl_ratio_discard_lag = self.config['trainer']['cl']['ratio_discard_lag']
 
-            self.obj_range_center = np.concatenate([obj1_range_center,obj2_range_center])
-            self.goal_range_center = np.concatenate([goal1_range_center,goal2_range_center])
-        
-        if self.obj_num == 0 and self.goal_num == 1:
-            self.obj_range_half = None
-            self.goal_range_half = (self.goal_range_high - self.goal_range_low) / 2.0    
-        elif self.obj_num == 1 and self.goal_num == 1:     
-            self.obj_range_half = (self.obj_range_high - self.obj_range_low) / 2.0
-            self.goal_range_half = (self.goal_range_high - self.goal_range_low) / 2.0 
-        elif self.obj_num == 2 and self.goal_num == 2:
-            obj1_range_half = (self.obj_range_high - self.obj_range_low) / 2.0
-            goal1_range_half = (self.goal_range_high - self.goal_range_low) / 2.0
-            
-            obj2_range_half = (self.obj_range_high - self.obj_range_low) / 2.0
-            goal2_range_half = (self.goal_range_high - self.goal_range_low) / 2.0
-
-            self.obj_range_half = np.concatenate([obj1_range_half,obj2_range_half])
-            self.goal_range_half = np.concatenate([goal1_range_half,goal2_range_half])
-        else:
-            print("Obj Num: " + str(self.obj_num))
-            print("Goal Num: " + str(self.goal_num))
-            assert False
-            
-        self.cl_range_growth_mode = config['trainer']['cl']['range_growth_mode']
-        self.balancediscard_ratio = config['trainer']['cl']['balancediscard_ratio']
-        self.cl_ratio_discard_lag = self.config['trainer']['cl']['ratio_discard_lag']
-
-        assert self.cl_range_growth_mode in RANGE_GROWTH_MODES
+            assert self.cl_range_growth_mode in RANGE_GROWTH_MODES
 
         self.cl_ratio = 0
         self.cl_obj_ratio = 0
