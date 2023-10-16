@@ -24,8 +24,58 @@ class Eval:
         self.max_ep_len = config['sampler']['max_ep_len']  
         self.agent_type = config['agent']['type']  
 
-    
     def eval_agent(self,model_name=90,num_display_episode=10, headless=True, time_delay=0.02, current_dir = None, outdir = "eval", figid = "X"):
+
+        # Load model
+        path = self.logger.get_model_save_path(model_name)
+        #path = os.path.join(current_dir,'logs/0928_A_PandaPush-v3_sac_controldiscrete_const/3/model_backup/model_best_model')
+        print(path)
+
+        self.agent.load_weights(path,mode="pi",eval=True)
+
+        # Create Env
+        self.config['environment']['headless'] = headless
+        self.env = make_env(self.config,self.config_framework)
+
+        # Start Eval
+        ep_rets = []
+        ep_lens = []
+        success_num = 0.0
+        for j in tqdm(range(num_display_episode), desc ="Eval: ", leave=True):
+            o, d, ep_ret, ep_len = self.env.reset(), False, 0, 0
+            self.env.ep_o_start = o.copy()
+            
+            while not(d or (ep_len == self.max_ep_len)):
+                # Take deterministic actions at test time 
+                if self.agent_type == 'sac':
+                    a = self.agent.get_action(o, True)
+                elif self.agent_type == 'td3':
+                    a = self.agent.get_action(o, 0)
+                o, r, terminated, truncated, info = self.env.step(a)
+                d = terminated or truncated
+                ep_ret += r
+                ep_len += 1
+                if headless == False: time.sleep(time_delay)
+            ep_rets.append(ep_ret)
+            ep_lens.append(ep_len)
+            tqdm.write("Len: " + str(ep_len) + " | " + str(info['is_success']))
+            if info['is_success'] == True:  success_num += 1        
+
+        # Shutdown environment
+        self.env.shuttdown() 
+
+        ep_ret_avg = sum(ep_rets) / len(ep_rets)
+        mean_ep_length = sum(ep_lens) / len(ep_lens)
+        success_rate = success_num / num_display_episode
+        
+        print("#########################################")
+        print("ep_ret_avg: " + str(ep_ret_avg))
+        print("mean_ep_length: " + str(mean_ep_length))
+        print("success_rate: " + str(success_rate))
+        print("#########################################")
+
+    
+    def eval_agent_stats(self,model_name=90,num_display_episode=10, headless=True, time_delay=0.02, current_dir = None, outdir = "eval", figid = "X"):
 
         # Load model
         path = self.logger.get_model_save_path(model_name)
@@ -68,7 +118,7 @@ class Eval:
         ep_lens = []
         success_num = 0.0
         for j in tqdm(range(num_display_episode), desc ="Eval: ", leave=True):
-            [o, info], d, ep_ret, ep_len = self.env.reset_with_init_check(), False, 0, 0
+            o, d, ep_ret, ep_len = self.env.reset(), False, 0, 0
             self.env.ep_o_start = o.copy()
             
             obj_init = self.env.get_achieved_goal_from_obs(o)
@@ -209,7 +259,7 @@ class Eval:
 
         for _ in tqdm(range(num_display_episode), desc ="Create video: ", leave=True):
 
-            [o_dict, info], d, ep_ret, ep_len = env.reset(), False, 0, 0
+            o_dict, d, ep_ret, ep_len = env.reset(), False, 0, 0
             o = np.concatenate((o_dict['observation'], o_dict['desired_goal']))
             images.append(env.render())
             

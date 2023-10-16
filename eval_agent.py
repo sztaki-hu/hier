@@ -28,10 +28,10 @@ def create_folder(path):
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--config", default="logs/1005_A_PandaSlide-v3_sac_nocl" ,help="Path of the config file")
-    parser.add_argument("--figid", default="1005_A_PickAndPlace" ,help="Fig id")
+    parser.add_argument("--config", default="logs/1016_B_InvertedPendulum-v4_sac_sparse_noher_ama_noper_nocl" ,help="Path of the config file")
+    parser.add_argument("--figid", default="1016_B_InvertedPendulum" ,help="Fig id")
     parser.add_argument("--hwid", type=int, default=0 ,help="Hardware id")
-    parser.add_argument("--seedid", type=int, default=0 ,help="seedid")
+    parser.add_argument("--seedid", type=int, default=3 ,help="seedid")
     parser.add_argument("--outdir", default="eval" ,help="Path of the output folder")
     # Example: python3 main.py --configfile /cfg/alma.yaml 0
     args = parser.parse_args()
@@ -63,7 +63,11 @@ if __name__ == '__main__':
     tester = Eval(agent,logger,config,config_framework)
 
     # Test Agent
-    tester.eval_agent(model_name="best_model",num_display_episode=10, headless=False, time_delay = 0.05, current_dir = current_dir, outdir = "eval", figid = args.figid)
+    tester.eval_agent(model_name="best_model",num_display_episode=10, headless=False, time_delay = 0.0, current_dir = current_dir, outdir = "eval", figid = args.figid)
+
+    # Test Agent with Stats (only gympanda)
+    # tester.eval_agent_stats(model_name="best_model",num_display_episode=10, headless=False, time_delay = 0.05, current_dir = current_dir, outdir = "eval", figid = args.figid)
+
 
 
     
