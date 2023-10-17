@@ -1,5 +1,5 @@
 general:
-  exp_name: 1016_X
+  exp_name: 1017_X
   logdir: logs
   demodir: demos
   seed: random
@@ -58,6 +58,8 @@ buffer:
     beta_frames_ratio: 0.8
   highlights:
     mode: input # nohl / fix / ama
+    batch_ratio_mode: prioritized # fix / prioritized
+    batch_ratio_prioritized_alpha: 0.6
     batch_ratio: input
     buffer_size: 5e4
     success_cond: False
