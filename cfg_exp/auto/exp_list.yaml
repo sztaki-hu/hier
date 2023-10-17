@@ -1,6 +1,6 @@
-process_0:
+process_0: # 2 x 2 x 3 x 2h = 24h 
   agent: 
-    type: ['sac','td3','ddpg']
+    type: ['sac','td3']
   environment:
     reward:
       reward_shaping_type: ['sparse'] # sparse / state_change_bonus
@@ -8,27 +8,30 @@ process_0:
   buffer:
     replay_buffer_size: [1e6]
     her:
-      goal_selection_strategy: ['noher','final'] # noher / final / future / future_once / near / next
+      goal_selection_strategy: ['noher'] # noher / final / future / future_once / near / next
     highlights:
-      mode: ['nohl'] # nohl / fix_th / ama
-      batch_ratio: [0.0]
+      mode: ['ama'] # nohl / fix / ama
+      batch_ratio_mode: ['fix',prioritized] # fix / prioritized (works only if 'mode' is not 'nohl')
+      batch_ratio: [0.5]
     per:
       mode: ['noper'] # noper / proportional
   trainer:
     total_timesteps: [5e5]
   eval:
     freq: [1e4]
+    num_episodes: [100]
   # structure is differend than in the config file ##################################################x
   task: 
+    #gym: ['InvertedPendulum-v4'] # InvertedPendulum-v4
     gympanda: ['PandaPush-v3'] # PandaReach-v3 / PandaPush-v3 / PandaSlide-v3 / PandaPickAndPlace-v3 / PandaStack-v3
   cl: 
-    type: ['controldiscrete_const'] # nocl / nullcl / predefined / predefinedtwostage / predefinedthreestage / selfpaced / selfpaceddual / controldiscrete / controldiscreteadaptive
+    type: ['nocl'] # nocl / nullcl / predefined / predefinedtwostage / predefinedthreestage / selfpaced / selfpaceddual / controldiscrete / controldiscreteadaptive
     range_growth_mode: ['simple']
 ####################################################################################################
 
-process_1:
+process_1: # 2 x 2 x 3 x 2h = 24h 
   agent: 
-    type: ['sac','td3','ddpg']
+    type: ['sac','td3']
   environment:
     reward:
       reward_shaping_type: ['sparse'] # sparse / state_change_bonus
@@ -36,83 +39,30 @@ process_1:
   buffer:
     replay_buffer_size: [1e6]
     her:
-      goal_selection_strategy: ['noher','final'] # noher / final / future / future_once / near / next
+      goal_selection_strategy: ['noher'] # noher / final / future / future_once / near / next
     highlights:
-      mode: ['nohl'] # nohl / fix_th / ama
-      batch_ratio: [0.0]
+      mode: ['fix'] # nohl / fix / ama
+      batch_ratio_mode: ['fix',prioritized] # fix / prioritized (works only if 'mode' is not 'nohl')
+      batch_ratio: [0.5]
     per:
       mode: ['noper'] # noper / proportional
   trainer:
     total_timesteps: [5e5]
   eval:
     freq: [1e4]
+    num_episodes: [100]
   # structure is differend than in the config file ##################################################x
   task: 
-    gympanda: ['PandaSlide-v3'] # PandaReach-v3 / PandaPush-v3 / PandaSlide-v3 / PandaPickAndPlace-v3 / PandaStack-v3
-  cl: 
-    type: ['controldiscrete_const'] # nocl / nullcl / predefined / predefinedtwostage / predefinedthreestage / selfpaced / selfpaceddual / controldiscrete / controldiscreteadaptive
-    range_growth_mode: ['simple']
-####################################################################################################
-
-process_2:
-  agent: 
-    type: ['sac','td3','ddpg']
-  environment:
-    reward:
-      reward_shaping_type: ['sparse'] # sparse / state_change_bonus
-      reward_bonus: [0.0]
-  buffer:
-    replay_buffer_size: [1e6]
-    her:
-      goal_selection_strategy: ['noher','final'] # noher / final / future / future_once / near / next
-    highlights:
-      mode: ['nohl'] # nohl / fix_th / ama
-      batch_ratio: [0.0]
-    per:
-      mode: ['noper'] # noper / proportional
-  trainer:
-    total_timesteps: [5e5]
-  eval:
-    freq: [1e4]
-  # structure is differend than in the config file ##################################################x
-  task: 
-    gympanda: ['PandaPickAndPlace-v3'] # PandaReach-v3 / PandaPush-v3 / PandaSlide-v3 / PandaPickAndPlace-v3 / PandaStack-v3
-  cl: 
-    type: ['controldiscrete_const'] # nocl / nullcl / predefined / predefinedtwostage / predefinedthreestage / selfpaced / selfpaceddual / controldiscrete / controldiscreteadaptive
-    range_growth_mode: ['simple']
-####################################################################################################
-
-process_3:
-  agent: 
-    type: ['sac','td3','ddpg']
-  environment:
-    reward:
-      reward_shaping_type: ['sparse'] # sparse / state_change_bonus
-      reward_bonus: [0.0]
-  buffer:
-    replay_buffer_size: [1e6]
-    her:
-      goal_selection_strategy: ['noher','final'] # noher / final / future / future_once / near / next
-    highlights:
-      mode: ['nohl'] # nohl / fix_th / ama
-      batch_ratio: [0.0]
-    per:
-      mode: ['proportional'] # noper / proportional
-  trainer:
-    total_timesteps: [5e5]
-  eval:
-    freq: [1e4]
-  # structure is differend than in the config file ##################################################x
-  task: 
+    #gym: ['InvertedPendulum-v4'] # InvertedPendulum-v4
     gympanda: ['PandaPush-v3'] # PandaReach-v3 / PandaPush-v3 / PandaSlide-v3 / PandaPickAndPlace-v3 / PandaStack-v3
   cl: 
-    type: ['controldiscrete_const'] # nocl / nullcl / predefined / predefinedtwostage / predefinedthreestage / selfpaced / selfpaceddual / controldiscrete / controldiscreteadaptive
+    type: ['nocl'] # nocl / nullcl / predefined / predefinedtwostage / predefinedthreestage / selfpaced / selfpaceddual / controldiscrete / controldiscreteadaptive
     range_growth_mode: ['simple']
 ####################################################################################################
 
-process_4:
+process_2: # 2 x 2 x 3 x 2h = 24h 
   agent: 
-    type: ['sac','td3','ddpg']
+    type: ['sac','td3']
   environment:
     reward:
       reward_shaping_type: ['sparse'] # sparse / state_change_bonus
@@ -120,27 +70,30 @@ process_4:
   buffer:
     replay_buffer_size: [1e6]
     her:
-      goal_selection_strategy: ['noher','final'] # noher / final / future / future_once / near / next
+      goal_selection_strategy: ['noher'] # noher / final / future / future_once / near / next
     highlights:
-      mode: ['nohl'] # nohl / fix_th / ama
-      batch_ratio: [0.0]
+      mode: ['ama'] # nohl / fix / ama
+      batch_ratio_mode: ['fix',prioritized] # fix / prioritized (works only if 'mode' is not 'nohl')
+      batch_ratio: [0.5]
     per:
-      mode: ['proportional'] # noper / proportional
+      mode: ['noper'] # noper / proportional
   trainer:
     total_timesteps: [5e5]
   eval:
     freq: [1e4]
+    num_episodes: [100]
   # structure is differend than in the config file ##################################################x
   task: 
+    #gym: ['InvertedPendulum-v4'] # InvertedPendulum-v4
     gympanda: ['PandaSlide-v3'] # PandaReach-v3 / PandaPush-v3 / PandaSlide-v3 / PandaPickAndPlace-v3 / PandaStack-v3
   cl: 
-    type: ['controldiscrete_const'] # nocl / nullcl / predefined / predefinedtwostage / predefinedthreestage / selfpaced / selfpaceddual / controldiscrete / controldiscreteadaptive
+    type: ['nocl'] # nocl / nullcl / predefined / predefinedtwostage / predefinedthreestage / selfpaced / selfpaceddual / controldiscrete / controldiscreteadaptive
     range_growth_mode: ['simple']
 ####################################################################################################
 
-process_5:
+process_3: # 2 x 2 x 3 x 2h = 24h 
   agent: 
-    type: ['sac','td3','ddpg']
+    type: ['sac','td3']
   environment:
     reward:
       reward_shaping_type: ['sparse'] # sparse / state_change_bonus
@@ -148,20 +101,147 @@ process_5:
   buffer:
     replay_buffer_size: [1e6]
     her:
-      goal_selection_strategy: ['noher','final'] # noher / final / future / future_once / near / next
+      goal_selection_strategy: ['noher'] # noher / final / future / future_once / near / next
     highlights:
-      mode: ['nohl'] # nohl / fix_th / ama
-      batch_ratio: [0.0]
+      mode: ['fix'] # nohl / fix / ama
+      batch_ratio_mode: ['fix',prioritized] # fix / prioritized (works only if 'mode' is not 'nohl')
+      batch_ratio: [0.5]
     per:
-      mode: ['proportional'] # noper / proportional
+      mode: ['noper'] # noper / proportional
   trainer:
     total_timesteps: [5e5]
   eval:
     freq: [1e4]
+    num_episodes: [100]
   # structure is differend than in the config file ##################################################x
   task: 
-    gympanda: ['PandaPickAndPlace-v3'] # PandaReach-v3 / PandaPush-v3 / PandaSlide-v3 / PandaPickAndPlace-v3 / PandaStack-v3
+    #gym: ['InvertedPendulum-v4'] # InvertedPendulum-v4
+    gympanda: ['PandaSlide-v3'] # PandaReach-v3 / PandaPush-v3 / PandaSlide-v3 / PandaPickAndPlace-v3 / PandaStack-v3
   cl: 
-    type: ['controldiscrete_const'] # nocl / nullcl / predefined / predefinedtwostage / predefinedthreestage / selfpaced / selfpaceddual / controldiscrete / controldiscreteadaptive
+    type: ['nocl'] # nocl / nullcl / predefined / predefinedtwostage / predefinedthreestage / selfpaced / selfpaceddual / controldiscrete / controldiscreteadaptive
+    range_growth_mode: ['simple']
+####################################################################################################
+
+process_4: # 2 x 2 x 3 x 2h = 24h 
+  agent: 
+    type: ['sac','td3']
+  environment:
+    reward:
+      reward_shaping_type: ['sparse'] # sparse / state_change_bonus
+      reward_bonus: [0.0]
+  buffer:
+    replay_buffer_size: [1e6]
+    her:
+      goal_selection_strategy: ['final'] # noher / final / future / future_once / near / next
+    highlights:
+      mode: ['ama'] # nohl / fix / ama
+      batch_ratio_mode: ['fix',prioritized] # fix / prioritized (works only if 'mode' is not 'nohl')
+      batch_ratio: [0.5]
+    per:
+      mode: ['noper'] # noper / proportional
+  trainer:
+    total_timesteps: [5e5]
+  eval:
+    freq: [1e4]
+    num_episodes: [100]
+  # structure is differend than in the config file ##################################################x
+  task: 
+    #gym: ['InvertedPendulum-v4'] # InvertedPendulum-v4
+    gympanda: ['PandaPush-v3'] # PandaReach-v3 / PandaPush-v3 / PandaSlide-v3 / PandaPickAndPlace-v3 / PandaStack-v3
+  cl: 
+    type: ['controldiscreteadaptive'] # nocl / nullcl / predefined / predefinedtwostage / predefinedthreestage / selfpaced / selfpaceddual / controldiscrete / controldiscreteadaptive
+    range_growth_mode: ['simple']
+####################################################################################################
+
+process_5: # 2 x 2 x 3 x 2h = 24h 
+  agent: 
+    type: ['sac','td3']
+  environment:
+    reward:
+      reward_shaping_type: ['sparse'] # sparse / state_change_bonus
+      reward_bonus: [0.0]
+  buffer:
+    replay_buffer_size: [1e6]
+    her:
+      goal_selection_strategy: ['final'] # noher / final / future / future_once / near / next
+    highlights:
+      mode: ['fix'] # nohl / fix / ama
+      batch_ratio_mode: ['fix',prioritized] # fix / prioritized (works only if 'mode' is not 'nohl')
+      batch_ratio: [0.5]
+    per:
+      mode: ['noper'] # noper / proportional
+  trainer:
+    total_timesteps: [5e5]
+  eval:
+    freq: [1e4]
+    num_episodes: [100]
+  # structure is differend than in the config file ##################################################x
+  task: 
+    #gym: ['InvertedPendulum-v4'] # InvertedPendulum-v4
+    gympanda: ['PandaPush-v3'] # PandaReach-v3 / PandaPush-v3 / PandaSlide-v3 / PandaPickAndPlace-v3 / PandaStack-v3
+  cl: 
+    type: ['controldiscreteadaptive'] # nocl / nullcl / predefined / predefinedtwostage / predefinedthreestage / selfpaced / selfpaceddual / controldiscrete / controldiscreteadaptive
+    range_growth_mode: ['simple']
+####################################################################################################
+
+process_6: # 2 x 2 x 3 x 2h = 24h 
+  agent: 
+    type: ['sac','td3']
+  environment:
+    reward:
+      reward_shaping_type: ['sparse'] # sparse / state_change_bonus
+      reward_bonus: [0.0]
+  buffer:
+    replay_buffer_size: [1e6]
+    her:
+      goal_selection_strategy: ['final'] # noher / final / future / future_once / near / next
+    highlights:
+      mode: ['ama'] # nohl / fix / ama
+      batch_ratio_mode: ['fix',prioritized] # fix / prioritized (works only if 'mode' is not 'nohl')
+      batch_ratio: [0.5]
+    per:
+      mode: ['noper'] # noper / proportional
+  trainer:
+    total_timesteps: [5e5]
+  eval:
+    freq: [1e4]
+    num_episodes: [100]
+  # structure is differend than in the config file ##################################################x
+  task: 
+    #gym: ['InvertedPendulum-v4'] # InvertedPendulum-v4
+    gympanda: ['PandaSlide-v3'] # PandaReach-v3 / PandaPush-v3 / PandaSlide-v3 / PandaPickAndPlace-v3 / PandaStack-v3
+  cl: 
+    type: ['controldiscreteadaptive'] # nocl / nullcl / predefined / predefinedtwostage / predefinedthreestage / selfpaced / selfpaceddual / controldiscrete / controldiscreteadaptive
+    range_growth_mode: ['simple']
+####################################################################################################
+
+process_7: # 2 x 2 x 3 x 2h = 24h 
+  agent: 
+    type: ['sac','td3']
+  environment:
+    reward:
+      reward_shaping_type: ['sparse'] # sparse / state_change_bonus
+      reward_bonus: [0.0]
+  buffer:
+    replay_buffer_size: [1e6]
+    her:
+      goal_selection_strategy: ['final'] # noher / final / future / future_once / near / next
+    highlights:
+      mode: ['fix'] # nohl / fix / ama
+      batch_ratio_mode: ['fix',prioritized] # fix / prioritized (works only if 'mode' is not 'nohl')
+      batch_ratio: [0.5]
+    per:
+      mode: ['noper'] # noper / proportional
+  trainer:
+    total_timesteps: [5e5]
+  eval:
+    freq: [1e4]
+    num_episodes: [100]
+  # structure is differend than in the config file ##################################################x
+  task: 
+    #gym: ['InvertedPendulum-v4'] # InvertedPendulum-v4
+    gympanda: ['PandaSlide-v3'] # PandaReach-v3 / PandaPush-v3 / PandaSlide-v3 / PandaPickAndPlace-v3 / PandaStack-v3
+  cl: 
+    type: ['controldiscreteadaptive'] # nocl / nullcl / predefined / predefinedtwostage / predefinedthreestage / selfpaced / selfpaceddual / controldiscrete / controldiscreteadaptive
     range_growth_mode: ['simple']
 ####################################################################################################

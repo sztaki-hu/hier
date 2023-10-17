@@ -50,6 +50,7 @@ def main():
     replay_buffer_sizes = exp_list['buffer']['replay_buffer_size']
     her_strategies = exp_list['buffer']['her']['goal_selection_strategy']
     highlights_modes = exp_list['buffer']['highlights']['mode']
+    highlights_batch_ratio_modes = exp_list['buffer']['highlights']['batch_ratio_mode']
     highlights_batch_ratios = exp_list['buffer']['highlights']['batch_ratio']
     per_modes = exp_list['buffer']['per']['mode']
     
@@ -57,6 +58,7 @@ def main():
     trainer_set_of_total_timesteps = exp_list['trainer']['total_timesteps']
     # Eval
     eval_freqs = exp_list['eval']['freq']
+    eval_num_episodes_list = exp_list['eval']['num_episodes']
     # Tasks
     envs = list(exp_list['task'].keys())
     # CLs
@@ -84,7 +86,8 @@ def main():
             else:
                 print("##################################################################")
                 print("                    Config file is valid!")
-                print("##################################################################")        
+                print("##################################################################") 
+                #return 0       
         
         for _ in range(seednum):
              for env_name in envs:
@@ -99,12 +102,14 @@ def main():
                             replay_buffer_sizes,
                             her_strategies,
                             highlights_modes,
+                            highlights_batch_ratio_modes,
                             highlights_batch_ratios,
                             per_modes,
                             # Trainers
                             trainer_set_of_total_timesteps,
                             # Eval
                             eval_freqs,
+                            eval_num_episodes_list,
                             # CL
                             cl_types,
                             cl_range_growth_modes,
@@ -115,23 +120,25 @@ def main():
                             print(r)
 
                             # Agent
-                            agent_type              = r[0]
+                            agent_type                   = r[0]
                             # Env
-                            reward_shaping_type     = r[1]
-                            reward_bonus            = r[2]
+                            reward_shaping_type          = r[1]
+                            reward_bonus                 = r[2]
                             # Buffer
-                            replay_buffer_size      = r[3]
-                            her_strategy            = r[4]
-                            highlights_mode         = r[5]
-                            highlights_batch_ratio  = r[6]
-                            per_mode                = r[7]
+                            replay_buffer_size           = r[3]
+                            her_strategy                 = r[4]
+                            highlights_mode              = r[5]
+                            highlights_batch_ratio_mode  = r[6]
+                            highlights_batch_ratio       = r[7]
+                            per_mode                     = r[8]
                             # Trainer
-                            trainer_total_timesteps = r[8]
+                            trainer_total_timesteps      = r[9]
                             # Eval
-                            eval_freq               = r[9]
+                            eval_freq                    = r[10]
+                            eval_num_episodes            = r[11]
                             # CL
-                            cl_type                 = r[10]
-                            cl_range_growth_mode    = r[11]                  
+                            cl_type                      = r[12]
+                            cl_range_growth_mode         = r[13]                  
                                                     
                             exp = {}
                             exp['main'] = {} 
@@ -158,6 +165,8 @@ def main():
                             exp['exp_in_name']['her_strategy'] = True
                             exp['main']['highlights_mode'] = highlights_mode
                             exp['exp_in_name']['highlights_mode'] = True
+                            exp['main']['highlights_batch_ratio_mode'] = highlights_batch_ratio_mode
+                            exp['exp_in_name']['highlights_batch_ratio_mode'] = True
                             exp['main']['highlights_batch_ratio'] = highlights_batch_ratio
                             exp['exp_in_name']['highlights_batch_ratio'] = False
                             exp['exp_abb']['highlights_batch_ratio'] = 'hbr'
@@ -169,12 +178,14 @@ def main():
                             # Eval
                             exp['main']['eval_freq'] = eval_freq
                             exp['exp_in_name']['eval_freq'] = False
+                            exp['main']['eval_num_episodes'] = eval_num_episodes
+                            exp['exp_in_name']['eval_num_episodes'] = False
                             # CL
                             exp['main']['cl'] = cl_type
                             exp['exp_in_name']['cl'] = True
                             exp['main']['cl_range_growth_mode'] = cl_range_growth_mode
                             exp['exp_in_name']['cl_range_growth_mode'] = False
-                            
+                        
 
                             # Init logger ###############################################x
                             logger = Logger(current_dir = current_dir, main_args = args, display_mode = False, exp = exp, is_test_config = is_test_config)

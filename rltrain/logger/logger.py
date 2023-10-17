@@ -41,12 +41,15 @@ class Logger:
             self.config['buffer']['replay_buffer_size'] = exp['main']['replay_buffer_size']
             self.config['buffer']['her']['goal_selection_strategy'] = exp['main']['her_strategy']
             self.config['buffer']['highlights']['mode'] = exp['main']['highlights_mode']
+            self.config['buffer']['highlights']['batch_ratio_mode'] = exp['main']['highlights_batch_ratio_mode']
             self.config['buffer']['highlights']['batch_ratio'] = exp['main']['highlights_batch_ratio']
             self.config['buffer']['per']['mode'] = exp['main']['per_mode']
             # Trainer
             self.config['trainer']['total_timesteps'] = exp['main']['trainer_total_timesteps']
             # Eval
             self.config['eval']['freq'] = exp['main']['eval_freq']
+            self.config['eval']['num_episodes'] = exp['main']['eval_num_episodes']
+            
             # CL
             self.config['trainer']['cl']['range_growth_mode'] = exp['main']['cl_range_growth_mode']    
             if exp['main']['cl'] == 'nocl': 

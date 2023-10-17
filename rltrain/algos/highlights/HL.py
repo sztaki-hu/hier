@@ -5,7 +5,7 @@ class HL:
 
         self.hl_threshold = 0
         self.hl_active = True 
-        
+
         self.batch_ratio_mode = config['buffer']['highlights']['batch_ratio_mode']
         assert self.batch_ratio_mode in ['fix', 'prioritized']
         self.batch_ratio_prioritized_alpha = config['buffer']['highlights']['batch_ratio_prioritized_alpha']
