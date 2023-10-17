@@ -95,8 +95,6 @@ class SamplerTrainerTester:
 
         # HL (Highlights)
         self.highlights_include_test =  config['buffer']['highlights']['include_test']
-        self.highlights_batch_size =  int(config['trainer']['batch_size'] * config['buffer']['highlights']['batch_ratio'])
-        self.replay_batch_size =  int(config['trainer']['batch_size'] - self.highlights_batch_size)
 
         self.HL = make_hl(self.config)
         if self.HL.hl_active == False: self.replay_batch_size = self.batch_size
@@ -194,12 +192,17 @@ class SamplerTrainerTester:
         time0 = time.time()
         time_start = time0
         t0 = 0
+        t_collect = 0
+        t_process_ep = 0
+        t_train = 0
+        t_test = 0
 
         print("Training starts: " + self.print_out_name)
 
         # Main loop: collect experience in env and update/log each epoch
         for t in tqdm(range(self.total_timesteps), desc ="Training: ", leave=True):
             
+            t_collect_0 = time.time()
             # Until start_steps have elapsed, randomly sample actions
             # from a uniform distribution for better exploration. Afterwards, 
             # use the learned policy. 
@@ -231,8 +234,12 @@ class SamplerTrainerTester:
             # most recent observation!
             o = o2
 
+            t_collect += (time.time() - t_collect_0)
+
+            
             # End of trajectory handling
             if d or (ep_len == self.max_ep_len):
+                t_process_ep_0 = time.time()
 
                 ep_succes = 1.0 if info['is_success'] == True else 0.0
                 self.ep_success_dq.append(ep_succes)
@@ -259,13 +266,19 @@ class SamplerTrainerTester:
                 o, ep_ret, ep_len = self.CL.reset_env(t), 0, 0
                 self.env.ep_o_start = o.copy()
 
+                t_process_ep += (time.time() - t_process_ep_0)
+
+            
             # Update handling
             if t >= self.update_after and t % self.update_every == 0:
+                t_train_0 = time.time()
                 if self.replay_buffer.size > 0:
-                    for j in range(self.update_every):           
+                    for j in range(self.update_every):  
+                        # SAMPLE BATCH         
                         if self.HL.hl_active and self.HL.hl_replay_buffer.size > 0:
+                            self.replay_batch_size =  int(self.batch_size - self.HL.hl_batch_size)
                             replay_batch = self.replay_buffer.sample_batch(self.replay_batch_size)
-                            highlights_batch = self.HL.hl_replay_buffer.sample_batch(self.highlights_batch_size)
+                            highlights_batch = self.HL.hl_replay_buffer.sample_batch(self.HL.hl_batch_size)
                             batch = dict(obs=torch.cat((replay_batch['obs'], highlights_batch['obs']), 0),
                                             obs2=torch.cat((replay_batch['obs2'], highlights_batch['obs2']), 0),
                                             act=torch.cat((replay_batch['act'], highlights_batch['act']), 0),
@@ -276,15 +289,27 @@ class SamplerTrainerTester:
                         else:     
                             batch = self.replay_buffer.sample_batch(self.batch_size)  
 
+                        # UPDATE WEIGHTS
                         ret_loss_q, ret_loss_pi, batch_priorities = self.agent.update(batch, j)
+
+                        # PER
                         if self.per_active: 
                             batch_indices = batch['indices'].detach().cpu().numpy().astype(int)
                             self.replay_buffer.update_priorities(batch_indices[:self.replay_batch_size], batch_priorities[:self.replay_batch_size])
+                        
+                        # PHiER
+                        if self.HL.hl_active and self.HL.hl_replay_buffer.size > 0:
+                            self.HL.update_priority(batch_priorities,self.replay_batch_size)
+                        
                         self.loss_q_dq.append(ret_loss_q)
                         if ret_loss_pi != None: self.loss_pi_dq.append(ret_loss_pi)
+                t_train += (time.time() - t_train_0)
+
+            
 
             # End of epoch handling
             if (t+1) % self.eval_freq == 0:
+                t_test_0 = time.time()
 
                 epoch +=1
 
@@ -319,8 +344,15 @@ class SamplerTrainerTester:
                     self.agent.save_model(model_path,self.model_save_mode)
                 
                 # Print out
-                if (epoch % self.model_save_freq == 0) or best_model_changed:
-                    message = self.print_out_name +  " | t: " + str(t) +  " | epoch: " + str(epoch) + " | eval_mean_reward: " + str(eval_mean_reward) + " | eval_mean_ep_length: " + str(eval_mean_ep_length) + " | eval_success_rate: " + str(eval_success_rate) + " | cl_ratio: " + str(round(self.CL.cl_ratio, 2))
+                if (epoch % self.model_save_freq == 0) or best_model_changed:              
+                    message = " | ".join([self.print_out_name,
+                                    "t: " + str(t),
+                                    "epoch: " + str(epoch),
+                                    "eval_mean_reward " + str(eval_mean_reward),
+                                    "eval_mean_ep_length: " + str(eval_mean_ep_length),
+                                    "eval_success_rate: " + str(eval_success_rate),
+                                    "ratios [CL, HiER]: " + str([round(self.CL.cl_ratio, 2),round(self.HL.hl_batch_ratio, 2)])])
+
                     if best_model_changed: message += " *" 
                     tqdm.write("[info] " + message)     
 
@@ -346,17 +378,37 @@ class SamplerTrainerTester:
                 # HL
                 self.logger.tb_writer_add_scalar("hl/highlights_buffer_size", self.HL.hl_replay_buffer.size, t)
                 self.logger.tb_writer_add_scalar("hl/highlights_threshold", self.HL.hl_threshold, t)
+                self.logger.tb_writer_add_scalar("hl/highlights_batch_ratio", self.HL.hl_batch_ratio, t)
 
                 # TIME
                 time1 = time.time()
                 time_delta = time1 - time0
                 fps =  (t-t0) / time_delta
+                t_test = time.time() - t_test_0
 
+                # General
                 self.logger.tb_writer_add_scalar('time/fps', fps, t)
-                self.logger.tb_writer_add_scalar('time/all', time1 - time_start, t)
+                self.logger.tb_writer_add_scalar('time/total', time1 - time_start, t)
+                # Abs
+                self.logger.tb_writer_add_scalar('time/abs_collect', t_collect, t)
+                self.logger.tb_writer_add_scalar('time/abs_process_ep', t_process_ep, t)
+                self.logger.tb_writer_add_scalar('time/abs_train', t_train, t)
+                self.logger.tb_writer_add_scalar('time/abs_test', t_test, t)
+                self.logger.tb_writer_add_scalar('time/abs_other', (time_delta - t_collect - t_process_ep - t_train - t_test), t)
+                self.logger.tb_writer_add_scalar('time/abs_all', time_delta, t)
+                # Share
+                self.logger.tb_writer_add_scalar('time/share_collect', t_collect / time_delta, t)
+                self.logger.tb_writer_add_scalar('time/share_process_ep', t_process_ep / time_delta, t)
+                self.logger.tb_writer_add_scalar('time/share_train', t_train / time_delta, t)
+                self.logger.tb_writer_add_scalar('time/share_test', t_test / time_delta, t)
+                self.logger.tb_writer_add_scalar('time/share_other', (time_delta - t_collect - t_process_ep - t_train - t_test) / time_delta, t)
 
                 time0 = time1
                 t0 = t
+                
+                t_collect = 0
+                t_process_ep = 0
+                t_train = 0
 
         self.logger.tb_close()
    
