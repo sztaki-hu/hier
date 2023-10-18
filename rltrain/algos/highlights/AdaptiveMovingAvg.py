@@ -11,7 +11,7 @@ class AdaptiveMovingAvgHL(HL):
         self.hl_threshold_margin = config['buffer']['highlights']['ama']['threshold_margin']
         self.hl_window = config['buffer']['highlights']['ama']['window']
 
-        self.hl_threshold = self.hl_threshold_start + self.hl_threshold_margin
+        self.hl_threshold = self.hl_threshold_start - self.hl_threshold_margin
         self.hl_ep_rew_dq = collections.deque(maxlen=self.hl_window )
     
     def store_episode(self,episode,info_success):

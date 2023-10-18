@@ -1,5 +1,5 @@
 general:
-  exp_name: 1017_X
+  exp_name: 1018_X
   logdir: logs
   demodir: demos
   seed: random
@@ -65,9 +65,9 @@ buffer:
     success_cond: False
     include_test: True
     fix:
-      threshold: -20
+      threshold: -20 
     ama: # adaptive moving average
-      threshold_start: 0
+      threshold_start: -50
       threshold_margin: 10
       window: 20
 
