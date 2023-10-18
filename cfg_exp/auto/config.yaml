@@ -61,6 +61,8 @@ buffer:
     batch_ratio_mode: input # fix / prioritized (works only if 'mode' is not 'nohl')
     batch_ratio_prioritized_alpha: 0.9
     batch_ratio: input
+    batch_ratio_min: 0.1 # in case of prioritized
+    batch_ratio_max: 0.9 # in case of prioritized
     buffer_size: 5e4
     success_cond: False
     include_test: True

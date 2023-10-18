@@ -1,3 +1,5 @@
+import numpy as np
+
 from rltrain.buffers.replay import ReplayBuffer
 
 class HL:
@@ -20,6 +22,9 @@ class HL:
         self.hl_success_cond = config['buffer']['highlights']['success_cond']
 
         self.hl_batch_size =  int(self.batch_size * self.hl_batch_ratio)
+
+        self.hl_batch_ratio_min = config['buffer']['highlights']['batch_ratio_min']
+        self.hl_batch_ratio_max = config['buffer']['highlights']['batch_ratio_max']
         
         
             
@@ -31,19 +36,14 @@ class HL:
             pass
 
         elif self.batch_ratio_mode == 'prioritized':
-            prio_hier = sum(batch_priorities[:replay_batch_size])
-            prio_er = sum(batch_priorities[replay_batch_size:])
-            
+            prio_hier = np.mean(batch_priorities[:replay_batch_size])
+            prio_er = np.mean(batch_priorities[replay_batch_size:])
+
             sum_priroty = prio_er**self.batch_ratio_prioritized_alpha + prio_hier**self.batch_ratio_prioritized_alpha 
 
             prob_hier = prio_hier**self.batch_ratio_prioritized_alpha / sum_priroty
             #prob_er = prio_er**self.batch_ratio_prioritized_alpha / sum_priroty
 
-            self.hl_batch_ratio = prob_hier    
+            self.hl_batch_ratio = min(max(prob_hier, self.hl_batch_ratio_min),self.hl_batch_ratio_max)
+
             self.hl_batch_size =  int(self.batch_size * self.hl_batch_ratio) 
- 
-
-
-
-
-
