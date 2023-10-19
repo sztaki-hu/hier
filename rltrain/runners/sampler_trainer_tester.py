@@ -275,10 +275,12 @@ class SamplerTrainerTester:
                 if self.replay_buffer.size > 0:
                     for j in range(self.update_every):  
                         # SAMPLE BATCH         
-                        if self.HL.hl_active and self.HL.hl_replay_buffer.size > 0:
-                            self.replay_batch_size =  int(self.batch_size - self.HL.hl_batch_size)
+                        if self.HL.hl_active and self.HL.is_sampling_possible():
+                            self.replay_batch_size = self.HL.get_replay_batch_size()
                             replay_batch = self.replay_buffer.sample_batch(self.replay_batch_size)
-                            highlights_batch = self.HL.hl_replay_buffer.sample_batch(self.HL.hl_batch_size)
+
+                            highlights_batch = self.HL.sample_batch()
+                        
                             batch = dict(obs=torch.cat((replay_batch['obs'], highlights_batch['obs']), 0),
                                             obs2=torch.cat((replay_batch['obs2'], highlights_batch['obs2']), 0),
                                             act=torch.cat((replay_batch['act'], highlights_batch['act']), 0),
@@ -298,7 +300,7 @@ class SamplerTrainerTester:
                             self.replay_buffer.update_priorities(batch_indices[:self.replay_batch_size], batch_priorities[:self.replay_batch_size])
                         
                         # PHiER
-                        if self.HL.hl_active and self.HL.hl_replay_buffer.size > 0:
+                        if self.HL.hl_active and self.HL.is_sampling_possible():
                             self.HL.update_priority(batch_priorities,self.replay_batch_size)
                         
                         self.loss_q_dq.append(ret_loss_q)
@@ -351,7 +353,7 @@ class SamplerTrainerTester:
                                     "eval_mean_reward " + str(eval_mean_reward),
                                     "eval_mean_ep_length: " + str(eval_mean_ep_length),
                                     "eval_success_rate: " + str(eval_success_rate),
-                                    "ratios [CL, HiER]: " + str([round(self.CL.cl_ratio, 2),round(self.HL.hl_batch_ratio, 2)])])
+                                    "ratios [CL]: " + str([round(self.CL.cl_ratio, 2)])])
 
                     if best_model_changed: message += " *" 
                     tqdm.write("[info] " + message)     
@@ -376,9 +378,15 @@ class SamplerTrainerTester:
                 if self.cl_mode == 'examplebyexample': self.logger.tb_writer_add_scalar("cl/same_setup_num", np.mean(self.CL.same_setup_num_dq), t)
 
                 # HL
-                self.logger.tb_writer_add_scalar("hl/highlights_buffer_size", self.HL.hl_replay_buffer.size, t)
-                self.logger.tb_writer_add_scalar("hl/highlights_threshold", self.HL.hl_threshold, t)
-                self.logger.tb_writer_add_scalar("hl/highlights_batch_ratio", self.HL.hl_batch_ratio, t)
+                if self.HL.hl_mode != 'multifix':
+                    self.logger.tb_writer_add_scalar("hl/highlights_buffer_size", self.HL.hl_replay_buffer.size, t)
+                    self.logger.tb_writer_add_scalar("hl/highlights_threshold", self.HL.hl_threshold, t)
+                    self.logger.tb_writer_add_scalar("hl/highlights_batch_ratio", self.HL.hl_batch_ratio, t)
+                else:
+                    for hl_index in range(self.HL.hl_bin_num): 
+                        self.logger.tb_writer_add_scalar("hl/highlights_buffer_size_"+str(hl_index), self.HL.hl_replay_buffers[hl_index].size, t)
+                        self.logger.tb_writer_add_scalar("hl/highlights_threshold_"+str(hl_index), self.HL.hl_thresholds[hl_index], t)
+                        self.logger.tb_writer_add_scalar("hl/highlights_batch_ratio_"+str(hl_index), self.HL.hl_batch_ratios[hl_index], t)             
 
                 # TIME
                 time1 = time.time()
