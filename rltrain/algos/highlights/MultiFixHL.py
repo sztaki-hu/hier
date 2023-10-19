@@ -31,7 +31,6 @@ class MultiFixHL(HL):
         if self.is_sampling_possible() == False:
             for i in range(self.hl_bin_num):
                 for (o, a, r, o2, d) in episode:
-                    print(i)
                     self.hl_replay_buffers[i].store(o, a, r, o2, d)   
             return      
 
@@ -51,7 +50,6 @@ class MultiFixHL(HL):
 
         elif self.batch_ratio_mode == 'prioritized':
             
-            print(batch_priorities.size)
 
             prios = []
             
@@ -72,9 +70,6 @@ class MultiFixHL(HL):
                 probs.append(prio**self.batch_ratio_prioritized_alpha / sum_prios)
 
             self.hl_batch_ratios = probs[1:]
-
-            print(self.hl_batch_ratios)
-            print(self.hl_batch_sizes )
 
             self.hl_batch_sizes = [int(x * self.batch_size) for x in self.hl_batch_ratios]
     
@@ -102,11 +97,6 @@ class MultiFixHL(HL):
                                     done=torch.cat((batch['done'], pivot['done']), 0),
                                     indices=torch.cat((batch['indices'], pivot['indices']), 0),
                                     weights=torch.cat((batch['weights'], pivot['weights']), 0))
-        print("###################################x")
-        print(self.hl_batch_sizes)
-        for i in range(self.hl_bin_num): 
-            print(self.hl_replay_buffers[i].size)
-        print(batch['obs'].shape)
         return batch
             
 
