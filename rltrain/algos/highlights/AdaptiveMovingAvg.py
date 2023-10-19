@@ -11,7 +11,7 @@ class AdaptiveMovingAvgHL(HL):
         self.hl_threshold_margin = config['buffer']['highlights']['ama']['threshold_margin']
         self.hl_window = config['buffer']['highlights']['ama']['window']
 
-        self.hl_threshold = self.hl_threshold_start - self.hl_threshold_margin
+        self.hl_threshold = self.hl_threshold_start
         self.hl_ep_rew_dq = collections.deque(maxlen=self.hl_window )
     
     def store_episode(self,episode,info_success):
@@ -27,4 +27,4 @@ class AdaptiveMovingAvgHL(HL):
                 self.hl_replay_buffer.store(o, a, r, o2, d)
 
             self.hl_ep_rew_dq.append(sum_rew)
-            if len(self.hl_ep_rew_dq) == self.hl_window: self.hl_threshold = np.mean(self.hl_ep_rew_dq) - self.hl_threshold_margin
+            if len(self.hl_ep_rew_dq) == self.hl_window: self.hl_threshold = np.mean(self.hl_ep_rew_dq) + self.hl_threshold_margin
