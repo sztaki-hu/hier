@@ -75,6 +75,7 @@ buffer:
     multifix:
       thresholds: [-10,-20,-30,-40]
       batch_ratios: [0.125, 0.125, 0.125, 0.125]
+      batch_bin_min_sample: 10
 
 
 

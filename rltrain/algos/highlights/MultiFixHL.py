@@ -15,6 +15,7 @@ class MultiFixHL(HL):
         self.hl_batch_ratios = config['buffer']['highlights']['multifix']['batch_ratios']
         self.hl_batch_sizes = [int(x * self.batch_size) for x in self.hl_batch_ratios]
         self.hl_buffer_sizes = [config['buffer']['highlights']['buffer_size']] * self.hl_bin_num
+        self.hl_batch_bin_min_sample = int(config['buffer']['highlights']['multifix']['batch_bin_min_sample'])
 
         self.hl_replay_buffers = []
         for i in range(self.hl_bin_num):
@@ -49,7 +50,6 @@ class MultiFixHL(HL):
             pass
 
         elif self.batch_ratio_mode == 'prioritized':
-            
 
             prios = []
             
@@ -61,6 +61,7 @@ class MultiFixHL(HL):
                 prios.append(np.mean(batch_priorities[start_i:end_i]))
                 start_i = end_i
 
+
             sum_prios = 0
             for prio in prios:
                 sum_prios += prio**self.batch_ratio_prioritized_alpha
@@ -71,7 +72,7 @@ class MultiFixHL(HL):
 
             self.hl_batch_ratios = probs[1:]
 
-            self.hl_batch_sizes = [int(x * self.batch_size) for x in self.hl_batch_ratios]
+            self.hl_batch_sizes = [int(min(max(x * self.batch_size,self.hl_batch_bin_min_sample),self.batch_size-self.hl_batch_bin_min_sample)) for x in self.hl_batch_ratios]
     
     def is_sampling_possible(self):
         for i in range(self.hl_bin_num):

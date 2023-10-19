@@ -382,11 +382,13 @@ class SamplerTrainerTester:
                     self.logger.tb_writer_add_scalar("hl/highlights_buffer_size", self.HL.hl_replay_buffer.size, t)
                     self.logger.tb_writer_add_scalar("hl/highlights_threshold", self.HL.hl_threshold, t)
                     self.logger.tb_writer_add_scalar("hl/highlights_batch_ratio", self.HL.hl_batch_ratio, t)
+                    self.logger.tb_writer_add_scalar("hl/highlights_batch_size", self.HL.hl_batch_size, t)
                 else:
                     for hl_index in range(self.HL.hl_bin_num): 
                         self.logger.tb_writer_add_scalar("hl/highlights_buffer_size_"+str(hl_index), self.HL.hl_replay_buffers[hl_index].size, t)
                         self.logger.tb_writer_add_scalar("hl/highlights_threshold_"+str(hl_index), self.HL.hl_thresholds[hl_index], t)
-                        self.logger.tb_writer_add_scalar("hl/highlights_batch_ratio_"+str(hl_index), self.HL.hl_batch_ratios[hl_index], t)             
+                        self.logger.tb_writer_add_scalar("hl/highlights_batch_ratio_"+str(hl_index), self.HL.hl_batch_ratios[hl_index], t)       
+                        self.logger.tb_writer_add_scalar("hl/highlights_batch_size_"+str(hl_index), self.HL.hl_batch_sizes[hl_index], t)      
 
                 # TIME
                 time1 = time.time()
