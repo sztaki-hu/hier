@@ -47,9 +47,6 @@ class PredefinedHL(HL):
             hl_threshold_ratio = min(1.0, math.sqrt(t / self.hl_threshold_pacing_sat))
         elif self.hl_threshold_pacing_profile == "quad":
             hl_threshold_ratio = min(1.0, math.pow(t / self.hl_threshold_pacing_sat,2))
-        
-        print(self.hl_threshold_range)
-        print(hl_threshold_ratio)
 
         self.hl_threshold = self.hl_threshold_start + (self.hl_threshold_range * hl_threshold_ratio)
 
