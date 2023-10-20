@@ -29,7 +29,7 @@ class HL:
             self.hl_batch_ratio_max = config['buffer']['highlights']['batch_ratio_max']
         
             
-    def store_episode(self,episode, info_success):
+    def store_episode(self,episode, info_success,t):
         pass
 
     def update_priority(self,batch_priorities,replay_batch_size):

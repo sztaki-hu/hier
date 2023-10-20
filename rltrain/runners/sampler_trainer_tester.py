@@ -141,7 +141,7 @@ class SamplerTrainerTester:
 
         """ 
 
-    def test_agent(self):
+    def test_agent(self,train_t):
         ep_rets = []
         ep_lens = []
         success_num = 0.0
@@ -165,7 +165,7 @@ class SamplerTrainerTester:
                 o = o2
                 ep_ret += r
                 ep_len += 1    
-            if self.highlights_include_test: self.HL.store_episode(test_episode,info['is_success'])               
+            if self.highlights_include_test: self.HL.store_episode(test_episode,info['is_success'],train_t)               
             ep_rets.append(ep_ret)
             ep_lens.append(ep_len)
             if info['is_success'] == True: success_num += 1
@@ -249,7 +249,7 @@ class SamplerTrainerTester:
                     self.replay_buffer.store(o, a, r, o2, d)
                 
                 # Highlights
-                self.HL.store_episode(episode,info['is_success'])
+                self.HL.store_episode(episode,info['is_success'],t)
 
                 # HER
                 if self.her_active and truncated: 
@@ -316,7 +316,7 @@ class SamplerTrainerTester:
                 epoch +=1
 
                 # Test the performance of the deterministic version of the agent.
-                eval_mean_reward, eval_mean_ep_length, eval_success_rate, eval_state_change_rate = self.test_agent()
+                eval_mean_reward, eval_mean_ep_length, eval_success_rate, eval_state_change_rate = self.test_agent(t)
 
                 if self.CL.store_eval_success_rate: self.CL.cl_eval_success_dq.append(eval_success_rate)
 

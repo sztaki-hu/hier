@@ -14,7 +14,7 @@ class AdaptiveMovingAvgHL(HL):
         self.hl_threshold = self.hl_threshold_start
         self.hl_ep_rew_dq = collections.deque(maxlen=self.hl_window)
     
-    def store_episode(self,episode,info_success):
+    def store_episode(self,episode,info_success,t):
 
         if self.hl_success_cond and info_success == False: return
         

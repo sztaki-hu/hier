@@ -1,5 +1,5 @@
 
-HIGHLIGHTS_MODES = ['nohl','fix','ama','multifix']
+HIGHLIGHTS_MODES = ['nohl','fix','ama','predefined','multifix']
 
 def make_hl(config):
 
@@ -13,6 +13,8 @@ def make_hl(config):
         from rltrain.algos.highlights.FixHL import FixHL as HL
     elif hl_mode == 'ama':
         from rltrain.algos.highlights.AdaptiveMovingAvg import AdaptiveMovingAvgHL as HL
+    elif hl_mode == 'predefined':
+        from rltrain.algos.highlights.PredefinedHL import PredefinedHL as HL
     elif hl_mode == 'multifix':
         from rltrain.algos.highlights.MultiFixHL import MultiFixHL as HL
 

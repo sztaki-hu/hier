@@ -7,7 +7,7 @@ class FixHL(HL):
         self.hl_threshold = config['buffer']['highlights']['fix']['threshold']
     
     
-    def store_episode(self,episode,info_success):
+    def store_episode(self,episode,info_success,t):
 
         if self.hl_success_cond and info_success == False: return
 
