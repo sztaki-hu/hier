@@ -15,7 +15,6 @@ class HL:
 
         self.batch_size = config['trainer']['batch_size']
         self.hl_success_cond = config['buffer']['highlights']['success_cond']
-        
 
         if self.hl_mode != 'multifix':   
             self.hl_batch_ratio = config['buffer']['highlights']['batch_ratio']
@@ -37,6 +36,7 @@ class HL:
             pass
 
         elif self.batch_ratio_mode == 'prioritized':
+            batch_priorities = abs(batch_priorities)
             prio_hier = np.mean(batch_priorities[replay_batch_size:])
             prio_er = np.mean(batch_priorities[:replay_batch_size])
 

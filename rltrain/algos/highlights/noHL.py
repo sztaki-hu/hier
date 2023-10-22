@@ -5,6 +5,7 @@ class noHL(HL):
     def __init__(self, config):
 
         self.hl_batch_ratio = 0
+        self.hl_batch_size =  0
         self.hl_buffer_size = 0
         self.hl_replay_buffer = ReplayBuffer(
                 obs_dim=int(config['environment']['obs_dim']), 
@@ -13,6 +14,7 @@ class noHL(HL):
         
         self.hl_threshold = 0
         self.hl_active = False 
+        self.hl_mode = config['buffer']['highlights']['mode']
     
     
 

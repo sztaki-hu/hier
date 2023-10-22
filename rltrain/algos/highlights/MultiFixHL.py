@@ -51,6 +51,8 @@ class MultiFixHL(HL):
 
         elif self.batch_ratio_mode == 'prioritized':
 
+            batch_priorities = abs(batch_priorities)
+
             prios = []
             
             prios.append(np.mean(batch_priorities[:replay_batch_size]))
