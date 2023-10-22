@@ -37,8 +37,8 @@ class HL:
             pass
 
         elif self.batch_ratio_mode == 'prioritized':
-            prio_hier = np.mean(batch_priorities[:replay_batch_size])
-            prio_er = np.mean(batch_priorities[replay_batch_size:])
+            prio_hier = np.mean(batch_priorities[replay_batch_size:])
+            prio_er = np.mean(batch_priorities[:replay_batch_size])
 
             sum_priroty = prio_er**self.batch_ratio_prioritized_alpha + prio_hier**self.batch_ratio_prioritized_alpha 
 

@@ -53,7 +53,7 @@ class MultiFixHL(HL):
 
             prios = []
             
-            prios.append(np.mean(batch_priorities[replay_batch_size:]))
+            prios.append(np.mean(batch_priorities[:replay_batch_size]))
 
             start_i = replay_batch_size 
             for i in range(self.hl_bin_num):
