@@ -32,7 +32,7 @@ gym:
     obs_dim: 11
     act_dim: 3
     boundary_min: [-1.0, -1.0, -1.0]
-    boundary_max: [+1.0, +1.0, -1.0]
+    boundary_max: [+1.0, +1.0, +1.0]
 
   HalfCheetah-v4:
     max_ep_len: 1000
