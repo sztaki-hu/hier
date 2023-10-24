@@ -43,6 +43,9 @@ class Logger:
             self.config['buffer']['highlights']['mode'] = exp['main']['highlights_mode']
             self.config['buffer']['highlights']['batch_ratio_mode'] = exp['main']['highlights_batch_ratio_mode']
             self.config['buffer']['highlights']['batch_ratio'] = exp['main']['highlights_batch_ratio']
+            self.config['buffer']['highlights']['fix']['threshold'] = exp['main']['highlights_fix_threshold']
+            self.config['buffer']['highlights']['predefined']['threshold_start'] = exp['main']['highlights_predefined_threshold_start']
+            self.config['buffer']['highlights']['predefined']['threshold_end'] = exp['main']['highlights_predefined_threshold_end']
             self.config['buffer']['per']['mode'] = exp['main']['per_mode']
             # Trainer
             self.config['trainer']['total_timesteps'] = exp['main']['trainer_total_timesteps']

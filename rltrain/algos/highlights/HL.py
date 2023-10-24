@@ -37,6 +37,7 @@ class HL:
 
         elif self.batch_ratio_mode == 'prioritized':
             batch_priorities = abs(batch_priorities)
+
             prio_hier = np.mean(batch_priorities[replay_batch_size:])
             prio_er = np.mean(batch_priorities[:replay_batch_size])
 
@@ -48,6 +49,7 @@ class HL:
             self.hl_batch_ratio = min(max(prob_hier, self.hl_batch_ratio_min),self.hl_batch_ratio_max)
 
             self.hl_batch_size =  int(self.batch_size * self.hl_batch_ratio) 
+
     
     def is_sampling_possible(self):
         if self.hl_replay_buffer.size > 0: return True

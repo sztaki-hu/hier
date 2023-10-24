@@ -31,7 +31,7 @@ def main():
     parser.add_argument("--config", default="cfg_exp/auto/config.yaml", help="Path of the config file")
     parser.add_argument("--explist", default="cfg_exp/auto/exp_list.yaml", help="Path of the config file")
     parser.add_argument("--hwid", type=int, default=0, help="Hardware id")
-    parser.add_argument("--seednum", type=int, default=3, help="seednum")
+    #parser.add_argument("--seednum", type=int, default=1, help="seednum")
     parser.add_argument("--processid", type=int, default=0, help="processid")
     parser.add_argument("--testconfig", type=bool, default=True, help="Test config file")
     args = parser.parse_args()
@@ -41,6 +41,8 @@ def main():
     exp_lists = load_yaml(os.path.join(current_dir,args.explist))
     exp_list = exp_lists['process_'+str(args.processid)]
 
+    # General
+    exp_seednum = exp_list['general']['seednum']
     # Agents
     agents = exp_list['agent']['type']
     # Envs
@@ -52,6 +54,9 @@ def main():
     highlights_modes = exp_list['buffer']['highlights']['mode']
     highlights_batch_ratio_modes = exp_list['buffer']['highlights']['batch_ratio_mode']
     highlights_batch_ratios = exp_list['buffer']['highlights']['batch_ratio']
+    highlights_fix_thresholds = exp_list['buffer']['highlights']['fix']['threshold']
+    highlights_predefined_threshold_starts = exp_list['buffer']['highlights']['predefined']['threshold_start']
+    highlights_predefined_threshold_ends = exp_list['buffer']['highlights']['predefined']['threshold_end']
     per_modes = exp_list['buffer']['per']['mode']
     
     # Trainers
@@ -72,7 +77,7 @@ def main():
 
     for is_test_config in test_list:
         
-        seednum = 1 if is_test_config else args.seednum
+        seednum = 1 if is_test_config else exp_seednum
 
         if is_test_config == False:
             if config_file_is_valid == False:
@@ -104,6 +109,9 @@ def main():
                             highlights_modes,
                             highlights_batch_ratio_modes,
                             highlights_batch_ratios,
+                            highlights_fix_thresholds,
+                            highlights_predefined_threshold_starts,
+                            highlights_predefined_threshold_ends,
                             per_modes,
                             # Trainers
                             trainer_set_of_total_timesteps,
@@ -120,25 +128,28 @@ def main():
                             print(r)
 
                             # Agent
-                            agent_type                   = r[0]
+                            agent_type                               = r[0]
                             # Env
-                            reward_shaping_type          = r[1]
-                            reward_bonus                 = r[2]
+                            reward_shaping_type                      = r[1]
+                            reward_bonus                             = r[2]
                             # Buffer
-                            replay_buffer_size           = r[3]
-                            her_strategy                 = r[4]
-                            highlights_mode              = r[5]
-                            highlights_batch_ratio_mode  = r[6]
-                            highlights_batch_ratio       = r[7]
-                            per_mode                     = r[8]
+                            replay_buffer_size                       = r[3]
+                            her_strategy                             = r[4]
+                            highlights_mode                          = r[5]
+                            highlights_batch_ratio_mode              = r[6]
+                            highlights_batch_ratio                   = r[7]
+                            highlights_fix_threshold                 = r[8]
+                            highlights_predefined_threshold_start    = r[9]
+                            highlights_predefined_threshold_end      = r[10]
+                            per_mode                                 = r[11]
                             # Trainer
-                            trainer_total_timesteps      = r[9]
+                            trainer_total_timesteps                  = r[12]
                             # Eval
-                            eval_freq                    = r[10]
-                            eval_num_episodes            = r[11]
+                            eval_freq                                = r[13]
+                            eval_num_episodes                        = r[14]
                             # CL
-                            cl_type                      = r[12]
-                            cl_range_growth_mode         = r[13]                  
+                            cl_type                                  = r[15]
+                            cl_range_growth_mode                     = r[16]                  
                                                     
                             exp = {}
                             exp['main'] = {} 
@@ -170,6 +181,12 @@ def main():
                             exp['main']['highlights_batch_ratio'] = highlights_batch_ratio
                             exp['exp_in_name']['highlights_batch_ratio'] = False
                             exp['exp_abb']['highlights_batch_ratio'] = 'hbr'
+                            exp['main']['highlights_fix_threshold'] = highlights_fix_threshold
+                            exp['exp_in_name']['highlights_fix_threshold'] = False
+                            exp['main']['highlights_predefined_threshold_start'] = highlights_predefined_threshold_start
+                            exp['exp_in_name']['highlights_predefined_threshold_start'] = False
+                            exp['main']['highlights_predefined_threshold_end'] = highlights_predefined_threshold_end
+                            exp['exp_in_name']['highlights_predefined_threshold_end'] = False
                             exp['main']['per_mode'] = per_mode
                             exp['exp_in_name']['per_mode'] = True
                             # Trainer

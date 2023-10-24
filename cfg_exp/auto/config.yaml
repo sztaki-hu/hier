@@ -1,5 +1,5 @@
 general:
-  exp_name: 1020_X
+  exp_name: 1024_X
   logdir: logs
   demodir: demos
   seed: random
@@ -67,16 +67,20 @@ buffer:
     success_cond: False
     include_test: True
     fix:
-      threshold: -20 
+      threshold: input 
     ama: # adaptive moving average
       threshold_start: -50
       threshold_margin: 10
       window: 20
+    amar: # adaptive moving average relative
+      threshold_start: -50
+      threshold_margin_relative: 0.5
+      window: 20
     predefined:
       threshold_pacing_profile: linear  # linear / sqrt / quad
       threshold_pacing_sat: 0.8
-      threshold_start: -50
-      threshold_end: -10
+      threshold_start: input
+      threshold_end: input
     multifix:
       thresholds: [-10,-20,-30,-40]
       batch_ratios: [0.125, 0.125, 0.125, 0.125]
@@ -85,7 +89,7 @@ buffer:
 
 
 sampler:
-  start_steps: 10000 # in SB3 we cannot set it
+  start_steps: 1000 # in SB3 we cannot set it
   max_ep_len: auto
 
 trainer:
