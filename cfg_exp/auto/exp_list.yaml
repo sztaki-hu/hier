@@ -3,6 +3,9 @@ process_0:
     seednum: 1
   agent: 
     type: ['sac'] # sac / td3 / ddpg
+    sac:
+      alpha: [0.2]
+    gamma: [0.95]
   environment:
     reward:
       reward_shaping_type: ['sparse'] # sparse / state_change_bonus

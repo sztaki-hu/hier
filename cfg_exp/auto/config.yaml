@@ -1,5 +1,5 @@
 general:
-  exp_name: 1024_X
+  exp_name: 1030_X
   logdir: logs
   demodir: demos
   seed: random
@@ -32,11 +32,11 @@ agent:
   hidden_sizes: [256,256,256]
   boundary_min: auto
   boundary_max: auto
-  gamma: 0.95
+  gamma: input
   polyak: 0.995
   learning_rate: 0.001
   sac:
-    alpha: 0.2 # spinningup do not have "auto" option
+    alpha: input # spinningup do not have "auto" option
   td3:
     target_noise: 0.2
     noise_clip: 0.5

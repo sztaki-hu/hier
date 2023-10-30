@@ -45,6 +45,8 @@ def main():
     exp_seednum = exp_list['general']['seednum']
     # Agents
     agents = exp_list['agent']['type']
+    agent_sac_alphas = exp_list['agent']['sac']['alpha']
+    agent_gammas = exp_list['agent']['gamma']
     # Envs
     reward_shaping_types = exp_list['environment']['reward']['reward_shaping_type']
     reward_bonuses = exp_list['environment']['reward']['reward_bonus']
@@ -100,6 +102,8 @@ def main():
                     for r in itertools.product(
                             # Agents
                             agents, 
+                            agent_sac_alphas,
+                            agent_gammas,
                             # Envs
                             reward_shaping_types,
                             reward_bonuses,
@@ -129,27 +133,29 @@ def main():
 
                             # Agent
                             agent_type                               = r[0]
+                            agent_sac_alpha                          = r[1]
+                            agent_gamma                              = r[2]
                             # Env
-                            reward_shaping_type                      = r[1]
-                            reward_bonus                             = r[2]
+                            reward_shaping_type                      = r[3]
+                            reward_bonus                             = r[4]
                             # Buffer
-                            replay_buffer_size                       = r[3]
-                            her_strategy                             = r[4]
-                            highlights_mode                          = r[5]
-                            highlights_batch_ratio_mode              = r[6]
-                            highlights_batch_ratio                   = r[7]
-                            highlights_fix_threshold                 = r[8]
-                            highlights_predefined_threshold_start    = r[9]
-                            highlights_predefined_threshold_end      = r[10]
-                            per_mode                                 = r[11]
+                            replay_buffer_size                       = r[5]
+                            her_strategy                             = r[6]
+                            highlights_mode                          = r[7]
+                            highlights_batch_ratio_mode              = r[8]
+                            highlights_batch_ratio                   = r[9]
+                            highlights_fix_threshold                 = r[10]
+                            highlights_predefined_threshold_start    = r[11]
+                            highlights_predefined_threshold_end      = r[12]
+                            per_mode                                 = r[13]
                             # Trainer
-                            trainer_total_timesteps                  = r[12]
+                            trainer_total_timesteps                  = r[14]
                             # Eval
-                            eval_freq                                = r[13]
-                            eval_num_episodes                        = r[14]
+                            eval_freq                                = r[15]
+                            eval_num_episodes                        = r[16]
                             # CL
-                            cl_type                                  = r[15]
-                            cl_range_growth_mode                     = r[16]                  
+                            cl_type                                  = r[17]
+                            cl_range_growth_mode                     = r[18]                  
                                                     
                             exp = {}
                             exp['main'] = {} 
@@ -163,6 +169,12 @@ def main():
                             # Agent
                             exp['main']['agent'] = agent_type
                             exp['exp_in_name']['agent'] = True
+                            exp['main']['agent_sac_alpha'] = agent_sac_alpha
+                            exp['exp_in_name']['agent_sac_alpha'] = False
+                            exp['exp_abb']['reward_bonus'] = 'alp'
+                            exp['main']['agent_gamma'] = agent_gamma
+                            exp['exp_in_name']['agent_gamma'] = False
+                            exp['exp_abb']['reward_bonus'] = 'gam'
                             # Env
                             exp['main']['reward_shaping_type'] = reward_shaping_type
                             exp['exp_in_name']['reward_shaping_type'] = True

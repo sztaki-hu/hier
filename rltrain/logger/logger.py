@@ -34,6 +34,8 @@ class Logger:
             self.config['environment']['task']['name'] = exp['main']['task']
             # Agent
             self.config['agent']['type'] = exp['main']['agent']
+            self.config['agent']['sac']['alpha'] = exp['main']['agent_sac_alpha']
+            self.config['agent']['gamma'] = exp['main']['agent_gamma']
             # Env
             self.config['environment']['reward']['reward_shaping_type'] = exp['main']['reward_shaping_type']
             self.config['environment']['reward']['reward_bonus'] = exp['main']['reward_bonus']
