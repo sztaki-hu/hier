@@ -171,10 +171,10 @@ def main():
                             exp['exp_in_name']['agent'] = True
                             exp['main']['agent_sac_alpha'] = agent_sac_alpha
                             exp['exp_in_name']['agent_sac_alpha'] = False
-                            exp['exp_abb']['reward_bonus'] = 'alp'
+                            exp['exp_abb']['agent_sac_alpha'] = 'alp'
                             exp['main']['agent_gamma'] = agent_gamma
                             exp['exp_in_name']['agent_gamma'] = False
-                            exp['exp_abb']['reward_bonus'] = 'gam'
+                            exp['exp_abb']['agent_gamma'] = 'gam'
                             # Env
                             exp['main']['reward_shaping_type'] = reward_shaping_type
                             exp['exp_in_name']['reward_shaping_type'] = True
