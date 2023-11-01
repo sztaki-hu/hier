@@ -1,12 +1,12 @@
 process_0: # 2 x 2 x 3 x 1.5h = 18h
   general:
-    seednum: 1
+    seednum: 3
   agent: 
     type: ['sac'] # sac / td3 / ddpg
     sac:
       alpha: [0.1]
     gamma: [0.95]
-    learning_rate: [0.001]
+    learning_rate: [0.01]
   environment:
     reward:
       reward_shaping_type: ['sparse'] # sparse / state_change_bonus
@@ -28,14 +28,487 @@ process_0: # 2 x 2 x 3 x 1.5h = 18h
     per:
       mode: ['noper'] # noper / proportional
   trainer:
-    total_timesteps: [500]
+    total_timesteps: [5e5]
   eval:
-    freq: [50]
-    num_episodes: [10]
+    freq: [1e4]
+    num_episodes: [100]
   # structure is differend than in the config file ##################################################x
   task: 
     #gym: ['Hopper-v4'] # 'Hopper-v4','HalfCheetah-v4','Walker2d-v4','Ant-v4'
-    gympanda: ['PandaReach-v3'] # PandaReach-v3 / PandaPush-v3 / PandaSlide-v3 / PandaPickAndPlace-v3 / PandaStack-v3
+    gympanda: ['PandaSlide-v3'] # PandaReach-v3 / PandaPush-v3 / PandaSlide-v3 / PandaPickAndPlace-v3 / PandaStack-v3
+  cl: 
+    type: ['controldiscreteadaptive'] # nocl / nullcl / predefined / predefinedtwostage / predefinedthreestage / selfpaced / selfpaceddual / controldiscrete / controldiscreteadaptive
+    range_growth_mode: ['simple'] #--- only if highlights mode != nocl
+####################################################################################################
+
+process_1: # 2 x 2 x 3 x 1.5h = 18h
+  general:
+    seednum: 3
+  agent: 
+    type: ['sac'] # sac / td3 / ddpg
+    sac:
+      alpha: [0.1]
+    gamma: [0.95]
+    learning_rate: [0.005]
+  environment:
+    reward:
+      reward_shaping_type: ['sparse'] # sparse / state_change_bonus
+      reward_bonus: [0.0] #--- only if reward_shaping_type == state_change_bonus
+  buffer:
+    replay_buffer_size: [1e6]
+    her:
+      goal_selection_strategy: ['final'] # noher / final / future / future_once / near / next
+    highlights:
+      mode: ['predefined'] # nohl / fix / ama / amar / predefined / multifix / multipredefined
+      batch_ratio_mode: ['fix'] # fix / prioritized (works only if 'mode' is not 'nohl')
+      batch_ratio: [0.5] #--- only if highlights mode != nohl
+      buffer_size: [5e4]
+      fix: #--- only if highlights mode == fix
+        threshold: [-20] # gympanda: -20 / gym: [Hopper: 2500 / HalfCheetah: 7000 / Walker2d: 3000 / Ant: 3000]
+      predefined: #--- only if highlights mode == predefined
+        threshold_start: [-50] # gympanda: -50 / gym: 0
+        threshold_end: [-10] # gympanda: -10 / gym: [Hopper: 3000 / HalfCheetah: 8000 / Walker2d: 3500 / Ant: 4000]
+    per:
+      mode: ['noper'] # noper / proportional
+  trainer:
+    total_timesteps: [5e5]
+  eval:
+    freq: [1e4]
+    num_episodes: [100]
+  # structure is differend than in the config file ##################################################x
+  task: 
+    #gym: ['Hopper-v4'] # 'Hopper-v4','HalfCheetah-v4','Walker2d-v4','Ant-v4'
+    gympanda: ['PandaSlide-v3'] # PandaReach-v3 / PandaPush-v3 / PandaSlide-v3 / PandaPickAndPlace-v3 / PandaStack-v3
+  cl: 
+    type: ['controldiscreteadaptive'] # nocl / nullcl / predefined / predefinedtwostage / predefinedthreestage / selfpaced / selfpaceddual / controldiscrete / controldiscreteadaptive
+    range_growth_mode: ['simple'] #--- only if highlights mode != nocl
+####################################################################################################
+
+process_2: # 2 x 2 x 3 x 1.5h = 18h
+  general:
+    seednum: 3
+  agent: 
+    type: ['sac'] # sac / td3 / ddpg
+    sac:
+      alpha: [0.1]
+    gamma: [0.95]
+    learning_rate: [0.002]
+  environment:
+    reward:
+      reward_shaping_type: ['sparse'] # sparse / state_change_bonus
+      reward_bonus: [0.0] #--- only if reward_shaping_type == state_change_bonus
+  buffer:
+    replay_buffer_size: [1e6]
+    her:
+      goal_selection_strategy: ['final'] # noher / final / future / future_once / near / next
+    highlights:
+      mode: ['predefined'] # nohl / fix / ama / amar / predefined / multifix / multipredefined
+      batch_ratio_mode: ['fix'] # fix / prioritized (works only if 'mode' is not 'nohl')
+      batch_ratio: [0.5] #--- only if highlights mode != nohl
+      buffer_size: [5e4]
+      fix: #--- only if highlights mode == fix
+        threshold: [-20] # gympanda: -20 / gym: [Hopper: 2500 / HalfCheetah: 7000 / Walker2d: 3000 / Ant: 3000]
+      predefined: #--- only if highlights mode == predefined
+        threshold_start: [-50] # gympanda: -50 / gym: 0
+        threshold_end: [-10] # gympanda: -10 / gym: [Hopper: 3000 / HalfCheetah: 8000 / Walker2d: 3500 / Ant: 4000]
+    per:
+      mode: ['noper'] # noper / proportional
+  trainer:
+    total_timesteps: [5e5]
+  eval:
+    freq: [1e4]
+    num_episodes: [100]
+  # structure is differend than in the config file ##################################################x
+  task: 
+    #gym: ['Hopper-v4'] # 'Hopper-v4','HalfCheetah-v4','Walker2d-v4','Ant-v4'
+    gympanda: ['PandaSlide-v3'] # PandaReach-v3 / PandaPush-v3 / PandaSlide-v3 / PandaPickAndPlace-v3 / PandaStack-v3
+  cl: 
+    type: ['controldiscreteadaptive'] # nocl / nullcl / predefined / predefinedtwostage / predefinedthreestage / selfpaced / selfpaceddual / controldiscrete / controldiscreteadaptive
+    range_growth_mode: ['simple'] #--- only if highlights mode != nocl
+####################################################################################################
+
+process_3: # 2 x 2 x 3 x 1.5h = 18h
+  general:
+    seednum: 3
+  agent: 
+    type: ['sac'] # sac / td3 / ddpg
+    sac:
+      alpha: [0.1]
+    gamma: [0.95]
+    learning_rate: [0.0005]
+  environment:
+    reward:
+      reward_shaping_type: ['sparse'] # sparse / state_change_bonus
+      reward_bonus: [0.0] #--- only if reward_shaping_type == state_change_bonus
+  buffer:
+    replay_buffer_size: [1e6]
+    her:
+      goal_selection_strategy: ['final'] # noher / final / future / future_once / near / next
+    highlights:
+      mode: ['predefined'] # nohl / fix / ama / amar / predefined / multifix / multipredefined
+      batch_ratio_mode: ['fix'] # fix / prioritized (works only if 'mode' is not 'nohl')
+      batch_ratio: [0.5] #--- only if highlights mode != nohl
+      buffer_size: [5e4]
+      fix: #--- only if highlights mode == fix
+        threshold: [-20] # gympanda: -20 / gym: [Hopper: 2500 / HalfCheetah: 7000 / Walker2d: 3000 / Ant: 3000]
+      predefined: #--- only if highlights mode == predefined
+        threshold_start: [-50] # gympanda: -50 / gym: 0
+        threshold_end: [-10] # gympanda: -10 / gym: [Hopper: 3000 / HalfCheetah: 8000 / Walker2d: 3500 / Ant: 4000]
+    per:
+      mode: ['noper'] # noper / proportional
+  trainer:
+    total_timesteps: [5e5]
+  eval:
+    freq: [1e4]
+    num_episodes: [100]
+  # structure is differend than in the config file ##################################################x
+  task: 
+    #gym: ['Hopper-v4'] # 'Hopper-v4','HalfCheetah-v4','Walker2d-v4','Ant-v4'
+    gympanda: ['PandaSlide-v3'] # PandaReach-v3 / PandaPush-v3 / PandaSlide-v3 / PandaPickAndPlace-v3 / PandaStack-v3
+  cl: 
+    type: ['controldiscreteadaptive'] # nocl / nullcl / predefined / predefinedtwostage / predefinedthreestage / selfpaced / selfpaceddual / controldiscrete / controldiscreteadaptive
+    range_growth_mode: ['simple'] #--- only if highlights mode != nocl
+####################################################################################################
+
+process_4: # 2 x 2 x 3 x 1.5h = 18h
+  general:
+    seednum: 3
+  agent: 
+    type: ['sac'] # sac / td3 / ddpg
+    sac:
+      alpha: [0.1]
+    gamma: [0.95]
+    learning_rate: [0.0001]
+  environment:
+    reward:
+      reward_shaping_type: ['sparse'] # sparse / state_change_bonus
+      reward_bonus: [0.0] #--- only if reward_shaping_type == state_change_bonus
+  buffer:
+    replay_buffer_size: [1e6]
+    her:
+      goal_selection_strategy: ['final'] # noher / final / future / future_once / near / next
+    highlights:
+      mode: ['predefined'] # nohl / fix / ama / amar / predefined / multifix / multipredefined
+      batch_ratio_mode: ['fix'] # fix / prioritized (works only if 'mode' is not 'nohl')
+      batch_ratio: [0.5] #--- only if highlights mode != nohl
+      buffer_size: [5e4]
+      fix: #--- only if highlights mode == fix
+        threshold: [-20] # gympanda: -20 / gym: [Hopper: 2500 / HalfCheetah: 7000 / Walker2d: 3000 / Ant: 3000]
+      predefined: #--- only if highlights mode == predefined
+        threshold_start: [-50] # gympanda: -50 / gym: 0
+        threshold_end: [-10] # gympanda: -10 / gym: [Hopper: 3000 / HalfCheetah: 8000 / Walker2d: 3500 / Ant: 4000]
+    per:
+      mode: ['noper'] # noper / proportional
+  trainer:
+    total_timesteps: [5e5]
+  eval:
+    freq: [1e4]
+    num_episodes: [100]
+  # structure is differend than in the config file ##################################################x
+  task: 
+    #gym: ['Hopper-v4'] # 'Hopper-v4','HalfCheetah-v4','Walker2d-v4','Ant-v4'
+    gympanda: ['PandaSlide-v3'] # PandaReach-v3 / PandaPush-v3 / PandaSlide-v3 / PandaPickAndPlace-v3 / PandaStack-v3
+  cl: 
+    type: ['controldiscreteadaptive'] # nocl / nullcl / predefined / predefinedtwostage / predefinedthreestage / selfpaced / selfpaceddual / controldiscrete / controldiscreteadaptive
+    range_growth_mode: ['simple'] #--- only if highlights mode != nocl
+####################################################################################################
+
+process_5: # 2 x 2 x 3 x 1.5h = 18h
+  general:
+    seednum: 3
+  agent: 
+    type: ['sac'] # sac / td3 / ddpg
+    sac:
+      alpha: [0.1]
+    gamma: [0.95]
+    learning_rate: [0.00005]
+  environment:
+    reward:
+      reward_shaping_type: ['sparse'] # sparse / state_change_bonus
+      reward_bonus: [0.0] #--- only if reward_shaping_type == state_change_bonus
+  buffer:
+    replay_buffer_size: [1e6]
+    her:
+      goal_selection_strategy: ['final'] # noher / final / future / future_once / near / next
+    highlights:
+      mode: ['predefined'] # nohl / fix / ama / amar / predefined / multifix / multipredefined
+      batch_ratio_mode: ['fix'] # fix / prioritized (works only if 'mode' is not 'nohl')
+      batch_ratio: [0.5] #--- only if highlights mode != nohl
+      buffer_size: [5e4]
+      fix: #--- only if highlights mode == fix
+        threshold: [-20] # gympanda: -20 / gym: [Hopper: 2500 / HalfCheetah: 7000 / Walker2d: 3000 / Ant: 3000]
+      predefined: #--- only if highlights mode == predefined
+        threshold_start: [-50] # gympanda: -50 / gym: 0
+        threshold_end: [-10] # gympanda: -10 / gym: [Hopper: 3000 / HalfCheetah: 8000 / Walker2d: 3500 / Ant: 4000]
+    per:
+      mode: ['noper'] # noper / proportional
+  trainer:
+    total_timesteps: [5e5]
+  eval:
+    freq: [1e4]
+    num_episodes: [100]
+  # structure is differend than in the config file ##################################################x
+  task: 
+    #gym: ['Hopper-v4'] # 'Hopper-v4','HalfCheetah-v4','Walker2d-v4','Ant-v4'
+    gympanda: ['PandaSlide-v3'] # PandaReach-v3 / PandaPush-v3 / PandaSlide-v3 / PandaPickAndPlace-v3 / PandaStack-v3
+  cl: 
+    type: ['controldiscreteadaptive'] # nocl / nullcl / predefined / predefinedtwostage / predefinedthreestage / selfpaced / selfpaceddual / controldiscrete / controldiscreteadaptive
+    range_growth_mode: ['simple'] #--- only if highlights mode != nocl
+####################################################################################################
+
+process_6: # 2 x 2 x 3 x 1.5h = 18h
+  general:
+    seednum: 3
+  agent: 
+    type: ['sac'] # sac / td3 / ddpg
+    sac:
+      alpha: [0.1]
+    gamma: [0.95]
+    learning_rate: [0.001]
+  environment:
+    reward:
+      reward_shaping_type: ['sparse'] # sparse / state_change_bonus
+      reward_bonus: [0.0] #--- only if reward_shaping_type == state_change_bonus
+  buffer:
+    replay_buffer_size: [1e6]
+    her:
+      goal_selection_strategy: ['final'] # noher / final / future / future_once / near / next
+    highlights:
+      mode: ['predefined'] # nohl / fix / ama / amar / predefined / multifix / multipredefined
+      batch_ratio_mode: ['fix'] # fix / prioritized (works only if 'mode' is not 'nohl')
+      batch_ratio: [0.5] #--- only if highlights mode != nohl
+      buffer_size: [1e6]
+      fix: #--- only if highlights mode == fix
+        threshold: [-20] # gympanda: -20 / gym: [Hopper: 2500 / HalfCheetah: 7000 / Walker2d: 3000 / Ant: 3000]
+      predefined: #--- only if highlights mode == predefined
+        threshold_start: [-50] # gympanda: -50 / gym: 0
+        threshold_end: [-10] # gympanda: -10 / gym: [Hopper: 3000 / HalfCheetah: 8000 / Walker2d: 3500 / Ant: 4000]
+    per:
+      mode: ['noper'] # noper / proportional
+  trainer:
+    total_timesteps: [5e5]
+  eval:
+    freq: [1e4]
+    num_episodes: [100]
+  # structure is differend than in the config file ##################################################x
+  task: 
+    #gym: ['Hopper-v4'] # 'Hopper-v4','HalfCheetah-v4','Walker2d-v4','Ant-v4'
+    gympanda: ['PandaSlide-v3'] # PandaReach-v3 / PandaPush-v3 / PandaSlide-v3 / PandaPickAndPlace-v3 / PandaStack-v3
+  cl: 
+    type: ['controldiscreteadaptive'] # nocl / nullcl / predefined / predefinedtwostage / predefinedthreestage / selfpaced / selfpaceddual / controldiscrete / controldiscreteadaptive
+    range_growth_mode: ['simple'] #--- only if highlights mode != nocl
+####################################################################################################
+
+process_7: # 2 x 2 x 3 x 1.5h = 18h
+  general:
+    seednum: 3
+  agent: 
+    type: ['sac'] # sac / td3 / ddpg
+    sac:
+      alpha: [0.1]
+    gamma: [0.95]
+    learning_rate: [0.001]
+  environment:
+    reward:
+      reward_shaping_type: ['sparse'] # sparse / state_change_bonus
+      reward_bonus: [0.0] #--- only if reward_shaping_type == state_change_bonus
+  buffer:
+    replay_buffer_size: [1e6]
+    her:
+      goal_selection_strategy: ['final'] # noher / final / future / future_once / near / next
+    highlights:
+      mode: ['predefined'] # nohl / fix / ama / amar / predefined / multifix / multipredefined
+      batch_ratio_mode: ['fix'] # fix / prioritized (works only if 'mode' is not 'nohl')
+      batch_ratio: [0.5] #--- only if highlights mode != nohl
+      buffer_size: [5e5]
+      fix: #--- only if highlights mode == fix
+        threshold: [-20] # gympanda: -20 / gym: [Hopper: 2500 / HalfCheetah: 7000 / Walker2d: 3000 / Ant: 3000]
+      predefined: #--- only if highlights mode == predefined
+        threshold_start: [-50] # gympanda: -50 / gym: 0
+        threshold_end: [-10] # gympanda: -10 / gym: [Hopper: 3000 / HalfCheetah: 8000 / Walker2d: 3500 / Ant: 4000]
+    per:
+      mode: ['noper'] # noper / proportional
+  trainer:
+    total_timesteps: [5e5]
+  eval:
+    freq: [1e4]
+    num_episodes: [100]
+  # structure is differend than in the config file ##################################################x
+  task: 
+    #gym: ['Hopper-v4'] # 'Hopper-v4','HalfCheetah-v4','Walker2d-v4','Ant-v4'
+    gympanda: ['PandaSlide-v3'] # PandaReach-v3 / PandaPush-v3 / PandaSlide-v3 / PandaPickAndPlace-v3 / PandaStack-v3
+  cl: 
+    type: ['controldiscreteadaptive'] # nocl / nullcl / predefined / predefinedtwostage / predefinedthreestage / selfpaced / selfpaceddual / controldiscrete / controldiscreteadaptive
+    range_growth_mode: ['simple'] #--- only if highlights mode != nocl
+####################################################################################################
+
+process_8: # 2 x 2 x 3 x 1.5h = 18h
+  general:
+    seednum: 3
+  agent: 
+    type: ['sac'] # sac / td3 / ddpg
+    sac:
+      alpha: [0.1]
+    gamma: [0.95]
+    learning_rate: [0.001]
+  environment:
+    reward:
+      reward_shaping_type: ['sparse'] # sparse / state_change_bonus
+      reward_bonus: [0.0] #--- only if reward_shaping_type == state_change_bonus
+  buffer:
+    replay_buffer_size: [1e6]
+    her:
+      goal_selection_strategy: ['final'] # noher / final / future / future_once / near / next
+    highlights:
+      mode: ['predefined'] # nohl / fix / ama / amar / predefined / multifix / multipredefined
+      batch_ratio_mode: ['fix'] # fix / prioritized (works only if 'mode' is not 'nohl')
+      batch_ratio: [0.5] #--- only if highlights mode != nohl
+      buffer_size: [1e5]
+      fix: #--- only if highlights mode == fix
+        threshold: [-20] # gympanda: -20 / gym: [Hopper: 2500 / HalfCheetah: 7000 / Walker2d: 3000 / Ant: 3000]
+      predefined: #--- only if highlights mode == predefined
+        threshold_start: [-50] # gympanda: -50 / gym: 0
+        threshold_end: [-10] # gympanda: -10 / gym: [Hopper: 3000 / HalfCheetah: 8000 / Walker2d: 3500 / Ant: 4000]
+    per:
+      mode: ['noper'] # noper / proportional
+  trainer:
+    total_timesteps: [5e5]
+  eval:
+    freq: [1e4]
+    num_episodes: [100]
+  # structure is differend than in the config file ##################################################x
+  task: 
+    #gym: ['Hopper-v4'] # 'Hopper-v4','HalfCheetah-v4','Walker2d-v4','Ant-v4'
+    gympanda: ['PandaSlide-v3'] # PandaReach-v3 / PandaPush-v3 / PandaSlide-v3 / PandaPickAndPlace-v3 / PandaStack-v3
+  cl: 
+    type: ['controldiscreteadaptive'] # nocl / nullcl / predefined / predefinedtwostage / predefinedthreestage / selfpaced / selfpaceddual / controldiscrete / controldiscreteadaptive
+    range_growth_mode: ['simple'] #--- only if highlights mode != nocl
+####################################################################################################
+
+process_9: # 2 x 2 x 3 x 1.5h = 18h
+  general:
+    seednum: 3
+  agent: 
+    type: ['sac'] # sac / td3 / ddpg
+    sac:
+      alpha: [0.1]
+    gamma: [0.95]
+    learning_rate: [0.001]
+  environment:
+    reward:
+      reward_shaping_type: ['sparse'] # sparse / state_change_bonus
+      reward_bonus: [0.0] #--- only if reward_shaping_type == state_change_bonus
+  buffer:
+    replay_buffer_size: [1e6]
+    her:
+      goal_selection_strategy: ['final'] # noher / final / future / future_once / near / next
+    highlights:
+      mode: ['predefined'] # nohl / fix / ama / amar / predefined / multifix / multipredefined
+      batch_ratio_mode: ['fix'] # fix / prioritized (works only if 'mode' is not 'nohl')
+      batch_ratio: [0.5] #--- only if highlights mode != nohl
+      buffer_size: [1e4]
+      fix: #--- only if highlights mode == fix
+        threshold: [-20] # gympanda: -20 / gym: [Hopper: 2500 / HalfCheetah: 7000 / Walker2d: 3000 / Ant: 3000]
+      predefined: #--- only if highlights mode == predefined
+        threshold_start: [-50] # gympanda: -50 / gym: 0
+        threshold_end: [-10] # gympanda: -10 / gym: [Hopper: 3000 / HalfCheetah: 8000 / Walker2d: 3500 / Ant: 4000]
+    per:
+      mode: ['noper'] # noper / proportional
+  trainer:
+    total_timesteps: [5e5]
+  eval:
+    freq: [1e4]
+    num_episodes: [100]
+  # structure is differend than in the config file ##################################################x
+  task: 
+    #gym: ['Hopper-v4'] # 'Hopper-v4','HalfCheetah-v4','Walker2d-v4','Ant-v4'
+    gympanda: ['PandaSlide-v3'] # PandaReach-v3 / PandaPush-v3 / PandaSlide-v3 / PandaPickAndPlace-v3 / PandaStack-v3
+  cl: 
+    type: ['controldiscreteadaptive'] # nocl / nullcl / predefined / predefinedtwostage / predefinedthreestage / selfpaced / selfpaceddual / controldiscrete / controldiscreteadaptive
+    range_growth_mode: ['simple'] #--- only if highlights mode != nocl
+####################################################################################################
+
+process_10: # 2 x 2 x 3 x 1.5h = 18h
+  general:
+    seednum: 3
+  agent: 
+    type: ['sac'] # sac / td3 / ddpg
+    sac:
+      alpha: [0.1]
+    gamma: [0.95]
+    learning_rate: [0.001]
+  environment:
+    reward:
+      reward_shaping_type: ['sparse'] # sparse / state_change_bonus
+      reward_bonus: [0.0] #--- only if reward_shaping_type == state_change_bonus
+  buffer:
+    replay_buffer_size: [1e6]
+    her:
+      goal_selection_strategy: ['final'] # noher / final / future / future_once / near / next
+    highlights:
+      mode: ['predefined'] # nohl / fix / ama / amar / predefined / multifix / multipredefined
+      batch_ratio_mode: ['fix'] # fix / prioritized (works only if 'mode' is not 'nohl')
+      batch_ratio: [0.5] #--- only if highlights mode != nohl
+      buffer_size: [5e3]
+      fix: #--- only if highlights mode == fix
+        threshold: [-20] # gympanda: -20 / gym: [Hopper: 2500 / HalfCheetah: 7000 / Walker2d: 3000 / Ant: 3000]
+      predefined: #--- only if highlights mode == predefined
+        threshold_start: [-50] # gympanda: -50 / gym: 0
+        threshold_end: [-10] # gympanda: -10 / gym: [Hopper: 3000 / HalfCheetah: 8000 / Walker2d: 3500 / Ant: 4000]
+    per:
+      mode: ['noper'] # noper / proportional
+  trainer:
+    total_timesteps: [5e5]
+  eval:
+    freq: [1e4]
+    num_episodes: [100]
+  # structure is differend than in the config file ##################################################x
+  task: 
+    #gym: ['Hopper-v4'] # 'Hopper-v4','HalfCheetah-v4','Walker2d-v4','Ant-v4'
+    gympanda: ['PandaSlide-v3'] # PandaReach-v3 / PandaPush-v3 / PandaSlide-v3 / PandaPickAndPlace-v3 / PandaStack-v3
+  cl: 
+    type: ['controldiscreteadaptive'] # nocl / nullcl / predefined / predefinedtwostage / predefinedthreestage / selfpaced / selfpaceddual / controldiscrete / controldiscreteadaptive
+    range_growth_mode: ['simple'] #--- only if highlights mode != nocl
+####################################################################################################
+
+process_11: # 2 x 2 x 3 x 1.5h = 18h
+  general:
+    seednum: 3
+  agent: 
+    type: ['sac'] # sac / td3 / ddpg
+    sac:
+      alpha: [0.1]
+    gamma: [0.95]
+    learning_rate: [0.001]
+  environment:
+    reward:
+      reward_shaping_type: ['sparse'] # sparse / state_change_bonus
+      reward_bonus: [0.0] #--- only if reward_shaping_type == state_change_bonus
+  buffer:
+    replay_buffer_size: [1e6]
+    her:
+      goal_selection_strategy: ['final'] # noher / final / future / future_once / near / next
+    highlights:
+      mode: ['predefined'] # nohl / fix / ama / amar / predefined / multifix / multipredefined
+      batch_ratio_mode: ['fix'] # fix / prioritized (works only if 'mode' is not 'nohl')
+      batch_ratio: [0.5] #--- only if highlights mode != nohl
+      buffer_size: [1e3]
+      fix: #--- only if highlights mode == fix
+        threshold: [-20] # gympanda: -20 / gym: [Hopper: 2500 / HalfCheetah: 7000 / Walker2d: 3000 / Ant: 3000]
+      predefined: #--- only if highlights mode == predefined
+        threshold_start: [-50] # gympanda: -50 / gym: 0
+        threshold_end: [-10] # gympanda: -10 / gym: [Hopper: 3000 / HalfCheetah: 8000 / Walker2d: 3500 / Ant: 4000]
+    per:
+      mode: ['noper'] # noper / proportional
+  trainer:
+    total_timesteps: [5e5]
+  eval:
+    freq: [1e4]
+    num_episodes: [100]
+  # structure is differend than in the config file ##################################################x
+  task: 
+    #gym: ['Hopper-v4'] # 'Hopper-v4','HalfCheetah-v4','Walker2d-v4','Ant-v4'
+    gympanda: ['PandaSlide-v3'] # PandaReach-v3 / PandaPush-v3 / PandaSlide-v3 / PandaPickAndPlace-v3 / PandaStack-v3
   cl: 
     type: ['controldiscreteadaptive'] # nocl / nullcl / predefined / predefinedtwostage / predefinedthreestage / selfpaced / selfpaceddual / controldiscrete / controldiscreteadaptive
     range_growth_mode: ['simple'] #--- only if highlights mode != nocl
