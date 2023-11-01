@@ -1,11 +1,12 @@
-process_0: 
+process_0: # 2 x 2 x 3 x 1.5h = 18h
   general:
     seednum: 1
   agent: 
     type: ['sac'] # sac / td3 / ddpg
     sac:
-      alpha: [0.2]
+      alpha: [0.1]
     gamma: [0.95]
+    learning_rate: [0.001]
   environment:
     reward:
       reward_shaping_type: ['sparse'] # sparse / state_change_bonus
@@ -13,11 +14,12 @@ process_0:
   buffer:
     replay_buffer_size: [1e6]
     her:
-      goal_selection_strategy: ['noher'] # noher / final / future / future_once / near / next
+      goal_selection_strategy: ['final'] # noher / final / future / future_once / near / next
     highlights:
-      mode: ['fix'] # nohl / fix / ama / amar / predefined / multifix / multipredefined
-      batch_ratio_mode: ['prioritized'] # fix / prioritized (works only if 'mode' is not 'nohl')
+      mode: ['predefined'] # nohl / fix / ama / amar / predefined / multifix / multipredefined
+      batch_ratio_mode: ['fix'] # fix / prioritized (works only if 'mode' is not 'nohl')
       batch_ratio: [0.5] #--- only if highlights mode != nohl
+      buffer_size: [5e4]
       fix: #--- only if highlights mode == fix
         threshold: [-20] # gympanda: -20 / gym: [Hopper: 2500 / HalfCheetah: 7000 / Walker2d: 3000 / Ant: 3000]
       predefined: #--- only if highlights mode == predefined
@@ -26,15 +28,15 @@ process_0:
     per:
       mode: ['noper'] # noper / proportional
   trainer:
-    total_timesteps: [2e3]
+    total_timesteps: [500]
   eval:
-    freq: [5e2]
+    freq: [50]
     num_episodes: [10]
   # structure is differend than in the config file ##################################################x
   task: 
     #gym: ['Hopper-v4'] # 'Hopper-v4','HalfCheetah-v4','Walker2d-v4','Ant-v4'
     gympanda: ['PandaReach-v3'] # PandaReach-v3 / PandaPush-v3 / PandaSlide-v3 / PandaPickAndPlace-v3 / PandaStack-v3
   cl: 
-    type: ['nocl'] # nocl / nullcl / predefined / predefinedtwostage / predefinedthreestage / selfpaced / selfpaceddual / controldiscrete / controldiscreteadaptive
+    type: ['controldiscreteadaptive'] # nocl / nullcl / predefined / predefinedtwostage / predefinedthreestage / selfpaced / selfpaceddual / controldiscrete / controldiscreteadaptive
     range_growth_mode: ['simple'] #--- only if highlights mode != nocl
 ####################################################################################################

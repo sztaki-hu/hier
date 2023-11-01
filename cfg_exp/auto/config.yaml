@@ -1,5 +1,5 @@
 general:
-  exp_name: 1030_X
+  exp_name: 1101_X
   logdir: logs
   demodir: demos
   seed: random
@@ -34,7 +34,7 @@ agent:
   boundary_max: auto
   gamma: input
   polyak: 0.995
-  learning_rate: 0.001
+  learning_rate: input
   sac:
     alpha: input # spinningup do not have "auto" option
   td3:
@@ -63,7 +63,7 @@ buffer:
     batch_ratio: input
     batch_ratio_min: 0.1 # in case of prioritized
     batch_ratio_max: 0.9 # in case of prioritized
-    buffer_size: 5e4
+    buffer_size: input
     success_cond: False
     include_test: True
     fix:

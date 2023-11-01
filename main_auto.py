@@ -47,6 +47,7 @@ def main():
     agents = exp_list['agent']['type']
     agent_sac_alphas = exp_list['agent']['sac']['alpha']
     agent_gammas = exp_list['agent']['gamma']
+    agent_learning_rates = exp_list['agent']['learning_rate']
     # Envs
     reward_shaping_types = exp_list['environment']['reward']['reward_shaping_type']
     reward_bonuses = exp_list['environment']['reward']['reward_bonus']
@@ -56,6 +57,7 @@ def main():
     highlights_modes = exp_list['buffer']['highlights']['mode']
     highlights_batch_ratio_modes = exp_list['buffer']['highlights']['batch_ratio_mode']
     highlights_batch_ratios = exp_list['buffer']['highlights']['batch_ratio']
+    highlights_buffer_sizes = exp_list['buffer']['highlights']['buffer_size']
     highlights_fix_thresholds = exp_list['buffer']['highlights']['fix']['threshold']
     highlights_predefined_threshold_starts = exp_list['buffer']['highlights']['predefined']['threshold_start']
     highlights_predefined_threshold_ends = exp_list['buffer']['highlights']['predefined']['threshold_end']
@@ -104,6 +106,7 @@ def main():
                             agents, 
                             agent_sac_alphas,
                             agent_gammas,
+                            agent_learning_rates,
                             # Envs
                             reward_shaping_types,
                             reward_bonuses,
@@ -113,6 +116,7 @@ def main():
                             highlights_modes,
                             highlights_batch_ratio_modes,
                             highlights_batch_ratios,
+                            highlights_buffer_sizes,
                             highlights_fix_thresholds,
                             highlights_predefined_threshold_starts,
                             highlights_predefined_threshold_ends,
@@ -135,27 +139,29 @@ def main():
                             agent_type                               = r[0]
                             agent_sac_alpha                          = r[1]
                             agent_gamma                              = r[2]
+                            agent_learning_rate                      = r[3]
                             # Env
-                            reward_shaping_type                      = r[3]
-                            reward_bonus                             = r[4]
+                            reward_shaping_type                      = r[4]
+                            reward_bonus                             = r[5]
                             # Buffer
-                            replay_buffer_size                       = r[5]
-                            her_strategy                             = r[6]
-                            highlights_mode                          = r[7]
-                            highlights_batch_ratio_mode              = r[8]
-                            highlights_batch_ratio                   = r[9]
-                            highlights_fix_threshold                 = r[10]
-                            highlights_predefined_threshold_start    = r[11]
-                            highlights_predefined_threshold_end      = r[12]
-                            per_mode                                 = r[13]
+                            replay_buffer_size                       = r[6]
+                            her_strategy                             = r[7]
+                            highlights_mode                          = r[8]
+                            highlights_batch_ratio_mode              = r[9]
+                            highlights_batch_ratio                   = r[10]
+                            highlights_buffer_size                   = r[11]
+                            highlights_fix_threshold                 = r[12]
+                            highlights_predefined_threshold_start    = r[13]
+                            highlights_predefined_threshold_end      = r[14]
+                            per_mode                                 = r[15]
                             # Trainer
-                            trainer_total_timesteps                  = r[14]
+                            trainer_total_timesteps                  = r[16]
                             # Eval
-                            eval_freq                                = r[15]
-                            eval_num_episodes                        = r[16]
+                            eval_freq                                = r[17]
+                            eval_num_episodes                        = r[18]
                             # CL
-                            cl_type                                  = r[17]
-                            cl_range_growth_mode                     = r[18]                  
+                            cl_type                                  = r[19]
+                            cl_range_growth_mode                     = r[20]                  
                                                     
                             exp = {}
                             exp['main'] = {} 
@@ -175,6 +181,9 @@ def main():
                             exp['main']['agent_gamma'] = agent_gamma
                             exp['exp_in_name']['agent_gamma'] = False
                             exp['exp_abb']['agent_gamma'] = 'gam'
+                            exp['main']['agent_learning_rate'] = agent_learning_rate
+                            exp['exp_in_name']['agent_learning_rate'] = True
+                            exp['exp_abb']['agent_learning_rate'] = 'lr'
                             # Env
                             exp['main']['reward_shaping_type'] = reward_shaping_type
                             exp['exp_in_name']['reward_shaping_type'] = True
@@ -193,6 +202,8 @@ def main():
                             exp['main']['highlights_batch_ratio'] = highlights_batch_ratio
                             exp['exp_in_name']['highlights_batch_ratio'] = False
                             exp['exp_abb']['highlights_batch_ratio'] = 'hbr'
+                            exp['main']['highlights_buffer_size'] = highlights_buffer_size
+                            exp['exp_in_name']['highlights_buffer_size'] = True
                             exp['main']['highlights_fix_threshold'] = highlights_fix_threshold
                             exp['exp_in_name']['highlights_fix_threshold'] = False
                             exp['main']['highlights_predefined_threshold_start'] = highlights_predefined_threshold_start

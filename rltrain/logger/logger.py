@@ -36,6 +36,7 @@ class Logger:
             self.config['agent']['type'] = exp['main']['agent']
             self.config['agent']['sac']['alpha'] = exp['main']['agent_sac_alpha']
             self.config['agent']['gamma'] = exp['main']['agent_gamma']
+            self.config['agent']['learning_rate'] = exp['main']['agent_learning_rate']
             # Env
             self.config['environment']['reward']['reward_shaping_type'] = exp['main']['reward_shaping_type']
             self.config['environment']['reward']['reward_bonus'] = exp['main']['reward_bonus']
@@ -45,6 +46,7 @@ class Logger:
             self.config['buffer']['highlights']['mode'] = exp['main']['highlights_mode']
             self.config['buffer']['highlights']['batch_ratio_mode'] = exp['main']['highlights_batch_ratio_mode']
             self.config['buffer']['highlights']['batch_ratio'] = exp['main']['highlights_batch_ratio']
+            self.config['buffer']['highlights']['buffer_size'] = exp['main']['highlights_buffer_size']
             self.config['buffer']['highlights']['fix']['threshold'] = exp['main']['highlights_fix_threshold']
             self.config['buffer']['highlights']['predefined']['threshold_start'] = exp['main']['highlights_predefined_threshold_start']
             self.config['buffer']['highlights']['predefined']['threshold_end'] = exp['main']['highlights_predefined_threshold_end']
