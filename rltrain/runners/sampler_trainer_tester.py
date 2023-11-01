@@ -373,6 +373,10 @@ class SamplerTrainerTester:
                 # HER
                 self.logger.tb_writer_add_scalar("her/virtual_experience_added", np.mean(self.virtual_experience_dq), t)
                 
+                # PER
+                if self.per_active:
+                    self.logger.tb_writer_add_scalar("per/beta", np.mean(self.replay_buffer.get_beta()), t)
+
                 # CL
                 self.logger.tb_writer_add_scalar("cl/ratio", self.CL.cl_ratio, t)
                 if self.cl_mode == 'examplebyexample': self.logger.tb_writer_add_scalar("cl/same_setup_num", np.mean(self.CL.same_setup_num_dq), t)
