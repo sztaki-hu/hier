@@ -6,7 +6,7 @@ process_0: # noher - nohl - noper - nocl
     sac:
       alpha: [0.1]
     gamma: [0.95]
-    learning_rate: [0.01]
+    learning_rate: [0.001]
   environment:
     reward:
       reward_shaping_type: ['sparse'] # sparse / state_change_bonus
@@ -49,7 +49,7 @@ process_1: # her - nohl - noper - nocl
     sac:
       alpha: [0.1]
     gamma: [0.95]
-    learning_rate: [0.01]
+    learning_rate: [0.001]
   environment:
     reward:
       reward_shaping_type: ['sparse'] # sparse / state_change_bonus
@@ -92,7 +92,7 @@ process_2: # noher - nohl - per - nocl
     sac:
       alpha: [0.1]
     gamma: [0.95]
-    learning_rate: [0.01]
+    learning_rate: [0.001]
   environment:
     reward:
       reward_shaping_type: ['sparse'] # sparse / state_change_bonus
@@ -135,7 +135,7 @@ process_3: # noher - nohl - noper - cl
     sac:
       alpha: [0.1]
     gamma: [0.95]
-    learning_rate: [0.01]
+    learning_rate: [0.001]
   environment:
     reward:
       reward_shaping_type: ['sparse'] # sparse / state_change_bonus
@@ -178,7 +178,7 @@ process_4: # her - nohl - noper - cl
     sac:
       alpha: [0.1]
     gamma: [0.95]
-    learning_rate: [0.01]
+    learning_rate: [0.001]
   environment:
     reward:
       reward_shaping_type: ['sparse'] # sparse / state_change_bonus
@@ -221,7 +221,7 @@ process_5: # noher - nohl - per - cl
     sac:
       alpha: [0.1]
     gamma: [0.95]
-    learning_rate: [0.01]
+    learning_rate: [0.001]
   environment:
     reward:
       reward_shaping_type: ['sparse'] # sparse / state_change_bonus
@@ -264,7 +264,7 @@ process_6: # noher - hl - noper - nocl
     sac:
       alpha: [0.1]
     gamma: [0.95]
-    learning_rate: [0.01]
+    learning_rate: [0.001]
   environment:
     reward:
       reward_shaping_type: ['sparse'] # sparse / state_change_bonus
@@ -307,7 +307,7 @@ process_7: # her - hl - noper - nocl
     sac:
       alpha: [0.1]
     gamma: [0.95]
-    learning_rate: [0.01]
+    learning_rate: [0.001]
   environment:
     reward:
       reward_shaping_type: ['sparse'] # sparse / state_change_bonus
@@ -350,7 +350,7 @@ process_8: # noher - hl - noper - cl
     sac:
       alpha: [0.1]
     gamma: [0.95]
-    learning_rate: [0.01]
+    learning_rate: [0.001]
   environment:
     reward:
       reward_shaping_type: ['sparse'] # sparse / state_change_bonus
@@ -393,7 +393,7 @@ process_9: # her - hl - noper - cl
     sac:
       alpha: [0.1]
     gamma: [0.95]
-    learning_rate: [0.01]
+    learning_rate: [0.001]
   environment:
     reward:
       reward_shaping_type: ['sparse'] # sparse / state_change_bonus
@@ -436,7 +436,7 @@ process_10: # noher - hl - per - cl
     sac:
       alpha: [0.1]
     gamma: [0.95]
-    learning_rate: [0.01]
+    learning_rate: [0.001]
   environment:
     reward:
       reward_shaping_type: ['sparse'] # sparse / state_change_bonus
@@ -479,7 +479,7 @@ process_11: # her - hl - per - cl
     sac:
       alpha: [0.1]
     gamma: [0.95]
-    learning_rate: [0.01]
+    learning_rate: [0.001]
   environment:
     reward:
       reward_shaping_type: ['sparse'] # sparse / state_change_bonus
