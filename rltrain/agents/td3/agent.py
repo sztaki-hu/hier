@@ -3,12 +3,13 @@ import itertools
 import numpy as np
 import torch
 from torch.optim import Adam
+from typing import Dict, Union, Tuple, Optional, List
 
 import rltrain.agents.td3.core as core
 
 class Agent:
 
-    def __init__(self,device,config):
+    def __init__(self, device: torch.device, config: Dict) -> None:
 
         self.device = device
         self.actor_critic=core.MLPActorCritic
@@ -75,7 +76,7 @@ class Agent:
 
 
     # Set up function for computing TD3 Q-losses
-    def compute_loss_q(self, data):
+    def compute_loss_q(self, data: Dict) -> Tuple[torch.Tensor, np.ndarray, Dict]:
         o, a, r, o2, d = data['obs'], data['act'], data['rew'], data['obs2'], data['done']
 
         o = o.float().to(self.device)
@@ -125,7 +126,7 @@ class Agent:
         return loss_q, batch_priorities, loss_info
 
     # Set up function for computing TD3 pi loss
-    def compute_loss_pi(self,data):
+    def compute_loss_pi(self, data: Dict) -> torch.Tensor:
 
         o = data['obs'].to(self.device)
 
@@ -133,7 +134,7 @@ class Agent:
         return -q1_pi.mean()
 
 
-    def update(self,data, timer):
+    def update(self, data: Dict, timer: int) -> Tuple[float, Optional[float], np.ndarray]:
         # First run one gradient descent step for Q1 and Q2
         self.q_optimizer.zero_grad()
         loss_q, batch_priorities, loss_info = self.compute_loss_q(data)
@@ -174,9 +175,10 @@ class Agent:
             
         return ret_loss_q, ret_loss_pi, batch_priorities
     
-    def get_action(self,o, noise_scale):
-        o = torch.from_numpy(o).float().unsqueeze(0).to(self.device)
-        a = self.ac.act(o)[0]
+
+    def get_action(self, o: np.ndarray, deterministic: bool, noise_scale: float) -> np.ndarray:
+        o_tensor = torch.from_numpy(o).float().unsqueeze(0).to(self.device)
+        a = self.ac.act(o_tensor)[0]
         a += noise_scale * np.random.randn(self.act_dim)
         return np.clip(a, self.boundary_min, self.boundary_max)
 
@@ -184,47 +186,10 @@ class Agent:
     #     o = torch.from_numpy(o).float().unsqueeze(0).to(self.device)
     #     return self.ac.act(o, deterministic)[0]
 
-    def get_random_action(self):
+    def get_random_action(self) -> np.ndarray:
         return np.random.uniform(low=self.boundary_min, high=self.boundary_max, size=(self.act_dim))
-
-    def save_model(self,model_path,mode="all"):
-        if mode == "all":
-            torch.save(self.ac.pi.state_dict(), model_path+"_pi")
-            torch.save(self.ac.q1.state_dict(), model_path+"_q1")
-            torch.save(self.ac.q2.state_dict(), model_path+"_q2")        
-            torch.save(self.ac_targ.pi.state_dict(), model_path+"_targ_ppi")   
-            torch.save(self.ac_targ.q1.state_dict(), model_path+"_targ_q1")
-            torch.save(self.ac_targ.q2.state_dict(), model_path+"_targ_q2")
-            torch.save(self.pi_optimizer.state_dict(), model_path+"_pi_optim")
-            torch.save(self.q_optimizer.state_dict(), model_path+"_q_optim")
-        elif mode == "pi":
-            torch.save(self.ac.pi.state_dict(), model_path+"_pi")
-        elif mode == "q":
-            torch.save(self.ac.q1.state_dict(), model_path+"_q1")
-            torch.save(self.ac.q2.state_dict(), model_path+"_q2")
     
-    def get_params(self):
-        #print([self.ac.parameters(), self.ac_targ.parameters()])
-
-        ac_params = []
-        for p in self.ac.parameters():
-            ac_params.append(p)
-        
-        ac_targ_params = []
-        for p in self.ac_targ.parameters():
-            ac_targ_params.append(p)
-
-        pi_optim_params = []
-        for p in self.pi_optimizer.param_groups:
-            pi_optim_params.append(p)
-        
-        q_optim_params = []
-        for p in self.q_optimizer.param_groups:
-            q_optim_params.append(p)
-        
-        return [ac_params, ac_targ_params,pi_optim_params,q_optim_params]
-
-    def load_weights(self,path,mode="all",eval=True):
+    def load_weights(self, path,mode: str = "all", eval: bool = True) -> None:
         if mode == "all":
             # policy network
             self.ac.pi.load_state_dict(torch.load(path+"_pi"))
@@ -269,3 +234,43 @@ class Agent:
             self.ac.pi.load_state_dict(torch.load(path+"_pi"))
             self.ac.pi.to(self.device)
             if eval: self.ac.pi.eval()
+
+    def save_model(self, model_path: str, mode: str = "all") -> None:
+        if mode == "all":
+            torch.save(self.ac.pi.state_dict(), model_path+"_pi")
+            torch.save(self.ac.q1.state_dict(), model_path+"_q1")
+            torch.save(self.ac.q2.state_dict(), model_path+"_q2")        
+            torch.save(self.ac_targ.pi.state_dict(), model_path+"_targ_ppi")   
+            torch.save(self.ac_targ.q1.state_dict(), model_path+"_targ_q1")
+            torch.save(self.ac_targ.q2.state_dict(), model_path+"_targ_q2")
+            torch.save(self.pi_optimizer.state_dict(), model_path+"_pi_optim")
+            torch.save(self.q_optimizer.state_dict(), model_path+"_q_optim")
+        elif mode == "pi":
+            torch.save(self.ac.pi.state_dict(), model_path+"_pi")
+        elif mode == "q":
+            torch.save(self.ac.q1.state_dict(), model_path+"_q1")
+            torch.save(self.ac.q2.state_dict(), model_path+"_q2")
+    
+    def get_params(self) -> List:
+        #print([self.ac.parameters(), self.ac_targ.parameters()])
+
+        ac_params = []
+        for p in self.ac.parameters():
+            ac_params.append(p)
+        
+        ac_targ_params = []
+        for p in self.ac_targ.parameters():
+            ac_targ_params.append(p)
+
+        pi_optim_params = []
+        for p in self.pi_optimizer.param_groups:
+            pi_optim_params.append(p)
+        
+        q_optim_params = []
+        for p in self.q_optimizer.param_groups:
+            q_optim_params.append(p)
+        
+        return [ac_params, ac_targ_params,pi_optim_params,q_optim_params]
+
+
+    

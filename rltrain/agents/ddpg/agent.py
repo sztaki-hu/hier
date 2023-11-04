@@ -3,11 +3,12 @@ import numpy as np
 import torch
 from torch.optim import Adam
 import time
+from typing import Dict, Union, Tuple, Optional, List
 
 import rltrain.agents.ddpg.core as core
 
 class Agent:
-    def __init__(self,device,config):
+    def __init__(self, device: torch.device, config: Dict) -> None:
         self.device = device
 
         self.actor_critic=core.MLPActorCritic
@@ -63,7 +64,7 @@ class Agent:
 
 
     # Set up function for computing DDPG Q-loss
-    def compute_loss_q(self,data):
+    def compute_loss_q(self, data: Dict) -> Tuple[torch.Tensor, np.ndarray, Dict]:
 
         o, a, r, o2, d = data['obs'], data['act'], data['rew'], data['obs2'], data['done']
 
@@ -96,13 +97,12 @@ class Agent:
         return loss_q, batch_priorities, loss_info
 
     # Set up function for computing DDPG pi loss
-    def compute_loss_pi(self,data):
+    def compute_loss_pi(self, data: Dict) -> torch.Tensor:
         o = data['obs'].to(self.device)
         q_pi = self.ac.q(o, self.ac.pi(o))
         return -q_pi.mean()
 
-
-    def update(self,data,placeholder = None):
+    def update(self, data: Dict, placeholder: None = None) -> Tuple[float, float, np.ndarray]:
         # First run one gradient descent step for Q.
         self.q_optimizer.zero_grad()
         loss_q, batch_priorities, loss_info = self.compute_loss_q(data)
@@ -138,17 +138,16 @@ class Agent:
         
         return ret_loss_q, ret_loss_pi, batch_priorities
 
-    def get_action(self,o, noise_scale):
-        o = torch.from_numpy(o).float().unsqueeze(0).to(self.device)
-        a = self.ac.act(o)[0]
+    def get_action(self, o: np.ndarray, deterministic: bool, noise_scale: float) -> np.ndarray:
+        o_tensor = torch.from_numpy(o).float().unsqueeze(0).to(self.device)
+        a = self.ac.act(o_tensor)[0]
         a += noise_scale * np.random.randn(self.act_dim)
         return np.clip(a, self.boundary_min, self.boundary_max)
-    
 
-    def get_random_action(self):
+    def get_random_action(self) -> np.ndarray:
         return np.random.uniform(low=self.boundary_min, high=self.boundary_max, size=(self.act_dim))
     
-    def load_weights(self,path,mode="all",eval=True):
+    def load_weights(self, path,mode: str = "all", eval: bool = True) -> None:
         if mode == "all":
             # policy network
             self.ac.pi.load_state_dict(torch.load(path+"_pi"))
@@ -186,7 +185,7 @@ class Agent:
             self.ac.pi.to(self.device)
             if eval: self.ac.pi.eval()
     
-    def save_model(self,model_path,mode="all"):
+    def save_model(self, model_path: str, mode: str = "all") -> None:
         if mode == "all":
             torch.save(self.ac.pi.state_dict(), model_path+"_pi")
             torch.save(self.ac.q.state_dict(), model_path+"_q")    
@@ -200,7 +199,7 @@ class Agent:
             torch.save(self.ac.q.state_dict(), model_path+"_q")
 
     
-    def get_params(self):
+    def get_params(self) -> List:
         #print([self.ac.parameters(), self.ac_targ.parameters()])
 
         ac_params = []

@@ -1,18 +1,21 @@
+from typing import Dict, Union
+import torch
 
+from rltrain.agents.sac.agent import Agent as SAC
+from rltrain.agents.td3.agent import Agent as TD3
+from rltrain.agents.ddpg.agent import Agent as DDPG
 
-def make_agent(device,config,config_framework):
+def make_agent(device: torch.device, config: Dict, config_framework: Dict) -> Union[SAC,TD3,DDPG]:
 
     agent_type = config['agent']['type']
-
     assert agent_type in config_framework['agent_list'] 
 
     if agent_type == 'sac':
-        from rltrain.agents.sac.agent import Agent
-        return Agent(device,config)
-    elif agent_type == 'td3':
-        from rltrain.agents.td3.agent import Agent
-        return Agent(device,config)
-    elif agent_type == 'ddpg':
-        from rltrain.agents.ddpg.agent import Agent
-        return Agent(device,config)
+        return SAC(device,config)
+    elif agent_type == 'td3': 
+        return TD3(device,config)
+    elif agent_type == 'ddpg': 
+        return DDPG(device,config)
+    else:
+        assert False
    

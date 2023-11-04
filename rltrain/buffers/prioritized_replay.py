@@ -1,11 +1,11 @@
 import numpy as np
 import torch
-
+from typing import Dict
 class PrioritizedReplay(object):
     """
     Proportional Prioritization
     """
-    def __init__(self, size, alpha=0.6,beta_start = 0.4,beta_frames=100000):
+    def __init__(self, size: int, alpha: float = 0.6, beta_start: float = 0.4, beta_frames: int = 100000) -> None:
         self.alpha = alpha
         self.beta_start = beta_start
         self.beta_frames = beta_frames
@@ -15,7 +15,7 @@ class PrioritizedReplay(object):
         self.pos        = 0
         self.priorities = np.zeros((size,), dtype=np.float32)
     
-    def beta_by_frame(self, frame_idx):
+    def beta_by_frame(self, frame_idx: int) -> float:
         """
         Linearly increases beta from beta_start to 1 over time from 1 to beta_frames.
         
@@ -27,7 +27,7 @@ class PrioritizedReplay(object):
         return min(1.0, self.beta_start + frame_idx * (1.0 - self.beta_start) / self.beta_frames)
     
     # def push(self, state, action, reward, next_state, done):
-    def store(self, state, action, reward, next_state, done):
+    def store(self, state: np.ndarray, action: np.ndarray, reward: float, next_state: np.ndarray, done: bool) -> None:
     
         assert state.ndim == next_state.ndim
         state      = np.expand_dims(state, 0)
@@ -46,7 +46,7 @@ class PrioritizedReplay(object):
         self.pos = (self.pos + 1) % self.size # lets the pos circle in the ranges of size if pos+1 > cap --> new posi = 0
     
     # def sample(self, batch_size):
-    def sample_batch(self, batch_size):
+    def sample_batch(self, batch_size: int) -> Dict:
         N = len(self.buffer)
         if N == self.size:
             prios = self.priorities
@@ -83,15 +83,15 @@ class PrioritizedReplay(object):
         return {k: torch.as_tensor(v, dtype=torch.float32) for k,v in batch.items()}
 
     
-    def update_priorities(self, batch_indices, batch_priorities):
+    def update_priorities(self, batch_indices: np.ndarray, batch_priorities: np.ndarray) -> None:
 
         for idx, prio in zip(batch_indices, batch_priorities):
             self.priorities[idx] = abs(prio) 
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.buffer)
 
-    def get_all(self):
+    def get_all(self) -> Dict:
         states, actions, rewards, next_states, dones = zip(*self.buffer) 
         batch = dict(obs=np.concatenate(states),
                      obs2=np.concatenate(next_states),
@@ -101,6 +101,6 @@ class PrioritizedReplay(object):
                      )
         return {k: torch.as_tensor(v, dtype=torch.float32) for k,v in batch.items()}
     
-    def get_beta(self):
+    def get_beta(self) -> float:
         return self.beta_by_frame(self.frame)
     

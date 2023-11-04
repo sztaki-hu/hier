@@ -4,10 +4,12 @@ from torch.optim import Adam
 from copy import deepcopy
 import itertools
 
+from typing import Dict, Union, Tuple, Optional, List
+
 import rltrain.agents.sac.core as core
 
 class Agent:
-    def __init__(self,device,config):
+    def __init__(self, device: torch.device, config: Dict) -> None:
 
         self.device = device
         self.actor_critic=core.MLPActorCritic
@@ -22,6 +24,8 @@ class Agent:
         self.act_dim = config['environment']['act_dim']
         self.boundary_min = np.array(config['agent']['boundary_min'])[:self.act_dim]
         self.boundary_max = np.array(config['agent']['boundary_max'])[:self.act_dim]
+
+        self.act_noise = 0.0
         
         # torch.manual_seed(self.seed)
         # np.random.seed(self.seed)
@@ -135,7 +139,7 @@ class Agent:
         """
 
     # Set up function for computing SAC Q-losses
-    def compute_loss_q(self, data):
+    def compute_loss_q(self, data: Dict) -> Tuple[torch.Tensor, np.ndarray, Dict]:
         o, a, r, o2, d = data['obs'], data['act'], data['rew'], data['obs2'], data['done']
 
         o = o.float().to(self.device)
@@ -178,7 +182,7 @@ class Agent:
         return loss_q, batch_priorities, q_info
 
     # Set up function for computing SAC pi loss
-    def compute_loss_pi(self,data):
+    def compute_loss_pi(self, data: Dict) -> Tuple[torch.Tensor, Dict]:
 
         o = data['obs'].to(self.device)
 
@@ -196,7 +200,7 @@ class Agent:
 
         return loss_pi, pi_info
 
-    def update(self, data, placeholder = None):
+    def update(self, data: Dict, placeholder: None = None) -> Tuple[float, float, np.ndarray]:
 
         # First run one gradient descent step for Q1 and Q2
         self.q_optimizer.zero_grad()
@@ -235,14 +239,14 @@ class Agent:
         
         return ret_loss_q, ret_loss_pi, batch_priorities
 
-    def get_action(self, o, deterministic=False):
-        o = torch.from_numpy(o).float().unsqueeze(0).to(self.device)
-        return self.ac.act(o, deterministic)[0]
+    def get_action(self, o: np.ndarray, deterministic: bool, noise_scale: float) -> np.ndarray:
+        o_tensor = torch.from_numpy(o).float().unsqueeze(0).to(self.device)
+        return self.ac.act(o_tensor, deterministic)[0]
 
-    def get_random_action(self):
+    def get_random_action(self) -> np.ndarray:
         return np.random.uniform(low=self.boundary_min, high=self.boundary_max, size=(self.act_dim))
     
-    def load_weights(self,path,mode="all",eval=True):
+    def load_weights(self, path,mode: str = "all", eval: bool = True) -> None:
         if mode == "all":
             # policy network
             self.ac.pi.load_state_dict(torch.load(path+"_pi"))
@@ -288,7 +292,7 @@ class Agent:
             self.ac.pi.to(self.device)
             if eval: self.ac.pi.eval()
     
-    def save_model(self,model_path,mode="all"):
+    def save_model(self, model_path: str, mode: str = "all") -> None:
         if mode == "all":
             torch.save(self.ac.pi.state_dict(), model_path+"_pi")
             torch.save(self.ac.q1.state_dict(), model_path+"_q1")
@@ -305,7 +309,7 @@ class Agent:
             torch.save(self.ac.q2.state_dict(), model_path+"_q2")
 
     
-    def get_params(self):
+    def get_params(self) -> List:
         #print([self.ac.parameters(), self.ac_targ.parameters()])
 
         ac_params = []
@@ -324,7 +328,7 @@ class Agent:
         for p in self.q_optimizer.param_groups:
             q_optim_params.append(p)
         
-        return [ac_params, ac_targ_params,pi_optim_params,q_optim_params]
+        return [ac_params, ac_targ_params, pi_optim_params, q_optim_params]
 
             
 

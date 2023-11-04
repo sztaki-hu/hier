@@ -1,22 +1,26 @@
 import numpy as np
 import random
 
+from typing import Dict, List, Tuple, Union
+
+from rltrain.taskenvs.Gym import Gym
+from rltrain.taskenvs.GymPanda import GymPanda
+
 RANGE_GROWTH_MODES = ['simple', 'discard', 'balancediscard']
 
 class CL:
-    def __init__(self,config, env, replay_buffer):
+    def __init__(self, config: Dict, taskenv: Union[Gym, GymPanda]):
 
         # INIT CONFIG
         self.config = config
-        self.env = env
-        self.replay_buffer = replay_buffer
+        self.taskenv = taskenv
 
         # TASK
         self.task_name = self.config['environment']['task']['name']
 
         # INIT
         self.total_timesteps = float(config['trainer']['total_timesteps'])
-        self.init_ranges = self.env.get_init_ranges()
+        self.init_ranges = self.taskenv.get_init_ranges()
 
         print(self.init_ranges)
 
@@ -136,10 +140,10 @@ class CL:
 
         desired_goal,object_position = self.get_setup()
 
-        self.env.reset()
-        self.env.load_state(robot_joints= None, desired_goal = desired_goal, object_position = object_position)
+        self.taskenv.reset()
+        self.taskenv.load_state(robot_joints= None, desired_goal = desired_goal, object_position = object_position)
         
-        return self.env.get_obs()
+        return self.taskenv.get_obs()
 
     def update_cl(self,t):
         pass

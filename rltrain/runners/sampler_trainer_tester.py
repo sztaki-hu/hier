@@ -3,14 +3,15 @@ import torch
 import time
 import collections
 import random
+from statistics import mean as dq_mean
 
 from tqdm import tqdm
 
-from rltrain.envs.builder import make_env
+from rltrain.taskenvs.builder import make_taskenv
 from rltrain.algos.cl.builder import make_cl
 from rltrain.agents.builder import make_agent
 from rltrain.buffers.builder import make_per
-from rltrain.algos.highlights.builder import make_hl
+from rltrain.algos.hier.builder import make_hier
 from rltrain.algos.her import HER
 
 class SamplerTrainerTester:
@@ -81,10 +82,10 @@ class SamplerTrainerTester:
         self.agent = make_agent(device,config,config_framework)
 
         # Env train
-        self.env = make_env(self.config, self.config_framework)
+        self.env = make_taskenv(self.config, self.config_framework)
 
         # Env eval
-        self.env_eval = make_env(self.config, self.config_framework)
+        self.env_eval = make_taskenv(self.config, self.config_framework)
 
         # HER (Hindsight Experience Replay)
         self.HER = HER(self.config,self.env,self.replay_buffer)
@@ -93,53 +94,12 @@ class SamplerTrainerTester:
         self.cl_mode = config['trainer']['cl']['type']
         self.CL = make_cl(self.config, self.env, self.replay_buffer)
 
-        # HL (Highlights)
-        self.highlights_include_test =  config['buffer']['highlights']['include_test']
-
-        self.HL = make_hl(self.config)
-        if self.HL.hl_active == False: self.replay_batch_size = self.batch_size
+        # HiER
+        self.hier_include_test =  config['buffer']['hier']['include_test']
+    
+        self.HiER = make_hier(self.config)
+        if self.HiER.active == False: self.ser_batch_size = self.batch_size
         
-
-        """
-        Trainer
-
-        Args:
-            env : RLBench task-environment
-
-            seed (int): Seed for random number generators.
-
-            steps_per_epoch (int): Number of steps of interaction (state-action pairs) 
-                for the agent and the environment in each epoch.
-
-            epochs (int): Number of epochs to run and train agent.
-
-            replay_size (int): Maximum length of replay buffer.
-
-            batch_size (int): Minibatch size for SGD.
-
-            start_steps (int): Number of steps for uniform-random action selection,
-                before running real policy. Helps exploration.
-
-            update_after (int): Number of env interactions to collect before
-                starting to do gradient descent updates. Ensures replay buffer
-                is full enough for useful updates.
-
-            update_every (int): Number of env interactions that should elapse
-                between gradient descent updates. Note: Regardless of how long 
-                you wait between updates, the ratio of env steps to gradient steps 
-                is locked to 1.
-
-            num_test_episodes (int): Number of episodes to test the deterministic
-                policy at the end of each epoch.
-
-            max_ep_len (int): Maximum length of trajectory / episode / rollout.
-
-            logger_kwargs (dict): Keyword args for EpochLogger.
-
-            save_freq (int): How often (in terms of gap between epochs) to save
-                the current policy and value function.
-
-        """ 
 
     def test_agent(self,train_t):
         ep_rets = []
@@ -150,14 +110,12 @@ class SamplerTrainerTester:
         for j in range(self.eval_num_episodes):
             o, d, ep_ret, ep_len = self.env_eval.reset(), False, 0, 0
             o_init = o.copy()
-            self.env_eval.ep_o_start = o.copy()
             test_episode = []
+            info = {}
+            info['is_success'] = False
             while not(d or (ep_len == self.max_ep_len)):
                 # Take deterministic actions at test time 
-                if self.agent_type == 'sac':
-                    a = self.agent.get_action(o, True)
-                elif self.agent_type in ['td3','ddpg']:
-                    a = self.agent.get_action(o, 0)
+                a = self.agent.get_action(o = o, deterministic = True, noise_scale = 0.0)
                 o2, r, terminated, truncated, info = self.env_eval.step(a)
                 d = terminated or truncated
                 # Save transition
@@ -165,7 +123,7 @@ class SamplerTrainerTester:
                 o = o2
                 ep_ret += r
                 ep_len += 1    
-            if self.highlights_include_test: self.HL.store_episode(test_episode,info['is_success'],train_t)               
+            if self.hier_include_test: self.HiER.store_episode(test_episode, info['is_success'], train_t)               
             ep_rets.append(ep_ret)
             ep_lens.append(ep_len)
             if info['is_success'] == True: success_num += 1
@@ -183,7 +141,6 @@ class SamplerTrainerTester:
 
         # Env reset
         o, ep_ret, ep_len = self.CL.reset_env(0), 0, 0
-        self.env.ep_o_start = o.copy()
 
         # Init variables
         best_eval_measure = -float('inf')
@@ -196,6 +153,8 @@ class SamplerTrainerTester:
         t_process_ep = 0
         t_train = 0
         t_test = 0
+        info = {}
+        info['is_success'] = False
 
         print("Training starts: " + self.print_out_name)
 
@@ -207,11 +166,7 @@ class SamplerTrainerTester:
             # from a uniform distribution for better exploration. Afterwards, 
             # use the learned policy. 
             if t > self.start_steps:
-                if self.agent_type == 'sac':
-                    a = self.agent.get_action(o, False) 
-                elif self.agent_type in ['td3','ddpg']:
-                    a = self.agent.get_action(o, self.agent.act_noise)
-                # a = self.get_action(o)
+                a = self.agent.get_action(o = o, deterministic = False, noise_scale = self.agent.act_noise)
             else:
                 a = self.env.random_sample()
                 # a = self.env.env.action_space.sample()
@@ -248,8 +203,8 @@ class SamplerTrainerTester:
                 for (o, a, r, o2, d) in episode:
                     self.replay_buffer.store(o, a, r, o2, d)
                 
-                # Highlights
-                self.HL.store_episode(episode,info['is_success'],t)
+                # Hier
+                self.HiER.store_episode(episode,info['is_success'],t)
 
                 # HER
                 if self.her_active and truncated: 
@@ -264,7 +219,6 @@ class SamplerTrainerTester:
 
                 # CL 
                 o, ep_ret, ep_len = self.CL.reset_env(t), 0, 0
-                self.env.ep_o_start = o.copy()
 
                 t_process_ep += (time.time() - t_process_ep_0)
 
@@ -274,22 +228,23 @@ class SamplerTrainerTester:
                 t_train_0 = time.time()
                 if self.replay_buffer.size > 0:
                     for j in range(self.update_every):  
-                        # SAMPLE BATCH         
-                        if self.HL.hl_active and self.HL.is_sampling_possible():
-                            self.replay_batch_size = self.HL.get_replay_batch_size()
-                            replay_batch = self.replay_buffer.sample_batch(self.replay_batch_size)
-
-                            highlights_batch = self.HL.sample_batch()
+                        # SAMPLE BATCH    
+                         
+                        if self.HiER.active and self.HiER.is_sampling_possible():   
+                            self.ser_batch_size = self.HiER.get_ser_batch_size()        
+                            ser_batch = self.replay_buffer.sample_batch(self.ser_batch_size)
+                            hier_batch = self.HiER.sample_batch()
                         
-                            batch = dict(obs=torch.cat((replay_batch['obs'], highlights_batch['obs']), 0),
-                                            obs2=torch.cat((replay_batch['obs2'], highlights_batch['obs2']), 0),
-                                            act=torch.cat((replay_batch['act'], highlights_batch['act']), 0),
-                                            rew=torch.cat((replay_batch['rew'], highlights_batch['rew']), 0),
-                                            done=torch.cat((replay_batch['done'], highlights_batch['done']), 0),
-                                            indices=torch.cat((replay_batch['indices'], highlights_batch['indices']), 0),
-                                            weights=torch.cat((replay_batch['weights'], highlights_batch['weights']), 0))
+                            batch = dict(obs=torch.cat((ser_batch['obs'], hier_batch['obs']), 0),
+                                            obs2=torch.cat((ser_batch['obs2'], hier_batch['obs2']), 0),
+                                            act=torch.cat((ser_batch['act'], hier_batch['act']), 0),
+                                            rew=torch.cat((ser_batch['rew'], hier_batch['rew']), 0),
+                                            done=torch.cat((ser_batch['done'], hier_batch['done']), 0),
+                                            indices=torch.cat((ser_batch['indices'], hier_batch['indices']), 0),
+                                            weights=torch.cat((ser_batch['weights'], hier_batch['weights']), 0))
                         else:     
                             batch = self.replay_buffer.sample_batch(self.batch_size)  
+                            self.ser_batch_size = self.batch_size
 
                         # UPDATE WEIGHTS
                         ret_loss_q, ret_loss_pi, batch_priorities = self.agent.update(batch, j)
@@ -297,11 +252,11 @@ class SamplerTrainerTester:
                         # PER
                         if self.per_active: 
                             batch_indices = batch['indices'].detach().cpu().numpy().astype(int)
-                            self.replay_buffer.update_priorities(batch_indices[:self.replay_batch_size], batch_priorities[:self.replay_batch_size])
+                            self.replay_buffer.update_priorities(batch_indices[:self.ser_batch_size], batch_priorities[:self.ser_batch_size])
                         
                         # PHiER
-                        if self.HL.hl_active and self.HL.is_sampling_possible():
-                            self.HL.update_priority(batch_priorities,self.replay_batch_size)
+                        if self.HiER.active and self.HiER.is_sampling_possible():
+                            self.HiER.update_priority(batch_priorities,self.ser_batch_size)
                         
                         self.loss_q_dq.append(ret_loss_q)
                         if ret_loss_pi != None: self.loss_pi_dq.append(ret_loss_pi)
@@ -359,19 +314,19 @@ class SamplerTrainerTester:
                     tqdm.write("[info] " + message)     
 
                 # ROLLOUT
-                self.logger.tb_writer_add_scalar("rollout/ep_rew_mean", np.mean(self.ep_rew_dq), t)
-                self.logger.tb_writer_add_scalar("rollout/ep_len_mean", np.mean(self.ep_len_dq), t)
-                self.logger.tb_writer_add_scalar("rollout/success_rate", np.mean(self.ep_success_dq), t)
+                self.logger.tb_writer_add_scalar("rollout/ep_rew_mean", dq_mean(self.ep_rew_dq), t)
+                self.logger.tb_writer_add_scalar("rollout/ep_len_mean", dq_mean(self.ep_len_dq), t)
+                self.logger.tb_writer_add_scalar("rollout/success_rate", dq_mean(self.ep_success_dq), t)
 
                 # STATE CHANGED
-                self.logger.tb_writer_add_scalar("rollout/state_changed", np.mean(self.ep_state_changed_dq), t)
+                self.logger.tb_writer_add_scalar("rollout/state_changed", dq_mean(self.ep_state_changed_dq), t)
 
                 # TRAIN
-                self.logger.tb_writer_add_scalar('train/critic_loss', np.mean(self.loss_q_dq), t)
-                self.logger.tb_writer_add_scalar("train/actor_loss", np.mean(self.loss_pi_dq), t)
+                self.logger.tb_writer_add_scalar('train/critic_loss', dq_mean(self.loss_q_dq), t)
+                self.logger.tb_writer_add_scalar("train/actor_loss", dq_mean(self.loss_pi_dq), t)
 
                 # HER
-                self.logger.tb_writer_add_scalar("her/virtual_experience_added", np.mean(self.virtual_experience_dq), t)
+                self.logger.tb_writer_add_scalar("her/virtual_experience_added", dq_mean(self.virtual_experience_dq), t)
                 
                 # PER
                 if self.per_active:
@@ -382,17 +337,17 @@ class SamplerTrainerTester:
                 if self.cl_mode == 'examplebyexample': self.logger.tb_writer_add_scalar("cl/same_setup_num", np.mean(self.CL.same_setup_num_dq), t)
 
                 # HL
-                if self.HL.hl_mode != 'multifix':
-                    self.logger.tb_writer_add_scalar("hl/highlights_buffer_size", self.HL.hl_replay_buffer.size, t)
-                    self.logger.tb_writer_add_scalar("hl/highlights_threshold", self.HL.hl_threshold, t)
-                    self.logger.tb_writer_add_scalar("hl/highlights_batch_ratio", self.HL.hl_batch_ratio, t)
-                    self.logger.tb_writer_add_scalar("hl/highlights_batch_size", self.HL.hl_batch_size, t)
+                if self.HiER.lambda_mode != 'multifix':
+                    self.logger.tb_writer_add_scalar("hier/buffer_size", self.HiER.replay_buffer.size, t)
+                    self.logger.tb_writer_add_scalar("hier/lambda", self.HiER.lambda_t, t)
+                    self.logger.tb_writer_add_scalar("hier/xi", self.HiER.xi, t)
+                    self.logger.tb_writer_add_scalar("hier/batch_size", self.HiER.batch_size, t)
                 else:
-                    for hl_index in range(self.HL.hl_bin_num): 
-                        self.logger.tb_writer_add_scalar("hl/highlights_buffer_size_"+str(hl_index), self.HL.hl_replay_buffers[hl_index].size, t)
-                        self.logger.tb_writer_add_scalar("hl/highlights_threshold_"+str(hl_index), self.HL.hl_thresholds[hl_index], t)
-                        self.logger.tb_writer_add_scalar("hl/highlights_batch_ratio_"+str(hl_index), self.HL.hl_batch_ratios[hl_index], t)       
-                        self.logger.tb_writer_add_scalar("hl/highlights_batch_size_"+str(hl_index), self.HL.hl_batch_sizes[hl_index], t)      
+                    for bin_index in range(self.HiER.bin_num): 
+                        self.logger.tb_writer_add_scalar("hier/buffer_size_"+str(bin_index), self.HiER.replay_buffers[bin_index].size, t)
+                        self.logger.tb_writer_add_scalar("hier/lambda"+str(bin_index), self.HiER.lambda_ts[bin_index], t)
+                        self.logger.tb_writer_add_scalar("hier/xi_"+str(bin_index), self.HiER.xis[bin_index], t)       
+                        self.logger.tb_writer_add_scalar("hier/batch_size_"+str(bin_index), self.HiER.batch_sizes[bin_index], t)      
 
                 # TIME
                 time1 = time.time()
