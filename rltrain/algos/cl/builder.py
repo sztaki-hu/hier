@@ -12,33 +12,31 @@ from rltrain.algos.cl.selfpacedCL import selfpacedCL
 from rltrain.algos.cl.controlCL import controlCL 
 from rltrain.algos.cl.controladaptive import controladaptiveCL 
 
-CL_TYPES = ['nocl','nullcl','predefined','predefined2stage','predefined3stage',
-            'selfpaced','control', 'controladaptive']
-
-def make_cl(config: Dict, taskenv: GymPanda
+def make_cl(config: Dict, config_framework: Dict, taskenv: GymPanda
             ) -> Union[noCL, nullCL, predefinedCL, predefined2stageCL, predefined3stageCL, 
                        selfpacedCL, controlCL, controladaptiveCL]:
 
-    cl_mode = config['trainer']['cl']['type']
-    print(cl_mode)
-    assert cl_mode in CL_TYPES
+    c_mode = config['trainer']['cl']['type']
+    print(c_mode)
+    #assert c_mode in config_framework['cl']['cl_mode_list']
     
-    if cl_mode == 'nocl':
+    if c_mode == 'nocl':
         return noCL(config, taskenv)
-    elif cl_mode == 'nullcl':
+    elif c_mode == 'nullcl':
         return nullCL(config, taskenv)
-    elif cl_mode == 'predefined':
+    elif c_mode == 'predefined':
         return predefinedCL(config, taskenv)
-    elif cl_mode == 'predefined2stage':
+    elif c_mode == 'predefined2stage':
         return predefined2stageCL(config, taskenv)
-    elif cl_mode == 'predefined3stage':
+    elif c_mode == 'predefined3stage':
         return predefined3stageCL(config, taskenv)
-    elif cl_mode == 'selfpaced':
+    elif c_mode == 'selfpaced':
         return selfpacedCL(config, taskenv)
-    elif cl_mode == 'control':
+    elif c_mode == 'control':
         return controlCL(config, taskenv)
-    elif cl_mode == 'controladaptive':
+    elif c_mode == 'controladaptive':
         return controladaptiveCL(config, taskenv)
     else:
-        assert False
+        raise ValueError("[CL]: c_mode: '" + str(c_mode) + "' must be in : " + str(config_framework['cl']['c_mode_list']))
+   
 

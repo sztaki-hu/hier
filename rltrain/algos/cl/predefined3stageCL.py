@@ -61,7 +61,8 @@ class predefined3stageCL(CL):
         elif self.profile == "quad":
             return min(1.0,math.pow(t_rel / pacing_sat,2))
         else:
-            assert False
+            raise ValueError("[CL]: profile: '" + str(self.profile) + "' must be in : " + str(PACING_PROFILES))
+   
         
 
 

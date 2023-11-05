@@ -8,7 +8,7 @@ from rltrain.agents.ddpg.agent import Agent as DDPG
 def make_agent(device: torch.device, config: Dict, config_framework: Dict) -> Union[SAC,TD3,DDPG]:
 
     agent_type = config['agent']['type']
-    assert agent_type in config_framework['agent_list'] 
+    #assert agent_type in config_framework['agent_list'] 
 
     if agent_type == 'sac':
         return SAC(device,config)
@@ -17,5 +17,5 @@ def make_agent(device: torch.device, config: Dict, config_framework: Dict) -> Un
     elif agent_type == 'ddpg': 
         return DDPG(device,config)
     else:
-        assert False
+        raise ValueError("[Agent]: agent_type: '" + str(agent_type) + "' must be in : " + str(config_framework['agent_list']))
    

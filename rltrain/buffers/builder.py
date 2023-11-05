@@ -4,13 +4,10 @@ from typing import Dict, Union
 from rltrain.buffers.replay import ReplayBuffer 
 from rltrain.buffers.prioritized_replay import PrioritizedReplay
 
-PER_TYPES = ['noper','proportional']
-
-def make_per(config: Dict) -> Union[ReplayBuffer, PrioritizedReplay]:
+def make_per(config: Dict, config_framework: Dict) -> Union[ReplayBuffer, PrioritizedReplay]:
 
     per_mode = config['buffer']['per']['mode']
     print(per_mode)
-    assert per_mode in PER_TYPES
 
     if per_mode == 'noper':
         replay_buffer = ReplayBuffer(
@@ -24,6 +21,6 @@ def make_per(config: Dict) -> Union[ReplayBuffer, PrioritizedReplay]:
             beta_start = float(config['buffer']['per']['beta_start']),
             beta_frames = int(float(config['buffer']['per']['beta_frames_ratio']) * float(config['trainer']['total_timesteps'])))
     else:
-        assert False
+        raise ValueError("[PER]: per_mode: '" + str(per_mode) + "' must be in : " + str(config_framework['per']['mode_list']))
 
     return replay_buffer

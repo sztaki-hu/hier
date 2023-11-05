@@ -2,8 +2,12 @@
 **.png
 **.ply
 **.jpg
+
+
+Benchmarks/*
 logs/*
-logs1/*
-demos/*
 dev/*
+results/output/*
+cfg_rlbench/*
 rltrain.egg-info/*
+others/*

@@ -11,6 +11,7 @@ class amaHiER(HiER): # Adaptive Moving Average
         super(amaHiER, self).__init__(config)
 
         self.lambda_0 = config['buffer']['hier']['lambda']['ama']['lambda_start']
+        self.lambda_end = config['buffer']['hier']['lambda']['ama']['lambda_end']
         self.lambda_margin = config['buffer']['hier']['lambda']['ama']['lambda_margin']
         self.window = config['buffer']['hier']['lambda']['ama']['window']
 
@@ -32,4 +33,6 @@ class amaHiER(HiER): # Adaptive Moving Average
                 self.replay_buffer.store(o, a, r, o2, d)
 
             self.ep_rew_dq.append(sum_rew)
-            if len(self.ep_rew_dq) == self.window: self.lambda_t = dq_mean(self.ep_rew_dq) + self.lambda_margin
+            if len(self.ep_rew_dq) == self.window: 
+                self.lambda_t = min(self.lambda_end, dq_mean(self.ep_rew_dq) + self.lambda_margin)
+            

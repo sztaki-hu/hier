@@ -75,11 +75,13 @@ buffer:
         lambda_end: input
       ama: # adaptive moving average
         lambda_start: -50
+        lambda_end: -10
         lambda_margin: 10
         window: 20
       amar: # adaptive moving average relative
         lambda_start: -50
-        lambda_margin_relative: 0.5
+        lambda_end: -10
+        lambda_margin_relative: 0.1
         window: 20
     xi:
       mode: input # fix / prioritized (works only if 'mode' is not 'nohl')

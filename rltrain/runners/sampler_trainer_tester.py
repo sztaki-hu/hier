@@ -76,10 +76,10 @@ class SamplerTrainerTester:
 
         # Replay Buffer / PER (Prioritized Experience Replay)
         self.per_active = False if config['buffer']['per']['mode'] == 'noper' else True
-        self.replay_buffer = make_per(config)
+        self.replay_buffer = make_per(self.config, self.config_framework)
         
         # Agent
-        self.agent = make_agent(device,config,config_framework)
+        self.agent = make_agent(device, self.config, self.config_framework)
 
         # Env train
         self.taskenv = make_taskenv(self.config, self.config_framework)
@@ -88,16 +88,15 @@ class SamplerTrainerTester:
         self.taskenv_eval = make_taskenv(self.config, self.config_framework)
 
         # HER (Hindsight Experience Replay)
-        self.HER = HER(self.config,self.taskenv,self.replay_buffer)
+        self.HER = HER(self.config, self.config_framework, self.taskenv, self.replay_buffer)
 
         # CL (Curriculum Learning)
-        self.cl_mode = config['trainer']['cl']['type']
-        self.CL = make_cl(self.config, self.taskenv)
+        self.CL = make_cl(self.config, self.config_framework, self.taskenv)
 
         # HiER
         self.hier_include_test =  config['buffer']['hier']['include_test']
     
-        self.HiER = make_hier(self.config)
+        self.HiER = make_hier(self.config, self.config_framework)
         if self.HiER.active == False: self.ser_batch_size = self.batch_size
         
 

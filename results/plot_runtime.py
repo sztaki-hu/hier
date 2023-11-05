@@ -1,6 +1,7 @@
 import os
 from os.path import dirname, abspath
 current_dir = dirname(abspath(__file__))
+current_dir = os.path.abspath(os.path.join(current_dir, os.pardir))
 
 import numpy as np
 import pandas as pd
@@ -23,13 +24,13 @@ def create_folder(path):
 
 parser = argparse.ArgumentParser()
 #parser.add_argument("--plotid", default="1004_A_slide" ,help="Id of plot")
-parser.add_argument("--outdir", default="plots_multifix" ,help="Path of the output folder")
+parser.add_argument("--outdir", default="results/output/plots_runtime" ,help="Path of the output folder")
 parser.add_argument("--show", default=False ,help="Id of plot")
 args = parser.parse_args()
 
 
-plotid = '1018_A'
-seednum = 3
+plotid = '1105_X'
+seednum = 1
 taskname_list = ['Push','Slide']
 #taskname_list = ['InvertedPendulum-v4']
 
@@ -38,16 +39,17 @@ create_folder(os.path.join(current_dir, args.outdir))
 
 algs = ['sac','td3']
 
-runtime_cat_name_list = ['0', '1', '2', '3']
-exp_test_color_list = ['green','orange','blue','magenta'] # collect, process ep, train, test, other
+runtime_cat_name_list = ['collect', 'process_ep', 'train', 'test', 'other']
+exp_test_color_list = ['green','orange','blue','magenta','brown'] # collect, process ep, train, test, other
 
 for taskname in taskname_list:
     for alg in algs:
         
         exps = []
-       
-        exps.append({"exp_name": "_".join(['1019_A', 'Panda'+taskname+'-v3',alg,'sparse','final','multifix','fix','noper','controldiscreteadaptive']) , "seed_num":seednum, "color": "purple", "plot_name":  alg +" HER+HiER(multifix)+CL"})
-        exps.append({"exp_name": "_".join(['1019_A', 'Panda'+taskname+'-v3',alg,'sparse','final','multifix','prioritized','noper','controldiscreteadaptive']) , "seed_num":seednum, "color": "magenta", "plot_name":  alg +" HER+PHiER(multifix)+CL"})
+    
+        exps.append({"exp_name": "_".join(['1105_T2', 'Panda'+taskname+'-v3',alg,'sparse','final','predefined','prioritized','proportional','5e5','controladaptive']) , "seed_num":seednum, "color": "blue", "plot_name":  'HER + PER + CL + HiER(p)'})
+        exps.append({"exp_name": "_".join(['1105_T2', 'Panda'+taskname+'-v3',alg,'sparse','final','predefined','fix','noper','5e5','controladaptive']) , "seed_num":seednum, "color": "magenta", "plot_name":  'HER + CL + HiER'})
+
         
         for exp in exps:
 
@@ -69,7 +71,7 @@ for taskname in taskname_list:
             for cat_name in runtime_cat_name_list:
                 values = []
                 for j in range(seednum):
-                    read_pd = pd.read_csv(os.path.join(current_dir, "logs",exp['exp_name'],str(j),'runs','csv','hl_highlights_batch_size_'+cat_name+'.csv'))         
+                    read_pd = pd.read_csv(os.path.join(current_dir, "logs",exp['exp_name'],str(j),'runs','csv','time_share_'+cat_name+'.csv'))         
                     if j == 0 : 
                         values = read_pd.iloc[:, 1]
                     else:
@@ -111,7 +113,7 @@ for taskname in taskname_list:
             plt.legend(title='Labels', bbox_to_anchor=(1, 1.01), loc='upper left')
             plt.xlabel("t (step)")
             plt.ylabel("Share")
-            plt.title("Batch sizes " + exp["plot_name"])
+            plt.title("Runtime analysis " + exp["plot_name"])
             figname = "_".join([plotid,exp["plot_name"],"runtime_analysis.png"])
             plt.savefig(os.path.join(current_dir, args.outdir, logdir, figname), bbox_inches='tight')
             if args.show: plt.show()

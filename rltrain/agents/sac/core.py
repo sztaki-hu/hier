@@ -15,8 +15,7 @@ def combined_shape(length: int, shape: Optional[int] = None) -> Tuple:
     if np.isscalar(shape):
         return (length, shape) 
     else:
-        assert False
-        (length, *shape)
+        return (length, *shape) # type: ignore
 
 def mlp(sizes: List, activation: Callable, output_activation: Callable = nn.Identity) -> Callable:
     layers = []

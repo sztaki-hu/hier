@@ -8,11 +8,15 @@ from rltrain.buffers.replay import ReplayBuffer
 from rltrain.buffers.prioritized_replay import PrioritizedReplay
 
 
-HER_TYPE_LIST = ['noher', 'final', 'future', 'future_once', 'near', 'next']
-
 class HER:
-    def __init__(self, config: Dict, taskenv: GymPanda, replay_buffer: Union[ReplayBuffer, PrioritizedReplay]) -> None:
+    def __init__(self, 
+                 config: Dict, 
+                 config_framework: Dict,
+                 taskenv: GymPanda, 
+                 replay_buffer: Union[ReplayBuffer, PrioritizedReplay]
+                 ) -> None:
         self.config = config
+        self.config_framework = config_framework
         self.taskenv = taskenv
         self.replay_buffer = replay_buffer
 
@@ -21,7 +25,10 @@ class HER:
         self.her_active = False if self.her_goal_selection_strategy == "noher" else True
         self.her_n_sampled_goal = config['buffer']['her']['n_sampled_goal']
         self.her_state_check = config['buffer']['her']['state_check'] if "state_check" in config['buffer']['her'] else False
-        assert self.her_goal_selection_strategy in HER_TYPE_LIST
+  
+        if self.her_goal_selection_strategy not in config_framework['her']['mode_list']:
+            raise ValueError("[HER]: her_goal_selection_strategy: '" + str(self.her_goal_selection_strategy) + "' must be in : " + str(config_framework['her']['strategy_list']))
+
 
     def get_new_goals(self, episode: List[Transition], ep_t: int) -> List[np.ndarray]:
         if self.her_goal_selection_strategy == 'final':
@@ -51,7 +58,7 @@ class HER:
                 new_goals.append(self.taskenv.get_achieved_goal_from_obs(o2))
             return new_goals
         else:
-            assert False
+            raise ValueError("[HER]: her_goal_selection_strategy: '" + str(self.her_goal_selection_strategy) + "' must be in : " + str(self.config_framework['her']['mode_list']))
 
     
     def add_virtial_experience(self, episode: List[Transition]) -> bool:

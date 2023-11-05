@@ -236,8 +236,6 @@ class Logger:
 
         # print(summary_iterators[0].Tags())
 
-        # assert False
-
         tags = summary_iterators[0].Tags()['scalars']
 
         for it in summary_iterators:

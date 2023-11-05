@@ -112,9 +112,7 @@ class CL:
                 self.obj_range_half = np.concatenate([obj1_range_half,obj2_range_half])
                 self.goal_range_half = np.concatenate([goal1_range_half,goal2_range_half])
             else:
-                print("Obj Num: " + str(self.obj_num))
-                print("Goal Num: " + str(self.goal_num))
-                assert False
+                raise ValueError("[CL]: Obj num and/or goal num are not valid. Obj num = " + str(self.obj_num) + " | Goal num = " + str(self.goal_num))
                 
             self.range_growth_mode = config['trainer']['cl']['range_growth_mode']
             self.balancediscard_ratio = config['trainer']['cl']['balancediscard_ratio']
@@ -164,7 +162,8 @@ class CL:
         if self.range_growth_mode == "simple": return self.get_range_rectangle() 
         elif self.range_growth_mode == "discard": return self.get_range_rectangle_with_cutout()
         elif self.range_growth_mode == "balancediscard": return self.get_range_rectangle_with_cutout() if random.random() < 0.80 else self.get_range_rectangle()
-        else: assert False
+        else: raise ValueError("[CL]: range_growth_mode: '" + str(self.range_growth_mode) + "' must be in : " + str(RANGE_GROWTH_MODES))
+   
 
 
     def get_range_rectangle(self) -> Tuple[np.ndarray, Optional[np.ndarray]]:

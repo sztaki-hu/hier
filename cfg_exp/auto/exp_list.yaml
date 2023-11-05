@@ -19,7 +19,7 @@ process_0: # noher - nohl - noper - nocl
     hier:
       buffer_size: [1e6]
       lambda: # threshold
-        mode: ['nohier'] # nohier / fix / multifix / predefined / ama / amar 
+        mode: ['ama','amar'] # nohier / fix / multifix / predefined / ama / amar 
         #mode: ['nohier','fix','multifix','predefined','ama','amar'] 
         fix:
           lambda: [-20] # gympanda: -20
@@ -27,14 +27,14 @@ process_0: # noher - nohl - noper - nocl
           lambda_start: [-50] # gympanda: -50 
           lambda_end: [-10] # gympanda: -10 
       xi: # hier batch ratio 
-        mode: ['fix'] # fix / prioritized
+        mode: ['prioritized'] # fix / prioritized
         xi: [0.5]     
     per:
-      mode: ['noper'] # noper / proportional
+      mode: ['proportional'] # noper / proportional
   trainer:
-    total_timesteps: [5e4]
+    total_timesteps: [5e2]
   eval:
-    freq: [1e3]
+    freq: [150]
     num_episodes: [100]
   # structure is differend than in the config file ##################################################x
   task: 
@@ -42,7 +42,7 @@ process_0: # noher - nohl - noper - nocl
     gympanda: ['PandaPush-v3'] # PandaReach-v3 / PandaPush-v3 / PandaSlide-v3 / PandaPickAndPlace-v3 / PandaStack-v3
   cl: 
     #type: ['controladaptive'] 
-    type: ['nocl', 'nullcl', 'predefined_linear', 'predefined2stage_linear', 'predefined3stage_linear', 'selfpaced', 'control', 'controladaptive'] 
+    type: ['controladaptive'] 
     range_growth_mode: ['simple'] #--- only if highlights mode != nocl
 ####################################################################################################
 

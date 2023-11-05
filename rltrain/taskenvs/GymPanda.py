@@ -13,9 +13,13 @@ class GymPanda(TaskEnvBase):
     def __init__(self,config: Dict, config_framework: Dict) -> None:
         super(GymPanda, self).__init__(config,config_framework)
 
+        if self.task_name not in config_framework['task_list']['gympanda']: 
+            raise ValueError("[TaskEnv GymPanda]: task_name: '" + str(self.task_name) + "' must be in : " + str(config_framework['task_list']['gympanda']))
+
+
         # Create taskenv
         self.env = gym.make(self.task_name) if self.headless == True else gym.make(self.task_name, render_mode="human") 
-        self.env._max_episode_steps = int(float(self.max_ep_len))
+        self.env._max_episode_steps = int(float(self.max_ep_len)) # type: ignore
         
         # Init Obj Num and goal Num
         if self.task_name in ['PandaReach-v3','PandaReachDense-v3']:
@@ -38,14 +42,14 @@ class GymPanda(TaskEnvBase):
 
     def save_state(self) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
 
-        robot_joints = np.array([self.env.robot.get_joint_angle(joint=i) for i in range(7)]) 
-        desired_goal = self.env.task.goal
-        object_position = self.env.task.get_achieved_goal()
+        robot_joints = np.array([self.env.robot.get_joint_angle(joint=i) for i in range(7)]) # type: ignore
+        desired_goal = self.env.task.goal # type: ignore
+        object_position = self.env.task.get_achieved_goal() # type: ignore
 
         return robot_joints,desired_goal,object_position
 
     def get_robot_joints(self) -> np.ndarray:
-        return np.array([self.env.robot.get_joint_angle(joint=i) for i in range(7)]) 
+        return np.array([self.env.robot.get_joint_angle(joint=i) for i in range(7)]) # type: ignore
     
     def load_state(self, 
                    robot_joints: Optional[np.ndarray], 
@@ -53,28 +57,27 @@ class GymPanda(TaskEnvBase):
                    object_position: Optional[np.ndarray] = None
                    ) -> None:
 
-        if robot_joints is not None: self.env.robot.set_joint_angles(robot_joints)
+        if robot_joints is not None: self.env.robot.set_joint_angles(robot_joints) # type: ignore
 
         if self.goal_num == 1:
-            self.env.task.goal = desired_goal
-            self.env.task.sim.set_base_pose("target", desired_goal, np.array([0.0, 0.0, 0.0, 1.0]))
+            self.env.task.goal = desired_goal # type: ignore
+            self.env.task.sim.set_base_pose("target", desired_goal, np.array([0.0, 0.0, 0.0, 1.0])) # type: ignore
         elif self.goal_num == 2:  
-            self.env.task.goal = desired_goal
-            self.env.task.sim.set_base_pose("target1", desired_goal[:3], np.array([0.0, 0.0, 0.0, 1.0]))
-            self.env.task.sim.set_base_pose("target2", desired_goal[3:], np.array([0.0, 0.0, 0.0, 1.0]))  
+            self.env.task.goal = desired_goal # type: ignore
+            self.env.task.sim.set_base_pose("target1", desired_goal[:3], np.array([0.0, 0.0, 0.0, 1.0])) # type: ignore
+            self.env.task.sim.set_base_pose("target2", desired_goal[3:], np.array([0.0, 0.0, 0.0, 1.0])) # type: ignore
         else:
-            assert False
-    
+            raise ValueError("[TaskEnv GymPanda]: goal_num: " + str(self.goal_num) + " must be in : " + str([1,2]))
+
         if self.obj_num == 0:
             pass
         elif self.obj_num == 1:
-            self.env.task.sim.set_base_pose("object", object_position, np.array([0.0, 0.0, 0.0, 1.0]))
+            self.env.task.sim.set_base_pose("object", object_position, np.array([0.0, 0.0, 0.0, 1.0])) # type: ignore
         elif self.obj_num == 2:
-            self.env.task.sim.set_base_pose("object1", object_position[:3], np.array([0.0, 0.0, 0.0, 1.0]))
-            self.env.task.sim.set_base_pose("object2", object_position[3:], np.array([0.0, 0.0, 0.0, 1.0]))
+            self.env.task.sim.set_base_pose("object1", object_position[:3], np.array([0.0, 0.0, 0.0, 1.0])) # type: ignore
+            self.env.task.sim.set_base_pose("object2", object_position[3:], np.array([0.0, 0.0, 0.0, 1.0])) # type: ignore
         else:
-            print("Obj Num: " + str(self.obj_num))
-            assert False
+            raise ValueError("[TaskEnv GymPanda]: obj_num: " + str(self.obj_num) + " must be in : " + str([0,1,2]))
       
     # def init_state_valid(self, o):
     #     if self.task_name == 'PandaPush-v3':
@@ -126,11 +129,11 @@ class GymPanda(TaskEnvBase):
             dict['obj_range_high'] = None
             dict['object_size'] = None
         else:
-            dict['obj_range_low'] = self.env.task.obj_range_low
-            dict['obj_range_high'] = self.env.task.obj_range_high
-            dict['object_size'] = self.env.task.object_size
-        dict['goal_range_low'] = self.env.task.goal_range_low
-        dict['goal_range_high'] = self.env.task.goal_range_high
+            dict['obj_range_low'] = self.env.task.obj_range_low # type: ignore
+            dict['obj_range_high'] = self.env.task.obj_range_high # type: ignore
+            dict['object_size'] = self.env.task.object_size # type: ignore
+        dict['goal_range_low'] = self.env.task.goal_range_low # type: ignore
+        dict['goal_range_high'] = self.env.task.goal_range_high # type: ignore
 
         dict['obj_num'] = self.obj_num
         dict['goal_num'] = self.goal_num
@@ -138,10 +141,10 @@ class GymPanda(TaskEnvBase):
         return dict
     
     def get_obs(self) -> np.ndarray:  
-        robot_obs = self.env.robot.get_obs().astype(np.float32)  # robot state
-        task_obs = self.env.task.get_obs().astype(np.float32)  # object position, velococity, etc...
+        robot_obs = self.env.robot.get_obs().astype(np.float32) # type: ignore # robot state
+        task_obs = self.env.task.get_obs().astype(np.float32)  # type: ignore # object position, velococity, etc...
         observation = np.concatenate([robot_obs, task_obs])
-        o = np.concatenate((observation, self.env.task.get_goal().astype(np.float32)))
+        o = np.concatenate((observation, self.env.task.get_goal().astype(np.float32))) # type: ignore
         return o
     
     def is_diff_state(self, 
@@ -206,8 +209,8 @@ class GymPanda(TaskEnvBase):
         desired_goal = self.get_desired_goal_from_obs(o)
         achieved_goal = self.get_achieved_goal_from_obs(o)
 
-        r = self.env.task.compute_reward(achieved_goal, desired_goal, {})
-        d = True if self.env.task.is_success(achieved_goal, desired_goal) else False
+        r = self.env.task.compute_reward(achieved_goal, desired_goal, {}) # type: ignore
+        d = True if self.env.task.is_success(achieved_goal, desired_goal) else False # type: ignore
         return r,d
     
 

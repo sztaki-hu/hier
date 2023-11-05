@@ -1,14 +1,32 @@
 agent_list: ['sac','td3','ddpg']
-env_list: ['gym','gympanda']
+env_list: ['gympanda']
 task_list:
-  gym: ['MountainCarContinuous-v0','InvertedPendulum-v4','InvertedDoublePendulum-v4','Swimmer-v4',
-             'Hopper-v4','HalfCheetah-v4','Walker2d-v4','Ant-v4','Reacher-v4','Humanoid-v4','HumanoidStandup-v4','Pusher-v4']
-  gympanda: ['PandaReach-v3','PandaReachDense-v3','PandaReachJoints-v3','PandaReachJointsDense-v3',
-                'PandaPush-v3','PandaPushDense-v3','PandaPushJoints-v3','PandaPushJointsDense-v3',
-                'PandaSlide-v3','PandaSlideDense-v3','PandaSlideJoints-v3','PandaSlideJointsDense-v3',
-                'PandaPickAndPlace-v3','PandaPickAndPlaceDense-v3','PandaPickAndPlaceJoint-v3','PandaPickAndPlaceJointDense-v3',
-                'PandaStack-v3','PandaStackDense-v3','PandaStackJoint-v3','PandaStackJointDense-v3']
-  gym_mod: ['Hopper-v4']
-  rlbench_joint: ['reach_target_no_distractors']
+  gympanda: ['PandaReach-v3','PandaPush-v3','PandaSlide-v3','PandaPickAndPlace-v3','PandaStack-v3']
+her:
+  mode_list: ['noher', 'final', 'future', 'future_once', 'near', 'next']
+per:
+  mode_list: ['noper','proportional']
+cl:
+  c_mode_list: ['nocl','nullcl',
+                'predefined','predefined2stage','predefined3stage',
+                'selfpaced','control', 'controladaptive']
+hier:
+  lambda_mode_list: ['nohier', 'fix', 'multifix', 'predefined', 'ama', 'amar']
+  xi_mode_list: ['fix', 'prioritized']
+
+
+
+# agent_list: ['sac','td3','ddpg']
+# env_list: ['gym','gympanda']
+# task_list:
+#   gym: ['MountainCarContinuous-v0','InvertedPendulum-v4','InvertedDoublePendulum-v4','Swimmer-v4',
+#              'Hopper-v4','HalfCheetah-v4','Walker2d-v4','Ant-v4','Reacher-v4','Humanoid-v4','HumanoidStandup-v4','Pusher-v4']
+#   gympanda: ['PandaReach-v3','PandaReachDense-v3','PandaReachJoints-v3','PandaReachJointsDense-v3',
+#                 'PandaPush-v3','PandaPushDense-v3','PandaPushJoints-v3','PandaPushJointsDense-v3',
+#                 'PandaSlide-v3','PandaSlideDense-v3','PandaSlideJoints-v3','PandaSlideJointsDense-v3',
+#                 'PandaPickAndPlace-v3','PandaPickAndPlaceDense-v3','PandaPickAndPlaceJoint-v3','PandaPickAndPlaceJointDense-v3',
+#                 'PandaStack-v3','PandaStackDense-v3','PandaStackJoint-v3','PandaStackJointDense-v3']
+#   gym_mod: ['Hopper-v4']
+#   rlbench_joint: ['reach_target_no_distractors']
 
     

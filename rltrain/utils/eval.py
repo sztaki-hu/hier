@@ -5,18 +5,26 @@ import torch
 import time
 import gymnasium as gym
 import matplotlib.pyplot as plt
+from typing import Dict, List, Tuple, Union, Optional
 
 from tqdm import tqdm
 from numpngw import write_apng  # pip install numpngw
 import cv2
 
-from rltrain.envs.builder import make_env
+from rltrain.taskenvs.builder import make_taskenv
+from rltrain.agents.builder import make_agent
+from rltrain.logger.logger import Logger
 
 class Eval:
 
-    def __init__(self,agent,logger,config,config_framework):
+    def __init__(self,device: torch.device, 
+                 logger: Logger, 
+                 config: Dict, 
+                 config_framework: Dict
+                 ) -> None:
         #self.env = env
-        self.agent = agent
+        
+        self.device = device
         self.logger = logger
         self.config = config
         self.config_framework = config_framework
@@ -24,7 +32,18 @@ class Eval:
         self.max_ep_len = config['sampler']['max_ep_len']  
         self.agent_type = config['agent']['type']  
 
-    def eval_agent(self,model_name=90,num_display_episode=10, headless=True, time_delay=0.02, current_dir = None, outdir = "eval", figid = "X"):
+        # Init Agent
+        self.agent = make_agent(device,config,config_framework)
+
+    def eval_agent(self,
+                   model_name: Union[int,str] = "best_model",
+                   num_display_episode: int = 10, 
+                   headless: bool = True, 
+                   time_delay: float = 0.02, 
+                   current_dir: Optional[str] = None, 
+                   outdir: str = "eval", 
+                   figid: str = "X"
+                   ) -> None:
 
         # Load model
         path = self.logger.get_model_save_path(model_name)
@@ -35,7 +54,7 @@ class Eval:
 
         # Create Env
         self.config['environment']['headless'] = headless
-        self.env = make_env(self.config,self.config_framework)
+        self.env = make_taskenv(self.config,self.config_framework)
 
         # Start Eval
         ep_rets = []
@@ -44,13 +63,11 @@ class Eval:
         for j in tqdm(range(num_display_episode), desc ="Eval: ", leave=True):
             o, d, ep_ret, ep_len = self.env.reset(), False, 0, 0
             self.env.ep_o_start = o.copy()
-            
+            info = {}
+            info['is_success'] = False
             while not(d or (ep_len == self.max_ep_len)):
                 # Take deterministic actions at test time 
-                if self.agent_type == 'sac':
-                    a = self.agent.get_action(o, True)
-                elif self.agent_type == 'td3':
-                    a = self.agent.get_action(o, 0)
+                a = self.agent.get_action(o = o, deterministic = True, noise_scale = 0.0)
                 o, r, terminated, truncated, info = self.env.step(a)
                 d = terminated or truncated
                 ep_ret += r
@@ -75,7 +92,15 @@ class Eval:
         print("#########################################")
 
     
-    def eval_agent_stats(self,model_name=90,num_display_episode=10, headless=True, time_delay=0.02, current_dir = None, outdir = "eval", figid = "X"):
+    def eval_agent_stats(self,
+                         model_name: Union[int,str] = "best_model",
+                         num_display_episode: int = 10, 
+                         headless: bool = True, 
+                         time_delay: float = 0.02, 
+                         current_dir: Optional[str] = None, 
+                         outdir: str = "eval", 
+                         figid: str = "X"
+                         ) -> None:
 
         # Load model
         path = self.logger.get_model_save_path(model_name)
@@ -86,7 +111,7 @@ class Eval:
 
         # Create Env
         self.config['environment']['headless'] = headless
-        self.env = make_env(self.config,self.config_framework)
+        self.env = make_taskenv(self.config,self.config_framework)
 
         # Init heatmap
         heatmap_res = 10
@@ -138,13 +163,11 @@ class Eval:
             #tqdm.write(str(angle))
             angle_dig = min(max(np.digitize(angle, bins_angle) - 1,0),heatmap_res - 1)
 
-            
+            info = {}
+            info['is_success'] = False
             while not(d or (ep_len == self.max_ep_len)):
                 # Take deterministic actions at test time 
-                if self.agent_type == 'sac':
-                    a = self.agent.get_action(o, True)
-                elif self.agent_type == 'td3':
-                    a = self.agent.get_action(o, 0)
+                a = self.agent.get_action(o = o, deterministic = True, noise_scale = 0.0)
                 o, r, terminated, truncated, info = self.env.step(a)
                 d = terminated or truncated
                 ep_ret += r
@@ -194,7 +217,7 @@ class Eval:
                 text = ax.text(j, i, heatmap_obj[i, j],
                             ha="center", va="center", color="white")
 
-        plt.savefig(os.path.join(current_dir,outdir,figid, figid+"_init_obj_heatmap.png"))
+        plt.savefig(os.path.join(current_dir, outdir, figid, figid+"_init_obj_heatmap.png"))
         #plt.show()
         plt.clf()
         plt.cla()
@@ -238,7 +261,13 @@ class Eval:
         plt.clf()
         plt.cla()
     
-    def save_video(self,model_name="best_model",num_display_episode=10, current_dir = None, outdir = "vids", save_name = "video.png"):
+    def save_video(self,
+                   model_name: Union[int,str] = "best_model",
+                   num_display_episode: int = 10, 
+                   current_dir: Optional[str] = None, 
+                   outdir: str = "vids", 
+                   save_name: str = "video.png"
+                   ) -> None:
 
         # Load model
         path = self.logger.get_model_save_path(model_name)
@@ -259,17 +288,15 @@ class Eval:
 
         for _ in tqdm(range(num_display_episode), desc ="Create video: ", leave=True):
 
-            o_dict, d, ep_ret, ep_len = env.reset(), False, 0, 0
+            [o_dict, _], d, ep_ret, ep_len = env.reset(), False, 0, 0
             o = np.concatenate((o_dict['observation'], o_dict['desired_goal']))
             images.append(env.render())
             
-
+            info = {}
+            info['is_success'] = False
             while not(d or (ep_len == self.max_ep_len)):
                 # Take deterministic actions at test time 
-                if self.agent_type == 'sac':
-                    a = self.agent.get_action(o, True)
-                elif self.agent_type == 'td3':
-                    a = self.agent.get_action(o, 0)
+                a = self.agent.get_action(o = o, deterministic = True, noise_scale = 0.0)
                 o_dict, r, terminated, truncated, info  = env.step(a)
                 o = np.concatenate((o_dict['observation'], o_dict['desired_goal']))
 
@@ -313,7 +340,10 @@ class Eval:
         print("success_rate: " + str(success_rate))
         print("#########################################")
     
-    def draw_results(self,img_np,success_list):
+    def draw_results(self,
+                     img_np: np.ndarray,
+                     success_list: List
+                     ) -> np.ndarray:
 
         img_shape = img_np.shape
 

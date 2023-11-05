@@ -13,7 +13,7 @@ class Gym(TaskEnvBase):
 
         # Create taskenv
         self.env = gym.make(self.task_name) if self.headless == True else gym.make(self.task_name, render_mode="human") 
-        self.env._max_episode_steps = int(float(self.max_ep_len))
+        self.env._max_episode_steps = int(float(self.max_ep_len)) # type: ignore
 
         assert config['buffer']['her']['goal_selection_strategy'] == 'noher'
         assert config['trainer']['cl']['type'] == 'nocl'
