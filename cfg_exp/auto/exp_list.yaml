@@ -19,6 +19,102 @@ process_0: # noher - nohl - noper - nocl
     hier:
       buffer_size: [1e6]
       lambda: # threshold
+        mode: ['nohier'] # nohier / fix / multifix / predefined / ama / amar 
+        #mode: ['nohier','fix','multifix','predefined','ama','amar'] 
+        fix:
+          lambda: [-20] # gympanda: -20
+        predefined: 
+          lambda_start: [-50] # gympanda: -50 
+          lambda_end: [-10] # gympanda: -10 
+      xi: # hier batch ratio 
+        mode: ['fix'] # fix / prioritized
+        xi: [0.5]     
+    per:
+      mode: ['noper'] # noper / proportional
+  trainer:
+    total_timesteps: [5e4]
+  eval:
+    freq: [1e3]
+    num_episodes: [100]
+  # structure is differend than in the config file ##################################################x
+  task: 
+    #gym: ['Hopper-v4'] # 'Hopper-v4','HalfCheetah-v4','Walker2d-v4','Ant-v4'
+    gympanda: ['PandaPush-v3'] # PandaReach-v3 / PandaPush-v3 / PandaSlide-v3 / PandaPickAndPlace-v3 / PandaStack-v3
+  cl: 
+    #type: ['controladaptive'] 
+    type: ['nocl', 'nullcl', 'predefined_linear', 'predefined2stage_linear', 'predefined3stage_linear', 'selfpaced', 'control', 'controladaptive'] 
+    range_growth_mode: ['simple'] #--- only if highlights mode != nocl
+####################################################################################################
+
+process_1: # noher - nohl - noper - nocl
+  general:
+    seednum: 1 # 3 (tasks) x 10(seeds) x 3h(runtime) = 90h = 3.75 days 
+  agent: 
+    type: ['sac'] # ['sac','td3','ddpg']
+    #type: ['sac','td3','ddpg']
+    sac:
+      alpha: [0.1]
+    gamma: [0.95]
+    learning_rate: [0.001]
+  environment:
+    reward:
+      reward_shaping_type: ['sparse'] # sparse / state_change_bonus
+      reward_bonus: [0.0] #--- only if reward_shaping_type == state_change_bonus
+  buffer:
+    replay_buffer_size: [1e6]
+    her:
+      goal_selection_strategy: ['final'] # noher / final / future / future_once / near / next
+    hier:
+      buffer_size: [1e6]
+      lambda: # threshold
+        #mode: ['nohier'] # nohier / fix / multifix / predefined / ama / amar 
+        mode: ['nohier','fix','multifix','predefined','ama','amar'] 
+        fix:
+          lambda: [-20] # gympanda: -20
+        predefined: 
+          lambda_start: [-50] # gympanda: -50 
+          lambda_end: [-10] # gympanda: -10 
+      xi: # hier batch ratio 
+        mode: ['fix'] # fix / prioritized
+        xi: [0.5]     
+    per:
+      mode: ['noper'] # noper / proportional
+  trainer:
+    total_timesteps: [5e4]
+  eval:
+    freq: [1e3]
+    num_episodes: [100]
+  # structure is differend than in the config file ##################################################x
+  task: 
+    #gym: ['Hopper-v4'] # 'Hopper-v4','HalfCheetah-v4','Walker2d-v4','Ant-v4'
+    gympanda: ['PandaPush-v3'] # PandaReach-v3 / PandaPush-v3 / PandaSlide-v3 / PandaPickAndPlace-v3 / PandaStack-v3
+  cl: 
+    type: ['nocl'] 
+    #type: ['nocl', 'nullcl', 'predefined_linear', 'predefined2stage_linear', 'predefined3stage_linear', 'selfpaced', 'control', 'controladaptive'] 
+    range_growth_mode: ['simple'] #--- only if highlights mode != nocl
+####################################################################################################
+
+process_2: # noher - nohl - noper - nocl
+  general:
+    seednum: 1 # 3 (tasks) x 10(seeds) x 3h(runtime) = 90h = 3.75 days 
+  agent: 
+    type: ['sac'] # ['sac','td3','ddpg']
+    #type: ['sac','td3','ddpg']
+    sac:
+      alpha: [0.1]
+    gamma: [0.95]
+    learning_rate: [0.001]
+  environment:
+    reward:
+      reward_shaping_type: ['sparse'] # sparse / state_change_bonus
+      reward_bonus: [0.0] #--- only if reward_shaping_type == state_change_bonus
+  buffer:
+    replay_buffer_size: [1e6]
+    her:
+      goal_selection_strategy: ['final'] # noher / final / future / future_once / near / next
+    hier:
+      buffer_size: [1e6]
+      lambda: # threshold
         mode: ['predefined'] # nohier / fix / multifix / predefined / ama / amar 
         #mode: ['nohier','fix','multifix','predefined','ama','amar'] 
         fix:
@@ -30,16 +126,448 @@ process_0: # noher - nohl - noper - nocl
         mode: ['fix'] # fix / prioritized
         xi: [0.5]     
     per:
-      mode: ['proportional'] # noper / proportional
+      mode: ['noper'] # noper / proportional
   trainer:
-    total_timesteps: [5e2]
+    total_timesteps: [5e4]
   eval:
-    freq: [150]
-    num_episodes: [10]
+    freq: [1e3]
+    num_episodes: [100]
   # structure is differend than in the config file ##################################################x
   task: 
     #gym: ['Hopper-v4'] # 'Hopper-v4','HalfCheetah-v4','Walker2d-v4','Ant-v4'
-    gympanda: ['PandaReach-v3','PandaPush-v3','PandaSlide-v3','PandaPickAndPlace-v3'] # PandaReach-v3 / PandaPush-v3 / PandaSlide-v3 / PandaPickAndPlace-v3 / PandaStack-v3
+    gympanda: ['PandaPush-v3'] # PandaReach-v3 / PandaPush-v3 / PandaSlide-v3 / PandaPickAndPlace-v3 / PandaStack-v3
+  cl: 
+    #type: ['controladaptive'] 
+    type: ['nocl', 'nullcl', 'predefined_linear', 'predefined2stage_linear', 'predefined3stage_linear', 'selfpaced', 'control', 'controladaptive'] 
+    range_growth_mode: ['simple'] #--- only if highlights mode != nocl
+####################################################################################################
+
+process_3: # noher - nohl - noper - nocl
+  general:
+    seednum: 1 # 3 (tasks) x 10(seeds) x 3h(runtime) = 90h = 3.75 days 
+  agent: 
+    type: ['sac'] # ['sac','td3','ddpg']
+    #type: ['sac','td3','ddpg']
+    sac:
+      alpha: [0.1]
+    gamma: [0.95]
+    learning_rate: [0.001]
+  environment:
+    reward:
+      reward_shaping_type: ['sparse'] # sparse / state_change_bonus
+      reward_bonus: [0.0] #--- only if reward_shaping_type == state_change_bonus
+  buffer:
+    replay_buffer_size: [1e6]
+    her:
+      goal_selection_strategy: ['final'] # noher / final / future / future_once / near / next
+    hier:
+      buffer_size: [1e6]
+      lambda: # threshold
+        #mode: ['nohier'] # nohier / fix / multifix / predefined / ama / amar 
+        mode: ['nohier','fix','multifix','predefined','ama','amar'] 
+        fix:
+          lambda: [-20] # gympanda: -20
+        predefined: 
+          lambda_start: [-50] # gympanda: -50 
+          lambda_end: [-10] # gympanda: -10 
+      xi: # hier batch ratio 
+        mode: ['fix'] # fix / prioritized
+        xi: [0.5]     
+    per:
+      mode: ['noper'] # noper / proportional
+  trainer:
+    total_timesteps: [5e4]
+  eval:
+    freq: [1e3]
+    num_episodes: [100]
+  # structure is differend than in the config file ##################################################x
+  task: 
+    #gym: ['Hopper-v4'] # 'Hopper-v4','HalfCheetah-v4','Walker2d-v4','Ant-v4'
+    gympanda: ['PandaPush-v3'] # PandaReach-v3 / PandaPush-v3 / PandaSlide-v3 / PandaPickAndPlace-v3 / PandaStack-v3
+  cl: 
+    type: ['controladaptive'] 
+    #type: ['nocl', 'nullcl', 'predefined_linear', 'predefined2stage_linear', 'predefined3stage_linear', 'selfpaced', 'control', 'controladaptive'] 
+    range_growth_mode: ['simple'] #--- only if highlights mode != nocl
+####################################################################################################
+
+process_4: # noher - nohl - noper - nocl
+  general:
+    seednum: 1 # 3 (tasks) x 10(seeds) x 3h(runtime) = 90h = 3.75 days 
+  agent: 
+    type: ['sac'] # ['sac','td3','ddpg']
+    #type: ['sac','td3','ddpg']
+    sac:
+      alpha: [0.1]
+    gamma: [0.95]
+    learning_rate: [0.001]
+  environment:
+    reward:
+      reward_shaping_type: ['sparse'] # sparse / state_change_bonus
+      reward_bonus: [0.0] #--- only if reward_shaping_type == state_change_bonus
+  buffer:
+    replay_buffer_size: [1e6]
+    her:
+      goal_selection_strategy: ['final'] # noher / final / future / future_once / near / next
+    hier:
+      buffer_size: [1e6]
+      lambda: # threshold
+        #mode: ['predefined'] # nohier / fix / multifix / predefined / ama / amar 
+        mode: ['nohier','fix','multifix','predefined','ama','amar'] 
+        fix:
+          lambda: [-20] # gympanda: -20
+        predefined: 
+          lambda_start: [-50] # gympanda: -50 
+          lambda_end: [-10] # gympanda: -10 
+      xi: # hier batch ratio 
+        mode: ['prioritized'] # fix / prioritized
+        xi: [0.5]     
+    per:
+      mode: ['noper'] # noper / proportional
+  trainer:
+    total_timesteps: [5e4]
+  eval:
+    freq: [1e3]
+    num_episodes: [100]
+  # structure is differend than in the config file ##################################################x
+  task: 
+    #gym: ['Hopper-v4'] # 'Hopper-v4','HalfCheetah-v4','Walker2d-v4','Ant-v4'
+    gympanda: ['PandaPush-v3'] # PandaReach-v3 / PandaPush-v3 / PandaSlide-v3 / PandaPickAndPlace-v3 / PandaStack-v3
+  cl: 
+    type: ['controladaptive'] 
+    #type: ['nocl', 'nullcl', 'predefined_linear', 'predefined2stage_linear', 'predefined3stage_linear', 'selfpaced', 'control', 'controladaptive'] 
+    range_growth_mode: ['simple'] #--- only if highlights mode != nocl
+####################################################################################################
+
+process_5: # noher - nohl - noper - nocl
+  general:
+    seednum: 3 # 3 (tasks) x 10(seeds) x 3h(runtime) = 90h = 3.75 days 
+  agent: 
+    type: ['sac'] # ['sac','td3','ddpg']
+    #type: ['sac','td3','ddpg']
+    sac:
+      alpha: [0.1]
+    gamma: [0.95]
+    learning_rate: [0.001]
+  environment:
+    reward:
+      reward_shaping_type: ['sparse'] # sparse / state_change_bonus
+      reward_bonus: [0.0] #--- only if reward_shaping_type == state_change_bonus
+  buffer:
+    replay_buffer_size: [1e6]
+    her:
+      goal_selection_strategy: ['final'] # noher / final / future / future_once / near / next
+    hier:
+      buffer_size: [1e6]
+      lambda: # threshold
+        mode: ['predefined'] # nohier / fix / multifix / predefined / ama / amar 
+        #mode: ['nohier','fix','multifix','predefined','ama','amar'] 
+        fix:
+          lambda: [-20] # gympanda: -20
+        predefined: 
+          lambda_start: [-50] # gympanda: -50 
+          lambda_end: [-10] # gympanda: -10 
+      xi: # hier batch ratio 
+        mode: ['prioritized'] # fix / prioritized
+        xi: [0.5]     
+    per:
+      mode: ['proportional'] # noper / proportional
+  trainer:
+    total_timesteps: [5e5]
+  eval:
+    freq: [1e4]
+    num_episodes: [100]
+  # structure is differend than in the config file ##################################################x
+  task: 
+    #gym: ['Hopper-v4'] # 'Hopper-v4','HalfCheetah-v4','Walker2d-v4','Ant-v4'
+    gympanda: ['PandaPush-v3'] # PandaReach-v3 / PandaPush-v3 / PandaSlide-v3 / PandaPickAndPlace-v3 / PandaStack-v3
+  cl: 
+    type: ['controladaptive'] 
+    #type: ['nocl', 'nullcl', 'predefined_linear', 'predefined2stage_linear', 'predefined3stage_linear', 'selfpaced', 'control', 'controladaptive'] 
+    range_growth_mode: ['simple'] #--- only if highlights mode != nocl
+####################################################################################################
+
+process_6: # noher - nohl - noper - nocl
+  general:
+    seednum: 3 # 3 (tasks) x 10(seeds) x 3h(runtime) = 90h = 3.75 days 
+  agent: 
+    type: ['sac'] # ['sac','td3','ddpg']
+    #type: ['sac','td3','ddpg']
+    sac:
+      alpha: [0.1]
+    gamma: [0.95]
+    learning_rate: [0.001]
+  environment:
+    reward:
+      reward_shaping_type: ['sparse'] # sparse / state_change_bonus
+      reward_bonus: [0.0] #--- only if reward_shaping_type == state_change_bonus
+  buffer:
+    replay_buffer_size: [1e6]
+    her:
+      goal_selection_strategy: ['final'] # noher / final / future / future_once / near / next
+    hier:
+      buffer_size: [1e6]
+      lambda: # threshold
+        mode: ['predefined'] # nohier / fix / multifix / predefined / ama / amar 
+        #mode: ['nohier','fix','multifix','predefined','ama','amar'] 
+        fix:
+          lambda: [-20] # gympanda: -20
+        predefined: 
+          lambda_start: [-50] # gympanda: -50 
+          lambda_end: [-10] # gympanda: -10 
+      xi: # hier batch ratio 
+        mode: ['prioritized'] # fix / prioritized
+        xi: [0.5]     
+    per:
+      mode: ['proportional'] # noper / proportional
+  trainer:
+    total_timesteps: [5e5]
+  eval:
+    freq: [1e4]
+    num_episodes: [100]
+  # structure is differend than in the config file ##################################################x
+  task: 
+    #gym: ['Hopper-v4'] # 'Hopper-v4','HalfCheetah-v4','Walker2d-v4','Ant-v4'
+    gympanda: ['PandaSlide-v3'] # PandaReach-v3 / PandaPush-v3 / PandaSlide-v3 / PandaPickAndPlace-v3 / PandaStack-v3
+  cl: 
+    type: ['controladaptive'] 
+    #type: ['nocl', 'nullcl', 'predefined_linear', 'predefined2stage_linear', 'predefined3stage_linear', 'selfpaced', 'control', 'controladaptive'] 
+    range_growth_mode: ['simple'] #--- only if highlights mode != nocl
+####################################################################################################
+
+process_7: # noher - nohl - noper - nocl
+  general:
+    seednum: 3 # 3 (tasks) x 10(seeds) x 3h(runtime) = 90h = 3.75 days 
+  agent: 
+    type: ['sac'] # ['sac','td3','ddpg']
+    #type: ['sac','td3','ddpg']
+    sac:
+      alpha: [0.1]
+    gamma: [0.95]
+    learning_rate: [0.001]
+  environment:
+    reward:
+      reward_shaping_type: ['sparse'] # sparse / state_change_bonus
+      reward_bonus: [0.0] #--- only if reward_shaping_type == state_change_bonus
+  buffer:
+    replay_buffer_size: [1e6]
+    her:
+      goal_selection_strategy: ['final'] # noher / final / future / future_once / near / next
+    hier:
+      buffer_size: [1e6]
+      lambda: # threshold
+        mode: ['predefined'] # nohier / fix / multifix / predefined / ama / amar 
+        #mode: ['nohier','fix','multifix','predefined','ama','amar'] 
+        fix:
+          lambda: [-20] # gympanda: -20
+        predefined: 
+          lambda_start: [-50] # gympanda: -50 
+          lambda_end: [-10] # gympanda: -10 
+      xi: # hier batch ratio 
+        mode: ['prioritized'] # fix / prioritized
+        xi: [0.5]     
+    per:
+      mode: ['proportional'] # noper / proportional
+  trainer:
+    total_timesteps: [5e5]
+  eval:
+    freq: [1e4]
+    num_episodes: [100]
+  # structure is differend than in the config file ##################################################x
+  task: 
+    #gym: ['Hopper-v4'] # 'Hopper-v4','HalfCheetah-v4','Walker2d-v4','Ant-v4'
+    gympanda: ['PandaPickAndPlace-v3'] # PandaReach-v3 / PandaPush-v3 / PandaSlide-v3 / PandaPickAndPlace-v3 / PandaStack-v3
+  cl: 
+    type: ['controladaptive'] 
+    #type: ['nocl', 'nullcl', 'predefined_linear', 'predefined2stage_linear', 'predefined3stage_linear', 'selfpaced', 'control', 'controladaptive'] 
+    range_growth_mode: ['simple'] #--- only if highlights mode != nocl
+####################################################################################################
+
+process_8: # noher - nohl - noper - nocl
+  general:
+    seednum: 3 # 3 (tasks) x 10(seeds) x 3h(runtime) = 90h = 3.75 days 
+  agent: 
+    type: ['sac'] # ['sac','td3','ddpg']
+    #type: ['sac','td3','ddpg']
+    sac:
+      alpha: [0.1]
+    gamma: [0.95]
+    learning_rate: [0.001]
+  environment:
+    reward:
+      reward_shaping_type: ['sparse'] # sparse / state_change_bonus
+      reward_bonus: [0.0] #--- only if reward_shaping_type == state_change_bonus
+  buffer:
+    replay_buffer_size: [1e6]
+    her:
+      goal_selection_strategy: ['final'] # noher / final / future / future_once / near / next
+    hier:
+      buffer_size: [1e6]
+      lambda: # threshold
+        mode: ['predefined'] # nohier / fix / multifix / predefined / ama / amar 
+        #mode: ['nohier','fix','multifix','predefined','ama','amar'] 
+        fix:
+          lambda: [-20] # gympanda: -20
+        predefined: 
+          lambda_start: [-50] # gympanda: -50 
+          lambda_end: [-10] # gympanda: -10 
+      xi: # hier batch ratio 
+        mode: ['fix'] # fix / prioritized
+        xi: [0.5]     
+    per:
+      mode: ['noper'] # noper / proportional
+  trainer:
+    total_timesteps: [5e5]
+  eval:
+    freq: [1e4]
+    num_episodes: [100]
+  # structure is differend than in the config file ##################################################x
+  task: 
+    #gym: ['Hopper-v4'] # 'Hopper-v4','HalfCheetah-v4','Walker2d-v4','Ant-v4'
+    gympanda: ['PandaPush-v3'] # PandaReach-v3 / PandaPush-v3 / PandaSlide-v3 / PandaPickAndPlace-v3 / PandaStack-v3
+  cl: 
+    type: ['controladaptive'] 
+    #type: ['nocl', 'nullcl', 'predefined_linear', 'predefined2stage_linear', 'predefined3stage_linear', 'selfpaced', 'control', 'controladaptive'] 
+    range_growth_mode: ['simple'] #--- only if highlights mode != nocl
+####################################################################################################
+
+process_9: # noher - nohl - noper - nocl
+  general:
+    seednum: 3 # 3 (tasks) x 10(seeds) x 3h(runtime) = 90h = 3.75 days 
+  agent: 
+    type: ['sac'] # ['sac','td3','ddpg']
+    #type: ['sac','td3','ddpg']
+    sac:
+      alpha: [0.1]
+    gamma: [0.95]
+    learning_rate: [0.001]
+  environment:
+    reward:
+      reward_shaping_type: ['sparse'] # sparse / state_change_bonus
+      reward_bonus: [0.0] #--- only if reward_shaping_type == state_change_bonus
+  buffer:
+    replay_buffer_size: [1e6]
+    her:
+      goal_selection_strategy: ['final'] # noher / final / future / future_once / near / next
+    hier:
+      buffer_size: [1e6]
+      lambda: # threshold
+        mode: ['predefined'] # nohier / fix / multifix / predefined / ama / amar 
+        #mode: ['nohier','fix','multifix','predefined','ama','amar'] 
+        fix:
+          lambda: [-20] # gympanda: -20
+        predefined: 
+          lambda_start: [-50] # gympanda: -50 
+          lambda_end: [-10] # gympanda: -10 
+      xi: # hier batch ratio 
+        mode: ['fix'] # fix / prioritized
+        xi: [0.5]     
+    per:
+      mode: ['noper'] # noper / proportional
+  trainer:
+    total_timesteps: [5e5]
+  eval:
+    freq: [1e4]
+    num_episodes: [100]
+  # structure is differend than in the config file ##################################################x
+  task: 
+    #gym: ['Hopper-v4'] # 'Hopper-v4','HalfCheetah-v4','Walker2d-v4','Ant-v4'
+    gympanda: ['PandaSlide-v3'] # PandaReach-v3 / PandaPush-v3 / PandaSlide-v3 / PandaPickAndPlace-v3 / PandaStack-v3
+  cl: 
+    type: ['controladaptive'] 
+    #type: ['nocl', 'nullcl', 'predefined_linear', 'predefined2stage_linear', 'predefined3stage_linear', 'selfpaced', 'control', 'controladaptive'] 
+    range_growth_mode: ['simple'] #--- only if highlights mode != nocl
+####################################################################################################
+
+process_10: # noher - nohl - noper - nocl
+  general:
+    seednum: 3 # 3 (tasks) x 10(seeds) x 3h(runtime) = 90h = 3.75 days 
+  agent: 
+    type: ['sac'] # ['sac','td3','ddpg']
+    #type: ['sac','td3','ddpg']
+    sac:
+      alpha: [0.1]
+    gamma: [0.95]
+    learning_rate: [0.001]
+  environment:
+    reward:
+      reward_shaping_type: ['sparse'] # sparse / state_change_bonus
+      reward_bonus: [0.0] #--- only if reward_shaping_type == state_change_bonus
+  buffer:
+    replay_buffer_size: [1e6]
+    her:
+      goal_selection_strategy: ['final'] # noher / final / future / future_once / near / next
+    hier:
+      buffer_size: [1e6]
+      lambda: # threshold
+        mode: ['predefined'] # nohier / fix / multifix / predefined / ama / amar 
+        #mode: ['nohier','fix','multifix','predefined','ama','amar'] 
+        fix:
+          lambda: [-20] # gympanda: -20
+        predefined: 
+          lambda_start: [-50] # gympanda: -50 
+          lambda_end: [-10] # gympanda: -10 
+      xi: # hier batch ratio 
+        mode: ['fix'] # fix / prioritized
+        xi: [0.5]     
+    per:
+      mode: ['noper'] # noper / proportional
+  trainer:
+    total_timesteps: [5e5]
+  eval:
+    freq: [1e4]
+    num_episodes: [100]
+  # structure is differend than in the config file ##################################################x
+  task: 
+    #gym: ['Hopper-v4'] # 'Hopper-v4','HalfCheetah-v4','Walker2d-v4','Ant-v4'
+    gympanda: ['PandaPickAndPlace-v3'] # PandaReach-v3 / PandaPush-v3 / PandaSlide-v3 / PandaPickAndPlace-v3 / PandaStack-v3
+  cl: 
+    type: ['controladaptive'] 
+    #type: ['nocl', 'nullcl', 'predefined_linear', 'predefined2stage_linear', 'predefined3stage_linear', 'selfpaced', 'control', 'controladaptive'] 
+    range_growth_mode: ['simple'] #--- only if highlights mode != nocl
+####################################################################################################
+
+process_11: # noher - nohl - noper - nocl
+  general:
+    seednum: 3 # 3 (tasks) x 10(seeds) x 3h(runtime) = 90h = 3.75 days 
+  agent: 
+    type: ['sac'] # ['sac','td3','ddpg']
+    #type: ['sac','td3','ddpg']
+    sac:
+      alpha: [0.1]
+    gamma: [0.95]
+    learning_rate: [0.001]
+  environment:
+    reward:
+      reward_shaping_type: ['sparse'] # sparse / state_change_bonus
+      reward_bonus: [0.0] #--- only if reward_shaping_type == state_change_bonus
+  buffer:
+    replay_buffer_size: [1e6]
+    her:
+      goal_selection_strategy: ['final'] # noher / final / future / future_once / near / next
+    hier:
+      buffer_size: [1e6]
+      lambda: # threshold
+        mode: ['predefined'] # nohier / fix / multifix / predefined / ama / amar 
+        #mode: ['nohier','fix','multifix','predefined','ama','amar'] 
+        fix:
+          lambda: [-20] # gympanda: -20
+        predefined: 
+          lambda_start: [-50] # gympanda: -50 
+          lambda_end: [-10] # gympanda: -10 
+      xi: # hier batch ratio 
+        mode: ['fix'] # fix / prioritized
+        xi: [0.5]     
+    per:
+      mode: ['noper'] # noper / proportional
+  trainer:
+    total_timesteps: [5e5]
+  eval:
+    freq: [1e4]
+    num_episodes: [100]
+  # structure is differend than in the config file ##################################################x
+  task: 
+    #gym: ['Hopper-v4'] # 'Hopper-v4','HalfCheetah-v4','Walker2d-v4','Ant-v4'
+    gympanda: ['PandaStack-v3'] # PandaReach-v3 / PandaPush-v3 / PandaSlide-v3 / PandaPickAndPlace-v3 / PandaStack-v3
   cl: 
     type: ['controladaptive'] 
     #type: ['nocl', 'nullcl', 'predefined_linear', 'predefined2stage_linear', 'predefined3stage_linear', 'selfpaced', 'control', 'controladaptive'] 
