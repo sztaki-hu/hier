@@ -3,7 +3,6 @@ import torch
 import time
 import collections
 import random
-from statistics import mean as dq_mean
 
 from tqdm import tqdm
 
@@ -12,11 +11,12 @@ from rltrain.algos.cl.builder import make_cl
 from rltrain.agents.builder import make_agent
 from rltrain.buffers.builder import make_per
 from rltrain.algos.hier.builder import make_hier
-from rltrain.algos.her import HER
+from rltrain.algos.her.HER import HER
+from rltrain.utils.utils import safe_dq_mean
 
 class SamplerTrainerTester:
 
-    def __init__(self,device,logger,config,main_args,config_framework):
+    def __init__(self,device,logger,config,config_framework):
 
         self.device = device
         
@@ -82,17 +82,17 @@ class SamplerTrainerTester:
         self.agent = make_agent(device,config,config_framework)
 
         # Env train
-        self.env = make_taskenv(self.config, self.config_framework)
+        self.taskenv = make_taskenv(self.config, self.config_framework)
 
         # Env eval
-        self.env_eval = make_taskenv(self.config, self.config_framework)
+        self.taskenv_eval = make_taskenv(self.config, self.config_framework)
 
         # HER (Hindsight Experience Replay)
-        self.HER = HER(self.config,self.env,self.replay_buffer)
+        self.HER = HER(self.config,self.taskenv,self.replay_buffer)
 
         # CL (Curriculum Learning)
         self.cl_mode = config['trainer']['cl']['type']
-        self.CL = make_cl(self.config, self.env, self.replay_buffer)
+        self.CL = make_cl(self.config, self.taskenv)
 
         # HiER
         self.hier_include_test =  config['buffer']['hier']['include_test']
@@ -108,7 +108,7 @@ class SamplerTrainerTester:
         state_changed_num = 0
         
         for j in range(self.eval_num_episodes):
-            o, d, ep_ret, ep_len = self.env_eval.reset(), False, 0, 0
+            o, d, ep_ret, ep_len = self.taskenv_eval.reset(), False, 0, 0
             o_init = o.copy()
             test_episode = []
             info = {}
@@ -116,7 +116,7 @@ class SamplerTrainerTester:
             while not(d or (ep_len == self.max_ep_len)):
                 # Take deterministic actions at test time 
                 a = self.agent.get_action(o = o, deterministic = True, noise_scale = 0.0)
-                o2, r, terminated, truncated, info = self.env_eval.step(a)
+                o2, r, terminated, truncated, info = self.taskenv_eval.step(a)
                 d = terminated or truncated
                 # Save transition
                 test_episode.append((o, a, r, o2, d))
@@ -127,7 +127,7 @@ class SamplerTrainerTester:
             ep_rets.append(ep_ret)
             ep_lens.append(ep_len)
             if info['is_success'] == True: success_num += 1
-            if self.env_eval.is_diff_state(o_init,o,threshold = 0.01): state_changed_num += 1   
+            if self.taskenv_eval.is_diff_state(o_init,o,threshold = 0.01): state_changed_num += 1   
         
         ep_ret_avg = sum(ep_rets) / len(ep_rets)
         mean_ep_length = sum(ep_lens) / len(ep_lens)
@@ -168,11 +168,10 @@ class SamplerTrainerTester:
             if t > self.start_steps:
                 a = self.agent.get_action(o = o, deterministic = False, noise_scale = self.agent.act_noise)
             else:
-                a = self.env.random_sample()
-                # a = self.env.env.action_space.sample()
+                a = self.taskenv.random_sample()
 
             # Step the env
-            o2, r, terminated, truncated, info = self.env.step(a)
+            o2, r, terminated, truncated, info = self.taskenv.step(a)
             d = terminated or truncated
             ep_ret += r
             ep_len += 1
@@ -198,7 +197,8 @@ class SamplerTrainerTester:
 
                 ep_succes = 1.0 if info['is_success'] == True else 0.0
                 self.ep_success_dq.append(ep_succes)
-                if self.CL.store_rollout_success_rate: self.CL.cl_rollout_success_dq.append(ep_succes)
+                self.CL.append_rollout_success_dq(ep_succes)
+                #if self.CL.store_rollout_success_rate: self.CL.rollout_success_dq.append(ep_succes)
                 
                 for (o, a, r, o2, d) in episode:
                     self.replay_buffer.store(o, a, r, o2, d)
@@ -211,7 +211,7 @@ class SamplerTrainerTester:
                     virtual_experience_added = self.HER.add_virtial_experience(episode)
                     self.virtual_experience_dq.append(virtual_experience_added)
 
-                self.ep_state_changed_dq.append(1.0) if self.env.is_diff_state(episode[0][0],episode[-1][0],threshold = 0.01) else self.ep_state_changed_dq.append(0.0)
+                self.ep_state_changed_dq.append(1.0) if self.taskenv.is_diff_state(episode[0][0],episode[-1][0],threshold = 0.01) else self.ep_state_changed_dq.append(0.0)
 
                 episode = []
                 self.ep_rew_dq.append(ep_ret)
@@ -273,7 +273,8 @@ class SamplerTrainerTester:
                 # Test the performance of the deterministic version of the agent.
                 eval_mean_reward, eval_mean_ep_length, eval_success_rate, eval_state_change_rate = self.test_agent(t)
 
-                if self.CL.store_eval_success_rate: self.CL.cl_eval_success_dq.append(eval_success_rate)
+                self.CL.append_eval_success_dq(eval_success_rate)
+                #if self.CL.store_eval_success_rate: self.CL.cl_eval_success_dq.append(eval_success_rate)
 
                 self.logger.tb_writer_add_scalar("eval/mean_reward", eval_mean_reward, t)
                 self.logger.tb_writer_add_scalar("eval/mean_ep_length", eval_mean_ep_length, t)
@@ -283,8 +284,9 @@ class SamplerTrainerTester:
                 best_model_changed = False
                 if self.model_save_measure == 'reward':
                     eval_measure = eval_mean_reward 
-                elif self.model_save_measure == 'success_rate':
+                else:
                     eval_measure = eval_success_rate
+
                 if t > self.model_save_best_start_t:
                     if eval_measure > best_eval_measure:
                         best_eval_measure = eval_measure
@@ -308,46 +310,45 @@ class SamplerTrainerTester:
                                     "eval_mean_reward " + str(eval_mean_reward),
                                     "eval_mean_ep_length: " + str(eval_mean_ep_length),
                                     "eval_success_rate: " + str(eval_success_rate),
-                                    "ratios [CL]: " + str([round(self.CL.cl_ratio, 2)])])
+                                    "ratios [CL]: " + str([round(self.CL.c, 2)])])
 
                     if best_model_changed: message += " *" 
                     tqdm.write("[info] " + message)     
 
                 # ROLLOUT
-                self.logger.tb_writer_add_scalar("rollout/ep_rew_mean", dq_mean(self.ep_rew_dq), t)
-                self.logger.tb_writer_add_scalar("rollout/ep_len_mean", dq_mean(self.ep_len_dq), t)
-                self.logger.tb_writer_add_scalar("rollout/success_rate", dq_mean(self.ep_success_dq), t)
+                self.logger.tb_writer_add_scalar("rollout/ep_rew_mean", safe_dq_mean(self.ep_rew_dq), t)
+                self.logger.tb_writer_add_scalar("rollout/ep_len_mean", safe_dq_mean(self.ep_len_dq), t)
+                self.logger.tb_writer_add_scalar("rollout/success_rate", safe_dq_mean(self.ep_success_dq), t)
 
                 # STATE CHANGED
-                self.logger.tb_writer_add_scalar("rollout/state_changed", dq_mean(self.ep_state_changed_dq), t)
+                self.logger.tb_writer_add_scalar("rollout/state_changed", safe_dq_mean(self.ep_state_changed_dq), t)
 
                 # TRAIN
-                self.logger.tb_writer_add_scalar('train/critic_loss', dq_mean(self.loss_q_dq), t)
-                self.logger.tb_writer_add_scalar("train/actor_loss", dq_mean(self.loss_pi_dq), t)
+                self.logger.tb_writer_add_scalar('train/critic_loss', safe_dq_mean(self.loss_q_dq), t)
+                self.logger.tb_writer_add_scalar("train/actor_loss", safe_dq_mean(self.loss_pi_dq), t)
 
                 # HER
-                self.logger.tb_writer_add_scalar("her/virtual_experience_added", dq_mean(self.virtual_experience_dq), t)
+                self.logger.tb_writer_add_scalar("her/virtual_experience_added", safe_dq_mean(self.virtual_experience_dq), t)
                 
                 # PER
                 if self.per_active:
                     self.logger.tb_writer_add_scalar("per/beta", np.mean(self.replay_buffer.get_beta()), t)
 
                 # CL
-                self.logger.tb_writer_add_scalar("cl/ratio", self.CL.cl_ratio, t)
-                if self.cl_mode == 'examplebyexample': self.logger.tb_writer_add_scalar("cl/same_setup_num", np.mean(self.CL.same_setup_num_dq), t)
-
-                # HL
+                self.logger.tb_writer_add_scalar("cl/c", self.CL.c, t)
+             
+                # HiER
                 if self.HiER.lambda_mode != 'multifix':
                     self.logger.tb_writer_add_scalar("hier/buffer_size", self.HiER.replay_buffer.size, t)
                     self.logger.tb_writer_add_scalar("hier/lambda", self.HiER.lambda_t, t)
                     self.logger.tb_writer_add_scalar("hier/xi", self.HiER.xi, t)
-                    self.logger.tb_writer_add_scalar("hier/batch_size", self.HiER.batch_size, t)
+                    self.logger.tb_writer_add_scalar("hier/batch_size", self.HiER.hier_batch_size, t)
                 else:
                     for bin_index in range(self.HiER.bin_num): 
                         self.logger.tb_writer_add_scalar("hier/buffer_size_"+str(bin_index), self.HiER.replay_buffers[bin_index].size, t)
                         self.logger.tb_writer_add_scalar("hier/lambda"+str(bin_index), self.HiER.lambda_ts[bin_index], t)
                         self.logger.tb_writer_add_scalar("hier/xi_"+str(bin_index), self.HiER.xis[bin_index], t)       
-                        self.logger.tb_writer_add_scalar("hier/batch_size_"+str(bin_index), self.HiER.batch_sizes[bin_index], t)      
+                        self.logger.tb_writer_add_scalar("hier/batch_size_"+str(bin_index), self.HiER.hier_batch_sizes[bin_index], t)      
 
                 # TIME
                 time1 = time.time()

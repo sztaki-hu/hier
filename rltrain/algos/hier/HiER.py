@@ -30,11 +30,12 @@ class HiER:
             self.xi_min = config['buffer']['hier']['xi']['prioritized']['xi_min']
             self.xi_max = config['buffer']['hier']['xi']['prioritized']['xi_max']
             
+            # For logging
             self.bin_num = 0
             self.replay_buffers = []
             self.lambda_ts = []
             self.xis = []
-            self.batch_sizes = []
+            self.hier_batch_sizes = []
 
             
     def store_episode(self, episode: List[Transition], info_success: bool, t: int) -> None:

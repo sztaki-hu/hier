@@ -4,6 +4,7 @@ import os
 from typing import Dict, List, Tuple, Any
 
 from rltrain.taskenvs.TaskEnvBase import TaskEnvBase
+from gymnasium import Env
 
 class Gym(TaskEnvBase):
 

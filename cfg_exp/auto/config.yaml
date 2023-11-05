@@ -1,5 +1,5 @@
 general:
-  exp_name: 1101_X
+  exp_name: 1105_X
   logdir: logs
   demodir: demos
   seed: random
@@ -81,11 +81,10 @@ buffer:
         lambda_start: -50
         lambda_margin_relative: 0.5
         window: 20
-      
     xi:
       mode: input # fix / prioritized (works only if 'mode' is not 'nohl')
       xi: input
-      priorizized:
+      prioritized:
         alpha: 0.95
         xi_min: 0.1 
         xi_max: 0.9 
@@ -100,50 +99,41 @@ trainer:
   update_after: 1e2
   update_every: 50
   cl:
-    type: input # nocl / nullcl / predefined / predefinedtwostage / predefinedthreestage / selfpaced / selfpaceddual / controldiscrete / controldiscreteadaptive
+    type: input # nocl / nullcl / predefined / predefined2stage / predefined3stage / selfpaced / control / controladaptive
     range_growth_mode: input # simple / discard / balancediscard
     ratio_discard_lag: 0.1 # Only if 'range_growth_mode' is 'discard' or 'balancediscard'
     balancediscard_ratio: 0.8  # Only if 'range_growth_mode' is 'balancediscard'
     predefined:
-      pacing_profile: input  # linear / sqrt / quad
-      pacing_sat: 0.8
-    predefinedtwostage:
-      pacing_profile: input  # linear / sqrt / quad
+      profile: input  # linear / sqrt / quad
+      saturation_t: 0.8
+    predefined2stage:
+      profile: input  # linear / sqrt / quad
       change_stage: 0.5
       stage1: # goal
-        pacing_sat: 0.4
+        saturation_t: 0.4
       stage2: # obj
-        pacing_sat: 0.8
-    predefinedthreestage:
-      pacing_profile: input  # linear / sqrt / quad
+        saturation_t: 0.8
+    predefined3stage:
+      profile: input  # linear / sqrt / quad
       change_stage12: 0.3
       change_stage23: 0.6
       stage1: # goal
-        pacing_sat: 0.2
+        saturation_t: 0.2
       stage2: # obj
-        pacing_sat: 0.5
+        saturation_t: 0.5
       stage3: # obj-goal
-        pacing_sat: 0.8
+        saturation_t: 0.8
     selfpaced:
-      conv_cond: 0.8
-      window_size: 20
-      step: 0.05
-    selfpaceddual:
       upper_cond: 0.8
       lower_cond: 0.2
       window_size: 20
       step: 0.05
-    controldiscrete:
-      target_profile: input # const / linear / sqrt / quad
-      target_sat: 0.8 
-      target_sat_value: 0.8
+    control:
+      target_value: 0.8 
       step: 0.01
       window_size: 20
-      const_sin:
-        amp: 0.05
-        freq_divide: 50
-    controldiscreteadaptive:
-      target_plus_eval: 0.2
+    controladaptive:
+      Delta: 0.2
       target_max: 0.9
       window_size_eval: 3
       window_size_rollout: 20

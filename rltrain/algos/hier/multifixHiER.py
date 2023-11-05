@@ -12,8 +12,8 @@ class multifixHiER(HiER):
     def __init__(self, config: Dict) -> None:
         super(multifixHiER, self).__init__(config)
 
-        self.lamda_ts = config['buffer']['hier']['lambda']['multifix']['lambdas']
-        self.bin_num = len(self.lamda_ts)
+        self.lambda_ts = config['buffer']['hier']['lambda']['multifix']['lambdas']
+        self.bin_num = len(self.lambda_ts)
         
         self.xis = config['buffer']['hier']['lambda']['multifix']['xis']
         self.hier_batch_sizes = [int(x * self.batch_size) for x in self.xis]
@@ -43,7 +43,7 @@ class multifixHiER(HiER):
             sum_rew += r
         
         for i in range(self.bin_num):
-            if sum_rew >= self.lamda_ts[i]:
+            if sum_rew >= self.lambda_ts[i]:
                 for (o, a, r, o2, d) in episode:
                     self.replay_buffers[i].store(o, a, r, o2, d)
                 break

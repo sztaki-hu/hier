@@ -102,7 +102,7 @@ class Agent:
         q_pi = self.ac.q(o, self.ac.pi(o))
         return -q_pi.mean()
 
-    def update(self, data: Dict, placeholder: None = None) -> Tuple[float, float, np.ndarray]:
+    def update(self, data: Dict, timer: int) -> Tuple[float, float, np.ndarray]:
         # First run one gradient descent step for Q.
         self.q_optimizer.zero_grad()
         loss_q, batch_priorities, loss_info = self.compute_loss_q(data)

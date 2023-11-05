@@ -1,11 +1,15 @@
 import os
 import torch
 import yaml
+import collections
+from statistics import mean as dq_mean
+from typing import Dict, Union, Optional
 
+from rltrain.logger.logger import Logger
 
 # Init CUDA ##############################################################
 
-def init_cuda(gpu,cpumin,cpumax):
+def init_cuda(gpu: int, cpumin: int, cpumax: int) -> None:
 
     # BEFORE IMPORTING PYTORCH
     os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
@@ -15,24 +19,29 @@ def init_cuda(gpu,cpumin,cpumax):
     # For defining the GPUs: 'nvidia-msi'
     # For defining the CPUs: 'top' and then press '1'
 
-def print_torch_info(logger):
+def print_torch_info(logger: Logger) -> None:
     logger.print_logfile(torch.__version__)
-    logger.print_logfile(torch.cuda.is_available())
+    logger.print_logfile(str(torch.cuda.is_available()))
     if torch.cuda.is_available():
-        logger.print_logfile(torch.cuda.current_device())
-        logger.print_logfile(torch.cuda.device(0))
-        logger.print_logfile(torch.cuda.device_count())
+        logger.print_logfile(str(torch.cuda.current_device()))
+        logger.print_logfile(str(torch.cuda.device(0)))
+        logger.print_logfile(str(torch.cuda.device_count()))
         logger.print_logfile(torch.cuda.get_device_name(0))
     logger.print_logfile("Torch threads: " + str(torch.get_num_threads()))
 
 # SAVE LOAD YAML ##############################################################
 
-def save_yaml(path, data):
+def save_yaml(path: str, data: Dict) -> None:
     with open(path, "w") as f:
         yaml.dump(data, f, default_flow_style=False)
 
-def load_yaml(file):
+def load_yaml(file: str) -> Dict:
     if file is not None:
         with open(file) as f:
             return yaml.load(f, Loader=yaml.UnsafeLoader)
-    return None
+    return {}
+
+# DEQUEUE #########################################################################
+
+def safe_dq_mean(dq: collections.deque) -> float:
+    return 0.0 if len(dq) == 0 else dq_mean(dq)

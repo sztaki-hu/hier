@@ -8,6 +8,7 @@ class noHiER(HiER):
 
         self.xi = 0
         self.batch_size =  0
+        self.hier_batch_size =  0
         self.buffer_size = 0
         self.replay_buffer = ReplayBuffer(
                 obs_dim=int(config['environment']['obs_dim']), 
@@ -16,7 +17,7 @@ class noHiER(HiER):
         
         self.lambda_t = 0
         self.active = False 
-        self.mode = config['buffer']['highlights']['mode']
+        self.lambda_mode = config['buffer']['hier']['lambda']['mode']
     
     
 

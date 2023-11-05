@@ -1,15 +1,14 @@
 import numpy as np
 import random
+import collections
 
-from typing import Dict, List, Tuple, Union
-
-from rltrain.taskenvs.Gym import Gym
+from typing import Dict, List, Tuple, Union, Optional
 from rltrain.taskenvs.GymPanda import GymPanda
 
 RANGE_GROWTH_MODES = ['simple', 'discard', 'balancediscard']
 
 class CL:
-    def __init__(self, config: Dict, taskenv: Union[Gym, GymPanda]):
+    def __init__(self, config: Dict, taskenv: GymPanda) -> None:
 
         # INIT CONFIG
         self.config = config
@@ -117,26 +116,38 @@ class CL:
                 print("Goal Num: " + str(self.goal_num))
                 assert False
                 
-            self.cl_range_growth_mode = config['trainer']['cl']['range_growth_mode']
+            self.range_growth_mode = config['trainer']['cl']['range_growth_mode']
             self.balancediscard_ratio = config['trainer']['cl']['balancediscard_ratio']
-            self.cl_ratio_discard_lag = self.config['trainer']['cl']['ratio_discard_lag']
+            self.c_discard_lag = self.config['trainer']['cl']['ratio_discard_lag']
 
-            assert self.cl_range_growth_mode in RANGE_GROWTH_MODES
+            assert self.range_growth_mode in RANGE_GROWTH_MODES
 
-        self.cl_ratio = 0
-        self.cl_obj_ratio = 0
-        self.cl_goal_ratio = 0
+        self.c = 0
+        self.c_obj = 0
+        self.c_goal = 0
 
-        self.cl_ratio_discard = 0
-        self.cl_obj_ratio_discard = 0
-        self.cl_goal_ratio_discard = 0
+        self.c_discard = 0
+        self.c_obj_discard = 0
+        self.c_goal_discard = 0
 
         self.store_rollout_success_rate = False
         self.store_eval_success_rate = False
-    
-    def reset_env(self,t):
 
-        self.update_cl(t)
+        self.eval_success_dq = collections.deque()
+        self.rollout_success_dq = collections.deque() 
+
+        # goal_low, goal_high, obj_low, obj_high = self.get_range(self.c_obj, self.c_goal)
+
+        # print(goal_low)
+        # print(type(goal_low))
+        # print(obj_low)
+        # print(type(obj_low))
+
+        # assert False
+    
+    def reset_env(self, t: int) -> np.ndarray:
+
+        self.update_c(t)
 
         desired_goal,object_position = self.get_setup()
 
@@ -145,19 +156,20 @@ class CL:
         
         return self.taskenv.get_obs()
 
-    def update_cl(self,t):
+    def update_c(self,t: int) -> None:
         pass
 
-    def get_setup(self):
+    def get_setup(self) -> Tuple[np.ndarray, Optional[np.ndarray]]:
 
-        if self.cl_range_growth_mode == "simple": return self.get_range_rectangle() 
-        elif self.cl_range_growth_mode == "discard": return self.get_range_rectangle_with_cutout()
-        elif self.cl_range_growth_mode == "balancediscard": return self.get_range_rectangle_with_cutout() if random.random() < 0.80 else self.get_range_rectangle()
+        if self.range_growth_mode == "simple": return self.get_range_rectangle() 
+        elif self.range_growth_mode == "discard": return self.get_range_rectangle_with_cutout()
+        elif self.range_growth_mode == "balancediscard": return self.get_range_rectangle_with_cutout() if random.random() < 0.80 else self.get_range_rectangle()
+        else: assert False
 
 
-    def get_range_rectangle(self):
+    def get_range_rectangle(self) -> Tuple[np.ndarray, Optional[np.ndarray]]:
 
-        goal_low, goal_high, obj_low, obj_high = self.get_range(self.cl_obj_ratio, self.cl_goal_ratio)
+        goal_low, goal_high, obj_low, obj_high = self.get_range(self.c_obj, self.c_goal)
         
         if self.obj_num == 0:
             object_position = None
@@ -169,7 +181,7 @@ class CL:
 
         return desired_goal,object_position
     
-    def get_range_rectangle_with_cutout(self):
+    def get_range_rectangle_with_cutout(self) -> Tuple[np.ndarray, Optional[np.ndarray]]:
 
         goal_low, goal_high, obj_low, obj_high = self.get_range(self.cl_obj_ratio, self.cl_goal_ratio)
         goal_d_low, goal_d_high, obj_d_low, obj_d_high = self.get_range(self.cl_obj_ratio_discard, self.cl_goal_ratio_discard)
@@ -189,7 +201,10 @@ class CL:
         
         return desired_goal,object_position
     
-    def get_range(self,obj_ratio,goal_ratio):     
+    def get_range(self, 
+                  obj_ratio: float, 
+                  goal_ratio: float
+                  ) -> Tuple[np.ndarray, np.ndarray, Optional[np.ndarray], Optional[np.ndarray]]:    
         if self.obj_num == 0:
             obj_low = None
             obj_high = None
@@ -201,11 +216,18 @@ class CL:
 
         return goal_low, goal_high, obj_low, obj_high
     
-    def copy_cl_ratios_to_obj_and_goal(self):
-        self.cl_obj_ratio = self.cl_ratio
-        self.cl_goal_ratio = self.cl_ratio
-        self.cl_obj_ratio_discard = self.cl_ratio_discard
-        self.cl_goal_ratio_discard = self.cl_ratio_discard
+    
+    def append_rollout_success_dq(self, ep_succes: float) -> None:
+        if self.store_rollout_success_rate: self.rollout_success_dq.append(ep_succes)
+    
+    def append_eval_success_dq(self, ep_succes: float) -> None:
+        if self.store_rollout_success_rate: self.eval_success_dq.append(ep_succes)
+    
+    def copy_c_to_obj_and_goal(self):
+        self.c_obj = self.c
+        self.c_goal = self.c
+        self.c_obj_discard = self.c_discard
+        self.c_goal_discard = self.c_discard
     
 
 

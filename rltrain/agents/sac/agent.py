@@ -200,7 +200,7 @@ class Agent:
 
         return loss_pi, pi_info
 
-    def update(self, data: Dict, placeholder: None = None) -> Tuple[float, float, np.ndarray]:
+    def update(self, data: Dict, timer: int) -> Tuple[float, float, np.ndarray]:
 
         # First run one gradient descent step for Q1 and Q2
         self.q_optimizer.zero_grad()

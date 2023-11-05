@@ -1,32 +1,44 @@
 
+from typing import Dict, Union
 
-CL_TYPES = ['nocl','nullcl','predefined','predefinedtwostage','predefinedthreestage',
-            'selfpaced','selfpaceddual','controldiscrete', 'controldiscreteadaptive', 
-            'examplebyexample']
+from rltrain.taskenvs.GymPanda import GymPanda
 
-def make_cl(config, env, replay_buffer):
+from rltrain.algos.cl.noCL import noCL
+from rltrain.algos.cl.nullCL import nullCL
+from rltrain.algos.cl.predefinedCL import predefinedCL 
+from rltrain.algos.cl.predefined2stageCL import predefined2stageCL 
+from rltrain.algos.cl.predefined3stageCL import predefined3stageCL 
+from rltrain.algos.cl.selfpacedCL import selfpacedCL 
+from rltrain.algos.cl.controlCL import controlCL 
+from rltrain.algos.cl.controladaptive import controladaptiveCL 
+
+CL_TYPES = ['nocl','nullcl','predefined','predefined2stage','predefined3stage',
+            'selfpaced','control', 'controladaptive']
+
+def make_cl(config: Dict, taskenv: GymPanda
+            ) -> Union[noCL, nullCL, predefinedCL, predefined2stageCL, predefined3stageCL, 
+                       selfpacedCL, controlCL, controladaptiveCL]:
 
     cl_mode = config['trainer']['cl']['type']
     print(cl_mode)
     assert cl_mode in CL_TYPES
     
     if cl_mode == 'nocl':
-        from rltrain.algos.cl.NoCL import NoCL as CL
+        return noCL(config, taskenv)
     elif cl_mode == 'nullcl':
-        from rltrain.algos.cl.NullCL import NullCL as CL
+        return nullCL(config, taskenv)
     elif cl_mode == 'predefined':
-        from rltrain.algos.cl.PredefinedCL import PredefinedCL as CL
-    elif cl_mode == 'predefinedtwostage':
-        from rltrain.algos.cl.PredefinedTwostageCL import PredefinedTwostageCL as CL
-    elif cl_mode == 'predefinedthreestage':
-        from rltrain.algos.cl.PredefinedThreestageCL import PredefinedThreestageCL as CL
+        return predefinedCL(config, taskenv)
+    elif cl_mode == 'predefined2stage':
+        return predefined2stageCL(config, taskenv)
+    elif cl_mode == 'predefined3stage':
+        return predefined3stageCL(config, taskenv)
     elif cl_mode == 'selfpaced':
-        from rltrain.algos.cl.SelfPacedCL import SelfPacedCL as CL
-    elif cl_mode == 'selfpaceddual':
-        from rltrain.algos.cl.SelfPacedDualCL import SelfPacedDualCL as CL
-    elif cl_mode == 'controldiscrete':
-        from rltrain.algos.cl.ControlDiscreteCL import ControlDiscreteCL as CL
-    elif cl_mode == 'controldiscreteadaptive':
-        from rltrain.algos.cl.ControlDiscreteAdaptiveCL import ControlDiscreteAdaptiveCL as CL
+        return selfpacedCL(config, taskenv)
+    elif cl_mode == 'control':
+        return controlCL(config, taskenv)
+    elif cl_mode == 'controladaptive':
+        return controladaptiveCL(config, taskenv)
+    else:
+        assert False
 
-    return CL(config, env, replay_buffer)

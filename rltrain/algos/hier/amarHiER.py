@@ -10,7 +10,7 @@ class amarHiER(HiER): # Adaptive Moving Average Relative
     def __init__(self, config: Dict) -> None:
         super(amarHiER, self).__init__(config)
 
-        self.lambda_start = config['buffer']['hier']['amar']['lambda']['lambda_start']
+        self.lambda_start = config['buffer']['hier']['lambda']['amar']['lambda_start']
         self.lambda_margin_relative = config['buffer']['hier']['lambda']['amar']['lambda_margin_relative']
         assert self.lambda_margin_relative > 0
         self.window = config['buffer']['hier']['lambda']['amar']['window']

@@ -5,6 +5,7 @@ import numpy as np
 import torch
 import argparse
 import itertools
+from typing import Dict, Union, Optional
 
 from rltrain.utils.utils import init_cuda, print_torch_info
 from rltrain.logger.logger import Logger
@@ -19,13 +20,13 @@ import pandas as pd
 import yaml
 
 
-def load_yaml(file):
+def load_yaml(file: str) -> Dict:
     if file is not None:
         with open(file) as f:
             return yaml.load(f, Loader=yaml.UnsafeLoader)
-    return None
+    return {}
 
-def main():
+def main() -> int:
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", default="cfg_exp/auto/config.yaml", help="Path of the config file")
@@ -54,13 +55,13 @@ def main():
     # Buffers
     replay_buffer_sizes = exp_list['buffer']['replay_buffer_size']
     her_strategies = exp_list['buffer']['her']['goal_selection_strategy']
-    hier_lambda_modes = exp_list['buffer']['highlights']['mode']
-    hier_xi_modes = exp_list['buffer']['highlights']['batch_ratio_mode']
-    hier_xis = exp_list['buffer']['highlights']['batch_ratio']
-    hier_buffer_sizes = exp_list['buffer']['highlights']['buffer_size']
-    hier_fix_lambdas = exp_list['buffer']['highlights']['fix']['threshold']
-    hier_predefined_lambda_starts = exp_list['buffer']['highlights']['predefined']['threshold_start']
-    hier_predefined_lambda_ends = exp_list['buffer']['highlights']['predefined']['threshold_end']
+    hier_buffer_sizes = exp_list['buffer']['hier']['buffer_size']
+    hier_lambda_modes = exp_list['buffer']['hier']['lambda']['mode']
+    hier_lambda_fix_lambdas = exp_list['buffer']['hier']['lambda']['fix']['lambda']
+    hier_lambda_predefined_lambda_starts = exp_list['buffer']['hier']['lambda']['predefined']['lambda_start']
+    hier_lambda_predefined_lambda_ends = exp_list['buffer']['hier']['lambda']['predefined']['lambda_end']
+    hier_xi_modes = exp_list['buffer']['hier']['xi']['mode']
+    hier_xi_xis = exp_list['buffer']['hier']['xi']['xi']
     per_modes = exp_list['buffer']['per']['mode']
     
     # Trainers
@@ -113,13 +114,13 @@ def main():
                             # Buffers
                             replay_buffer_sizes,
                             her_strategies,
-                            hier_lambda_modes,
-                            hier_xi_modes,
-                            hier_xis,
                             hier_buffer_sizes,
-                            hier_fix_lambdas,
-                            hier_predefined_lambda_starts,
-                            hier_predefined_lambda_ends,
+                            hier_lambda_modes,
+                            hier_lambda_fix_lambdas,
+                            hier_lambda_predefined_lambda_starts,
+                            hier_lambda_predefined_lambda_ends,
+                            hier_xi_modes,
+                            hier_xi_xis,
                             per_modes,
                             # Trainers
                             trainer_set_of_total_timesteps,
@@ -146,13 +147,13 @@ def main():
                         # Buffer
                         replay_buffer_size                       = r[6]
                         her_strategy                             = r[7]
-                        hier_lambda_mode                         = r[8]
-                        hier_xi_mode                             = r[9]
-                        hier_xi                                  = r[10]
-                        hier_buffer_size                         = r[11]
-                        hier_fix_lambda                          = r[12]
-                        hier_predefined_lambda_start             = r[13]
-                        hier_predefined_lambda_end               = r[14]
+                        hier_buffer_size                         = r[8]
+                        hier_lambda_mode                         = r[9]
+                        hier_lambda_fix_lambda                   = r[10]
+                        hier_lambda_predefined_lambda_start      = r[11]
+                        hier_lambda_predefined_lambda_end        = r[12]
+                        hier_xi_mode                             = r[13]
+                        hier_xi_xi                               = r[14]
                         per_mode                                 = r[15]
                         # Trainer
                         trainer_total_timesteps                  = r[16]
@@ -182,7 +183,7 @@ def main():
                         exp['exp_in_name']['agent_gamma'] = False
                         exp['exp_abb']['agent_gamma'] = 'gam'
                         exp['main']['agent_learning_rate'] = agent_learning_rate
-                        exp['exp_in_name']['agent_learning_rate'] = True
+                        exp['exp_in_name']['agent_learning_rate'] = False
                         exp['exp_abb']['agent_learning_rate'] = 'lr'
                         # Env
                         exp['main']['reward_shaping_type'] = reward_shaping_type
@@ -192,24 +193,24 @@ def main():
                         exp['exp_abb']['reward_bonus'] = 'rb'
                         # Buffer
                         exp['main']['replay_buffer_size'] = replay_buffer_size
-                        exp['exp_in_name']['replay_buffer_size'] = False
+                        exp['exp_in_name']['replay_buffer_size'] = False                        
                         exp['main']['her_strategy'] = her_strategy
                         exp['exp_in_name']['her_strategy'] = True
+                        exp['main']['hier_buffer_size'] = hier_buffer_size
+                        exp['exp_in_name']['hier_buffer_size'] = False
                         exp['main']['hier_lambda_mode'] = hier_lambda_mode
                         exp['exp_in_name']['hier_lambda_mode'] = True
+                        exp['main']['hier_lambda_fix_lambda'] = hier_lambda_fix_lambda
+                        exp['exp_in_name']['hier_lambda_fix_lambda'] = False
+                        exp['main']['hier_lambda_predefined_lambda_start'] = hier_lambda_predefined_lambda_start
+                        exp['exp_in_name']['hier_lambda_predefined_lambda_start'] = False
+                        exp['main']['hier_lambda_predefined_lambda_end'] = hier_lambda_predefined_lambda_end
+                        exp['exp_in_name']['hier_lambda_predefined_lambda_end'] = False
                         exp['main']['hier_xi_mode'] = hier_xi_mode
                         exp['exp_in_name']['hier_xi_mode'] = True
-                        exp['main']['hier_xi'] = hier_xi
-                        exp['exp_in_name']['hier_xi'] = False
-                        exp['exp_abb']['hier_xi'] = 'xi'
-                        exp['main']['hier_buffer_size'] = hier_buffer_size
-                        exp['exp_in_name']['hier_buffer_size'] = True
-                        exp['main']['hier_fix_lambda'] = hier_fix_lambda
-                        exp['exp_in_name']['hier_fix_lambda'] = False
-                        exp['main']['hier_predefined_lambda_start'] = hier_predefined_lambda_start
-                        exp['exp_in_name']['hier_predefined_lambda_start'] = False
-                        exp['main']['hier_predefined_lambda_end'] = hier_predefined_lambda_end
-                        exp['exp_in_name']['hier_predefined_lambda_end'] = False
+                        exp['main']['hier_xi_xi'] = hier_xi_xi
+                        exp['exp_in_name']['hier_xi_xi'] = False
+                        exp['exp_abb']['hier_xi_xi'] = 'xi'
                         exp['main']['per_mode'] = per_mode
                         exp['exp_in_name']['per_mode'] = True
                         # Trainer
@@ -228,7 +229,7 @@ def main():
                     
 
                         # Init logger ###############################################x
-                        logger = Logger(current_dir = current_dir, main_args = args, display_mode = False, exp = exp, is_test_config = is_test_config)
+                        logger = Logger(current_dir = current_dir, configpath = args.config, display_mode = False, exp = exp, is_test_config = is_test_config)
 
                         config = logger.get_config()
 
@@ -240,14 +241,14 @@ def main():
                         print_torch_info(logger)
 
                         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-                        logger.print_logfile(device)
+                        logger.print_logfile(str(device))
 
                         torch.set_num_threads(torch.get_num_threads())
 
                         torch.manual_seed(config['general']['seed'])
                         np.random.seed(config['general']['seed'])  
 
-                        samplerTrainerTester = SamplerTrainerTester(device,logger,config,args,config_framework,)
+                        samplerTrainerTester = SamplerTrainerTester(device,logger,config,config_framework,)
 
                         if is_test_config == False: 
                             samplerTrainerTester.start()
@@ -268,7 +269,9 @@ def main():
     else:
         print("##################################################################")
         print("                    No errors!")
-        print("##################################################################")     
+        print("##################################################################")   
+
+    return 1  
 
 
 if __name__ == '__main__':

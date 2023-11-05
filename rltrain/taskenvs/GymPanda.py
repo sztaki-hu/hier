@@ -46,10 +46,9 @@ class GymPanda(TaskEnvBase):
 
     def get_robot_joints(self) -> np.ndarray:
         return np.array([self.env.robot.get_joint_angle(joint=i) for i in range(7)]) 
-
     
     def load_state(self, 
-                   robot_joints: np.ndarray, 
+                   robot_joints: Optional[np.ndarray], 
                    desired_goal: np.ndarray, 
                    object_position: Optional[np.ndarray] = None
                    ) -> None:
@@ -99,6 +98,10 @@ class GymPanda(TaskEnvBase):
         r_float = r_float * self.reward_scalor
 
         return o, r_float, terminated, truncated, info 
+    
+    def random_sample(self) -> np.ndarray:
+        return self.env.action_space.sample() 
+
 
     def get_reward_bonus(self, o: np.ndarray) -> float:
         if self.task_name in ['PandaReach-v3','PandaReachDense-v3']:
@@ -199,12 +202,12 @@ class GymPanda(TaskEnvBase):
             o2[-3:] = goal.copy()
             return o2
     
-    def her_get_reward_and_done(self, o: np.ndarray) -> Tuple[float, float]:
+    def her_get_reward_and_done(self, o: np.ndarray) -> Tuple[float, bool]:
         desired_goal = self.get_desired_goal_from_obs(o)
         achieved_goal = self.get_achieved_goal_from_obs(o)
 
         r = self.env.task.compute_reward(achieved_goal, desired_goal, {})
-        d = 1.0 if self.env.task.is_success(achieved_goal, desired_goal) else 0.0
+        d = True if self.env.task.is_success(achieved_goal, desired_goal) else False
         return r,d
     
 
