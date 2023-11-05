@@ -20,6 +20,8 @@ class amaHiER(HiER): # Adaptive Moving Average
     def store_episode(self,episode: List[Transition], info_success: bool, t: int) -> None:
 
         if self.success_cond and info_success == False: return
+
+        if len(episode) <= 1: return
         
         sum_rew = 0
         for (o, a, r, o2, d) in episode:
