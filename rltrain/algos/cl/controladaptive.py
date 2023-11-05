@@ -25,7 +25,7 @@ class controladaptiveCL(CL):
         self.eval_success_dq = collections.deque(maxlen=self.eval_dq_maxlen)
         self.rollout_success_dq = collections.deque(maxlen=self.rollout_dq_maxlen) 
    
-    def update_cl(self,t: int) -> None: 
+    def update_c(self,t: int) -> None: 
         success_rate = dq_mean(self.rollout_success_dq) if len(self.rollout_success_dq) > 0  else 0
         eval_success_rate = dq_mean(self.eval_success_dq) if len(self.eval_success_dq) > 0 else 0
         target = min(self.target_max, eval_success_rate + self.Delta)
