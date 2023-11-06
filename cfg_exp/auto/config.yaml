@@ -60,6 +60,7 @@ buffer:
     buffer_size: input
     success_cond: False
     include_test: True
+    include_train: True
     lambda:
       mode: input # nohier / fix / ama / predefined / multifix / multipredefined
       fix:

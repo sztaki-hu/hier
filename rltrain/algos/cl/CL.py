@@ -23,7 +23,7 @@ class CL:
 
         print(self.init_ranges)
 
-        if config['trainer']['cl']['type'] != 'nocl':
+        if config['trainer']['cl']['type'] not in ['nocl','nullcl']:
             self.obj_range_low = self.init_ranges['obj_range_low']
             self.obj_range_high = self.init_ranges['obj_range_high']
             self.object_size = self.init_ranges['object_size']
@@ -174,16 +174,19 @@ class CL:
             object_position = None
             desired_goal = np.random.uniform(goal_low, goal_high)
         else:
-            object_position =  np.random.uniform(obj_low, obj_high)
-            desired_goal = np.random.uniform(goal_low, goal_high)
+            if obj_low is not None and obj_high is not None:
+                object_position =  np.random.uniform(obj_low, obj_high)
+                desired_goal = np.random.uniform(goal_low, goal_high)
+            else:
+                raise ValueError("[CL]: [obj_low, obj_high]: " + str([obj_low, obj_high]))
             
 
         return desired_goal,object_position
     
     def get_range_rectangle_with_cutout(self) -> Tuple[np.ndarray, Optional[np.ndarray]]:
 
-        goal_low, goal_high, obj_low, obj_high = self.get_range(self.cl_obj_ratio, self.cl_goal_ratio)
-        goal_d_low, goal_d_high, obj_d_low, obj_d_high = self.get_range(self.cl_obj_ratio_discard, self.cl_goal_ratio_discard)
+        goal_low, goal_high, obj_low, obj_high = self.get_range(self.c_obj, self.c_goal)
+        goal_d_low, goal_d_high, obj_d_low, obj_d_high = self.get_range(self.c_obj_discard, self.c_goal_discard)
         
         if random.random() < 0.50:
             desired_goal = np.random.uniform(goal_low, goal_d_low)
@@ -192,11 +195,17 @@ class CL:
         
         if self.obj_num == 0:
             object_position = None
-        else:
+        else:        
             if random.random() < 0.50:
-                object_position =  np.random.uniform(obj_low, obj_d_low)
+                if obj_low is not None and obj_d_low is not None:
+                    object_position =  np.random.uniform(obj_low, obj_d_low)
+                else:
+                    raise ValueError("[CL]: [obj_low, obj_d_low]: " + str([obj_low, obj_d_low]))
             else:
-                object_position =  np.random.uniform(obj_d_high, obj_high)
+                if obj_d_high is not None and obj_high is not None:
+                    object_position =  np.random.uniform(obj_d_high, obj_high)
+                else:
+                    raise ValueError("[CL]: [obj_d_high, obj_high]: " + str([obj_d_high, obj_high]))
         
         return desired_goal,object_position
     
@@ -208,8 +217,11 @@ class CL:
             obj_low = None
             obj_high = None
         else:
-            obj_low = self.obj_range_center - self.obj_range_half * obj_ratio
-            obj_high = self.obj_range_center + self.obj_range_half * obj_ratio
+            if self.obj_range_half is not None:
+                obj_low = self.obj_range_center - self.obj_range_half * obj_ratio
+                obj_high = self.obj_range_center + self.obj_range_half * obj_ratio
+            else:
+                raise ValueError("[CL]: obj_range_half: " + str(self.obj_range_half))
         goal_low = self.goal_range_center - self.goal_range_half * goal_ratio
         goal_high = self.goal_range_center + self.goal_range_half * goal_ratio
 

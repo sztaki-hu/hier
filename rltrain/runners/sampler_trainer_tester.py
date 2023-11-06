@@ -95,6 +95,7 @@ class SamplerTrainerTester:
 
         # HiER
         self.hier_include_test =  config['buffer']['hier']['include_test']
+        self.hier_include_train =  config['buffer']['hier']['include_train']
     
         self.HiER = make_hier(self.config, self.config_framework)
         if self.HiER.active == False: self.ser_batch_size = self.batch_size
@@ -203,7 +204,7 @@ class SamplerTrainerTester:
                     self.replay_buffer.store(o, a, r, o2, d)
                 
                 # Hier
-                self.HiER.store_episode(episode,info['is_success'],t)
+                if self.hier_include_train: self.HiER.store_episode(episode,info['is_success'],t)
 
                 # HER
                 if self.her_active and truncated: 
