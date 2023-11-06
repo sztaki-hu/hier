@@ -40,14 +40,14 @@ color_line_width = 4.0
 
 linewidth = 2
 
-plotid = '1105_X'
-seednum = 1
+plotid = '1105_B'
+seednum = 3
 #plotdata_list = ['eval_success_rate',"rollout_success_rate","cl_ratio","rollout_state_changed","eval_state_change_rate","hl_highlights_buffer_size","time_fps"]
 #taskname_list = ['Reach','Push','Slide','PickAndPlace','Stack']
 #taskname_list = ['Push']
-taskname_list = ['Push','Slide','PickAndPlace']
+#taskname_list = ['Push','Slide','PickAndPlace']
 #taskname_list = ['Push']
-#taskname_list = ['PickAndPlace']
+taskname_list = ['Slide']
 plotdata_list = ['eval_success_rate','eval_mean_reward',
                  'rollout_success_rate', 'rollout_state_changed','rollout_ep_rew_mean',
                  'cl_c',
@@ -58,6 +58,9 @@ plotdata_y_list = ['Eval success rate','Eval Mean reward',
                  'CL param c',
                  'time fps',
                  'HiER batch size','HiER buffer size','HiER lambda','HiER xi']
+
+# plotdata_list = ['hier_batch_size','hier_buffer_size','hier_lambda','hier_xi']
+# plotdata_y_list = ['HiER batch size','HiER buffer size','HiER lambda','HiER xi']
 
 
 # plotdata_list = ['eval_success_rate','eval_mean_reward']
@@ -78,266 +81,33 @@ for taskname in taskname_list:
         create_folder(os.path.join(current_dir, args.outdir, logdir))
         exps = []
 
-        #exps.append({"exp_name": "_".join(['1012_B', 'Panda'+taskname+'-v3',alg,'sparse','noher','nohl','noper','nocl']) , "seed_num":seednum, "color": "brown", "plot_name": alg})  
-        # exps.append({"exp_name": "_".join(['1012_B', 'Panda'+taskname+'-v3',alg,'sparse','final','nohl','noper','nocl']) , "seed_num":seednum, "color": "orange", "plot_name": alg + " HER"}) 
+        # HiER ###########################################################xxx
 
-        # exps.append({"exp_name": "_".join(['1012_B', 'Panda'+taskname+'-v3',alg,'sparse','noher','nohl','proportional','nocl']) , "seed_num":seednum, "color": "darkkhaki", "plot_name":  alg +" PER"}) #ddpg
-        # exps.append({"exp_name": "_".join(['1012_B', 'Panda'+taskname+'-v3',alg,'sparse','final','nohl','proportional','nocl']) , "seed_num":seednum, "color": "gold", "plot_name":  alg +" HER+PER"}) #td3
-        
-        # exps.append({"exp_name": "_".join(['1012_B', 'Panda'+taskname+'-v3',alg,'sparse','final','fix','proportional','controldiscreteadaptive']) , "seed_num":seednum, "color": "blue", "plot_name":  alg +" HER+PER+HiER(fix)+CL"})
-        # exps.append({"exp_name": "_".join(['1012_B', 'Panda'+taskname+'-v3',alg,'sparse','final','ama','proportional','controldiscreteadaptive']) , "seed_num":seednum, "color": "navy", "plot_name":  alg +" HER+PER+HiER(ama)+CL"})
-        # exps.append({"exp_name": "_".join(['1015_A', 'Panda'+taskname+'-v3',alg,'sparse','noher','ama','noper','nocl']) , "seed_num":seednum, "color": "lightblue", "plot_name":  alg +" HiER"})
-        # exps.append({"exp_name": "_".join(['1015_A', 'Panda'+taskname+'-v3',alg,'sparse','noher','nohl','noper','controldiscreteadaptive']) , "seed_num":seednum, "color": "orange", "plot_name":  alg +" CL"})
-        # exps.append({"exp_name": "_".join(['1015_A', 'Panda'+taskname+'-v3',alg,'state_change_bonus','final','ama','proportional','controldiscreteadaptive']) , "seed_num":seednum, "color": "purple", "plot_name":  alg +" HER+PER+HiER(fix)+CL+REW"})
+        # exps.append({"exp_name": "_".join(['1105_A', 'Panda'+taskname+'-v3',alg,'sparse','final','nohier','fix','noper','5e5','controladaptive']) , "seed_num":seednum, "color": "red", "plot_name":  'HER + CL'})
+        # exps.append({"exp_name": "_".join(['1105_A', 'Panda'+taskname+'-v3',alg,'sparse','final','fix','fix','noper','5e5','controladaptive']) , "seed_num":seednum, "color": "orange", "plot_name":  'HER + CL + HiER(fix)'})
+        # exps.append({"exp_name": "_".join(['1105_A', 'Panda'+taskname+'-v3',alg,'sparse','final','multifix','fix','noper','5e5','controladaptive']) , "seed_num":seednum, "color": "green", "plot_name":  'HER + CL + HiER(multifix)'})
+        # exps.append({"exp_name": "_".join(['1105_A', 'Panda'+taskname+'-v3',alg,'sparse','final','predefined','fix','noper','5e5','controladaptive']) , "seed_num":seednum, "color": "blue", "plot_name":  'HER + CL + HiER(predefined)'})
+        # exps.append({"exp_name": "_".join(['1105_A', 'Panda'+taskname+'-v3',alg,'sparse','final','ama','fix','noper','5e5','controladaptive']) , "seed_num":seednum, "color": "magenta", "plot_name":  'HER + CL + HiER(ama)'})
+        # exps.append({"exp_name": "_".join(['1105_A', 'Panda'+taskname+'-v3',alg,'sparse','final','amar','fix','noper','5e5','controladaptive']) , "seed_num":seednum, "color": "purple", "plot_name":  'HER + CL + HiER(amar)'})
 
-        # exps.append({"exp_name": "_".join(['1017_A', 'Panda'+taskname+'-v3',alg,'sparse','final','ama','fix','noper','controldiscreteadaptive']) , "seed_num":seednum, "color": "lime", "plot_name":  alg +" HER+HiER(ama)+CL"})
-        # exps.append({"exp_name": "_".join(['1017_A', 'Panda'+taskname+'-v3',alg,'sparse','final','ama','prioritized','noper','controldiscreteadaptive']) , "seed_num":seednum, "color": "aqua", "plot_name":  alg +" HER+PHiER(ama)+CL"})
-        
-        # exps.append({"exp_name": "_".join(['1017_A', 'Panda'+taskname+'-v3',alg,'sparse','final','fix','prioritized','noper','controldiscreteadaptive']) , "seed_num":seednum, "color": "deepskyblue", "plot_name":  alg +" HER+PHiER(fix)+CL"})
-        # exps.append({"exp_name": "_".join(['1017_A', 'Panda'+taskname+'-v3',alg,'sparse','noher','ama','fix','noper','nocl']) , "seed_num":seednum, "color": "palegreen", "plot_name":  alg +" HiER(ama)+CL"})
-        # exps.append({"exp_name": "_".join(['1017_A', 'Panda'+taskname+'-v3',alg,'sparse','noher','ama','prioritized','noper','nocl']) , "seed_num":seednum, "color": "lightgreen", "plot_name":  alg +" PHiER(ama)+CL"})
-        # exps.append({"exp_name": "_".join(['1017_A', 'Panda'+taskname+'-v3',alg,'sparse','noher','fix','fix','noper','nocl']) , "seed_num":seednum, "color": "blue", "plot_name":  alg +" HiER(fix)+CL"})
-        # exps.append({"exp_name": "_".join(['1017_A', 'Panda'+taskname+'-v3',alg,'sparse','noher','fix','prioritized','noper','nocl']) , "seed_num":seednum, "color": "olive", "plot_name":  alg +" PHiER(fix)+CL"})
+        # HiERp ###########################################################xxx
 
-        # exps.append({"exp_name": "_".join(['1018_A', 'Panda'+taskname+'-v3',alg,'sparse','final','ama','fix','noper','controldiscreteadaptive']) , "seed_num":seednum, "color": "orange", "plot_name":  alg +" HER+HiER(old ama)+CL"})
-        # # exps.append({"exp_name": "_".join(['1018_A', 'Panda'+taskname+'-v3',alg,'sparse','final','ama','prioritized','noper','controldiscreteadaptive']) , "seed_num":seednum, "color": "gold", "plot_name":  alg +" HER+PHiER(old ama)+CL"})
-        
-        # exps.append({"exp_name": "_".join(['1017_A', 'Panda'+taskname+'-v3',alg,'sparse','final','fix','fix','noper','controldiscreteadaptive']) , "seed_num":seednum, "color": "green", "plot_name":  alg +" HER+HiER(fix)+CL"})
-        # # exps.append({"exp_name": "_".join(['1018_A', 'Panda'+taskname+'-v3',alg,'sparse','final','fix','prioritized','noper','controldiscreteadaptive']) , "seed_num":seednum, "color": "lime", "plot_name":  alg +" HER+PHiER(fix)+CL"})
-        # exps.append({"exp_name": "_".join(['1018_A', 'Panda'+taskname+'-v3',alg,'sparse','noher','nohl','fix','proportional','controldiscreteadaptive']) , "seed_num":seednum, "color": "green", "plot_name":  alg +" PER+CL"})
+        exps.append({"exp_name": "_".join(['1105_A', 'Panda'+taskname+'-v3',alg,'sparse','final','nohier','prioritized','noper','5e5','controladaptive']) , "seed_num":seednum, "color": "red", "plot_name":  'HER + CL'})
+        exps.append({"exp_name": "_".join(['1105_A', 'Panda'+taskname+'-v3',alg,'sparse','final','fix','prioritized','noper','5e5','controladaptive']) , "seed_num":seednum, "color": "orange", "plot_name":  'HER + CL + HiER(fix)'})
+        exps.append({"exp_name": "_".join(['1105_A', 'Panda'+taskname+'-v3',alg,'sparse','final','multifix','prioritized','noper','5e5','controladaptive']) , "seed_num":seednum, "color": "green", "plot_name":  'HER + CL + HiER(multifix)'})
+        exps.append({"exp_name": "_".join(['1105_A', 'Panda'+taskname+'-v3',alg,'sparse','final','predefined','prioritized','noper','5e5','controladaptive']) , "seed_num":seednum, "color": "blue", "plot_name":  'HER + CL + HiER(predefined)'})
+        exps.append({"exp_name": "_".join(['1105_A', 'Panda'+taskname+'-v3',alg,'sparse','final','ama','prioritized','noper','5e5','controladaptive']) , "seed_num":seednum, "color": "magenta", "plot_name":  'HER + CL + HiER(ama)'})
+        exps.append({"exp_name": "_".join(['1105_A', 'Panda'+taskname+'-v3',alg,'sparse','final','amar','prioritized','noper','5e5','controladaptive']) , "seed_num":seednum, "color": "purple", "plot_name":  'HER + CL + HiER(amar)'})
 
-        # # exps.append({"exp_name": "_".join(['1019_A', 'Panda'+taskname+'-v3',alg,'sparse','final','ama','fix','noper','controldiscreteadaptive']) , "seed_num":seednum, "color": "blue", "plot_name":  alg +" HER+HiER(ama)+CL"})
-        # # exps.append({"exp_name": "_".join(['1019_A', 'Panda'+taskname+'-v3',alg,'sparse','final','ama','prioritized','noper','controldiscreteadaptive']) , "seed_num":seednum, "color": "aqua", "plot_name":  alg +" HER+PHiER(ama)+CL"})
-
-        # # exps.append({"exp_name": "_".join(['1019_A', 'Panda'+taskname+'-v3',alg,'sparse','final','multifix','prioritized','noper','controldiscreteadaptive']) , "seed_num":seednum, "color": "magenta", "plot_name":  alg +" HER+PHiER(multifix)+CL"})
-
-        # exps.append({"exp_name": "_".join(['1020_A', 'Panda'+taskname+'-v3',alg,'sparse','final','predefined','fix','noper','controldiscreteadaptive']) , "seed_num":seednum, "color": "blue", "plot_name":  alg +" HER+HiER(predefined)+CL"})
-        # # exps.append({"exp_name": "_".join(['1020_A', 'Panda'+taskname+'-v3',alg,'sparse','final','predefined','prioritized','noper','controldiscreteadaptive']) , "seed_num":seednum, "color": "aqua", "plot_name":  alg +" HER+PHiER(predefined)+CL"})
-
-        # #exps.append({"exp_name": "_".join(['1019_A', 'Panda'+taskname+'-v3',alg,'sparse','final','multifix','fix','noper','controldiscreteadaptive']) , "seed_num":seednum, "color": "purple", "plot_name":  alg +" HER+HiER(multifix)+CL"})
-
-        # exps.append({"exp_name": "_".join(['1022_A', 'Panda'+taskname+'-v3',alg,'sparse','final','ama','prioritized','noper','controldiscreteadaptive']) , "seed_num":seednum, "color": "gold", "plot_name":  alg +" HER+PHiER(ama)+CL"})
-        # exps.append({"exp_name": "_".join(['1022_A', 'Panda'+taskname+'-v3',alg,'sparse','final','fix','prioritized','noper','controldiscreteadaptive']) , "seed_num":seednum, "color": "lime", "plot_name":  alg +" HER+PHiER(fix)+CL"})
-        # exps.append({"exp_name": "_".join(['1022_A', 'Panda'+taskname+'-v3',alg,'sparse','final','predefined','prioritized','noper','controldiscreteadaptive']) , "seed_num":seednum, "color": "aqua", "plot_name":  alg +" HER+PHiER(predefined)+CL"})
-        # #exps.append({"exp_name": "_".join(['1022_A', 'Panda'+taskname+'-v3',alg,'sparse','final','multifix','prioritized','noper','controldiscreteadaptive']) , "seed_num":seednum, "color": "magenta", "plot_name":  alg +" HER+PHiER(multifix)+CL"})
-
-        #exps.append({"exp_name": "_".join(['1025_A', 'Panda'+taskname+'-v3',alg,'sparse','final','predefined','fix','hbr01','noper','controldiscreteadaptive']) , "seed_num":seednum, "color": "darkcyan", "plot_name":  alg +" HER+HiER(fix 0.1)+CL"})
-        #exps.append({"exp_name": "_".join(['1025_A', 'Panda'+taskname+'-v3',alg,'sparse','final','predefined','fix','hbr03','noper','controldiscreteadaptive']) , "seed_num":seednum, "color": "royalblue", "plot_name":  alg +" HER+HiER(fix 0.3)+CL"})
-        # exps.append({"exp_name": "_".join(['1025_A', 'Panda'+taskname+'-v3',alg,'sparse','final','predefined','fix','hbr05','noper','controldiscreteadaptive']) , "seed_num":seednum, "color": "magenta", "plot_name":  alg +" HER+HiER(fix 0.5)+CL"})
-        #exps.append({"exp_name": "_".join(['1025_A', 'Panda'+taskname+'-v3',alg,'sparse','final','predefined','fix','hbr07','noper','controldiscreteadaptive']) , "seed_num":seednum, "color": "navy", "plot_name":  alg +" HER+HiER(fix 0.7)+CL"})
-        #exps.append({"exp_name": "_".join(['1025_A', 'Panda'+taskname+'-v3',alg,'sparse','final','predefined','fix','hbr09','noper','controldiscreteadaptive']) , "seed_num":seednum, "color": "indigo", "plot_name":  alg +" HER+HiER(fix 0.9)+CL"})
-
-        #########################################################################################
-
-        # # PUSH
-        # exps.append({"exp_name": "_".join(['1025_A', 'Panda'+taskname+'-v3',alg,'sparse','final','predefined','fix','hbr05','noper','controldiscreteadaptive']) , "seed_num":seednum, "color": "magenta", "plot_name":  alg +" HER + CL + HiER"})
-        # exps.append({"exp_name": "_".join(['1012_B', 'Panda'+taskname+'-v3',alg,'sparse','final','nohl','noper','nocl']) , "seed_num":seednum, "color": "orange", "plot_name": alg + " HER"}) 
-        # exps.append({"exp_name": "_".join(['1018_A', 'Panda'+taskname+'-v3',alg,'sparse','noher','nohl','fix','proportional','controldiscreteadaptive']) , "seed_num":seednum, "color": "blue", "plot_name":  alg +" CL + PER"})
-        # exps.append({"exp_name": "_".join(['1015_A', 'Panda'+taskname+'-v3',alg,'sparse','noher','nohl','noper','controldiscreteadaptive']) , "seed_num":seednum, "color": "green", "plot_name":  alg +" CL"})
-        # exps.append({"exp_name": "_".join(['1012_B', 'Panda'+taskname+'-v3',alg,'sparse','noher','nohl','noper','nocl']) , "seed_num":seednum, "color": "red", "plot_name": alg}) 
-
-        # SLIDE
-        # exps.append({"exp_name": "_".join(['1025_A', 'Panda'+taskname+'-v3',alg,'sparse','final','predefined','fix','hbr05','noper','controldiscreteadaptive']) , "seed_num":seednum, "color": "magenta", "plot_name":  alg +" HER + CL + HiER"})
-        # exps.append({"exp_name": "_".join(['1018_A', 'Panda'+taskname+'-v3',alg,'sparse','noher','nohl','fix','proportional','controldiscreteadaptive']) , "seed_num":seednum, "color": "blue", "plot_name":  alg +" CL + PER"})
-        # exps.append({"exp_name": "_".join(['1015_A', 'Panda'+taskname+'-v3',alg,'sparse','noher','nohl','noper','controldiscreteadaptive']) , "seed_num":seednum, "color": "green", "plot_name":  alg +" CL"})
-        # exps.append({"exp_name": "_".join(['1012_B', 'Panda'+taskname+'-v3',alg,'sparse','final','nohl','noper','nocl']) , "seed_num":seednum, "color": "orange", "plot_name": alg + " HER"})     
-        # exps.append({"exp_name": "_".join(['1012_B', 'Panda'+taskname+'-v3',alg,'sparse','noher','nohl','noper','nocl']) , "seed_num":seednum, "color": "red", "plot_name": alg}) 
-
-        #########################################################################################
-
-        # exps.append({"exp_name": "_".join(['1012_B', 'Panda'+taskname+'-v3',alg,'sparse','final','nohl','noper','nocl']) , "seed_num":seednum, "color": "blue", "plot_name": alg + " HER 1"}) 
-        # exps.append({"exp_name": "_".join(['1026_A', 'Panda'+taskname+'-v3',alg,'sparse','final','nohl','fix','noper','nocl']) , "seed_num":seednum, "color": "magenta", "plot_name": alg + " HER 2"}) 
-        # exps.append({"exp_name": "_".join(['1026_A', 'Panda'+taskname+'-v3',alg,'sparse','noher','nohl','fix','noper','nocl']) , "seed_num":seednum, "color": "orange", "plot_name": alg})     
-
-        # exps.append({"exp_name": "_".join(['1023_B', taskname+'-v4',alg,'sparse','noher','nohl','fix','noper','nocl']) , "seed_num":seednum, "color": "maroon", "plot_name":  alg +" baseline"})
-        # exps.append({"exp_name": "_".join(['1024_B', taskname+'-v4',alg,'sparse','noher','fix','fix','noper','nocl']) , "seed_num":seednum, "color": "green", "plot_name":  alg +" HiER(fix)"})
-        # exps.append({"exp_name": "_".join(['1024_B', taskname+'-v4',alg,'sparse','noher','fix','prioritized','noper','nocl']) , "seed_num":seednum, "color": "lime", "plot_name":  alg +" PHiER(fix)"})
-        # exps.append({"exp_name": "_".join(['1024_B', taskname+'-v4',alg,'sparse','noher','ama','fix','noper','nocl']) , "seed_num":seednum, "color": "blue", "plot_name":  alg +" HiER(ama)"})
-        # exps.append({"exp_name": "_".join(['1024_B', taskname+'-v4',alg,'sparse','noher','ama','prioritized','noper','nocl']) , "seed_num":seednum, "color": "aqua", "plot_name":  alg +" PHiER(ama)"})
-        # exps.append({"exp_name": "_".join(['1024_B', taskname+'-v4',alg,'sparse','noher','amar','fix','noper','nocl']) , "seed_num":seednum, "color": "purple", "plot_name":  alg +" HiER(amar)"})
-        # exps.append({"exp_name": "_".join(['1024_B', taskname+'-v4',alg,'sparse','noher','amar','prioritized','noper','nocl']) , "seed_num":seednum, "color": "magenta", "plot_name":  alg +" PHiER(amar)"})
-        # exps.append({"exp_name": "_".join(['1024_B', taskname+'-v4',alg,'sparse','noher','predefined','fix','noper','nocl']) , "seed_num":seednum, "color": "orange", "plot_name":  alg +" HiER(predefined)"})
-        # exps.append({"exp_name": "_".join(['1024_B', taskname+'-v4',alg,'sparse','noher','predefined','prioritized','noper','nocl']) , "seed_num":seednum, "color": "gold", "plot_name":  alg +" PHiER(predefined)"})
-
-        # Buffer ##########################x
-        # exps.append({"exp_name": "_".join(['1028_A', 'Panda'+taskname+'-v3',alg,'sparse','1e5','final','predefined','fix','noper','controldiscreteadaptive']) , "seed_num":seednum, "color": "cornflowerblue", "plot_name":  alg +" HER + CL + HiER + buffer 1e5"})
-        # exps.append({"exp_name": "_".join(['1028_A', 'Panda'+taskname+'-v3',alg,'sparse','5e5','final','predefined','fix','noper','controldiscreteadaptive']) , "seed_num":seednum, "color": "blue", "plot_name":  alg +" HER + CL + HiER + buffer 5e5"})
-        # exps.append({"exp_name": "_".join(['1028_A', 'Panda'+taskname+'-v3',alg,'sparse','final','predefined','fix','noper','controldiscreteadaptive']) , "seed_num":seednum, "color": "magenta", "plot_name":  alg +" HER + CL + HiER + buffer 1e6"})
-        # exps.append({"exp_name": "_".join(['1028_A', 'Panda'+taskname+'-v3',alg,'sparse','2e6','final','predefined','fix','noper','controldiscreteadaptive']) , "seed_num":seednum, "color": "purple", "plot_name":  alg +" HER + CL + HiER + buffer 2e6"})
-        
-        # # Alpha ############################
-        # exps.append({"exp_name": "_".join(['1028_A5', 'Panda'+taskname+'-v3',alg,'sparse','1e6','final','predefined','fix','noper','controldiscreteadaptive']) , "seed_num":seednum, "color": "cornflowerblue", "plot_name":  alg +" HER + CL + HiER + alpha 0.1"})
-        # exps.append({"exp_name": "_".join(['1028_A', 'Panda'+taskname+'-v3',alg,'sparse','final','predefined','fix','noper','controldiscreteadaptive']) , "seed_num":seednum, "color": "magenta", "plot_name":  alg +" HER + CL + HiER + alpha 0.2"})
-        # exps.append({"exp_name": "_".join(['1028_A6', 'Panda'+taskname+'-v3',alg,'sparse','1e6','final','predefined','fix','noper','controldiscreteadaptive']) , "seed_num":seednum, "color": "blue", "plot_name":  alg +" HER + CL + HiER + alpha 0.4"})
-       
-        # Gamma
-        # exps.append({"exp_name": "_".join(['1028_A', 'Panda'+taskname+'-v3',alg,'sparse','final','predefined','fix','noper','controldiscreteadaptive']) , "seed_num":seednum, "color": "magenta", "plot_name":  alg +" HER + CL + HiER + gamma 0.95"})
-        # exps.append({"exp_name": "_".join(['1028_A7', 'Panda'+taskname+'-v3',alg,'sparse','1e6','final','predefined','fix','noper','controldiscreteadaptive']) , "seed_num":seednum, "color": "blue", "plot_name":  alg +" HER + CL + HiER + gamma 0.99"})
-      
-        # Network
-        # exps.append({"exp_name": "_".join(['1028_A', 'Panda'+taskname+'-v3',alg,'sparse','final','predefined','fix','noper','controldiscreteadaptive']) , "seed_num":seednum, "color": "magenta", "plot_name":  alg +" HER + CL + HiER + network(256,256,256)"})
-        # exps.append({"exp_name": "_".join(['1028_A8', 'Panda'+taskname+'-v3',alg,'sparse','1e6','final','predefined','fix','noper','controldiscreteadaptive']) , "seed_num":seednum, "color": "purple", "plot_name":  alg +" HER + CL + HiER + network(512,512,512)"})
-        # exps.append({"exp_name": "_".join(['1028_A9', 'Panda'+taskname+'-v3',alg,'sparse','1e6','final','predefined','fix','noper','controldiscreteadaptive']) , "seed_num":seednum, "color": "cornflowerblue", "plot_name":  alg +" HER + CL + HiER + network(128,128,128)"})
-        # exps.append({"exp_name": "_".join(['1028_A10', 'Panda'+taskname+'-v3',alg,'sparse','1e6','final','predefined','fix','noper','controldiscreteadaptive']) , "seed_num":seednum, "color": "blue", "plot_name":  alg +" HER + CL + HiER + network(256,256,128)"})
-        # exps.append({"exp_name": "_".join(['1028_A11', 'Panda'+taskname+'-v3',alg,'sparse','1e6','final','predefined','fix','noper','controldiscreteadaptive']) , "seed_num":seednum, "color": "navy", "plot_name":  alg +" HER + CL + HiER + network(256,256,128,64)"})
-      
-        # Alpha ############################
-        # exps.append({"exp_name": "_".join(['1030_A', 'Panda'+taskname+'-v3',alg,'alp02','gam095','sparse','final','predefined','fix','noper','controldiscreteadaptive']) , "seed_num":seednum, "color": "red", "plot_name":  alg +" HER + CL + HiER + alpha 0.2 + gamma 0.95"})
-        # exps.append({"exp_name": "_".join(['1030_A', 'Panda'+taskname+'-v3',alg,'alp01','gam095','sparse','final','predefined','fix','noper','controldiscreteadaptive']) , "seed_num":seednum, "color": "blue", "plot_name":  alg +" HER + CL + HiER + alpha 0.1 + gamma 0.95"})
-        # exps.append({"exp_name": "_".join(['1030_A', 'Panda'+taskname+'-v3',alg,'alp005','gam095','sparse','final','predefined','fix','noper','controldiscreteadaptive']) , "seed_num":seednum, "color": "royalblue", "plot_name":  alg +" HER + CL + HiER + alpha 0.05 + gamma 0.95"})
-        # exps.append({"exp_name": "_".join(['1030_A', 'Panda'+taskname+'-v3',alg,'alp001','gam095','sparse','final','predefined','fix','noper','controldiscreteadaptive']) , "seed_num":seednum, "color": "turquoise", "plot_name":  alg +" HER + CL + HiER + alpha 0.01 + gamma 0.95"})
-      
-        # exps.append({"exp_name": "_".join(['1030_A', 'Panda'+taskname+'-v3',alg,'alp02','gam09','sparse','final','predefined','fix','noper','controldiscreteadaptive']) , "seed_num":seednum, "color": "indigo", "plot_name":  alg +" HER + CL + HiER + alpha 0.2 + gamma 0.9"})
-        # exps.append({"exp_name": "_".join(['1030_A', 'Panda'+taskname+'-v3',alg,'alp01','gam09','sparse','final','predefined','fix','noper','controldiscreteadaptive']) , "seed_num":seednum, "color": "purple", "plot_name":  alg +" HER + CL + HiER + alpha 0.1 + gamma 0.9"})
-        # exps.append({"exp_name": "_".join(['1030_A', 'Panda'+taskname+'-v3',alg,'alp005','gam09','sparse','final','predefined','fix','noper','controldiscreteadaptive']) , "seed_num":seednum, "color": "deeppink", "plot_name":  alg +" HER + CL + HiER + alpha 0.05 + gamma 0.9"})
-        # exps.append({"exp_name": "_".join(['1030_A', 'Panda'+taskname+'-v3',alg,'alp001','gam09','sparse','final','predefined','fix','noper','controldiscreteadaptive']) , "seed_num":seednum, "color": "pink", "plot_name":  alg +" HER + CL + HiER + alpha 0.01 + gamma 0.9"})
-      
-        # Gamma ############################
-
-        # exps.append({"exp_name": "_".join(['1030_A', 'Panda'+taskname+'-v3',alg,'alp02','gam095','sparse','final','predefined','fix','noper','controldiscreteadaptive']) , "seed_num":seednum, "color": "red", "plot_name":  alg +" HER + CL + HiER + alpha 0.2 + gamma 0.95"})
-        # exps.append({"exp_name": "_".join(['1030_A', 'Panda'+taskname+'-v3',alg,'alp02','gam09','sparse','final','predefined','fix','noper','controldiscreteadaptive']) , "seed_num":seednum, "color": "blue", "plot_name":  alg +" HER + CL + HiER + alpha 0.2 + gamma 0.9"})
-        # exps.append({"exp_name": "_".join(['1030_A', 'Panda'+taskname+'-v3',alg,'alp02','gam08','sparse','final','predefined','fix','noper','controldiscreteadaptive']) , "seed_num":seednum, "color": "royalblue", "plot_name":  alg +" HER + CL + HiER + alpha 0.2 + gamma 0.8"})
-        # exps.append({"exp_name": "_".join(['1030_A', 'Panda'+taskname+'-v3',alg,'alp02','gam07','sparse','final','predefined','fix','noper','controldiscreteadaptive']) , "seed_num":seednum, "color": "lightseagreen", "plot_name":  alg +" HER + CL + HiER + alpha 0.2 + gamma 0.7"})
-        # exps.append({"exp_name": "_".join(['1030_A', 'Panda'+taskname+'-v3',alg,'alp02','gam06','sparse','final','predefined','fix','noper','controldiscreteadaptive']) , "seed_num":seednum, "color": "turquoise", "plot_name":  alg +" HER + CL + HiER + alpha 0.2 + gamma 0.6"})
-      
-
-        # exps.append({"exp_name": "_".join(['1030_A', 'Panda'+taskname+'-v3',alg,'alp01','gam095','sparse','final','predefined','fix','noper','controldiscreteadaptive']) , "seed_num":seednum, "color": "indigo", "plot_name":  alg +" HER + CL + HiER + alpha 0.1 + gamma 0.95"})
-        # exps.append({"exp_name": "_".join(['1030_A', 'Panda'+taskname+'-v3',alg,'alp01','gam09','sparse','final','predefined','fix','noper','controldiscreteadaptive']) , "seed_num":seednum, "color": "purple", "plot_name":  alg +" HER + CL + HiER + alpha 0.1 + gamma 0.9"})
-        # exps.append({"exp_name": "_".join(['1030_A', 'Panda'+taskname+'-v3',alg,'alp01','gam08','sparse','final','predefined','fix','noper','controldiscreteadaptive']) , "seed_num":seednum, "color": "deeppink", "plot_name":  alg +" HER + CL + HiER + alpha 0.1 + gamma 0.8"})
-        # exps.append({"exp_name": "_".join(['1030_A', 'Panda'+taskname+'-v3',alg,'alp01','gam07','sparse','final','predefined','fix','noper','controldiscreteadaptive']) , "seed_num":seednum, "color": "hotpink", "plot_name":  alg +" HER + CL + HiER + alpha 0.1 + gamma 0.7"})
-        # exps.append({"exp_name": "_".join(['1030_A', 'Panda'+taskname+'-v3',alg,'alp01','gam06','sparse','final','predefined','fix','noper','controldiscreteadaptive']) , "seed_num":seednum, "color": "pink", "plot_name":  alg +" HER + CL + HiER + alpha 0.1 + gamma 0.6"})
-      
-        # PickAndPlace ####################xx
-        # exps.append({"exp_name": "_".join(['1015_A', 'Panda'+taskname+'-v3',alg,'sparse','noher','nohl','noper','controldiscreteadaptive']) , "seed_num":seednum, "color": "orange", "plot_name":  alg})
-        # exps.append({"exp_name": "_".join(['1030_A', 'Panda'+taskname+'-v3',alg,'alp02','gam095','sparse','final','predefined','fix','noper','controldiscreteadaptive']) , "seed_num":seednum, "color": "blue", "plot_name":  alg +" HER + CL + HiER"})
-        # exps.append({"exp_name": "_".join(['1030_A', 'Panda'+taskname+'-v3',alg,'alp02','gam095','state_change_bonus','final','predefined','fix','noper','controldiscreteadaptive']) , "seed_num":seednum, "color": "magenta", "plot_name":  alg +" HER + CL + HiER + REWBONUS"})
-      
-        # DDPG ###############################x
-        # exps.append({"exp_name": "_".join(['1015_A', 'Panda'+taskname+'-v3',alg,'sparse','noher','nohl','noper','controldiscreteadaptive']) , "seed_num":seednum, "color": "orange", "plot_name":  alg})
-        # exps.append({"exp_name": "_".join(['1030_A', 'Panda'+taskname+'-v3',alg,'alp02','gam095','sparse','final','predefined','fix','noper','controldiscreteadaptive']) , "seed_num":seednum, "color": "magenta", "plot_name":  alg +" HER + CL + HiER"})
-      
-        # Learning rate ######################x
-
-        # exps.append({"exp_name": "_".join(['1101_A', 'Panda'+taskname+'-v3',alg,'lr001','sparse','final','predefined','fix','5e4','noper','controldiscreteadaptive']) , "seed_num":seednum, "color": "purple", "plot_name":  alg +" HER + CL + HiER + lr 0.01"})
-        # exps.append({"exp_name": "_".join(['1101_A', 'Panda'+taskname+'-v3',alg,'lr0005','sparse','final','predefined','fix','5e4','noper','controldiscreteadaptive']) , "seed_num":seednum, "color": "violet", "plot_name":  alg +" HER + CL + HiER + lr 0.005"})
-        # exps.append({"exp_name": "_".join(['1101_A', 'Panda'+taskname+'-v3',alg,'lr0002','sparse','final','predefined','fix','5e4','noper','controldiscreteadaptive']) , "seed_num":seednum, "color": "blue", "plot_name":  alg +" HER + CL + HiER + lr 0.002"})
-
-        # exps.append({"exp_name": "_".join(['1030_A', 'Panda'+taskname+'-v3',alg,'alp01','gam095','sparse','final','predefined','fix','noper','controldiscreteadaptive']) , "seed_num":seednum, "color": "red", "plot_name":  alg +" HER + CL + HiER + lr 0.001"})
-
-        # exps.append({"exp_name": "_".join(['1101_A', 'Panda'+taskname+'-v3',alg,'lr00005','sparse','final','predefined','fix','5e4','noper','controldiscreteadaptive']) , "seed_num":seednum, "color": "cornflowerblue", "plot_name":  alg +" HER + CL + HiER + lr 0.0005"})
-        # exps.append({"exp_name": "_".join(['1101_A', 'Panda'+taskname+'-v3',alg,'lr00001','sparse','final','predefined','fix','5e4','noper','controldiscreteadaptive']) , "seed_num":seednum, "color": "aquamarine", "plot_name":  alg +" HER + CL + HiER + lr 0.0001"})
-        # exps.append({"exp_name": "_".join(['1101_A', 'Panda'+taskname+'-v3',alg,'lr5e-05','sparse','final','predefined','fix','5e4','noper','controldiscreteadaptive']) , "seed_num":seednum, "color": "springgreen", "plot_name":  alg +" HER + CL + HiER + lr 0.00005"})        
-      
-        # Highlight buffer size ######################x
-
-        # exps.append({"exp_name": "_".join(['1101_A', 'Panda'+taskname+'-v3',alg,'lr0001','sparse','final','predefined','fix','1e6','noper','controldiscreteadaptive']) , "seed_num":seednum, "color": "purple", "plot_name":  alg +" HER + CL + HiER(buffer_size: 1e6)"})
-        # exps.append({"exp_name": "_".join(['1101_A', 'Panda'+taskname+'-v3',alg,'lr0001','sparse','final','predefined','fix','5e5','noper','controldiscreteadaptive']) , "seed_num":seednum, "color": "violet", "plot_name":  alg +" HER + CL + HiER(buffer_size: 5e5)"})
-        # exps.append({"exp_name": "_".join(['1101_A', 'Panda'+taskname+'-v3',alg,'lr0001','sparse','final','predefined','fix','1e5','noper','controldiscreteadaptive']) , "seed_num":seednum, "color": "blue", "plot_name":  alg +" HER + CL + HiER(buffer_size: 1e5)"})
-
-        # exps.append({"exp_name": "_".join(['1030_A', 'Panda'+taskname+'-v3',alg,'alp01','gam095','sparse','final','predefined','fix','noper','controldiscreteadaptive']) , "seed_num":seednum, "color": "red", "plot_name":  alg +" HER + CL + HiER(buffer_size: 5e4)"})
-
-        # exps.append({"exp_name": "_".join(['1101_A', 'Panda'+taskname+'-v3',alg,'lr0001','sparse','final','predefined','fix','1e4','noper','controldiscreteadaptive']) , "seed_num":seednum, "color": "cornflowerblue", "plot_name":  alg +" HER + CL + HiER(buffer_size: 1e4)"})
-        # exps.append({"exp_name": "_".join(['1101_A', 'Panda'+taskname+'-v3',alg,'lr0001','sparse','final','predefined','fix','5e3','noper','controldiscreteadaptive']) , "seed_num":seednum, "color": "aquamarine", "plot_name":  alg +" HER + CL + HiER(buffer_size: 5e3)"})
-        # exps.append({"exp_name": "_".join(['1101_A', 'Panda'+taskname+'-v3',alg,'lr0001','sparse','final','predefined','fix','1e3','noper','controldiscreteadaptive']) , "seed_num":seednum, "color": "springgreen", "plot_name":  alg +" HER + CL + HiER(buffer_size: 1e3)"})
-
-        # SOTA ######################x
-
-        # exps.append({"exp_name": "_".join(['1103_A', 'Panda'+taskname+'-v3',alg,'sparse','noher','nohl','fix','noper','nocl']) , "seed_num":seednum, "color": "brown", "plot_name":  alg})
-        # exps.append({"exp_name": "_".join(['1103_A', 'Panda'+taskname+'-v3',alg,'sparse','final','nohl','fix','noper','nocl']) , "seed_num":seednum, "color": "orange", "plot_name":  alg + " + HER"})
-        # exps.append({"exp_name": "_".join(['1103_A', 'Panda'+taskname+'-v3',alg,'sparse','noher','nohl','fix','proportional','nocl']) , "seed_num":seednum, "color": "green", "plot_name":  alg + " + PER"})
-        # exps.append({"exp_name": "_".join(['1103_A', 'Panda'+taskname+'-v3',alg,'sparse','noher','nohl','fix','noper','controldiscreteadaptive']) , "seed_num":seednum, "color": "blue", "plot_name":  alg + " + CL"})
-        # exps.append({"exp_name": "_".join(['1103_A', 'Panda'+taskname+'-v3',alg,'sparse','final','nohl','fix','noper','controldiscreteadaptive']) , "seed_num":seednum, "color": "gold", "plot_name":  alg + " + HER + CL"})
-        # exps.append({"exp_name": "_".join(['1103_A', 'Panda'+taskname+'-v3',alg,'sparse','noher','nohl','fix','proportional','controldiscreteadaptive']) , "seed_num":seednum, "color": "lawngreen", "plot_name":  alg + " + PER + CL"})
-        # exps.append({"exp_name": "_".join(['1103_A', 'Panda'+taskname+'-v3',alg,'sparse','noher','predefined','fix','noper','nocl']) , "seed_num":seednum, "color": "springgreen", "plot_name":  alg + " + HiER"})
-        # exps.append({"exp_name": "_".join(['1103_A', 'Panda'+taskname+'-v3',alg,'sparse','final','predefined','fix','noper','nocl']) , "seed_num":seednum, "color": "aqua", "plot_name":  alg + " + HER + HiER"})
-        # exps.append({"exp_name": "_".join(['1103_A', 'Panda'+taskname+'-v3',alg,'sparse','noher','predefined','fix','noper','controldiscreteadaptive']) , "seed_num":seednum, "color": "navy", "plot_name":  alg + " + CL + HiER"})
-        # exps.append({"exp_name": "_".join(['1103_A', 'Panda'+taskname+'-v3',alg,'sparse','final','predefined','fix','noper','controldiscreteadaptive']) , "seed_num":seednum, "color": "magenta", "plot_name":  alg + " + HER + CL + HiER"})
-        # exps.append({"exp_name": "_".join(['1103_A', 'Panda'+taskname+'-v3',alg,'sparse','noher','predefined','fix','proportional','controldiscreteadaptive']) , "seed_num":seednum, "color": "hotpink", "plot_name":  alg + " + PER + CL + HiER"})
-        # exps.append({"exp_name": "_".join(['1103_A', 'Panda'+taskname+'-v3',alg,'sparse','final','predefined','fix','proportional','controldiscreteadaptive']) , "seed_num":seednum, "color": "indigo", "plot_name":  alg + " + HER + PER + CL + HiER"})
-
-
-        # CL ###########################
-              
-        # # exps.append({"exp_name": "_".join(['1026_A', 'Panda'+taskname+'-v3',alg,'sparse','final','nohl','fix','noper','predefined_linear']) , "seed_num":seednum, "color": "blue", "plot_name":  alg +" HER + CL(predefined_linear)"})
-        # exps.append({"exp_name": "_".join(['1026_A', 'Panda'+taskname+'-v3',alg,'sparse','final','predefined','fix','noper','predefined_linear']) , "seed_num":seednum, "color": "orange", "plot_name":  "predefined"})
-
-        # # exps.append({"exp_name": "_".join(['1026_A', 'Panda'+taskname+'-v3',alg,'sparse','final','nohl','fix','noper','predefinedtwostage_linear']) , "seed_num":seednum, "color": "green", "plot_name":  alg +" HER + CL(predefinedtwostage_linear)"})
-        # exps.append({"exp_name": "_".join(['1026_A', 'Panda'+taskname+'-v3',alg,'sparse','final','predefined','fix','noper','predefinedtwostage_linear']) , "seed_num":seednum, "color": "gold", "plot_name":  "predefined 2-stage"})
-
-        # # exps.append({"exp_name": "_".join(['1026_A', 'Panda'+taskname+'-v3',alg,'sparse','final','nohl','fix','noper','selfpaced']) , "seed_num":seednum, "color": "gold", "plot_name":  alg +" HER + CL(selfpaced)"})
-        # exps.append({"exp_name": "_".join(['1026_A', 'Panda'+taskname+'-v3',alg,'sparse','final','predefined','fix','noper','selfpaced']) , "seed_num":seednum, "color": "springgreen", "plot_name":  "self-paced"})
-
-        # # exps.append({"exp_name": "_".join(['1026_A', 'Panda'+taskname+'-v3',alg,'sparse','final','nohl','fix','noper','selfpaceddual']) , "seed_num":seednum, "color": "orange", "plot_name":  alg +" HER + CL(selfpaceddual)"})
-        # exps.append({"exp_name": "_".join(['1026_A', 'Panda'+taskname+'-v3',alg,'sparse','final','predefined','fix','noper','selfpaceddual']) , "seed_num":seednum, "color": "forestgreen", "plot_name":  "self-paced dual"})
-
-        # # exps.append({"exp_name": "_".join(['1026_A', 'Panda'+taskname+'-v3',alg,'sparse','final','nohl','fix','noper','controldiscrete_const']) , "seed_num":seednum, "color": "red", "plot_name":  alg +" HER + CL(controldiscrete_const)"})
-        # exps.append({"exp_name": "_".join(['1026_A', 'Panda'+taskname+'-v3',alg,'sparse','final','predefined','fix','noper','controldiscrete_const']) , "seed_num":seednum, "color": "royalblue", "plot_name":  "control"})
-
-        # # exps.append({"exp_name": "_".join(['1028_A', 'Panda'+taskname+'-v3',alg,'sparse','final','nohl','fix','noper','controldiscreteadaptive']) , "seed_num":seednum, "color": "aqua", "plot_name":  alg +" HER + CL(controldiscreteadaptive)"})
-        # exps.append({"exp_name": "_".join(['1028_A', 'Panda'+taskname+'-v3',alg,'sparse','final','predefined','fix','noper','controldiscreteadaptive']) , "seed_num":seednum, "color": "blue", "plot_name":  "control adaptive"})
-
-        # TEST CL ###############
-
-        # exps.append({"exp_name": "_".join(['1105_T2', 'Panda'+taskname+'-v3',alg,'sparse','final','nohier','fix','noper','5e4','nocl']) , "seed_num":seednum, "color": "brown", "plot_name":  'nocl'})
-        # exps.append({"exp_name": "_".join(['1105_T2', 'Panda'+taskname+'-v3',alg,'sparse','final','nohier','fix','noper','5e4','nullcl']) , "seed_num":seednum, "color": "red", "plot_name":  'nullcl'})
-        # exps.append({"exp_name": "_".join(['1105_T2', 'Panda'+taskname+'-v3',alg,'sparse','final','nohier','fix','noper','5e4','predefined_linear']) , "seed_num":seednum, "color": "yellow", "plot_name":  'predefined_linear'})
-        # exps.append({"exp_name": "_".join(['1105_T2', 'Panda'+taskname+'-v3',alg,'sparse','final','nohier','fix','noper','5e4','predefined2stage_linear']) , "seed_num":seednum, "color": "orange", "plot_name":  'predefined2stage_linear'})
-        # exps.append({"exp_name": "_".join(['1105_T2', 'Panda'+taskname+'-v3',alg,'sparse','final','nohier','fix','noper','5e4','predefined3stage_linear']) , "seed_num":seednum, "color": "green", "plot_name":  'predefined3stage_linear'})
-        # exps.append({"exp_name": "_".join(['1105_T2', 'Panda'+taskname+'-v3',alg,'sparse','final','nohier','fix','noper','5e4','selfpaced']) , "seed_num":seednum, "color": "blue", "plot_name":  'selfpaced'})
-        # exps.append({"exp_name": "_".join(['1105_T2', 'Panda'+taskname+'-v3',alg,'sparse','final','nohier','fix','noper','5e4','control']) , "seed_num":seednum, "color": "magenta", "plot_name":  'control'})
-        # exps.append({"exp_name": "_".join(['1105_T2', 'Panda'+taskname+'-v3',alg,'sparse','final','nohier','fix','noper','5e4','controladaptive']) , "seed_num":seednum, "color": "purple", "plot_name":  'controladaptive'})
-
-        # TEST HiER ###################xx
-
-        # exps.append({"exp_name": "_".join(['1105_T2', 'Panda'+taskname+'-v3',alg,'sparse','final','nohier','fix','noper','5e4','nocl']) , "seed_num":seednum, "color": "orange", "plot_name":  'nohier'})
-        # exps.append({"exp_name": "_".join(['1105_T2', 'Panda'+taskname+'-v3',alg,'sparse','final','fix','fix','noper','5e4','nocl']) , "seed_num":seednum, "color": "green", "plot_name":  'fix'})
-        # #exps.append({"exp_name": "_".join(['1105_T2', 'Panda'+taskname+'-v3',alg,'sparse','final','multifix','fix','noper','5e4','nocl']) , "seed_num":seednum, "color": "purple", "plot_name":  'multifix'})
-        # exps.append({"exp_name": "_".join(['1105_T2', 'Panda'+taskname+'-v3',alg,'sparse','final','predefined','fix','noper','5e4','nocl']) , "seed_num":seednum, "color": "blue", "plot_name":  'predefined'})
-        # exps.append({"exp_name": "_".join(['1105_T2', 'Panda'+taskname+'-v3',alg,'sparse','final','ama','fix','noper','5e4','nocl']) , "seed_num":seednum, "color": "magenta", "plot_name":  'ama'})
-        # exps.append({"exp_name": "_".join(['1105_T2', 'Panda'+taskname+'-v3',alg,'sparse','final','amar','fix','noper','5e4','nocl']) , "seed_num":seednum, "color": "purple", "plot_name":  'amar'})
-
-        # TEST CL ###############
-
-        # exps.append({"exp_name": "_".join(['1105_T2', 'Panda'+taskname+'-v3',alg,'sparse','final','predefined','fix','noper','5e4','nocl']) , "seed_num":seednum, "color": "brown", "plot_name":  'nocl'})
-        # exps.append({"exp_name": "_".join(['1105_T2', 'Panda'+taskname+'-v3',alg,'sparse','final','predefined','fix','noper','5e4','nullcl']) , "seed_num":seednum, "color": "red", "plot_name":  'nullcl'})
-        # exps.append({"exp_name": "_".join(['1105_T2', 'Panda'+taskname+'-v3',alg,'sparse','final','predefined','fix','noper','5e4','predefined_linear']) , "seed_num":seednum, "color": "yellow", "plot_name":  'predefined_linear'})
-        # exps.append({"exp_name": "_".join(['1105_T2', 'Panda'+taskname+'-v3',alg,'sparse','final','predefined','fix','noper','5e4','predefined2stage_linear']) , "seed_num":seednum, "color": "orange", "plot_name":  'predefined2stage_linear'})
-        # exps.append({"exp_name": "_".join(['1105_T2', 'Panda'+taskname+'-v3',alg,'sparse','final','predefined','fix','noper','5e4','predefined3stage_linear']) , "seed_num":seednum, "color": "green", "plot_name":  'predefined3stage_linear'})
-        # exps.append({"exp_name": "_".join(['1105_T2', 'Panda'+taskname+'-v3',alg,'sparse','final','predefined','fix','noper','5e4','selfpaced']) , "seed_num":seednum, "color": "blue", "plot_name":  'selfpaced'})
-        # exps.append({"exp_name": "_".join(['1105_T2', 'Panda'+taskname+'-v3',alg,'sparse','final','predefined','fix','noper','5e4','control']) , "seed_num":seednum, "color": "magenta", "plot_name":  'control'})
-        # exps.append({"exp_name": "_".join(['1105_T2', 'Panda'+taskname+'-v3',alg,'sparse','final','predefined','fix','noper','5e4','controladaptive']) , "seed_num":seednum, "color": "purple", "plot_name":  'controladaptive'})
-
-        # TEST HiER ###################xx
-
-        # exps.append({"exp_name": "_".join(['1105_T2', 'Panda'+taskname+'-v3',alg,'sparse','final','nohier','fix','noper','5e4','controladaptive']) , "seed_num":seednum, "color": "orange", "plot_name":  'nohier'})
-        # exps.append({"exp_name": "_".join(['1105_T2', 'Panda'+taskname+'-v3',alg,'sparse','final','fix','fix','noper','5e4','controladaptive']) , "seed_num":seednum, "color": "green", "plot_name":  'fix'})
-        # exps.append({"exp_name": "_".join(['1105_T2', 'Panda'+taskname+'-v3',alg,'sparse','final','multifix','fix','noper','5e4','controladaptive']) , "seed_num":seednum, "color": "red", "plot_name":  'multifix'})
-        # exps.append({"exp_name": "_".join(['1105_T2', 'Panda'+taskname+'-v3',alg,'sparse','final','predefined','fix','noper','5e4','controladaptive']) , "seed_num":seednum, "color": "blue", "plot_name":  'predefined'})
-        # exps.append({"exp_name": "_".join(['1105_T2', 'Panda'+taskname+'-v3',alg,'sparse','final','ama','fix','noper','5e4','controladaptive']) , "seed_num":seednum, "color": "magenta", "plot_name":  'ama'})
-        # exps.append({"exp_name": "_".join(['1105_T2', 'Panda'+taskname+'-v3',alg,'sparse','final','amar','fix','noper','5e4','controladaptive']) , "seed_num":seednum, "color": "purple", "plot_name":  'amar'})
-
-        # TEST HiER ###################xx
-
-        # exps.append({"exp_name": "_".join(['1105_T2', 'Panda'+taskname+'-v3',alg,'sparse','final','nohier','prioritized','noper','5e4','controladaptive']) , "seed_num":seednum, "color": "orange", "plot_name":  'nohier'})
-        # exps.append({"exp_name": "_".join(['1105_T2', 'Panda'+taskname+'-v3',alg,'sparse','final','fix','prioritized','noper','5e4','controladaptive']) , "seed_num":seednum, "color": "green", "plot_name":  'fix'})
-        # exps.append({"exp_name": "_".join(['1105_T2', 'Panda'+taskname+'-v3',alg,'sparse','final','multifix','prioritized','noper','5e4','controladaptive']) , "seed_num":seednum, "color": "blue", "plot_name":  'multifix'})
-        # exps.append({"exp_name": "_".join(['1105_T2', 'Panda'+taskname+'-v3',alg,'sparse','final','predefined','prioritized','noper','5e4','controladaptive']) , "seed_num":seednum, "color": "blue", "plot_name":  'predefined'})
-        # exps.append({"exp_name": "_".join(['1105_T2', 'Panda'+taskname+'-v3',alg,'sparse','final','ama','prioritized','noper','5e4','controladaptive']) , "seed_num":seednum, "color": "magenta", "plot_name":  'ama'})
-        # exps.append({"exp_name": "_".join(['1105_T2', 'Panda'+taskname+'-v3',alg,'sparse','final','amar','prioritized','noper','5e4','controladaptive']) , "seed_num":seednum, "color": "purple", "plot_name":  'amar'})
-
-        # TEST
-
-        exps.append({"exp_name": "_".join(['1105_T2', 'Panda'+taskname+'-v3',alg,'sparse','final','predefined','prioritized','proportional','5e5','controladaptive']) , "seed_num":seednum, "color": "blue", "plot_name":  'HER + PER + CL + HiER(p)'})
-        exps.append({"exp_name": "_".join(['1105_T2', 'Panda'+taskname+'-v3',alg,'sparse','final','predefined','fix','noper','5e5','controladaptive']) , "seed_num":seednum, "color": "magenta", "plot_name":  'HER + CL + HiER'})
-
-
-    
-        exp_test_color_list = []
-        for i in range(len(exps)):
-            exp_test_color_list.append(exps[i]['color'])
-            
 
         for plotdata,plotdata_y in zip(plotdata_list,plotdata_y_list):
+
+            exp_test_color_list = []
+            for i in range(len(exps)):                
+                if (exps[i]['exp_name'].find('multifix') != -1) and (plotdata in ['hier_batch_size','hier_buffer_size','hier_lambda','hier_xi']):
+                    continue
+                
+                exp_test_color_list.append(exps[i]['color'])
 
             dtypes = np.dtype(
                 [
@@ -354,6 +124,8 @@ for taskname in taskname_list:
             for i in range(len(exps)):
                 running_id = 0
                 for j in range(exps[i]['seed_num']):
+                    if (exps[i]['exp_name'].find('multifix') != -1) and (plotdata in ['hier_batch_size','hier_buffer_size','hier_lambda','hier_xi']):
+                        continue
                     path = os.path.join(current_dir, "logs",exps[i]['exp_name'],str(j),'runs','csv',plotdata+'.csv')
                     print(path)
                     pivot = pd.read_csv(path)
@@ -426,6 +198,8 @@ for taskname in taskname_list:
 
             for i in range(len(exps)):
                 for j in range(exps[i]['seed_num']):
+                    if (exps[i]['exp_name'].find('multifix') != -1) and (plotdata in ['hier_batch_size','hier_buffer_size','hier_lambda','hier_xi']):
+                        continue
                     pivot=data_pd[data_pd["exp_name"] == exps[i]['exp_name']]  
                     pivot=pivot[pivot["seed"] == j]
                     if j == 0:
@@ -436,10 +210,10 @@ for taskname in taskname_list:
                                 linewidth=linewidth)  
                     else: 
                         plt.plot(pivot['t'],
-                                 pivot['value'],
-                                 color=exps[i]['color'],
-                                 linewidth=linewidth)
-                    
+                                pivot['value'],
+                                color=exps[i]['color'],
+                                linewidth=linewidth)
+                        
 
             if args.legend: 
                 legend = plt.legend(bbox_to_anchor=(1, 1.01), loc='upper left', fontsize=fontsize_label_next_figure)
