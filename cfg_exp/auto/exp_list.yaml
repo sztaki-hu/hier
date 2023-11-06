@@ -20,7 +20,7 @@ process_0: # noher - nohl - noper - nocl
       buffer_size: [1e6]
       lambda: # threshold
         #mode: ['ama','amar'] # nohier / fix / multifix / predefined / ama / amar 
-        mode: ['predefined'] 
+        mode: ['nohier'] 
         fix:
           lambda: [-20] # gympanda: -20
         predefined: 
@@ -41,7 +41,7 @@ process_0: # noher - nohl - noper - nocl
     #gym: ['Hopper-v4'] # 'Hopper-v4','HalfCheetah-v4','Walker2d-v4','Ant-v4'
     gympanda: ['PandaSlide-v3'] # PandaReach-v3 / PandaPush-v3 / PandaSlide-v3 / PandaPickAndPlace-v3 / PandaStack-v3
   cl: 
-    type: ['nocl'] # ['nocl','predefined','predefined2stage','selfpaced','control', 'controladaptive']
+    type: ['controladaptive'] 
     range_growth_mode: ['simple'] #--- only if highlights mode != nocl
 ####################################################################################################
 
@@ -67,7 +67,7 @@ process_1: # noher - nohl - noper - nocl
       buffer_size: [1e6]
       lambda: # threshold
         #mode: ['ama','amar'] # nohier / fix / multifix / predefined / ama / amar 
-        mode: ['predefined'] 
+        mode: ['fix'] 
         fix:
           lambda: [-20] # gympanda: -20
         predefined: 
@@ -88,9 +88,9 @@ process_1: # noher - nohl - noper - nocl
     #gym: ['Hopper-v4'] # 'Hopper-v4','HalfCheetah-v4','Walker2d-v4','Ant-v4'
     gympanda: ['PandaSlide-v3'] # PandaReach-v3 / PandaPush-v3 / PandaSlide-v3 / PandaPickAndPlace-v3 / PandaStack-v3
   cl: 
-    type: ['predefined_linear'] # ['nocl','predefined','predefined2stage','selfpaced','control', 'controladaptive']
+    type: ['controladaptive'] 
     range_growth_mode: ['simple'] #--- only if highlights mode != nocl
-####################################################################################################
+###################################################################################################
 
 process_2: # noher - nohl - noper - nocl
   general:
@@ -114,7 +114,7 @@ process_2: # noher - nohl - noper - nocl
       buffer_size: [1e6]
       lambda: # threshold
         #mode: ['ama','amar'] # nohier / fix / multifix / predefined / ama / amar 
-        mode: ['predefined'] 
+        mode: ['multifix'] 
         fix:
           lambda: [-20] # gympanda: -20
         predefined: 
@@ -135,7 +135,7 @@ process_2: # noher - nohl - noper - nocl
     #gym: ['Hopper-v4'] # 'Hopper-v4','HalfCheetah-v4','Walker2d-v4','Ant-v4'
     gympanda: ['PandaSlide-v3'] # PandaReach-v3 / PandaPush-v3 / PandaSlide-v3 / PandaPickAndPlace-v3 / PandaStack-v3
   cl: 
-    type: ['predefined2stage_linear'] # ['nocl','predefined','predefined2stage','selfpaced','control', 'controladaptive']
+    type: ['controladaptive'] 
     range_growth_mode: ['simple'] #--- only if highlights mode != nocl
 ####################################################################################################
 
@@ -182,7 +182,7 @@ process_3: # noher - nohl - noper - nocl
     #gym: ['Hopper-v4'] # 'Hopper-v4','HalfCheetah-v4','Walker2d-v4','Ant-v4'
     gympanda: ['PandaSlide-v3'] # PandaReach-v3 / PandaPush-v3 / PandaSlide-v3 / PandaPickAndPlace-v3 / PandaStack-v3
   cl: 
-    type: ['selfpaced'] # ['nocl','predefined','predefined2stage','selfpaced','control', 'controladaptive']
+    type: ['controladaptive'] 
     range_growth_mode: ['simple'] #--- only if highlights mode != nocl
 ####################################################################################################
 
@@ -208,7 +208,7 @@ process_4: # noher - nohl - noper - nocl
       buffer_size: [1e6]
       lambda: # threshold
         #mode: ['ama','amar'] # nohier / fix / multifix / predefined / ama / amar 
-        mode: ['predefined'] 
+        mode: ['ama'] 
         fix:
           lambda: [-20] # gympanda: -20
         predefined: 
@@ -229,9 +229,9 @@ process_4: # noher - nohl - noper - nocl
     #gym: ['Hopper-v4'] # 'Hopper-v4','HalfCheetah-v4','Walker2d-v4','Ant-v4'
     gympanda: ['PandaSlide-v3'] # PandaReach-v3 / PandaPush-v3 / PandaSlide-v3 / PandaPickAndPlace-v3 / PandaStack-v3
   cl: 
-    type: ['control'] # ['nocl','predefined','predefined2stage','selfpaced','control', 'controladaptive']
+    type: ['controladaptive'] 
     range_growth_mode: ['simple'] #--- only if highlights mode != nocl
-####################################################################################################
+###################################################################################################
 
 process_5: # noher - nohl - noper - nocl
   general:
@@ -255,7 +255,7 @@ process_5: # noher - nohl - noper - nocl
       buffer_size: [1e6]
       lambda: # threshold
         #mode: ['ama','amar'] # nohier / fix / multifix / predefined / ama / amar 
-        mode: ['predefined'] 
+        mode: ['amar'] 
         fix:
           lambda: [-20] # gympanda: -20
         predefined: 
@@ -276,7 +276,7 @@ process_5: # noher - nohl - noper - nocl
     #gym: ['Hopper-v4'] # 'Hopper-v4','HalfCheetah-v4','Walker2d-v4','Ant-v4'
     gympanda: ['PandaSlide-v3'] # PandaReach-v3 / PandaPush-v3 / PandaSlide-v3 / PandaPickAndPlace-v3 / PandaStack-v3
   cl: 
-    type: ['nullcl'] # ['nocl','predefined','predefined2stage','selfpaced','control', 'controladaptive']
+    type: ['controladaptive'] 
     range_growth_mode: ['simple'] #--- only if highlights mode != nocl
 ####################################################################################################
 
@@ -302,7 +302,7 @@ process_6: # noher - nohl - noper - nocl
       buffer_size: [1e6]
       lambda: # threshold
         #mode: ['ama','amar'] # nohier / fix / multifix / predefined / ama / amar 
-        mode: ['predefined'] 
+        mode: ['nohier'] 
         fix:
           lambda: [-20] # gympanda: -20
         predefined: 
@@ -321,9 +321,9 @@ process_6: # noher - nohl - noper - nocl
   # structure is differend than in the config file ##################################################x
   task: 
     #gym: ['Hopper-v4'] # 'Hopper-v4','HalfCheetah-v4','Walker2d-v4','Ant-v4'
-    gympanda: ['PandaPush-v3'] # PandaReach-v3 / PandaPush-v3 / PandaSlide-v3 / PandaPickAndPlace-v3 / PandaStack-v3
+    gympanda: ['PandaSlide-v3'] # PandaReach-v3 / PandaPush-v3 / PandaSlide-v3 / PandaPickAndPlace-v3 / PandaStack-v3
   cl: 
-    type: ['nocl'] # ['nocl','predefined','predefined2stage','selfpaced','control', 'controladaptive']
+    type: ['controladaptive'] 
     range_growth_mode: ['simple'] #--- only if highlights mode != nocl
 ####################################################################################################
 
@@ -349,7 +349,7 @@ process_7: # noher - nohl - noper - nocl
       buffer_size: [1e6]
       lambda: # threshold
         #mode: ['ama','amar'] # nohier / fix / multifix / predefined / ama / amar 
-        mode: ['predefined'] 
+        mode: ['fix'] 
         fix:
           lambda: [-20] # gympanda: -20
         predefined: 
@@ -368,11 +368,11 @@ process_7: # noher - nohl - noper - nocl
   # structure is differend than in the config file ##################################################x
   task: 
     #gym: ['Hopper-v4'] # 'Hopper-v4','HalfCheetah-v4','Walker2d-v4','Ant-v4'
-    gympanda: ['PandaPush-v3'] # PandaReach-v3 / PandaPush-v3 / PandaSlide-v3 / PandaPickAndPlace-v3 / PandaStack-v3
+    gympanda: ['PandaSlide-v3'] # PandaReach-v3 / PandaPush-v3 / PandaSlide-v3 / PandaPickAndPlace-v3 / PandaStack-v3
   cl: 
-    type: ['predefined_linear'] # ['nocl','predefined','predefined2stage','selfpaced','control', 'controladaptive']
+    type: ['controladaptive'] 
     range_growth_mode: ['simple'] #--- only if highlights mode != nocl
-####################################################################################################
+###################################################################################################
 
 process_8: # noher - nohl - noper - nocl
   general:
@@ -396,7 +396,7 @@ process_8: # noher - nohl - noper - nocl
       buffer_size: [1e6]
       lambda: # threshold
         #mode: ['ama','amar'] # nohier / fix / multifix / predefined / ama / amar 
-        mode: ['predefined'] 
+        mode: ['multifix'] 
         fix:
           lambda: [-20] # gympanda: -20
         predefined: 
@@ -415,9 +415,9 @@ process_8: # noher - nohl - noper - nocl
   # structure is differend than in the config file ##################################################x
   task: 
     #gym: ['Hopper-v4'] # 'Hopper-v4','HalfCheetah-v4','Walker2d-v4','Ant-v4'
-    gympanda: ['PandaPush-v3'] # PandaReach-v3 / PandaPush-v3 / PandaSlide-v3 / PandaPickAndPlace-v3 / PandaStack-v3
+    gympanda: ['PandaSlide-v3'] # PandaReach-v3 / PandaPush-v3 / PandaSlide-v3 / PandaPickAndPlace-v3 / PandaStack-v3
   cl: 
-    type: ['predefined2stage_linear'] # ['nocl','predefined','predefined2stage','selfpaced','control', 'controladaptive']
+    type: ['controladaptive'] 
     range_growth_mode: ['simple'] #--- only if highlights mode != nocl
 ####################################################################################################
 
@@ -462,9 +462,9 @@ process_9: # noher - nohl - noper - nocl
   # structure is differend than in the config file ##################################################x
   task: 
     #gym: ['Hopper-v4'] # 'Hopper-v4','HalfCheetah-v4','Walker2d-v4','Ant-v4'
-    gympanda: ['PandaPush-v3'] # PandaReach-v3 / PandaPush-v3 / PandaSlide-v3 / PandaPickAndPlace-v3 / PandaStack-v3
+    gympanda: ['PandaSlide-v3'] # PandaReach-v3 / PandaPush-v3 / PandaSlide-v3 / PandaPickAndPlace-v3 / PandaStack-v3
   cl: 
-    type: ['selfpaced'] # ['nocl','predefined','predefined2stage','selfpaced','control', 'controladaptive']
+    type: ['controladaptive'] 
     range_growth_mode: ['simple'] #--- only if highlights mode != nocl
 ####################################################################################################
 
@@ -490,7 +490,7 @@ process_10: # noher - nohl - noper - nocl
       buffer_size: [1e6]
       lambda: # threshold
         #mode: ['ama','amar'] # nohier / fix / multifix / predefined / ama / amar 
-        mode: ['predefined'] 
+        mode: ['ama'] 
         fix:
           lambda: [-20] # gympanda: -20
         predefined: 
@@ -509,11 +509,11 @@ process_10: # noher - nohl - noper - nocl
   # structure is differend than in the config file ##################################################x
   task: 
     #gym: ['Hopper-v4'] # 'Hopper-v4','HalfCheetah-v4','Walker2d-v4','Ant-v4'
-    gympanda: ['PandaPush-v3'] # PandaReach-v3 / PandaPush-v3 / PandaSlide-v3 / PandaPickAndPlace-v3 / PandaStack-v3
+    gympanda: ['PandaSlide-v3'] # PandaReach-v3 / PandaPush-v3 / PandaSlide-v3 / PandaPickAndPlace-v3 / PandaStack-v3
   cl: 
-    type: ['control'] # ['nocl','predefined','predefined2stage','selfpaced','control', 'controladaptive']
+    type: ['controladaptive'] 
     range_growth_mode: ['simple'] #--- only if highlights mode != nocl
-####################################################################################################
+###################################################################################################
 
 process_11: # noher - nohl - noper - nocl
   general:
@@ -537,7 +537,7 @@ process_11: # noher - nohl - noper - nocl
       buffer_size: [1e6]
       lambda: # threshold
         #mode: ['ama','amar'] # nohier / fix / multifix / predefined / ama / amar 
-        mode: ['predefined'] 
+        mode: ['amar'] 
         fix:
           lambda: [-20] # gympanda: -20
         predefined: 
@@ -556,8 +556,8 @@ process_11: # noher - nohl - noper - nocl
   # structure is differend than in the config file ##################################################x
   task: 
     #gym: ['Hopper-v4'] # 'Hopper-v4','HalfCheetah-v4','Walker2d-v4','Ant-v4'
-    gympanda: ['PandaPush-v3'] # PandaReach-v3 / PandaPush-v3 / PandaSlide-v3 / PandaPickAndPlace-v3 / PandaStack-v3
+    gympanda: ['PandaSlide-v3'] # PandaReach-v3 / PandaPush-v3 / PandaSlide-v3 / PandaPickAndPlace-v3 / PandaStack-v3
   cl: 
-    type: ['nullcl'] # ['nocl','predefined','predefined2stage','selfpaced','control', 'controladaptive']
+    type: ['controladaptive'] 
     range_growth_mode: ['simple'] #--- only if highlights mode != nocl
 ####################################################################################################
