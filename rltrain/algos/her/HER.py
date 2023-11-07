@@ -23,8 +23,8 @@ class HER:
         # HER
         self.her_goal_selection_strategy = config['buffer']['her']['goal_selection_strategy']
         self.her_active = False if self.her_goal_selection_strategy == "noher" else True
-        self.her_n_sampled_goal = config['buffer']['her']['n_sampled_goal']
-        self.her_state_check = config['buffer']['her']['state_check'] if "state_check" in config['buffer']['her'] else False
+        self.n_sampled_goal = config['buffer']['her']['n_sampled_goal']
+        self.state_check = config['buffer']['her']['state_check']
   
         if self.her_goal_selection_strategy not in config_framework['her']['mode_list']:
             raise ValueError("[HER]: her_goal_selection_strategy: '" + str(self.her_goal_selection_strategy) + "' must be in : " + str(config_framework['her']['strategy_list']))
@@ -34,26 +34,26 @@ class HER:
         if self.her_goal_selection_strategy == 'final':
             new_goals = []
             _, _, _, o2, _ = episode[-1]
-            for _ in range(self.her_n_sampled_goal):
+            for _ in range(self.n_sampled_goal):
                 new_goals.append(self.taskenv.get_achieved_goal_from_obs(o2))
             return new_goals
         elif self.her_goal_selection_strategy == 'future' or self.her_goal_selection_strategy == 'future_once':
             new_goals = []
-            for _ in range(self.her_n_sampled_goal):
+            for _ in range(self.n_sampled_goal):
                 rand_future_transition = random.randint(ep_t, len(episode)-1)
                 _, _, _, o2, _ = episode[rand_future_transition]
                 new_goals.append(self.taskenv.get_achieved_goal_from_obs(o2))
             return new_goals
         elif self.her_goal_selection_strategy == 'near':
             new_goals = []
-            for _ in range(self.her_n_sampled_goal):
+            for _ in range(self.n_sampled_goal):
                 rand_future_transition = random.randint(ep_t, min(len(episode)-1,ep_t+5))
                 _, _, _, o2, _ = episode[rand_future_transition]
                 new_goals.append(self.taskenv.get_achieved_goal_from_obs(o2))
             return new_goals
         elif self.her_goal_selection_strategy == 'next':
             new_goals = []
-            for _ in range(self.her_n_sampled_goal):
+            for _ in range(self.n_sampled_goal):
                 _, _, _, o2, _ = episode[ep_t]
                 new_goals.append(self.taskenv.get_achieved_goal_from_obs(o2))
             return new_goals
@@ -63,10 +63,9 @@ class HER:
     
     def add_virtial_experience(self, episode: List[Transition]) -> bool:
 
-        state_changed = True
-        if self.her_state_check: state_changed = self.taskenv.is_diff_state(episode[0][0], episode[-1][0])
+        state_changed = self.taskenv.is_diff_state(episode[0][0], episode[-1][0])
 
-        if state_changed:
+        if state_changed or self.state_check == False:
             if self.her_goal_selection_strategy == 'future_once':
                 new_goals = self.get_new_goals(episode,0)
                 for (o, a, r, o2, d) in episode:                  

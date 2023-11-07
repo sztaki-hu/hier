@@ -68,7 +68,6 @@ class SamplerTrainerTester:
         # HER
         self.her_goal_selection_strategy = config['buffer']['her']['goal_selection_strategy']
         self.her_active = False if self.her_goal_selection_strategy == "noher" else True
-        self.her_n_sampled_goal = config['buffer']['her']['n_sampled_goal'] 
         self.virtual_experience_dq = collections.deque(maxlen=self.rollout_stats_window_size)     
 
         # Log
