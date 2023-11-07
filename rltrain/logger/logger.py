@@ -131,18 +131,20 @@ class Logger:
             self.tb_logdir = os.path.join(self.exp_folder,self.seed_id,"runs")
             self.writer = SummaryWriter(log_dir = self.tb_logdir)     
         
-        # Printout logging
-        self.log_file_path = os.path.join(self.exp_folder,self.seed_id,'logs.log')
-        if os.path.isfile(self.log_file_path):
-            os.remove(self.log_file_path) 
+            # Printout logging
+            self.log_file_path = os.path.join(self.exp_folder,self.seed_id,'logs.log')
+            if os.path.isfile(self.log_file_path):
+                os.remove(self.log_file_path) 
+            
+            self.print_logfile(message = "Logger is ready", level = "info", terminal = False) 
+            self.print_logfile(message = self.exp_name, level = "info", terminal = False) 
         
 
 
         # logging.basicConfig(filename=log_file_path,level=logging.DEBUG)
         # self.pylogger = logging.getLogger('mylogger')
 
-        self.print_logfile(message = "Logger is ready", level = "info", terminal = False) 
-        self.print_logfile(message = self.exp_name, level = "info", terminal = False) 
+        
 
         # Set up RLBench path
         # cfg_rlbench = {'path' : self.config_path}

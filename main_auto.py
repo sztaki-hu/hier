@@ -238,10 +238,10 @@ def main() -> int:
                         # Init CUDA and torch and np ##################################
                         init_cuda(config['hardware']['gpu'][args.hwid],config['hardware']['cpu_min'][args.hwid],config['hardware']['cpu_max'][args.hwid])
 
-                        print_torch_info(logger)
+                        if is_test_config == False: print_torch_info(logger)
 
                         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-                        logger.print_logfile(str(device))
+                        if is_test_config == False: logger.print_logfile(str(device))
 
                         torch.set_num_threads(torch.get_num_threads())
 
