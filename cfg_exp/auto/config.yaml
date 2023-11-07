@@ -1,5 +1,5 @@
 general:
-  exp_name: 1105_X
+  exp_name: 1107_X
   logdir: logs
   demodir: demos
   seed: random
@@ -50,7 +50,7 @@ buffer:
   her:
     goal_selection_strategy: input # noher / final / future / future_once / near / next
     n_sampled_goal: 4
-    state_check: true
+    state_check: True
   per:
     mode: input # noper / proportional
     alpha: 0.6

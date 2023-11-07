@@ -132,13 +132,17 @@ class Logger:
             self.tb_logdir = os.path.join(self.exp_folder,self.seed_id,"runs")
             self.writer = SummaryWriter(log_dir = self.tb_logdir)     
         
-        # # Printout logging
-        # log_file_path = os.path.join(self.exp_folder,self.seed_id,'logs.log')
-        # if os.path.isfile(log_file_path):
-        #     os.remove(log_file_path) 
+        # Printout logging
+        self.log_file_path = os.path.join(self.exp_folder,self.seed_id,'logs.log')
+        if os.path.isfile(self.log_file_path):
+            os.remove(self.log_file_path) 
+        
+
 
         # logging.basicConfig(filename=log_file_path,level=logging.DEBUG)
         # self.pylogger = logging.getLogger('mylogger')
+
+        self.print_logfile(message = "Logger is ready", level = "info", terminal = False) 
 
         # Set up RLBench path
         # cfg_rlbench = {'path' : self.config_path}
@@ -172,22 +176,24 @@ class Logger:
         if self.config['general']['seed'] == 'random': self.config['general']['seed'] = random.randint(0,1000)
 
 
+    # def print_logfile(self, message: str, level: str = "info", terminal: bool = True) -> None:
+    #     if terminal:
+    #         print("["+level+"]: " + str(message))
+    #     if level == "debug":
+    #         self.pylogger.debug(str(message))
+    #     elif level == "warning":
+    #         self.pylogger.warning(str(message))
+    #     elif level == "error":
+    #         self.pylogger.error(str(message))
+    #     else:
+    #         self.pylogger.info(str(message))
+    
     def print_logfile(self, message: str, level: str = "info", terminal: bool = True) -> None:
         if terminal:
             print("["+level+"]: " + str(message))
-        if level == "debug":
-            # self.pylogger.debug(str(message))
-            print(message)
-        elif level == "warning":
-            # self.pylogger.warning(str(message))
-            print(message)
-        elif level == "error":
-            # self.pylogger.error(str(message))
-            print(message)
-        else:
-            # self.pylogger.info(str(message))
-            print(message)
-    
+        with open(self.log_file_path, 'a') as file1:
+            file1.write(message + "\n")
+
     # Config ########################################################################
 
     def get_config(self) -> Dict:

@@ -50,6 +50,10 @@ class SamplerTrainerTester:
         self.model_save_measure = config['logger']['model']['save']['measure']
         assert self.model_save_measure in ['reward','success_rate']
 
+        torch.set_num_threads(torch.get_num_threads())
+        torch.manual_seed(config['general']['seed'])
+        np.random.seed(config['general']['seed']) 
+
         # Rollout
         self.rollout_stats_window_size = int(config['logger']['rollout']['stats_window_size'])
         self.ep_rew_dq = collections.deque(maxlen=self.rollout_stats_window_size) 
@@ -260,7 +264,6 @@ class SamplerTrainerTester:
                         self.loss_q_dq.append(ret_loss_q)
                         if ret_loss_pi != None: self.loss_pi_dq.append(ret_loss_pi)
                 t_train += (time.time() - t_train_0)
-
             
 
             # End of epoch handling
@@ -312,7 +315,8 @@ class SamplerTrainerTester:
                                     "ratios [CL]: " + str([round(self.CL.c, 2)])])
 
                     if best_model_changed: message += " *" 
-                    tqdm.write("[info] " + message)     
+                    tqdm.write("[info] " + message)  
+                    self.logger.print_logfile(message = message, level = "info", terminal = False)   
 
                 # ROLLOUT
                 self.logger.tb_writer_add_scalar("rollout/ep_rew_mean", safe_dq_mean(self.ep_rew_dq), t)
