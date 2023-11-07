@@ -47,7 +47,9 @@ def main() -> int:
         samplerTrainerTester = SamplerTrainerTester(device,logger,config,config_framework,)
 
         samplerTrainerTester.start()
-        
+    
+        logger.print_logfile(message = "##################################", level = "info", terminal = False) 
+        logger.print_logfile(message = "Experiment finished!", level = "info", terminal = False) 
     return 1
 
 if __name__ == '__main__':

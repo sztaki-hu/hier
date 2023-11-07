@@ -104,7 +104,6 @@ class Logger:
         # Lognames
         self.logdir = self.config['general']['logdir']
         self.exp_name = self.config['general']['exp_name']
-        print(self.config['general']['exp_name'])
         
         # Compute and replace auto values
         self.compute_and_replace_auto_values()
@@ -143,6 +142,7 @@ class Logger:
         # self.pylogger = logging.getLogger('mylogger')
 
         self.print_logfile(message = "Logger is ready", level = "info", terminal = False) 
+        self.print_logfile(message = self.exp_name, level = "info", terminal = False) 
 
         # Set up RLBench path
         # cfg_rlbench = {'path' : self.config_path}
