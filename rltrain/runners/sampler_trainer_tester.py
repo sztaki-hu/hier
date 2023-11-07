@@ -3,6 +3,7 @@ import torch
 import time
 import collections
 import random
+import math
 
 from tqdm import tqdm
 
@@ -142,6 +143,15 @@ class SamplerTrainerTester:
 
     def start(self):
 
+        time_train_start = time.time()
+        time0 = time_train_start
+        time_start = time0
+        t0 = 0
+        t_collect = 0
+        t_process_ep = 0
+        t_train = 0
+        t_test = 0
+
         # Env reset
         o, ep_ret, ep_len = self.CL.reset_env(0), 0, 0
 
@@ -149,13 +159,7 @@ class SamplerTrainerTester:
         best_eval_measure = -float('inf')
         episode = []
         epoch = 0
-        time0 = time.time()
-        time_start = time0
-        t0 = 0
-        t_collect = 0
-        t_process_ep = 0
-        t_train = 0
-        t_test = 0
+
         info = {}
         info['is_success'] = False
 
@@ -384,5 +388,17 @@ class SamplerTrainerTester:
                 t_train = 0
 
         self.logger.tb_close()
+
+        sec = time.time() - time_train_start
+
+        hour = sec // 3600
+        sec %= 3600
+        min = sec // 60
+        sec %= 60
+
+        message = str(math.floor(hour)) + "h " + str(math.floor(min)) + "min " + str(math.floor(sec)) + "s"
+        self.logger.print_logfile(message = message, level = "info", terminal = True) 
+
+
    
     
