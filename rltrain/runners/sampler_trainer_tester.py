@@ -308,19 +308,18 @@ class SamplerTrainerTester:
                     model_path = self.logger.get_model_save_path(epoch)
                     self.agent.save_model(model_path,self.model_save_mode)
                 
-                # Print out
-                if (epoch % self.model_save_freq == 0) or best_model_changed:              
-                    message = " | ".join([self.print_out_name,
-                                    "t: " + str(t),
-                                    "epoch: " + str(epoch),
-                                    "eval_mean_reward " + str(eval_mean_reward),
-                                    "eval_mean_ep_length: " + str(eval_mean_ep_length),
-                                    "eval_success_rate: " + str(eval_success_rate),
-                                    "ratios [CL]: " + str([round(self.CL.c, 2)])])
+                # Print out                 
+                message = " | ".join([self.print_out_name,
+                                "t: " + str(t),
+                                "epoch: " + str(epoch),
+                                "eval_mean_reward " + str(eval_mean_reward),
+                                "eval_mean_ep_length: " + str(eval_mean_ep_length),
+                                "eval_success_rate: " + str(eval_success_rate),
+                                "ratios [CL]: " + str([round(self.CL.c, 2)])])
 
-                    if best_model_changed: message += " *" 
-                    tqdm.write("[info] " + message)  
-                    self.logger.print_logfile(message = message, level = "info", terminal = False)   
+                if best_model_changed: message += " *" 
+                tqdm.write("[info] " + message)  
+                self.logger.print_logfile(message = message, level = "info", terminal = False)   
 
                 # ROLLOUT
                 self.logger.tb_writer_add_scalar("rollout/ep_rew_mean", safe_dq_mean(self.ep_rew_dq), t)
