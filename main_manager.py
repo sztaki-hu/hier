@@ -217,7 +217,10 @@ def main():
                 #print(command)           
                 os.system(command)   
 
-                hw_i += 1 if hw_i < len(hwid_list)-1 else 0 
+                if hw_i < len(hwid_list)-1:
+                    hw_i += 1 
+                else:
+                    hw_i = 0 
 
                         
 
