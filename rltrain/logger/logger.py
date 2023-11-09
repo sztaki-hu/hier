@@ -57,13 +57,17 @@ class Logger:
             self.config['buffer']['hier']['lambda']['predefined']['lambda_start'] = exp['main']['hier_lambda_predefined_lambda_start']
             self.config['buffer']['hier']['lambda']['predefined']['lambda_end'] = exp['main']['hier_lambda_predefined_lambda_end']
             self.config['buffer']['hier']['xi']['mode'] = exp['main']['hier_xi_mode']
-            self.config['buffer']['hier']['xi']['xi'] = exp['main']['hier_xi_xi']         
+            self.config['buffer']['hier']['xi']['xi'] = exp['main']['hier_xi_xi'] 
             self.config['buffer']['per']['mode'] = exp['main']['per_mode']
             # Trainer
             self.config['trainer']['total_timesteps'] = exp['main']['trainer_total_timesteps']
             # Eval
             self.config['eval']['freq'] = exp['main']['eval_freq']
             self.config['eval']['num_episodes'] = exp['main']['eval_num_episodes']
+
+            if self.config['buffer']['per']['mode'] != 'noper' and self.config['buffer']['hier']['xi']['set_prioritized_for_PER']: 
+                self.config['buffer']['hier']['xi']['mode'] = 'prioritized'
+                exp['main']['hier_xi_mode'] = 'prioritized'
             
             # CL
             self.config['trainer']['cl']['range_growth_mode'] = exp['main']['cl_range_growth_mode']    
@@ -107,6 +111,8 @@ class Logger:
         
         # Compute and replace auto values
         self.compute_and_replace_auto_values()
+        if self.config['buffer']['per']['mode'] != 'noper' and self.config['buffer']['hier']['xi']['set_prioritized_for_PER']: 
+            self.config['buffer']['hier']['xi']['mode'] = 'prioritized'
         
         # Demos
         self.demodir = self.config['general']['demodir']
