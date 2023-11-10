@@ -18,7 +18,7 @@ process_0: # CL
     hier:
       buffer_size: [1e6]
       lambda: # threshold
-        mode: ['predefined'] # predefined               ######################## HiER ################
+        mode: ['nohier', 'fix', 'multifix', 'predefined', 'ama', 'amar']    ######################## HiER ################
         fix:
           lambda: [-20] # gympanda: -20
         predefined: 
@@ -38,7 +38,7 @@ process_0: # CL
   task: 
     gympanda: ['PandaSlide-v3']
   cl: 
-    type: ['nocl','predefined','selfpaced','control', 'controladaptive']  # 'selfpaced'  ######################## CL ##################
+    type: ['selfpaced']  # 'selfpaced'  ######################## CL ##################
     range_growth_mode: ['simple'] 
 ####################################################################################
 
