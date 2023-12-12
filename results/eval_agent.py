@@ -30,8 +30,11 @@ def create_folder(path):
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--config", default="logs/"+"_".join(['1105_T2', 'PandaPush-v3','sac','sparse','final','predefined','prioritized','proportional','5e5','controladaptive']),help="Path of the config file")
-    parser.add_argument("--figid", default="1105_T2" ,help="Fig id")
+    
+    
+    #parser.add_argument("--config", default="logs/"+"_".join(['1106_A', 'PandaSlide-v3','sac','sparse','final','predefined','fix','noper','5e5','selfpaced']),help="Path of the config file")
+    parser.add_argument("--config", default="logs/"+"_".join(['1109_A','sac','selfpaced','final','predefined','fix','noper','sparse','PandaPickAndPlace-v3']),help="Path of the config file")
+    parser.add_argument("--figid", default="1106_A" ,help="Fig id")
     parser.add_argument("--hwid", type=int, default=0 ,help="Hardware id")
     parser.add_argument("--seedid", type=int, default=0 ,help="seedid")
     parser.add_argument("--outdir", default="results/output/eval" ,help="Path of the output folder")
@@ -49,7 +52,7 @@ if __name__ == '__main__':
     # Init CUDA
     init_cuda(config['hardware']['gpu'][args.hwid],config['hardware']['cpu_min'][args.hwid],config['hardware']['cpu_max'][args.hwid])
 
-    print_torch_info(logger)
+    print_torch_info(logger, display_mode = True)
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print(device)
@@ -57,7 +60,7 @@ if __name__ == '__main__':
     torch.set_num_threads(torch.get_num_threads())
 
     # Init Agent
-    agent = make_agent(device,config,config_framework)
+    agent = make_agent(device,config, config_framework)
 
     # Init Trainer
     tester = Eval(device, logger, config, config_framework)

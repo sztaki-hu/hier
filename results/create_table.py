@@ -21,16 +21,19 @@ def create_folder(path):
         print(path + ' folder already exists!')
 
 parser = argparse.ArgumentParser()
-#parser.add_argument("--plotid", default="1004_A_slide" ,help="Id of plot")
 parser.add_argument("--outdir", default="results/output/tables" ,help="Path of the output folder")
 parser.add_argument("--show", default=False ,help="Id of plot")
 args = parser.parse_args()
 
-plotid = '1105_X'
-seednum = 1
-alg = 'sac'
+plotid = 'plotid'
+seednum = 10
+alg = 'sac' # 'td3','ddpg'
 plotdata = 'eval_success_rate'
-taskname_list = ['Push','Slide','PickAndPlace']
+taskname_list = ['Slide']
+taskname_missing_list = ['Push','PickAndPlace']
+
+# taskname_list = ['Push','Slide','PickAndPlace']
+# taskname_missing_list = []
 
 create_folder(os.path.join(current_dir, args.outdir, plotid))
 
@@ -64,14 +67,27 @@ for task_index in range(len(taskname_list)):
 
     # SOTA ######################x
 
-    exps.append({"exp_name": "_".join(['1105_T2', 'Panda'+taskname+'-v3',alg,'sparse','final','predefined','prioritized','proportional','5e5','controladaptive']) , "seed_num":seednum, "color": "blue", "plot_name":  'HER + PER + CL + HiER(p)'})
-    exps.append({"exp_name": "_".join(['1105_T2', 'Panda'+taskname+'-v3',alg,'sparse','final','predefined','fix','noper','5e5','controladaptive']) , "seed_num":seednum, "color": "magenta", "plot_name":  'HER + CL + HiER'})
+    cls = ['nocl','selfpaced']
+    hers = ['noher','final']
+    hiers = ['nohier','predefined']
+    pers = ['noper','proportional']
+
+    datetag = '1116' if taskname in ['Push','Slide'] else '1119'
+    
+    idx = 0
+    for hier in hiers:
+        for cl in cls:
+            for per in pers:
+                for her in hers:
+                    if per == 'noper':
+                        exps.append({"exp_name": "_".join([datetag,'A',alg,cl,her,hier,'fix',per,'sparse','Panda'+taskname+'-v3']) , "seed_num":seednum, "plot_name": " + ".join([her,per,cl,hier])}) # type: ignore
+                    else:
+                        exps.append({"exp_name": "_".join([datetag,'A',alg,cl,her,hier,'prioritized',per,'sparse','Panda'+taskname+'-v3']) , "seed_num":seednum, "plot_name": " + ".join([her,per,cl,hier])}) # type: ignore
+                    idx += 1
 
 
-    exp_test_color_list = []
-    for i in range(len(exps)):
-        exp_test_color_list.append(exps[i]['color'])
 
+  
 
     data_pd = pd.DataFrame(np.empty(0, dtype=dtypes))
     print(data_pd.dtypes)
@@ -102,6 +118,9 @@ for task_index in range(len(taskname_list)):
             pivot=pivot[pivot["seed"] == j]
 
             maxVals[j] = pivot['value'].max()
+
+        print(maxVals)
+        #assert False
         maxmaxVal = np.max(maxVals)
         meanmaxVal = np.mean(maxVals)
         stdmaxVal = np.std(maxVals)
@@ -119,6 +138,13 @@ for task_index in range(len(taskname_list)):
         maxdata_all_pd['maxvalue_'+str(task_index)] = maxdata_pd['maxvalue']
         maxdata_all_pd['meanmaxvalue_'+str(task_index)] = maxdata_pd['meanmaxvalue']
         maxdata_all_pd['stdmaxvalue_'+str(task_index)] = maxdata_pd['stdmaxvalue']
+
+for _ in range(len(taskname_missing_list)):
+    task_index += 1
+    maxdata_all_pd['maxvalue_'+str(task_index)] = "-"
+    maxdata_all_pd['meanmaxvalue_'+str(task_index)] = "-"
+    maxdata_all_pd['stdmaxvalue_'+str(task_index)] = "-"
+    
 
 
 maxdata_all_pd['HER'] = "-"
@@ -140,7 +166,7 @@ print(maxdata_all_pd.head())
 
 s = maxdata_all_pd.to_latex(index=False,
             formatters={"name": str.upper},
-            float_format="{:.1f}".format,
+            float_format="{:.2f}".format,
             escape=False)
 
 

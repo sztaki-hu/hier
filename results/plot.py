@@ -26,28 +26,25 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--outdir", default="results/output/plots" ,help="Path of the output folder")
 parser.add_argument("--show", default=False ,help="-")
 parser.add_argument("--createcsv", default=True ,help="-")
-parser.add_argument("--legend", default=True ,help="-")
+parser.add_argument("--legend", default=False ,help="-")
 args = parser.parse_args()
 
 fontsize_title = 32
-fontsize_label = 28
+
 fontsize_label_next_figure = 18
 fontsize_ticks = 22
 
 fontsize_axis_label = 28
-legend_columns = 6
-color_line_width = 4.0
 
-linewidth = 2
+fontsize_label = 28 # 28
+legend_columns = 5
+color_line_width = 6.0
 
-plotid = '1105_B'
-seednum = 3
-#plotdata_list = ['eval_success_rate',"rollout_success_rate","cl_ratio","rollout_state_changed","eval_state_change_rate","hl_highlights_buffer_size","time_fps"]
-#taskname_list = ['Reach','Push','Slide','PickAndPlace','Stack']
-#taskname_list = ['Push']
-#taskname_list = ['Push','Slide','PickAndPlace']
-#taskname_list = ['Push']
-taskname_list = ['Slide']
+linewidth = 3
+
+plotid = 'plotid'
+seednum = 10
+taskname_list = ['Reach','Push','Slide','PickAndPlace','Stack']
 plotdata_list = ['eval_success_rate','eval_mean_reward',
                  'rollout_success_rate', 'rollout_state_changed','rollout_ep_rew_mean',
                  'cl_c',
@@ -59,55 +56,108 @@ plotdata_y_list = ['Eval success rate','Eval Mean reward',
                  'time fps',
                  'HiER batch size','HiER buffer size','HiER lambda','HiER xi']
 
-# plotdata_list = ['hier_batch_size','hier_buffer_size','hier_lambda','hier_xi']
-# plotdata_y_list = ['HiER batch size','HiER buffer size','HiER lambda','HiER xi']
+
+# Grand test ###################
+
+plotdata_list = ['eval_success_rate']
+plotdata_y_list = ['Eval success rate']
+
+# HiER #########################
+
+# plotdata_list = ['eval_success_rate','hier_lambda']
+# plotdata_y_list = ['Eval success rate','HiER lambda']
+
+# plotdata_list = ['hier_lambda']
+# plotdata_y_list = ['HiER lambda']
+
+# E2H ############################
+
+# plotdata_list = ['eval_success_rate','rollout_success_rate','cl_c']
+# plotdata_y_list = ['Eval success rate','Rollout success rate','CL param c']
+
+# plotdata_list = ['cl_c']
+# plotdata_y_list = ['CL param c']
 
 
-# plotdata_list = ['eval_success_rate','eval_mean_reward']
-# plotdata_y_list = ['Eval success rate','Eval sum reward']
-
-# plotdata_list = ['eval_success_rate']
-# plotdata_y_list = ['Eval success rate']
 
 #print(os.path.join(current_dir, args.outdir))
 
 algs = ['sac']
+#algs = ['ddpg','td3']
 
 
 for taskname in taskname_list:
+
+    if taskname == 'PickAndPlace':
+        taskname_title = 'Pick-and-place'
+    else:
+        taskname_title = taskname
+
     for alg in algs:
     
         logdir = plotid + "_Panda" + taskname + "_" + alg
         create_folder(os.path.join(current_dir, args.outdir, logdir))
         exps = []
 
-        # HiER ###########################################################xxx
+########### Grand test
+        #color_palette = ['darkgray','dimgray','green','blue','purple','magenta']
+        #color_palette = [(0.5,0.5,0.5),(0.2,0.2,0.2),'green','blue','purple','magenta']
 
-        # exps.append({"exp_name": "_".join(['1105_A', 'Panda'+taskname+'-v3',alg,'sparse','final','nohier','fix','noper','5e5','controladaptive']) , "seed_num":seednum, "color": "red", "plot_name":  'HER + CL'})
-        # exps.append({"exp_name": "_".join(['1105_A', 'Panda'+taskname+'-v3',alg,'sparse','final','fix','fix','noper','5e5','controladaptive']) , "seed_num":seednum, "color": "orange", "plot_name":  'HER + CL + HiER(fix)'})
-        # exps.append({"exp_name": "_".join(['1105_A', 'Panda'+taskname+'-v3',alg,'sparse','final','multifix','fix','noper','5e5','controladaptive']) , "seed_num":seednum, "color": "green", "plot_name":  'HER + CL + HiER(multifix)'})
-        # exps.append({"exp_name": "_".join(['1105_A', 'Panda'+taskname+'-v3',alg,'sparse','final','predefined','fix','noper','5e5','controladaptive']) , "seed_num":seednum, "color": "blue", "plot_name":  'HER + CL + HiER(predefined)'})
-        # exps.append({"exp_name": "_".join(['1105_A', 'Panda'+taskname+'-v3',alg,'sparse','final','ama','fix','noper','5e5','controladaptive']) , "seed_num":seednum, "color": "magenta", "plot_name":  'HER + CL + HiER(ama)'})
-        # exps.append({"exp_name": "_".join(['1105_A', 'Panda'+taskname+'-v3',alg,'sparse','final','amar','fix','noper','5e5','controladaptive']) , "seed_num":seednum, "color": "purple", "plot_name":  'HER + CL + HiER(amar)'})
+        # exps.append({"exp_name": "_".join(['1109_A',alg,'nocl','noher','nohier','fix','noper','sparse','Panda'+taskname+'-v3']) , "seed_num":seednum, "color": color_palette[0], "plot_name": "Baseline"})
+        # exps.append({"exp_name": "_".join(['1109_A',alg,'nocl','final','nohier','prioritized','proportional','sparse','Panda'+taskname+'-v3']) , "seed_num":seednum, "color": color_palette[1], "plot_name": "Baseline (HER + PER)"}) 
+        # exps.append({"exp_name": "_".join(['1109_A',alg,'selfpaced','final','nohier','prioritized','proportional','sparse','Panda'+taskname+'-v3']) , "seed_num":seednum, "color": color_palette[2], "plot_name": "HER + PER + CL"}) 
+        # exps.append({"exp_name": "_".join(['1109_A',alg,'nocl','final','predefined','prioritized','proportional','sparse','Panda'+taskname+'-v3']) , "seed_num":seednum, "color": color_palette[3], "plot_name": "HER + PER + HiER"}) 
+        # exps.append({"exp_name": "_".join(['1109_A',alg,'selfpaced','final','predefined','prioritized','proportional','sparse','Panda'+taskname+'-v3']) , "seed_num":seednum, "color": color_palette[4], "plot_name": "HER + PER + HiERCuLe"}) 
+        # exps.append({"exp_name": "_".join(['1109_A',alg,'selfpaced','final','predefined','fix','noper','sparse','Panda'+taskname+'-v3']) , "seed_num":seednum, "color": color_palette[5], "plot_name": "HER + HiERCuLe"}) 
 
-        # HiERp ###########################################################xxx
+        # exps.append({"exp_name": "_".join(['1108_A',alg,'nocl','noher','nohier','fix','noper','sparse','Panda'+taskname+'-v3']) , "seed_num":seednum, "color": color_palette[0], "plot_name": "Baseline"})
+        # exps.append({"exp_name": "_".join(['1108_B',alg,'nocl','final','nohier','prioritized','proportional','sparse','Panda'+taskname+'-v3']) , "seed_num":seednum, "color": color_palette[1], "plot_name": "Baseline (with HER & PER)"}) 
+        # exps.append({"exp_name": "_".join(['1108_B',alg,'selfpaced','final','nohier','prioritized','proportional','sparse','Panda'+taskname+'-v3']) , "seed_num":seednum, "color": color_palette[2], "plot_name": "E2H-ISE (with HER & PER)"}) 
+        # exps.append({"exp_name": "_".join(['1108_B',alg,'nocl','final','predefined','prioritized','proportional','sparse','Panda'+taskname+'-v3']) , "seed_num":seednum, "color": color_palette[3], "plot_name": "HiER (with HER & PER)"}) 
+        # exps.append({"exp_name": "_".join(['1108_B',alg,'selfpaced','final','predefined','prioritized','proportional','sparse','Panda'+taskname+'-v3']) , "seed_num":seednum, "color": color_palette[4], "plot_name": "HiER+ (with HER & PER)"}) 
+        # exps.append({"exp_name": "_".join(['1108_A',alg,'selfpaced','final','predefined','fix','noper','sparse','Panda'+taskname+'-v3']) , "seed_num":seednum, "color": color_palette[5], "plot_name": "HiER+ (with HER)"}) 
+      
+        datetag = '1116' if taskname in ['Push','Slide'] else '1119'
+        
+        exps.append({"exp_name": "_".join([datetag,'A',alg,'nocl','noher','nohier','fix','noper','sparse','Panda'+taskname+'-v3']) , "seed_num":seednum, "color": color_palette[0], "plot_name": "Baseline", "linestyle": 'dashed'})
+        exps.append({"exp_name": "_".join([datetag,'A',alg,'nocl','final','nohier','prioritized','proportional','sparse','Panda'+taskname+'-v3']) , "seed_num":seednum, "color": color_palette[1], "plot_name": "Baseline [HER & PER]", "linestyle": 'dashed' }) 
+        exps.append({"exp_name": "_".join([datetag,'A',alg,'selfpaced','final','nohier','prioritized','proportional','sparse','Panda'+taskname+'-v3']) , "seed_num":seednum, "color": color_palette[2], "plot_name": "E2H-ISE [HER & PER]", "linestyle": 'solid' }) 
+        exps.append({"exp_name": "_".join([datetag,'A',alg,'nocl','final','predefined','prioritized','proportional','sparse','Panda'+taskname+'-v3']) , "seed_num":seednum, "color": color_palette[3], "plot_name": "HiER [HER & PER]", "linestyle": 'solid' }) 
+        exps.append({"exp_name": "_".join([datetag,'A',alg,'selfpaced','final','predefined','prioritized','proportional','sparse','Panda'+taskname+'-v3']) , "seed_num":seednum, "color": color_palette[4], "plot_name": "HiER+ [HER & PER]", "linestyle": 'solid' }) 
+        exps.append({"exp_name": "_".join([datetag,'A',alg,'selfpaced','final','predefined','fix','noper','sparse','Panda'+taskname+'-v3']) , "seed_num":seednum, "color": color_palette[5], "plot_name": "HiER+ [HER]", "linestyle": 'solid' }) 
 
-        exps.append({"exp_name": "_".join(['1105_A', 'Panda'+taskname+'-v3',alg,'sparse','final','nohier','prioritized','noper','5e5','controladaptive']) , "seed_num":seednum, "color": "red", "plot_name":  'HER + CL'})
-        exps.append({"exp_name": "_".join(['1105_A', 'Panda'+taskname+'-v3',alg,'sparse','final','fix','prioritized','noper','5e5','controladaptive']) , "seed_num":seednum, "color": "orange", "plot_name":  'HER + CL + HiER(fix)'})
-        exps.append({"exp_name": "_".join(['1105_A', 'Panda'+taskname+'-v3',alg,'sparse','final','multifix','prioritized','noper','5e5','controladaptive']) , "seed_num":seednum, "color": "green", "plot_name":  'HER + CL + HiER(multifix)'})
-        exps.append({"exp_name": "_".join(['1105_A', 'Panda'+taskname+'-v3',alg,'sparse','final','predefined','prioritized','noper','5e5','controladaptive']) , "seed_num":seednum, "color": "blue", "plot_name":  'HER + CL + HiER(predefined)'})
-        exps.append({"exp_name": "_".join(['1105_A', 'Panda'+taskname+'-v3',alg,'sparse','final','ama','prioritized','noper','5e5','controladaptive']) , "seed_num":seednum, "color": "magenta", "plot_name":  'HER + CL + HiER(ama)'})
-        exps.append({"exp_name": "_".join(['1105_A', 'Panda'+taskname+'-v3',alg,'sparse','final','amar','prioritized','noper','5e5','controladaptive']) , "seed_num":seednum, "color": "purple", "plot_name":  'HER + CL + HiER(amar)'})
+########### HiER lambda
 
+        # color_palette = [(0.2,0.2,0.2),'orange','blue','purple']
+    
+        # exps.append({"exp_name": "_".join(['1127_D',alg,'nocl','noher','nohier','fix','noper','sparse','Panda'+taskname+'-v3']) , "seed_num":seednum, "color": color_palette[0], "plot_name": "without", "linestyle": 'dashed'}) # type: ignore
+        # exps.append({"exp_name": "_".join(['1127_D',alg,'nocl','noher','fix','fix','noper','sparse','Panda'+taskname+'-v3']) , "seed_num":seednum, "color": color_palette[1], "plot_name": "fix", "linestyle": 'solid'}) 
+        # exps.append({"exp_name": "_".join(['1127_D',alg,'nocl','noher','predefined','fix','noper','sparse','Panda'+taskname+'-v3']) , "seed_num":seednum, "color": color_palette[2], "plot_name": "predefined", "linestyle": 'solid'}) 
+        # exps.append({"exp_name": "_".join(['1127_D',alg,'nocl','noher','ama','fix','noper','sparse','Panda'+taskname+'-v3']) , "seed_num":seednum, "color": color_palette[3], "plot_name": "ama", "linestyle": 'solid'}) 
 
+########## HiER xi
+
+        # color_palette = ['orangered','orange','green','blue','navy','purple']
+    
+        # exps.append({"exp_name": "_".join(['1127_E',alg,'selfpaced','final','predefined','fix','xi01','noper','sparse','Panda'+taskname+'-v3']) , "seed_num":seednum, "color": color_palette[0], "plot_name": "fix 0.1", "linestyle": 'solid'}) # type: ignore
+        # exps.append({"exp_name": "_".join(['1127_E',alg,'selfpaced','final','predefined','fix','xi025','noper','sparse','Panda'+taskname+'-v3']) , "seed_num":seednum, "color": color_palette[1], "plot_name": "fix 0.25", "linestyle": 'solid'}) # type: ignore
+        # exps.append({"exp_name": "_".join(['1127_E',alg,'selfpaced','final','predefined','fix','xi05','noper','sparse','Panda'+taskname+'-v3']) , "seed_num":seednum, "color": color_palette[2], "plot_name": "fix 0.5", "linestyle": 'solid'}) # type: ignore
+        # exps.append({"exp_name": "_".join(['1127_E',alg,'selfpaced','final','predefined','fix','xi075','noper','sparse','Panda'+taskname+'-v3']) , "seed_num":seednum, "color": color_palette[3], "plot_name": "fix 0.75", "linestyle": 'solid'}) # type: ignore
+        # exps.append({"exp_name": "_".join(['1127_E',alg,'selfpaced','final','predefined','fix','xi09','noper','sparse','Panda'+taskname+'-v3']) , "seed_num":seednum, "color": color_palette[4], "plot_name": "fix 0.9", "linestyle": 'solid'}) # type: ignore
+        # exps.append({"exp_name": "_".join(['1127_E',alg,'selfpaced','final','predefined','prioritized','noper','sparse','Panda'+taskname+'-v3']) , "seed_num":seednum, "color": color_palette[5], "plot_name": "prioritized", "linestyle": 'solid'}) # type: ignore
+
+      
         for plotdata,plotdata_y in zip(plotdata_list,plotdata_y_list):
 
             exp_test_color_list = []
+            #exp_test_linesyte_list = []
             for i in range(len(exps)):                
                 if (exps[i]['exp_name'].find('multifix') != -1) and (plotdata in ['hier_batch_size','hier_buffer_size','hier_lambda','hier_xi']):
                     continue
                 
                 exp_test_color_list.append(exps[i]['color'])
+                #exp_test_linesyte_list.append(exps[i]['linestyle'])
+
 
             dtypes = np.dtype(
                 [
@@ -207,11 +257,13 @@ for taskname in taskname_list:
                                 pivot['value'],
                                 color=exps[i]['color'],
                                 label=exps[i]['plot_name'],
+                                linestyle = exps[i]['linestyle'],
                                 linewidth=linewidth)  
                     else: 
                         plt.plot(pivot['t'],
                                 pivot['value'],
                                 color=exps[i]['color'],
+                                linestyle = exps[i]['linestyle'],
                                 linewidth=linewidth)
                         
 
@@ -221,11 +273,26 @@ for taskname in taskname_list:
                 for line in legend.get_lines():
                     line.set_linewidth(2.0)
 
-            plt.xlabel("Timesteps (x1000)", fontsize=fontsize_axis_label)
+            plt.xlabel("Timesteps (x$10^3$)", fontsize=fontsize_axis_label)
             plt.ylabel(plotdata_y, fontsize=fontsize_axis_label)
-            plt.title(taskname, fontsize=fontsize_title)
+            plt.title(taskname_title, fontsize=fontsize_title)
+
+        
+
+            x_min = data_pd["t"].min()
+            x_max = data_pd["t"].max()+1
+            y_min = data_pd["value"].min()
+            y_max = data_pd["value"].max()#+0.05 #+5
+
+            #plt.xticks(np.arange(x_min, x_max, step=100),fontsize=fontsize_ticks)
             plt.xticks(fontsize=fontsize_ticks)
             plt.yticks(fontsize=fontsize_ticks)
+
+            plt.xlim([x_min, x_max])
+            plt.ylim([y_min, y_max])
+            # plt.autoscale(enable=True, axis='x', tight=True)
+            # plt.autoscale(enable=True, axis='y', tight=True)
+
             ax.set_facecolor((1.0, 1.0, 1.0))
             ax.spines['bottom'].set_color('black')
             ax.spines['top'].set_color('black') 
@@ -233,7 +300,7 @@ for taskname in taskname_list:
             ax.spines['left'].set_color('black')
             plt.grid(c='gray')
 
-            figname = plotid + '_' + plotdata
+            figname = '_'.join([plotid,taskname,plotdata,'.png'])
             plt.savefig(os.path.join(current_dir, args.outdir, logdir, figname),bbox_inches='tight')
             if args.show: plt.show()
 
@@ -249,9 +316,12 @@ for taskname in taskname_list:
                          y="value", 
                          hue="plot_name", 
                          errorbar=('ci', 95), 
-                         palette=exp_test_color_list, 
+                         palette=exp_test_color_list,
                          legend=args.legend,
                          linewidth = linewidth)
+
+            for i in range(len(exps)): 
+                ax.lines[i].set_linestyle(exps[i]['linestyle'])
 
             if args.legend: 
                 legend = plt.legend(bbox_to_anchor=(1, 1.01), loc='upper left', fontsize=fontsize_label_next_figure)
@@ -260,11 +330,15 @@ for taskname in taskname_list:
                     line.set_linewidth(2.0)
             plt.xlabel("Timesteps")
             plt.ylabel(plotdata_y)
-            plt.xlabel("Timesteps (x1000)", fontsize=fontsize_axis_label)
+            plt.xlabel("Timesteps (x$10^3$)", fontsize=fontsize_axis_label)
             plt.ylabel(plotdata_y, fontsize=fontsize_axis_label)
-            plt.title(taskname, fontsize=fontsize_title)
+            plt.title(taskname_title, fontsize=fontsize_title)
             plt.xticks(fontsize=fontsize_ticks)
             plt.yticks(fontsize=fontsize_ticks)
+            plt.xlim([x_min, x_max])
+            plt.ylim([y_min, y_max])
+            # plt.autoscale(enable=True, axis='x', tight=True)
+            # plt.autoscale(enable=True, axis='y', tight=True)
             ax.set_facecolor((1.0, 1.0, 1.0))
             ax.spines['bottom'].set_color('black')
             ax.spines['top'].set_color('black') 
@@ -272,7 +346,7 @@ for taskname in taskname_list:
             ax.spines['left'].set_color('black')
             plt.grid(c='gray')
 
-            figname = plotid + '_'+plotdata+'_std.png'
+            figname = '_'.join([plotid,taskname,plotdata,'std.png'])
             plt.savefig(os.path.join(current_dir, args.outdir, logdir, figname),bbox_inches='tight')
             if args.show: plt.show()
 
@@ -288,7 +362,17 @@ for taskname in taskname_list:
                 for j in range(exps[i]['seed_num']):
                     pivot=data_pd[data_pd["exp_name"] == exps[i]['exp_name']]  
                     pivot=pivot[pivot["seed"] == j]
-                    plt.plot(pivot['t'],pivot['value'],color=exps[i]['color'],label=exps[i]['plot_name']) if j == 0 else plt.plot(pivot['t'],pivot['value'],color=exps[i]['color'])
+                    if j == 0:
+                        plt.plot(pivot['t'],
+                                 pivot['value'],
+                                 color=exps[i]['color'],
+                                 linestyle = exps[i]['linestyle'],
+                                 label=exps[i]['plot_name']) 
+                    else: 
+                        plt.plot(pivot['t'],
+                                 pivot['value'],
+                                 color=exps[i]['color'],
+                                 linestyle = exps[i]['linestyle'])
                     
 
             legend = plt.legend(bbox_to_anchor=(0.5, -0.2), loc='upper center', 
@@ -303,7 +387,8 @@ for taskname in taskname_list:
                 bbox  = legend.get_window_extent()
                 bbox = bbox.from_extents(*(bbox.extents + np.array(expand)))
                 bbox = bbox.transformed(fig.dpi_scale_trans.inverted())
-                fig.savefig(os.path.join(current_dir, args.outdir, logdir, "legend.png"), dpi="figure", bbox_inches=bbox, facecolor='white')
+                figname = '_'.join([plotid,"legend.png"])
+                fig.savefig(os.path.join(current_dir, args.outdir, logdir, figname), dpi="figure", bbox_inches=bbox, facecolor='white')
 
             export_legend(legend)
 

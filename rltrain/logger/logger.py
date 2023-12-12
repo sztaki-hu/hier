@@ -111,8 +111,9 @@ class Logger:
         
         # Compute and replace auto values
         self.compute_and_replace_auto_values()
-        if self.config['buffer']['per']['mode'] != 'noper' and self.config['buffer']['hier']['xi']['set_prioritized_for_PER']: 
-            self.config['buffer']['hier']['xi']['mode'] = 'prioritized'
+        if display_mode == False:
+            if self.config['buffer']['per']['mode'] != 'noper' and self.config['buffer']['hier']['xi']['set_prioritized_for_PER']: 
+                self.config['buffer']['hier']['xi']['mode'] = 'prioritized'
         
         # Demos
         self.demodir = self.config['general']['demodir']
@@ -196,11 +197,17 @@ class Logger:
     #     else:
     #         self.pylogger.info(str(message))
     
-    def print_logfile(self, message: str, level: str = "info", terminal: bool = True) -> None:
-        if terminal:
+    def print_logfile(self, 
+                      message: str, 
+                      level: str = "info", 
+                      terminal: bool = True, 
+                      display_mode: bool = False
+                      ) -> None:
+        if terminal or display_mode:
             print("["+level+"]: " + str(message))
-        with open(self.log_file_path, 'a') as file1:
-            file1.write(message + "\n")
+        if display_mode == False:
+            with open(self.log_file_path, 'a') as file1:
+                file1.write(message + "\n")
 
     # Config ########################################################################
 

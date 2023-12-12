@@ -26,9 +26,16 @@ def create_folder(path: str) -> None:
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
-     
-     
-    parser.add_argument("--config", default="logs/"+"_".join(['1105_T2', 'PandaPush-v3','sac','sparse','final','predefined','prioritized','proportional','5e5','controladaptive']),help="Path of the config file")
+    
+    # Slide
+    #parser.add_argument("--config", default="logs/"+"_".join(['1108_B','sac','selfpaced','final','predefined','prioritized','proportional','sparse','PandaSlide-v3']),help="Path of the config file")
+    #parser.add_argument("--config", default="logs/"+"_".join(['1108_A','sac','nocl','final','nohier','fix','proportional','sparse','PandaSlide-v3']),help="Path of the config file")
+    
+    # Pick-and-Place
+    #parser.add_argument("--config", default="logs/"+"_".join(['1109_A','sac','selfpaced','final','predefined','prioritized','noper','sparse','PandaPickAndPlace-v3']),help="Path of the config file")
+    parser.add_argument("--config", default="logs/"+"_".join(['1109_A','sac','nocl','final','nohier','fix','noper','sparse','PandaPickAndPlace-v3']),help="Path of the config file")
+    
+    
     parser.add_argument("--hwid", type=int, default=0 ,help="Hardware id")
     parser.add_argument("--seedid", type=int, default=0 ,help="seedid")
     parser.add_argument("--outdir", default="results/output/vids" ,help="Path of the output folder")
@@ -48,7 +55,7 @@ if __name__ == '__main__':
     # Init CUDA
     init_cuda(config['hardware']['gpu'][args.hwid],config['hardware']['cpu_min'][args.hwid],config['hardware']['cpu_max'][args.hwid])
 
-    print_torch_info(logger)
+    print_torch_info(logger, display_mode = True)
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print(device)
@@ -59,5 +66,9 @@ if __name__ == '__main__':
     tester = Eval(device, logger,config,config_framework)
 
     # Test Agent
-    tester.save_video(model_name="best_model",num_display_episode=2, current_dir = current_dir, outdir = args.outdir, save_name = "video.png")
+    tester.save_video(model_name="best_model",
+                      num_display_episode=20, 
+                      current_dir = current_dir, 
+                      outdir = args.outdir, 
+                      save_name = "1109_A_PickAndPlace_3.png")
     
