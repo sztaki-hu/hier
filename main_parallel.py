@@ -28,11 +28,11 @@ def create_folder(path: str) -> None:
 def main():
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--config", default="cfg_exp/auto/config.yaml", help="Path of the config file")
-    parser.add_argument("--explist", default="cfg_exp/auto/exp_list.yaml", help="Path of the config file")
+    parser.add_argument("--config", default="cfg_exp/multi/config.yaml", help="Path of the config file")
+    parser.add_argument("--explist", default="cfg_exp/multi/exp_list.yaml", help="Path of the config file")
     parser.add_argument("--processid", type=int, default=0, help="processid")
     parser.add_argument("--testconfig", type=bool, default=True, help="Test config file")
-    parser.add_argument("--tempconfig", default="cfg_exp/auto/temp", help="Path of the dir of temp config")
+    parser.add_argument("--tempconfig", default="cfg_exp/multi/temp", help="Path of the dir of temp config")
     args = parser.parse_args()
 
     hwid_list = [0,1,2,3]

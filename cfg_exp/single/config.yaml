@@ -1,0 +1,163 @@
+general:
+  exp_name: X_test_01_manual
+  logdir: logs
+  demodir: demos
+  seed: random
+  init_weights:
+    bool: False
+    mode: all # all / pi
+    path: logs/0928_X_PandaPush-v3_sac_controldiscrete_const/0/model_backup/model_best_model
+
+hardware:
+  gpu: [0,1,2,3] 
+  cpu_min: [1,1,1,1]
+  cpu_max: [32,32,32,32]
+
+environment:
+  name: gympanda # gympanda
+  task: 
+    name: PandaReach-v3 # PandaReach-v3 / PandaPush-v3 / PandaSlide-v3 (and dense versions)
+    params: []
+  headless: True
+  obs_dim: auto
+  act_dim: auto
+  camera: False
+  reward:
+    reward_scalor: 1
+    reward_bonus: 0
+    reward_shaping_type: sparse # sparse / state_change_bonus
+
+agent:
+  type: sac
+  hidden_sizes: [256,256,256]
+  boundary_min: auto
+  boundary_max: auto
+  gamma: 0.95
+  polyak: 0.995
+  learning_rate: 0.001
+  sac:
+    alpha: 0.1 # spinningup do not have "auto" option
+  td3:
+    target_noise: 0.2
+    noise_clip: 0.5
+    policy_delay : 2
+    act_noise: 0.1
+  ddpg:
+    act_noise: 0.1
+
+buffer:
+  replay_buffer_size: 1e6
+  her:
+    goal_selection_strategy: final # noher / final / future / future_once / near / next
+    n_sampled_goal: 4
+    state_check: True
+  per:
+    mode: proportional # noper / proportional
+    alpha: 0.6
+    beta_start: 0.4
+    beta_frames_ratio: 0.8
+  hier:
+    buffer_size: 1e6
+    success_cond: False
+    include_test: True
+    include_train: True
+    lambda:
+      mode: predefined # nohier / fix / ama / predefined / multifix / multipredefined
+      fix:
+        lambda: -20 
+      multifix:
+        lambdas: [-10,-20,-30,-40]
+        xis: [0.125, 0.125, 0.125, 0.125]
+        batch_bin_min_sample: 10
+      predefined:
+        lambda_profile: linear  # linear / sqrt / quad
+        lambda_saturation_t: 0.8
+        lambda_start: -50
+        lambda_end: -10
+      ama: # adaptive moving average
+        lambda_start: -50
+        lambda_end: -10
+        lambda_margin: 10
+        window: 20
+      amar: # adaptive moving average relative
+        lambda_start: -50
+        lambda_end: -10
+        lambda_margin_relative: 0.1
+        window: 20
+    xi:
+      mode: fix # fix / prioritized (works only if 'mode' is not 'nohl')
+      set_prioritized_for_PER: False
+      xi: 0.5
+      prioritized:
+        alpha: 0.95
+        xi_min: 0.1 
+        xi_max: 0.9 
+
+sampler:
+  start_steps: 1000 # in SB3 we cannot set it
+  max_ep_len: auto
+
+trainer:
+  total_timesteps: 5e2
+  batch_size: 256
+  update_after: 1e2
+  update_every: 50
+  cl:
+    type: selfpaced # nocl / nullcl / predefined / predefined2stage / predefined3stage / selfpaced / control / controladaptive
+    range_growth_mode: simple # simple / discard / balancediscard
+    ratio_discard_lag: 0.1 # Only if 'range_growth_mode' is 'discard' or 'balancediscard'
+    balancediscard_ratio: 0.8  # Only if 'range_growth_mode' is 'balancediscard'
+    predefined:
+      profile: linear  # linear / sqrt / quad
+      saturation_t: 0.8
+    predefined2stage:
+      profile: linear  # linear / sqrt / quad
+      change_stage: 0.5
+      stage1: # goal
+        saturation_t: 0.4
+      stage2: # obj
+        saturation_t: 0.8
+    predefined3stage:
+      profile: linear  # linear / sqrt / quad
+      change_stage12: 0.3
+      change_stage23: 0.6
+      stage1: # goal
+        saturation_t: 0.2
+      stage2: # obj
+        saturation_t: 0.5
+      stage3: # obj-goal
+        saturation_t: 0.8
+    selfpaced:
+      upper_cond: 0.8
+      lower_cond: 0.2
+      window_size: 20
+      step: 0.05
+    control:
+      target_value: 0.8 
+      step: 0.01
+      window_size: 20
+    controladaptive:
+      Delta: 0.2
+      target_max: 0.9
+      window_size_eval: 3
+      window_size_rollout: 20
+      step: 0.01
+
+eval:
+  freq: 5e1
+  num_episodes: 10
+  
+
+logger:
+  rollout:
+    stats_window_size: 10
+  train:
+    stats_window_size: 1
+  state_change:
+    stats_window_size: 100
+  model:
+    save:
+      mode: pi
+      best_start_t: 0.0
+      freq: 20
+      measure: reward # reward / success_rate

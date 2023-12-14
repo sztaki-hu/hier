@@ -1,5 +1,5 @@
 general:
-  exp_name: 1109_3X
+  exp_name: X_test_01_multi_serial
   logdir: logs
   demodir: demos
   seed: random
@@ -86,7 +86,7 @@ buffer:
         window: 20
     xi:
       mode: input # fix / prioritized (works only if 'mode' is not 'nohl')
-      set_prioritized_for_PER: True
+      set_prioritized_for_PER: False
       xi: input
       prioritized:
         alpha: 0.95

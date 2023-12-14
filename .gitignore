@@ -11,4 +11,4 @@ results/output/*
 cfg_rlbench/*
 rltrain.egg-info/*
 others/*
-cfg_exp/auto/temp/*
+cfg_exp/multi/temp/*

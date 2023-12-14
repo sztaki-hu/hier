@@ -17,15 +17,15 @@ def load_yaml(file: str) -> Dict:
 def main() -> int:
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--config", default="cfg_exp/auto/config.yaml", help="Path of the config file")
+    parser.add_argument("--config", default="cfg_exp/single/config.yaml", help="Path of the config file")
     parser.add_argument("--hwid", type=int, default=0, help="Hardware id")
-    parser.add_argument("--seednum", type=int, default=0, help="seednum")
-    parser.add_argument("--exppath", type=str, help="exppath")
+    parser.add_argument("--seednum", type=int, default=1, help="seednum")
+    parser.add_argument("--exppath", type=str, default='None', help="exppath")
     args = parser.parse_args()
 
     current_dir = os.path.dirname(os.path.abspath(__file__))
 
-    exp = load_yaml(args.exppath)
+    exp = load_yaml(args.exppath) if args.exppath != 'None' else None
 
     for _ in range(args.seednum):
 
