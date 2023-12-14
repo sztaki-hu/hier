@@ -18,8 +18,8 @@ def main() -> int:
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", default="cfg_exp/single/config.yaml", help="Path of the config file")
-    parser.add_argument("--hwid", type=int, default=0, help="Hardware id")
-    parser.add_argument("--seednum", type=int, default=1, help="seednum")
+    parser.add_argument("--hwid", type=int, default=0, help="The id of the GPU")
+    parser.add_argument("--seednum", type=int, default=1, help="The number of random seeds")
     parser.add_argument("--exppath", type=str, default='None', help="exppath")
     args = parser.parse_args()
 
