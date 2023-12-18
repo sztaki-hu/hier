@@ -2,9 +2,13 @@
 
 This repository contains the implementation of our methods called HiER, E2H-ISE, and HiER+ presented in our article titled: Highlight Experience Replay and Easy2Hard Curriculum Learning for Boosting Off-Policy Reinforcement Learning Agents. 
 
-For more information please visit the project site: xxxxxx. 
+For more information please visit the project site: http://www.danielhorvath.eu/hier/
 
-The article is available here: XXXXXX.
+The article is available here: https://arxiv.org/abs/2312.09394
+
+The qualitative evaluation: https://youtu.be/pmM4oK5CfKQ?si=Dxjd8RFioUlx35IM
+
+The short video presentation: https://youtu.be/7_7OTvw6tj8?si=1AiXhMB36hUNJz1J
 
 ## Training and evaluation with rltrain
 
@@ -91,4 +95,23 @@ The rltrain package has the following structure:
 
 
 ## Citation
-Soon to be updated.
+
+## Citation
+
+Cite as
+
+```bib
+@misc{horvath_hier_2023,
+    title = {{HiER}: {Highlight} {Experience} {Replay} and {Easy2Hard} {Curriculum} {Learning} for {Boosting} {Off}-{Policy} {Reinforcement} {Learning} {Agents}},
+    author = {Horváth, Dániel and Martín, Jesús Bujalance and Erdős, Ferenc Gábor and Istenes, Zoltán and Moutarde, Fabien},
+    shorttitle = {{HiER}},
+    url = {http://doi.org/10.48550/arXiv.2312.09394},
+    doi = {10.48550/arXiv.2312.09394},
+    urldate = {2023-12-18},
+    publisher = {arXiv},
+    month = dec,
+    year = {2023},
+    note = {arXiv:2312.09394 [cs]},
+    keywords = {Computer Science - Robotics},
+}
+```
