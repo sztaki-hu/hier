@@ -96,8 +96,6 @@ The rltrain package has the following structure:
 
 ## Citation
 
-## Citation
-
 Cite as
 
 ```bib
