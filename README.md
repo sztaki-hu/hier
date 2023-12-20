@@ -1,5 +1,7 @@
 # HiER and E2H-ISE
 
+## General information
+
 This repository contains the implementation of our methods called HiER, E2H-ISE, and HiER+ presented in our article titled: Highlight Experience Replay and Easy2Hard Curriculum Learning for Boosting Off-Policy Reinforcement Learning Agents. 
 
 For more information please visit the project site: http://www.danielhorvath.eu/hier/
@@ -9,6 +11,37 @@ The article is available here: https://arxiv.org/abs/2312.09394
 The qualitative evaluation: https://youtu.be/pmM4oK5CfKQ?si=Dxjd8RFioUlx35IM
 
 The short video presentation: https://youtu.be/7_7OTvw6tj8?si=1AiXhMB36hUNJz1J
+
+## Instalation
+
+We developed and tested this repository on `Ubuntu 20.04` with `Python3.8` and `CUDA version 11.8`. Nevertheless, it should work on other configurations as well. Even though the packages are relatively common (thus their installation should not be a problem), we provide an instalaltion guide for the aforementioned setup. 
+
+The installation as follows.
+
+1. It is recommended to create a virtual environment with python3.8 such as:
+    ```
+    python3.8 -m venv rltrain-env
+    ```
+
+2. Activate the environment:
+    ```
+    source rltrain-env/bin/activate
+    ```
+
+3. Install poetry with pip:
+    ```
+    pip install poetry
+    ```
+
+4. A) Either install your torch version according to https://pytorch.org/ and from the root directory of the repository run: 
+    ```
+    poetry install --without torchgroup
+    ```
+
+    B) or if you our setup (`torch ^2.1.2+cu118` and `torchvision ^0.16.2+cu118`) is compatible with your system then simply run from the root directory of the repository:
+    ```
+    poetry install
+    ```
 
 ## Training and evaluation with rltrain
 
