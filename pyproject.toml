@@ -1,0 +1,27 @@
+[tool.poetry]
+name = "rltrain"
+version = "0.1.0"
+description = ""
+authors = ["Daniel Horvath <hdaniel@sztaki.hu>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+torch = {version = "^2.1.2+cu118", source = "pytorch"}
+torchvision = {version = "^0.16.2+cu118", source = "pytorch"}
+pyyaml = "^6.0.1"
+pandas = "2.0.3"
+tensorboard = "2.14.0"
+tqdm = "^4.66.1"
+gymnasium = "^0.29.1"
+panda-gym = "^3.0.7"
+
+
+[[tool.poetry.source]]
+name = "pytorch"
+url = "https://download.pytorch.org/whl/cu118"
+priority = "explicit"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

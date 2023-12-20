@@ -9,6 +9,7 @@ logs/*
 dev/*
 results/output/*
 cfg_rlbench/*
+cfg_framework/venv/*
 rltrain.egg-info/*
 others/*
 cfg_exp/multi/temp/*
