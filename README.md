@@ -38,7 +38,7 @@ The installation as follows.
     poetry install --without torchgroup
     ```
 
-    B) or if you our setup (`torch ^2.1.2+cu118` and `torchvision ^0.16.2+cu118`) is compatible with your system then simply run from the root directory of the repository:
+    B) or if our setup (`torch ^2.1.2+cu118` and `torchvision ^0.16.2+cu118`) is compatible with your system then simply run from the root directory of the repository:
     ```
     poetry install
     ```
