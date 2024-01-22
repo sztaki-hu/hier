@@ -5,18 +5,18 @@ import math
 from typing import Dict, List, Tuple, Union, Optional
 
 from rltrain.taskenvs.GymPanda import GymPanda
-from rltrain.algos.cl.CL import CL
+from rltrain.algos.ise.InitialStateEntropy import InitialStateEntropy
 
 PACING_PROFILES = ['linear','sqrt','quad']
 
-class predefinedCL(CL):
+class PredefinedISE(InitialStateEntropy):
    
     def __init__(self, config: Dict, taskenv: GymPanda) -> None:
-        super(predefinedCL, self).__init__(config, taskenv)
+        super(PredefinedISE, self).__init__(config, taskenv)
 
         # PREDEFINED
-        self.profile = self.config['trainer']['cl']['predefined']['profile']
-        self.saturation_t = self.config['trainer']['cl']['predefined']['saturation_t']
+        self.profile = self.config['trainer']['ise']['predefined']['profile']
+        self.saturation_t = self.config['trainer']['ise']['predefined']['saturation_t']
 
         assert self.profile in PACING_PROFILES
  

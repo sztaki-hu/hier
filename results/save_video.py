@@ -33,8 +33,9 @@ if __name__ == '__main__':
     
     # Pick-and-Place
     #parser.add_argument("--config", default="logs/"+"_".join(['1109_A','sac','selfpaced','final','predefined','prioritized','noper','sparse','PandaPickAndPlace-v3']),help="Path of the config file")
-    parser.add_argument("--config", default="logs/"+"_".join(['1109_A','sac','nocl','final','nohier','fix','noper','sparse','PandaPickAndPlace-v3']),help="Path of the config file")
+    #parser.add_argument("--config", default="logs/"+"_".join(['1109_A','sac','nocl','final','nohier','fix','noper','sparse','PandaPickAndPlace-v3']),help="Path of the config file")
     
+    parser.add_argument("--config", default="logs/"+"_".join(['X_0122_SERIAL','sac','noher','nohier','fix','max','noper','sparse','PandaPush-v3']),help="Path of the config file")
     
     parser.add_argument("--hwid", type=int, default=0 ,help="Hardware id")
     parser.add_argument("--seedid", type=int, default=0 ,help="seedid")
@@ -67,8 +68,8 @@ if __name__ == '__main__':
 
     # Test Agent
     tester.save_video(model_name="best_model",
-                      num_display_episode=20, 
+                      num_display_episode=2, 
                       current_dir = current_dir, 
                       outdir = args.outdir, 
-                      save_name = "1109_A_PickAndPlace_3.png")
+                      save_name = "X_0122.png")
     

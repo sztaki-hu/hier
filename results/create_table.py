@@ -67,7 +67,7 @@ for task_index in range(len(taskname_list)):
 
     # SOTA ######################x
 
-    cls = ['nocl','selfpaced']
+    ises = ['max','selfpaced']
     hers = ['noher','final']
     hiers = ['nohier','predefined']
     pers = ['noper','proportional']
@@ -76,13 +76,13 @@ for task_index in range(len(taskname_list)):
     
     idx = 0
     for hier in hiers:
-        for cl in cls:
+        for ise in ises:
             for per in pers:
                 for her in hers:
                     if per == 'noper':
-                        exps.append({"exp_name": "_".join([datetag,'A',alg,cl,her,hier,'fix',per,'sparse','Panda'+taskname+'-v3']) , "seed_num":seednum, "plot_name": " + ".join([her,per,cl,hier])}) # type: ignore
+                        exps.append({"exp_name": "_".join([datetag,'A',alg,ise,her,hier,'fix',per,'sparse','Panda'+taskname+'-v3']) , "seed_num":seednum, "plot_name": " + ".join([her,per,ise,hier])}) # type: ignore
                     else:
-                        exps.append({"exp_name": "_".join([datetag,'A',alg,cl,her,hier,'prioritized',per,'sparse','Panda'+taskname+'-v3']) , "seed_num":seednum, "plot_name": " + ".join([her,per,cl,hier])}) # type: ignore
+                        exps.append({"exp_name": "_".join([datetag,'A',alg,ise,her,hier,'prioritized',per,'sparse','Panda'+taskname+'-v3']) , "seed_num":seednum, "plot_name": " + ".join([her,per,ise,hier])}) # type: ignore
                     idx += 1
 
 
@@ -149,16 +149,16 @@ for _ in range(len(taskname_missing_list)):
 
 maxdata_all_pd['HER'] = "-"
 maxdata_all_pd['PER'] = "-"
-maxdata_all_pd['CL'] = "-"
+maxdata_all_pd['ISE'] = "-"
 maxdata_all_pd['HiER'] = "-"
 
 for ind in maxdata_all_pd.index:
     if maxdata_all_pd['exp_name'][ind].find('noher') == -1: maxdata_all_pd['HER'][ind] = "\checkmark"
     if maxdata_all_pd['exp_name'][ind].find('noper') == -1: maxdata_all_pd['PER'][ind] = "\checkmark"
-    if maxdata_all_pd['exp_name'][ind].find('nocl') == -1: maxdata_all_pd['CL'][ind] = "\checkmark"
+    if maxdata_all_pd['exp_name'][ind].find('max') == -1: maxdata_all_pd['ISE'][ind] = "\checkmark"
     if maxdata_all_pd['exp_name'][ind].find('nohier') == -1: maxdata_all_pd['HiER'][ind] = "\checkmark"
 
-maxdata_all_pd = maxdata_all_pd[['HER','PER','CL','HiER','maxvalue','meanmaxvalue','stdmaxvalue','maxvalue_1','meanmaxvalue_1','stdmaxvalue_1','maxvalue_2','meanmaxvalue_2','stdmaxvalue_2']]
+maxdata_all_pd = maxdata_all_pd[['HER','PER','ISE','HiER','maxvalue','meanmaxvalue','stdmaxvalue','maxvalue_1','meanmaxvalue_1','stdmaxvalue_1','maxvalue_2','meanmaxvalue_2','stdmaxvalue_2']]
 
 print(maxdata_all_pd.to_string())
 print(maxdata_all_pd.head())

@@ -47,8 +47,6 @@ for taskname in taskname_list:
         
         exps = []
        
-        # exps.append({"exp_name": "_".join(['1019_A', 'Panda'+taskname+'-v3',alg,'sparse','final','multifix','fix','noper','controldiscreteadaptive']) , "seed_num":seednum, "color": "purple", "plot_name":  alg +" HER+HiER(multifix)+CL"})
-        # exps.append({"exp_name": "_".join(['1019_A', 'Panda'+taskname+'-v3',alg,'sparse','final','multifix','prioritized','noper','controldiscreteadaptive']) , "seed_num":seednum, "color": "magenta", "plot_name":  alg +" HER+PHiER(multifix)+CL"})
         
         exps.append({"exp_name": "_".join(['1105_T2', 'Panda'+taskname+'-v3',alg,'sparse','final','multifix','prioritized','noper','5e4','controladaptive']) , "seed_num":seednum, "color": "purple", "plot_name":  'multifix'})
 

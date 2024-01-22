@@ -69,28 +69,16 @@ class Logger:
                 self.config['buffer']['hier']['xi']['mode'] = 'prioritized'
                 exp['main']['hier_xi_mode'] = 'prioritized'
             
-            # CL
-            self.config['trainer']['cl']['range_growth_mode'] = exp['main']['cl_range_growth_mode']    
-            if exp['main']['cl'] == 'nocl': 
-                self.config['trainer']['cl']['type'] = 'nocl'
-            elif exp['main']['cl'] == 'nullcl': 
-                self.config['trainer']['cl']['type'] = 'nullcl'
-            elif exp['main']['cl'] in ['predefined_linear','predefined_sqrt','predefined_quad']:       
-                self.config['trainer']['cl']['type'] = 'predefined'         
-                self.config['trainer']['cl']['predefined']['profile'] = exp['main']['cl'][11:]
-            elif exp['main']['cl'] in ['predefined2stage_linear','predefined2stage_sqrt','predefined2stage_quad']:       
-                self.config['trainer']['cl']['type'] = 'predefined2stage'         
-                self.config['trainer']['cl']['predefined2stage']['profile'] = exp['main']['cl'][17:]
-            elif exp['main']['cl'] in ['predefined3stage_linear','predefined3stage_sqrt','predefined3stage_quad']:       
-                self.config['trainer']['cl']['type'] = 'predefined3stage'         
-                self.config['trainer']['cl']['predefined3stage']['profile'] = exp['main']['cl'][17:]
-            elif exp['main']['cl'] == 'selfpaced': 
-                self.config['trainer']['cl']['type'] = 'selfpaced'
-            elif exp['main']['cl'] == 'control': 
-                self.config['trainer']['cl']['type'] = 'control'
-            elif exp['main']['cl'] == 'controladaptive': 
-                self.config['trainer']['cl']['type'] = 'controladaptive'
+            # ISE
+            self.config['trainer']['ise']['type'] = exp['main']['ise']
+            self.config['trainer']['ise']['range_growth_mode'] = exp['main']['ise_range_growth_mode']    
 
+            # Sort dict for logging
+            myKeys = list(exp['main'].keys())
+            myKeys.sort()
+            exp['main'] = {i: exp['main'][i] for i in myKeys}
+
+            # Create name
             exp_name = self.config['general']['exp_name']
             for key in list(exp['main'].keys()):
                 print(key)

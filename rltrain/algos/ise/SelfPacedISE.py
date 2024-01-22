@@ -5,18 +5,18 @@ from statistics import mean as dq_mean
 from typing import Dict, List, Tuple, Union, Optional
 
 from rltrain.taskenvs.GymPanda import GymPanda
-from rltrain.algos.cl.CL import CL
+from rltrain.algos.ise.InitialStateEntropy import InitialStateEntropy
 
-class selfpacedCL(CL):
+class SelfPacedISE(InitialStateEntropy):
 
     def __init__(self, config: Dict, taskenv: GymPanda) -> None:
-        super(selfpacedCL, self).__init__(config, taskenv)
+        super(SelfPacedISE, self).__init__(config, taskenv)
 
         # SELFPACED DUAL
-        self.Psi_high = self.config['trainer']['cl']['selfpaced']['upper_cond']
-        self.Psi_low = self.config['trainer']['cl']['selfpaced']['lower_cond']
-        self.step = self.config['trainer']['cl']['selfpaced']['step']
-        self.dequeu_maxlen = config['trainer']['cl']['selfpaced']['window_size']
+        self.Psi_high = self.config['trainer']['ise']['selfpaced']['upper_cond']
+        self.Psi_low = self.config['trainer']['ise']['selfpaced']['lower_cond']
+        self.step = self.config['trainer']['ise']['selfpaced']['step']
+        self.dequeu_maxlen = config['trainer']['ise']['selfpaced']['window_size']
       
         self.store_rollout_success_rate = True
         self.rollout_success_dq = collections.deque(maxlen=self.dequeu_maxlen)

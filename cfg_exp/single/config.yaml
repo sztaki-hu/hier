@@ -1,5 +1,5 @@
 general:
-  exp_name: X_test_01_manual
+  exp_name: X_0122_SINGLE
   logdir: logs
   demodir: demos
   seed: random
@@ -102,8 +102,8 @@ trainer:
   batch_size: 256
   update_after: 1e2
   update_every: 50
-  cl:
-    type: selfpaced # nocl / nullcl / predefined / predefined2stage / predefined3stage / selfpaced / control / controladaptive
+  ise:
+    type: selfpaced # max / min / predefined / predefined2stage / predefined3stage / selfpaced / control / controladaptive
     range_growth_mode: simple # simple / discard / balancediscard
     ratio_discard_lag: 0.1 # Only if 'range_growth_mode' is 'discard' or 'balancediscard'
     balancediscard_ratio: 0.8  # Only if 'range_growth_mode' is 'balancediscard'

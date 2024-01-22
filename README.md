@@ -110,7 +110,7 @@ The rltrain package has the following structure:
 
     * The HiER (highlight experience replay) implementation can be found at the `rltrain/algos/hier` folder.
 
-    * The E2H-ISE (easy2hard initial state entropy) implementation can be found at the `rltrain/algos/cl` folder.
+    * The E2H-ISE (easy2hard initial state entropy) implementation can be found at the `rltrain/algos/ise` folder.
 
 * `buffers`:
 

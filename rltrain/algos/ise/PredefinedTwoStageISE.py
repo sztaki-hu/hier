@@ -6,20 +6,20 @@ from typing import Dict, List, Tuple, Union, Optional
 
 from rltrain.taskenvs.GymPanda import GymPanda
 
-from rltrain.algos.cl.CL import CL
+from rltrain.algos.ise.InitialStateEntropy import InitialStateEntropy
 
 PACING_PROFILES = ['linear','sqrt','quad']
 
-class predefined2stageCL(CL):
+class PredefinedTwoStageISE(InitialStateEntropy):
    
     def __init__(self, config: Dict, taskenv: GymPanda) -> None:
-        super(predefined2stageCL, self).__init__(config, taskenv)
+        super(PredefinedTwoStageISE, self).__init__(config, taskenv)
 
         # PREDEFINED 2-STAGE
-        self.profile = self.config['trainer']['cl']['predefined2stage']['profile']
-        self.change_stage = self.config['trainer']['cl']['predefined2stage']['change_stage']
-        self.stage1_saturation_t = self.config['trainer']['cl']['predefined2stage']['stage1']['saturation_t']
-        self.stage2_saturation_t = self.config['trainer']['cl']['predefined2stage']['stage2']['saturation_t']
+        self.profile = self.config['trainer']['ise']['predefined2stage']['profile']
+        self.change_stage = self.config['trainer']['ise']['predefined2stage']['change_stage']
+        self.stage1_saturation_t = self.config['trainer']['ise']['predefined2stage']['stage1']['saturation_t']
+        self.stage2_saturation_t = self.config['trainer']['ise']['predefined2stage']['stage2']['saturation_t']
 
         print(self.profile)
         assert self.profile in PACING_PROFILES

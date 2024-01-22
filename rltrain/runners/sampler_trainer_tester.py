@@ -8,7 +8,7 @@ import math
 from tqdm import tqdm
 
 from rltrain.taskenvs.builder import make_taskenv
-from rltrain.algos.cl.builder import make_cl
+from rltrain.algos.ise.builder import make_ise
 from rltrain.agents.builder import make_agent
 from rltrain.buffers.builder import make_per
 from rltrain.algos.hier.builder import make_hier
@@ -94,8 +94,8 @@ class SamplerTrainerTester:
         # HER (Hindsight Experience Replay)
         self.HER = HER(self.config, self.config_framework, self.taskenv, self.replay_buffer)
 
-        # CL (Curriculum Learning)
-        self.CL = make_cl(self.config, self.config_framework, self.taskenv)
+        # ISE (Initial State Entropy)
+        self.ISE = make_ise(self.config, self.config_framework, self.taskenv)
 
         # HiER
         self.hier_include_test =  config['buffer']['hier']['include_test']
@@ -153,7 +153,7 @@ class SamplerTrainerTester:
         t_test = 0
 
         # Env reset
-        o, ep_ret, ep_len = self.CL.reset_env(0), 0, 0
+        o, ep_ret, ep_len = self.ISE.reset_env(0), 0, 0
 
         # Init variables
         best_eval_measure = -float('inf')
@@ -204,8 +204,8 @@ class SamplerTrainerTester:
 
                 ep_succes = 1.0 if info['is_success'] == True else 0.0
                 self.ep_success_dq.append(ep_succes)
-                self.CL.append_rollout_success_dq(ep_succes)
-                #if self.CL.store_rollout_success_rate: self.CL.rollout_success_dq.append(ep_succes)
+                self.ISE.append_rollout_success_dq(ep_succes)
+                #if self.ISE.store_rollout_success_rate: self.ISE.rollout_success_dq.append(ep_succes)
                 
                 for (o, a, r, o2, d) in episode:
                     self.replay_buffer.store(o, a, r, o2, d)
@@ -224,8 +224,8 @@ class SamplerTrainerTester:
                 self.ep_rew_dq.append(ep_ret)
                 self.ep_len_dq.append(ep_len)
 
-                # CL 
-                o, ep_ret, ep_len = self.CL.reset_env(t), 0, 0
+                # ISE 
+                o, ep_ret, ep_len = self.ISE.reset_env(t), 0, 0
 
                 t_process_ep += (time.time() - t_process_ep_0)
 
@@ -279,8 +279,8 @@ class SamplerTrainerTester:
                 # Test the performance of the deterministic version of the agent.
                 eval_mean_reward, eval_mean_ep_length, eval_success_rate, eval_state_change_rate = self.test_agent(t)
 
-                self.CL.append_eval_success_dq(eval_success_rate)
-                #if self.CL.store_eval_success_rate: self.CL.cl_eval_success_dq.append(eval_success_rate)
+                self.ISE.append_eval_success_dq(eval_success_rate)
+                #if self.ISE.store_eval_success_rate: self.ISE.ise_eval_success_dq.append(eval_success_rate)
 
                 self.logger.tb_writer_add_scalar("eval/mean_reward", eval_mean_reward, t)
                 self.logger.tb_writer_add_scalar("eval/mean_ep_length", eval_mean_ep_length, t)
@@ -315,7 +315,7 @@ class SamplerTrainerTester:
                                 "eval_mean_reward " + str(eval_mean_reward),
                                 "eval_mean_ep_length: " + str(eval_mean_ep_length),
                                 "eval_success_rate: " + str(eval_success_rate),
-                                "ratios [CL]: " + str([round(self.CL.c, 2)])])
+                                "ratios [ISE]: " + str([round(self.ISE.c, 2)])])
 
                 if best_model_changed: message += " *" 
                 tqdm.write("[info] " + message)  
@@ -340,8 +340,8 @@ class SamplerTrainerTester:
                 if self.per_active:
                     self.logger.tb_writer_add_scalar("per/beta", np.mean(self.replay_buffer.get_beta()), t)
 
-                # CL
-                self.logger.tb_writer_add_scalar("cl/c", self.CL.c, t)
+                # ISE
+                self.logger.tb_writer_add_scalar("ise/c", self.ISE.c, t)
              
                 # HiER
                 if self.HiER.lambda_mode != 'multifix':

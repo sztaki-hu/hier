@@ -1,5 +1,5 @@
 general:
-  exp_name: X_test_01_multi_serial
+  exp_name: X_0122_PARALLEL
   logdir: logs
   demodir: demos
   seed: random
@@ -102,23 +102,23 @@ trainer:
   batch_size: 256
   update_after: 1e2
   update_every: 50
-  cl:
-    type: input # nocl / nullcl / predefined / predefined2stage / predefined3stage / selfpaced / control / controladaptive
+  ise:
+    type: input # min / max / predefined / predefined2stage / predefined3stage / selfpaced / control / controladaptive
     range_growth_mode: input # simple / discard / balancediscard
     ratio_discard_lag: 0.1 # Only if 'range_growth_mode' is 'discard' or 'balancediscard'
     balancediscard_ratio: 0.8  # Only if 'range_growth_mode' is 'balancediscard'
     predefined:
-      profile: input  # linear / sqrt / quad
+      profile: linear  # linear / sqrt / quad
       saturation_t: 0.8
     predefined2stage:
-      profile: input  # linear / sqrt / quad
+      profile: linear  # linear / sqrt / quad
       change_stage: 0.5
       stage1: # goal
         saturation_t: 0.4
       stage2: # obj
         saturation_t: 0.8
     predefined3stage:
-      profile: input  # linear / sqrt / quad
+      profile: linear  # linear / sqrt / quad
       change_stage12: 0.3
       change_stage23: 0.6
       stage1: # goal

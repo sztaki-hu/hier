@@ -32,8 +32,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     
     
-    #parser.add_argument("--config", default="logs/"+"_".join(['1106_A', 'PandaSlide-v3','sac','sparse','final','predefined','fix','noper','5e5','selfpaced']),help="Path of the config file")
-    parser.add_argument("--config", default="logs/"+"_".join(['1109_A','sac','selfpaced','final','predefined','fix','noper','sparse','PandaPickAndPlace-v3']),help="Path of the config file")
+    parser.add_argument("--config", default="logs/"+"_".join(['X_0122_SERIAL','sac','noher','nohier','fix','max','noper','sparse','PandaPush-v3']),help="Path of the config file")
     parser.add_argument("--figid", default="1106_A" ,help="Fig id")
     parser.add_argument("--hwid", type=int, default=0 ,help="Hardware id")
     parser.add_argument("--seedid", type=int, default=0 ,help="seedid")

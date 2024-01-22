@@ -7,7 +7,7 @@ from rltrain.taskenvs.GymPanda import GymPanda
 
 RANGE_GROWTH_MODES = ['simple', 'discard', 'balancediscard']
 
-class CL:
+class InitialStateEntropy:
     def __init__(self, config: Dict, taskenv: GymPanda) -> None:
 
         # INIT CONFIG
@@ -23,7 +23,7 @@ class CL:
 
         print(self.init_ranges)
 
-        if config['trainer']['cl']['type'] not in ['nocl','nullcl']:
+        if config['trainer']['ise']['type'] not in ['min','max']:
             self.obj_range_low = self.init_ranges['obj_range_low']
             self.obj_range_high = self.init_ranges['obj_range_high']
             self.object_size = self.init_ranges['object_size']
@@ -112,11 +112,11 @@ class CL:
                 self.obj_range_half = np.concatenate([obj1_range_half,obj2_range_half])
                 self.goal_range_half = np.concatenate([goal1_range_half,goal2_range_half])
             else:
-                raise ValueError("[CL]: Obj num and/or goal num are not valid. Obj num = " + str(self.obj_num) + " | Goal num = " + str(self.goal_num))
+                raise ValueError("[ISE]: Obj num and/or goal num are not valid. Obj num = " + str(self.obj_num) + " | Goal num = " + str(self.goal_num))
                 
-            self.range_growth_mode = config['trainer']['cl']['range_growth_mode']
-            self.balancediscard_ratio = config['trainer']['cl']['balancediscard_ratio']
-            self.c_discard_lag = self.config['trainer']['cl']['ratio_discard_lag']
+            self.range_growth_mode = config['trainer']['ise']['range_growth_mode']
+            self.balancediscard_ratio = config['trainer']['ise']['balancediscard_ratio']
+            self.c_discard_lag = self.config['trainer']['ise']['ratio_discard_lag']
 
             assert self.range_growth_mode in RANGE_GROWTH_MODES
 
@@ -162,7 +162,7 @@ class CL:
         if self.range_growth_mode == "simple": return self.get_range_rectangle() 
         elif self.range_growth_mode == "discard": return self.get_range_rectangle_with_cutout()
         elif self.range_growth_mode == "balancediscard": return self.get_range_rectangle_with_cutout() if random.random() < 0.80 else self.get_range_rectangle()
-        else: raise ValueError("[CL]: range_growth_mode: '" + str(self.range_growth_mode) + "' must be in : " + str(RANGE_GROWTH_MODES))
+        else: raise ValueError("[ISE]: range_growth_mode: '" + str(self.range_growth_mode) + "' must be in : " + str(RANGE_GROWTH_MODES))
    
 
 
@@ -178,7 +178,7 @@ class CL:
                 object_position =  np.random.uniform(obj_low, obj_high)
                 desired_goal = np.random.uniform(goal_low, goal_high)
             else:
-                raise ValueError("[CL]: [obj_low, obj_high]: " + str([obj_low, obj_high]))
+                raise ValueError("[ISE]: [obj_low, obj_high]: " + str([obj_low, obj_high]))
             
 
         return desired_goal,object_position
@@ -200,12 +200,12 @@ class CL:
                 if obj_low is not None and obj_d_low is not None:
                     object_position =  np.random.uniform(obj_low, obj_d_low)
                 else:
-                    raise ValueError("[CL]: [obj_low, obj_d_low]: " + str([obj_low, obj_d_low]))
+                    raise ValueError("[ISE]: [obj_low, obj_d_low]: " + str([obj_low, obj_d_low]))
             else:
                 if obj_d_high is not None and obj_high is not None:
                     object_position =  np.random.uniform(obj_d_high, obj_high)
                 else:
-                    raise ValueError("[CL]: [obj_d_high, obj_high]: " + str([obj_d_high, obj_high]))
+                    raise ValueError("[ISE]: [obj_d_high, obj_high]: " + str([obj_d_high, obj_high]))
         
         return desired_goal,object_position
     
@@ -221,7 +221,7 @@ class CL:
                 obj_low = self.obj_range_center - self.obj_range_half * obj_ratio
                 obj_high = self.obj_range_center + self.obj_range_half * obj_ratio
             else:
-                raise ValueError("[CL]: obj_range_half: " + str(self.obj_range_half))
+                raise ValueError("[ISE]: obj_range_half: " + str(self.obj_range_half))
         goal_low = self.goal_range_center - self.goal_range_half * goal_ratio
         goal_high = self.goal_range_center + self.goal_range_half * goal_ratio
 

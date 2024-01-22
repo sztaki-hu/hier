@@ -29,15 +29,15 @@ parser.add_argument("--show", default=False ,help="Id of plot")
 args = parser.parse_args()
 
 
-plotid = '1105_X'
+plotid = 'X_0122'
 seednum = 1
-taskname_list = ['Push','Slide']
+taskname_list = ['Push']
 #taskname_list = ['InvertedPendulum-v4']
 
 
 create_folder(os.path.join(current_dir, args.outdir))
 
-algs = ['sac','td3']
+algs = ['sac']
 
 runtime_cat_name_list = ['collect', 'process_ep', 'train', 'test', 'other']
 exp_test_color_list = ['green','orange','blue','magenta','brown'] # collect, process ep, train, test, other
@@ -47,9 +47,9 @@ for taskname in taskname_list:
         
         exps = []
     
-        exps.append({"exp_name": "_".join(['1105_T2', 'Panda'+taskname+'-v3',alg,'sparse','final','predefined','prioritized','proportional','5e5','controladaptive']) , "seed_num":seednum, "color": "blue", "plot_name":  'HER + PER + CL + HiER(p)'})
-        exps.append({"exp_name": "_".join(['1105_T2', 'Panda'+taskname+'-v3',alg,'sparse','final','predefined','fix','noper','5e5','controladaptive']) , "seed_num":seednum, "color": "magenta", "plot_name":  'HER + CL + HiER'})
-
+        exps.append({"exp_name": "_".join(['X_0122_SERIAL',alg,'noher','nohier','fix','max','noper','sparse','Panda'+taskname+'-v3']) , "seed_num":seednum, "plot_name": "max", "linestyle": 'solid'}) # type: ignore
+        exps.append({"exp_name": "_".join(['X_0122_SERIAL',alg,'noher','nohier','fix','min','noper','sparse','Panda'+taskname+'-v3']) , "seed_num":seednum, "plot_name": "min", "linestyle": 'solid'}) # type: ignore
+        
         
         for exp in exps:
 

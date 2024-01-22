@@ -6,6 +6,7 @@
 
 Benchmarks/*
 logs/*
+logs_2023/*
 dev/*
 results/output/*
 cfg_rlbench/*

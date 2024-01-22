@@ -43,24 +43,26 @@ color_line_width = 6.0
 linewidth = 3
 
 plotid = 'plotid'
-seednum = 10
-taskname_list = ['Reach','Push','Slide','PickAndPlace','Stack']
-plotdata_list = ['eval_success_rate','eval_mean_reward',
-                 'rollout_success_rate', 'rollout_state_changed','rollout_ep_rew_mean',
-                 'cl_c',
-                 'time_fps',
-                 'hier_batch_size','hier_buffer_size','hier_lambda','hier_xi']
-plotdata_y_list = ['Eval success rate','Eval Mean reward',
-                 'Rollout success rate', 'Rollout state changed','Rollout ep rew mean',
-                 'CL param c',
-                 'time fps',
-                 'HiER batch size','HiER buffer size','HiER lambda','HiER xi']
+seednum = 1
+# taskname_list = ['Reach','Push','Slide','PickAndPlace','Stack']
+taskname_list = ['Push']
+
+# plotdata_list = ['eval_success_rate','eval_mean_reward',
+#                  'rollout_success_rate', 'rollout_state_changed','rollout_ep_rew_mean',
+#                  'ise_c',
+#                  'time_fps',
+#                  'hier_batch_size','hier_buffer_size','hier_lambda','hier_xi']
+# plotdata_y_list = ['Eval success rate','Eval Mean reward',
+#                  'Rollout success rate', 'Rollout state changed','Rollout ep rew mean',
+#                  'ISE param c',
+#                  'time fps',
+#                  'HiER batch size','HiER buffer size','HiER lambda','HiER xi']
 
 
 # Grand test ###################
 
-plotdata_list = ['eval_success_rate']
-plotdata_y_list = ['Eval success rate']
+# plotdata_list = ['eval_success_rate']
+# plotdata_y_list = ['Eval success rate']
 
 # HiER #########################
 
@@ -72,11 +74,11 @@ plotdata_y_list = ['Eval success rate']
 
 # E2H ############################
 
-# plotdata_list = ['eval_success_rate','rollout_success_rate','cl_c']
-# plotdata_y_list = ['Eval success rate','Rollout success rate','CL param c']
+plotdata_list = ['eval_success_rate','rollout_success_rate','ise_c']
+plotdata_y_list = ['Eval success rate','Rollout success rate','ISE param c']
 
-# plotdata_list = ['cl_c']
-# plotdata_y_list = ['CL param c']
+plotdata_list = ['ise_c']
+plotdata_y_list = ['ISE param c']
 
 
 
@@ -98,6 +100,18 @@ for taskname in taskname_list:
         logdir = plotid + "_Panda" + taskname + "_" + alg
         create_folder(os.path.join(current_dir, args.outdir, logdir))
         exps = []
+    
+        color_palette = [(0.2,0.2,0.2),'orange','blue','purple','red','green','brown','aqua']
+
+        exps.append({"exp_name": "_".join(['X_0122_SERIAL',alg,'noher','nohier','fix','max','noper','sparse','Panda'+taskname+'-v3']) , "seed_num":seednum, "color": color_palette[0], "plot_name": "max", "linestyle": 'solid'}) # type: ignore
+        exps.append({"exp_name": "_".join(['X_0122_SERIAL',alg,'noher','nohier','fix','min','noper','sparse','Panda'+taskname+'-v3']) , "seed_num":seednum, "color": color_palette[1], "plot_name": "min", "linestyle": 'solid'}) # type: ignore
+        exps.append({"exp_name": "_".join(['X_0122_SERIAL',alg,'noher','nohier','fix','predefined','noper','sparse','Panda'+taskname+'-v3']) , "seed_num":seednum, "color": color_palette[2], "plot_name": "predefined", "linestyle": 'solid'}) # type: ignore
+        exps.append({"exp_name": "_".join(['X_0122_SERIAL',alg,'noher','nohier','fix','predefined3stage','noper','sparse','Panda'+taskname+'-v3']) , "seed_num":seednum, "color": color_palette[3], "plot_name": "predefined2stage", "linestyle": 'solid'}) # type: ignore
+        exps.append({"exp_name": "_".join(['X_0122_SERIAL',alg,'noher','nohier','fix','predefined2stage','noper','sparse','Panda'+taskname+'-v3']) , "seed_num":seednum, "color": color_palette[4], "plot_name": "fpredefined3stage", "linestyle": 'solid'}) # type: ignore
+        exps.append({"exp_name": "_".join(['X_0122_SERIAL',alg,'noher','nohier','fix','selfpaced','noper','sparse','Panda'+taskname+'-v3']) , "seed_num":seednum, "color": color_palette[5], "plot_name": "selfpaced", "linestyle": 'solid'}) # type: ignore
+        exps.append({"exp_name": "_".join(['X_0122_SERIAL',alg,'noher','nohier','fix','control','noper','sparse','Panda'+taskname+'-v3']) , "seed_num":seednum, "color": color_palette[6], "plot_name": "control", "linestyle": 'solid'}) # type: ignore
+        exps.append({"exp_name": "_".join(['X_0122_SERIAL',alg,'noher','nohier','fix','controladaptive','noper','sparse','Panda'+taskname+'-v3']) , "seed_num":seednum, "color": color_palette[7], "plot_name": "controladaptive", "linestyle": 'solid'}) # type: ignore
+        
 
 ########### Grand test
         #color_palette = ['darkgray','dimgray','green','blue','purple','magenta']
@@ -117,14 +131,14 @@ for taskname in taskname_list:
         # exps.append({"exp_name": "_".join(['1108_B',alg,'selfpaced','final','predefined','prioritized','proportional','sparse','Panda'+taskname+'-v3']) , "seed_num":seednum, "color": color_palette[4], "plot_name": "HiER+ (with HER & PER)"}) 
         # exps.append({"exp_name": "_".join(['1108_A',alg,'selfpaced','final','predefined','fix','noper','sparse','Panda'+taskname+'-v3']) , "seed_num":seednum, "color": color_palette[5], "plot_name": "HiER+ (with HER)"}) 
       
-        datetag = '1116' if taskname in ['Push','Slide'] else '1119'
+        # datetag = '1116' if taskname in ['Push','Slide'] else '1119'
         
-        exps.append({"exp_name": "_".join([datetag,'A',alg,'nocl','noher','nohier','fix','noper','sparse','Panda'+taskname+'-v3']) , "seed_num":seednum, "color": color_palette[0], "plot_name": "Baseline", "linestyle": 'dashed'})
-        exps.append({"exp_name": "_".join([datetag,'A',alg,'nocl','final','nohier','prioritized','proportional','sparse','Panda'+taskname+'-v3']) , "seed_num":seednum, "color": color_palette[1], "plot_name": "Baseline [HER & PER]", "linestyle": 'dashed' }) 
-        exps.append({"exp_name": "_".join([datetag,'A',alg,'selfpaced','final','nohier','prioritized','proportional','sparse','Panda'+taskname+'-v3']) , "seed_num":seednum, "color": color_palette[2], "plot_name": "E2H-ISE [HER & PER]", "linestyle": 'solid' }) 
-        exps.append({"exp_name": "_".join([datetag,'A',alg,'nocl','final','predefined','prioritized','proportional','sparse','Panda'+taskname+'-v3']) , "seed_num":seednum, "color": color_palette[3], "plot_name": "HiER [HER & PER]", "linestyle": 'solid' }) 
-        exps.append({"exp_name": "_".join([datetag,'A',alg,'selfpaced','final','predefined','prioritized','proportional','sparse','Panda'+taskname+'-v3']) , "seed_num":seednum, "color": color_palette[4], "plot_name": "HiER+ [HER & PER]", "linestyle": 'solid' }) 
-        exps.append({"exp_name": "_".join([datetag,'A',alg,'selfpaced','final','predefined','fix','noper','sparse','Panda'+taskname+'-v3']) , "seed_num":seednum, "color": color_palette[5], "plot_name": "HiER+ [HER]", "linestyle": 'solid' }) 
+        # exps.append({"exp_name": "_".join([datetag,'A',alg,'nocl','noher','nohier','fix','noper','sparse','Panda'+taskname+'-v3']) , "seed_num":seednum, "color": color_palette[0], "plot_name": "Baseline", "linestyle": 'dashed'})
+        # exps.append({"exp_name": "_".join([datetag,'A',alg,'nocl','final','nohier','prioritized','proportional','sparse','Panda'+taskname+'-v3']) , "seed_num":seednum, "color": color_palette[1], "plot_name": "Baseline [HER & PER]", "linestyle": 'dashed' }) 
+        # exps.append({"exp_name": "_".join([datetag,'A',alg,'selfpaced','final','nohier','prioritized','proportional','sparse','Panda'+taskname+'-v3']) , "seed_num":seednum, "color": color_palette[2], "plot_name": "E2H-ISE [HER & PER]", "linestyle": 'solid' }) 
+        # exps.append({"exp_name": "_".join([datetag,'A',alg,'nocl','final','predefined','prioritized','proportional','sparse','Panda'+taskname+'-v3']) , "seed_num":seednum, "color": color_palette[3], "plot_name": "HiER [HER & PER]", "linestyle": 'solid' }) 
+        # exps.append({"exp_name": "_".join([datetag,'A',alg,'selfpaced','final','predefined','prioritized','proportional','sparse','Panda'+taskname+'-v3']) , "seed_num":seednum, "color": color_palette[4], "plot_name": "HiER+ [HER & PER]", "linestyle": 'solid' }) 
+        # exps.append({"exp_name": "_".join([datetag,'A',alg,'selfpaced','final','predefined','fix','noper','sparse','Panda'+taskname+'-v3']) , "seed_num":seednum, "color": color_palette[5], "plot_name": "HiER+ [HER]", "linestyle": 'solid' }) 
 
 ########### HiER lambda
 
@@ -225,16 +239,16 @@ for taskname in taskname_list:
             
                     maxdata_pd['HER'] = False
                     maxdata_pd['PER'] = False
-                    maxdata_pd['CL'] = False
+                    maxdata_pd['ISE'] = False
                     maxdata_pd['HiER'] = False
 
                     for ind in maxdata_pd.index:
                         if maxdata_pd['exp_name'][ind].find('noher') == -1: maxdata_pd['HER'][ind] = True
                         if maxdata_pd['exp_name'][ind].find('noper') == -1: maxdata_pd['PER'][ind] = True
-                        if maxdata_pd['exp_name'][ind].find('nocl') == -1: maxdata_pd['CL'][ind] = True
+                        if maxdata_pd['exp_name'][ind].find('max') == -1: maxdata_pd['ISE'][ind] = True
                         if maxdata_pd['exp_name'][ind].find('nohier') == -1: maxdata_pd['HiER'][ind] = True
                 
-                    maxdata_pd = maxdata_pd[['HER','PER','CL','HiER','meanmaxvalue','stdmaxvalue']]
+                    maxdata_pd = maxdata_pd[['HER','PER','ISE','HiER','meanmaxvalue','stdmaxvalue']]
 
                     print(maxdata_pd.to_string())
                     print(maxdata_pd.head())

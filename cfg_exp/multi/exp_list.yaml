@@ -1,6 +1,6 @@
 process_0: 
   general:
-    seednum: 2 
+    seednum: 1 
   agent: 
     type: ['sac'] # ['sac','td3','ddpg']
     sac:
@@ -36,97 +36,13 @@ process_0:
     num_episodes: [10]
   # structure is differend than in the config file #################################
   task: 
-    gympanda: ['PandaSlide-v3']
-  cl: 
-    type: ['nocl','selfpaced']  ######################## E2H-ISE  ################## 
+    gympanda: ['PandaPush-v3']
+  ise: 
+    type: ['max','min','predefined','predefined2stage']
+    # type: ['max','min',
+    #              'predefined','predefined2stage','predefined3stage',
+    #              'selfpaced','control', 'controladaptive'] ######################## E2H-ISE  ################## 
     range_growth_mode: ['simple'] 
 ####################################################################################
 
-process_1: 
-  general:
-    seednum: 2 
-  agent: 
-    type: ['sac'] # ['sac','td3','ddpg']
-    sac:
-      alpha: [0.1]
-    gamma: [0.95]
-    learning_rate: [0.001]
-  environment:
-    reward:
-      reward_shaping_type: ['sparse'] # sparse / state_change_bonus
-      reward_bonus: [0.0] #--- only if reward_shaping_type == state_change_bonus
-  buffer:
-    replay_buffer_size: [1e6]
-    her:
-      goal_selection_strategy: ['final'] # final  ######################## HER ################
-    hier:
-      buffer_size: [1e6]
-      lambda: # threshold
-        mode: ['predefined']    ######################## HiER ################
-        fix:
-          lambda: [-20] # gympanda: -20
-        predefined: 
-          lambda_start: [-50] # gympanda: -50 
-          lambda_end: [-10] # gympanda: -10 
-      xi: # hier batch ratio 
-        mode: ['fix'] # fix 
-        xi: [0.5]     
-    per:
-      mode: ['noper'] # proportional               ######################## PER ################
-  trainer:
-    total_timesteps: [5e5]
-  eval:
-    freq: [1e4]
-    num_episodes: [100]
-  # structure is differend than in the config file #################################
-  task: 
-    gympanda: ['PandaSlide-v3']
-  cl: 
-    type: ['nocl','selfpaced']  ######################## E2H-ISE ################## 
-    range_growth_mode: ['simple'] 
-####################################################################################
-
-process_2: 
-  general:
-    seednum: 3 
-  agent: 
-    type: ['sac'] # ['sac','td3','ddpg']
-    sac:
-      alpha: [0.1]
-    gamma: [0.95]
-    learning_rate: [0.001]
-  environment:
-    reward:
-      reward_shaping_type: ['sparse'] # sparse / state_change_bonus
-      reward_bonus: [0.0] #--- only if reward_shaping_type == state_change_bonus
-  buffer:
-    replay_buffer_size: [1e6]
-    her:
-      goal_selection_strategy: ['final'] # final  ######################## HER ################
-    hier:
-      buffer_size: [1e6]
-      lambda: # threshold
-        mode: ['nohier', 'fix', 'multifix', 'predefined', 'ama']  ######################## HiER ################
-        fix:
-          lambda: [-20] # gympanda: -20
-        predefined: 
-          lambda_start: [-50] # gympanda: -50 
-          lambda_end: [-10] # gympanda: -10 
-      xi: # hier batch ratio 
-        mode: ['fix'] # fix 
-        xi: [0.5]     
-    per:
-      mode: ['noper'] # proportional               ######################## PER ################
-  trainer:
-    total_timesteps: [5e5]
-  eval:
-    freq: [1e4]
-    num_episodes: [100]
-  # structure is differend than in the config file #################################
-  task: 
-    gympanda: ['PandaSlide-v3']
-  cl: 
-    type: ['nocl']  ######################## E2H-ISE  ################## 
-    range_growth_mode: ['simple'] 
-####################################################################################
 

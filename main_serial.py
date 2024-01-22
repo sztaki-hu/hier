@@ -70,9 +70,9 @@ def main() -> int:
     eval_num_episodes_list = exp_list['eval']['num_episodes']
     # Tasks
     envs = list(exp_list['task'].keys())
-    # CLs
-    cl_types = exp_list['cl']['type']
-    cl_range_growth_modes = exp_list['cl']['range_growth_mode']
+    # ISE
+    ise_types = exp_list['ise']['type']
+    ise_range_growth_modes = exp_list['ise']['range_growth_mode']
 
     config_file_is_valid = True
     error_exps = []
@@ -126,9 +126,9 @@ def main() -> int:
                             # Eval
                             eval_freqs,
                             eval_num_episodes_list,
-                            # CL
-                            cl_types,
-                            cl_range_growth_modes,
+                            # ISE
+                            ise_types,
+                            ise_range_growth_modes,
                             ):
                         
                         #try:   
@@ -159,9 +159,9 @@ def main() -> int:
                         # Eval
                         eval_freq                                = r[17]
                         eval_num_episodes                        = r[18]
-                        # CL
-                        cl_type                                  = r[19]
-                        cl_range_growth_mode                     = r[20]                  
+                        # ISE
+                        ise_type                                  = r[19]
+                        ise_range_growth_mode                     = r[20]                  
                                                 
                         exp = {}
                         exp['main'] = {} 
@@ -220,11 +220,11 @@ def main() -> int:
                         exp['exp_in_name']['eval_freq'] = False
                         exp['main']['eval_num_episodes'] = eval_num_episodes
                         exp['exp_in_name']['eval_num_episodes'] = False
-                        # CL
-                        exp['main']['cl'] = cl_type
-                        exp['exp_in_name']['cl'] = True
-                        exp['main']['cl_range_growth_mode'] = cl_range_growth_mode
-                        exp['exp_in_name']['cl_range_growth_mode'] = False
+                        # ISE
+                        exp['main']['ise'] = ise_type
+                        exp['exp_in_name']['ise'] = True
+                        exp['main']['ise_range_growth_mode'] = ise_range_growth_mode
+                        exp['exp_in_name']['ise_range_growth_mode'] = False
                     
 
                         # Init logger ###############################################x
