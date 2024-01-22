@@ -68,7 +68,7 @@ if __name__ == '__main__':
     #tester.eval_agent(model_name="best_model",num_display_episode=1, headless=False, time_delay = 0.0, current_dir = current_dir, outdir = args.outdir, figid = args.figid)
 
     # Test Agent with Stats (only gympanda)
-    tester.eval_agent_stats(model_name="best_model",num_display_episode=10, headless=False, time_delay = 0.05, current_dir = current_dir, outdir = args.outdir, figid = args.figid)
+    tester.eval_agent_stats(model_name="best_model",num_display_episode=10, headless=True, time_delay = 0.05, current_dir = current_dir, outdir = args.outdir, figid = args.figid)
 
 
 

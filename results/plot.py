@@ -42,7 +42,7 @@ color_line_width = 6.0
 
 linewidth = 3
 
-plotid = 'plotid'
+plotid = 'XXXXXX_000001111'
 seednum = 1
 # taskname_list = ['Reach','Push','Slide','PickAndPlace','Stack']
 taskname_list = ['Push']
@@ -202,7 +202,10 @@ for taskname in taskname_list:
                     pivot['t'] = pivot['t'] / 1000
                     pivot = pivot[['exp_name','seed','t','value','plot_name']]
 
-                    data_pd = data_pd.append(pivot, ignore_index = True) # type: ignore
+                    print("-----------------")
+                    print(data_pd)
+
+                    data_pd = pd.concat([data_pd,pivot], ignore_index = True) # type: ignore
 
                         
             print(data_pd.to_string())
@@ -235,7 +238,7 @@ for taskname in taskname_list:
                                         'meanmaxvalue': meanmaxVal,
                                         'stdmaxvalue': stdmaxVal,
                                         'plot_name': pivot.iloc[0]["plot_name"]} # type: ignore
-                        maxdata_pd = maxdata_pd.append(df_append, ignore_index = True) # type: ignore
+                        maxdata_pd = pd.concat([maxdata_pd,df_append], ignore_index = True) # type: ignore
             
                     maxdata_pd['HER'] = False
                     maxdata_pd['PER'] = False
@@ -266,16 +269,17 @@ for taskname in taskname_list:
                         continue
                     pivot=data_pd[data_pd["exp_name"] == exps[i]['exp_name']]  
                     pivot=pivot[pivot["seed"] == j]
+
                     if j == 0:
-                        plt.plot(pivot['t'],
-                                pivot['value'],
+                        plt.plot(np.array(pivot['t']),
+                                np.array(pivot['value']),
                                 color=exps[i]['color'],
                                 label=exps[i]['plot_name'],
                                 linestyle = exps[i]['linestyle'],
                                 linewidth=linewidth)  
                     else: 
-                        plt.plot(pivot['t'],
-                                pivot['value'],
+                        plt.plot(np.array(pivot['t']),
+                                np.array(pivot['value']),
                                 color=exps[i]['color'],
                                 linestyle = exps[i]['linestyle'],
                                 linewidth=linewidth)
@@ -324,6 +328,10 @@ for taskname in taskname_list:
             # SD plot ###################################
 
             fig, ax = plt.subplots(figsize=(10,8))
+
+            print("#######################xx")
+            print(data_pd)
+            print(np.array(data_pd))
 
             sns.lineplot(data=data_pd, 
                          x="t", 
