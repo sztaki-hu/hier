@@ -14,16 +14,16 @@ process_0:
   buffer:
     replay_buffer_size: [1e6]
     her:
-      goal_selection_strategy: ['noher'] # final  ######################## HER ################
+      goal_selection_strategy: ['noher','final'] # final  ######################## HER ################
     hier:
       buffer_size: [1e6]
       lambda: # threshold
-        mode: ['nohier']    ######################## HiER ################
+        mode: ['nohier','predefined']    ######################## HiER ################
         fix:
           lambda: [-20] # gympanda: -20
         predefined: 
-          lambda_start: [-50] # gympanda: -50 
-          lambda_end: [-10] # gympanda: -10 
+          lambda_start: [-100] # gympanda: -50; gym: -100
+          lambda_end: [-10] # gympanda: -10; gym: -10
       xi: # hier batch ratio 
         mode: ['fix'] # fix 
         xi: [0.5]     
@@ -35,10 +35,11 @@ process_0:
     freq: [5e1]
     num_episodes: [10]
   # structure is differend than in the config file #################################
-  task: 
-    gympanda: ['PandaPush-v3']
+  task:
+    gym: ['PointMaze_UMaze-v3'] 
+    #gympanda: ['PandaPush-v3']
   ise: 
-    type: ['max','min','predefined','predefined2stage']
+    type: ['max']
     # type: ['max','min',
     #              'predefined','predefined2stage','predefined3stage',
     #              'selfpaced','control', 'controladaptive'] ######################## E2H-ISE  ################## 

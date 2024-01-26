@@ -32,7 +32,8 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     
     
-    parser.add_argument("--config", default="logs/"+"_".join(['X_0122_SERIAL','sac','noher','nohier','fix','max','noper','sparse','PandaPush-v3']),help="Path of the config file")
+    #parser.add_argument("--config", default="logs/"+"_".join(['X_0122_SERIAL','sac','noher','nohier','fix','max','noper','sparse','PandaPush-v3']),help="Path of the config file")
+    parser.add_argument("--config", default="logs/"+"_".join(['0126_X','sac','noher','nohier','fix','max','noper','sparse','PointMaze_UMaze-v3']),help="Path of the config file")
     parser.add_argument("--figid", default="1106_A" ,help="Fig id")
     parser.add_argument("--hwid", type=int, default=0 ,help="Hardware id")
     parser.add_argument("--seedid", type=int, default=0 ,help="seedid")
@@ -65,10 +66,10 @@ if __name__ == '__main__':
     tester = Eval(device, logger, config, config_framework)
 
     # Test Agent
-    #tester.eval_agent(model_name="best_model",num_display_episode=1, headless=False, time_delay = 0.0, current_dir = current_dir, outdir = args.outdir, figid = args.figid)
+    tester.eval_agent(model_name="best_model",num_display_episode=10, headless=False, time_delay = 0.0, current_dir = current_dir, outdir = args.outdir, figid = args.figid)
 
     # Test Agent with Stats (only gympanda)
-    tester.eval_agent_stats(model_name="best_model",num_display_episode=10, headless=True, time_delay = 0.05, current_dir = current_dir, outdir = args.outdir, figid = args.figid)
+    #tester.eval_agent_stats(model_name="best_model",num_display_episode=10, headless=True, time_delay = 0.05, current_dir = current_dir, outdir = args.outdir, figid = args.figid)
 
 
 

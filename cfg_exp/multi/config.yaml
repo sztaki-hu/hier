@@ -1,5 +1,5 @@
 general:
-  exp_name: X_0122_PARALLEL
+  exp_name: 0126_X
   logdir: logs
   demodir: demos
   seed: random

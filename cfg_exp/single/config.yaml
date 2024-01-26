@@ -1,5 +1,5 @@
 general:
-  exp_name: X_0126_SINGLE
+  exp_name: X_0126_SINGLE_Maze
   logdir: logs
   demodir: demos
   seed: random
@@ -14,9 +14,10 @@ hardware:
   cpu_max: [32,32,32,32]
 
 environment:
-  name: gympanda # gympanda
+  name: gym # gym / gympanda
   task: 
-    name: PandaReach-v3 # PandaReach-v3 / PandaPush-v3 / PandaSlide-v3 (and dense versions)
+    #name: PandaReach-v3 # PandaReach-v3 / PandaPush-v3 / PandaSlide-v3 (and dense versions)
+    name: PointMaze_UMaze-v3 # PointMaze_UMaze-v3
     params: []
   headless: True
   obs_dim: auto
@@ -52,7 +53,7 @@ buffer:
     n_sampled_goal: 4
     state_check: True
   per:
-    mode: proportional # noper / proportional
+    mode: noper # noper / proportional
     alpha: 0.6
     beta_start: 0.4
     beta_frames_ratio: 0.8
@@ -72,8 +73,8 @@ buffer:
       predefined:
         lambda_profile: linear  # linear / sqrt / quad
         lambda_saturation_t: 0.8
-        lambda_start: -50
-        lambda_end: -10
+        lambda_start: -100 # Panda: -50; Gym: -100
+        lambda_end: -10 # Panda: -10; Gym: -10
       ama: # adaptive moving average
         lambda_start: -50
         lambda_end: -10
@@ -104,7 +105,7 @@ trainer:
   update_every: 50
   init_state:
     ise:
-      type: selfpaced # max / min / predefined / predefined2stage / predefined3stage / selfpaced / control / controladaptive
+      type: max # max / min / predefined / predefined2stage / predefined3stage / selfpaced / control / controladaptive
       range_growth_mode: simple # simple / discard / balancediscard
       ratio_discard_lag: 0.1 # Only if 'range_growth_mode' is 'discard' or 'balancediscard'
       balancediscard_ratio: 0.8  # Only if 'range_growth_mode' is 'balancediscard'

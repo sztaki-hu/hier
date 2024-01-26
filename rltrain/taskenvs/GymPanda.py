@@ -4,8 +4,6 @@ import panda_gym
 import time
 from typing import Dict, List, Tuple, Any, Optional
 
-
-
 from rltrain.taskenvs.TaskEnvBase import TaskEnvBase
 
 class GymPanda(TaskEnvBase):
@@ -40,16 +38,79 @@ class GymPanda(TaskEnvBase):
         self.ep_o_start = o.copy()
         return o   
 
-    def save_state(self) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    # def save_state(self) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
 
-        robot_joints = np.array([self.env.robot.get_joint_angle(joint=i) for i in range(7)]) # type: ignore
-        desired_goal = self.env.task.goal # type: ignore
-        object_position = self.env.task.get_achieved_goal() # type: ignore
+    #     robot_joints = np.array([self.env.robot.get_joint_angle(joint=i) for i in range(7)]) # type: ignore
+    #     desired_goal = self.env.task.goal # type: ignore
+    #     object_position = self.env.task.get_achieved_goal() # type: ignore
 
-        return robot_joints,desired_goal,object_position
+    #     return robot_joints,desired_goal,object_position
 
     def get_robot_joints(self) -> np.ndarray:
         return np.array([self.env.robot.get_joint_angle(joint=i) for i in range(7)]) # type: ignore
+        
+    
+    def step(self, action: np.ndarray) -> Tuple[np.ndarray, float, bool, bool, Dict[str, Any]]:
+
+        o_dict, r, terminated, truncated, info = self.env.step(action)
+
+        o = np.concatenate((o_dict['observation'], o_dict['desired_goal']))
+       
+        r_float = float(r)
+        if self.reward_shaping_type == 'state_change_bonus':
+            r_float += self.get_reward_bonus(o)
+        r_float = r_float * self.reward_scalor
+
+        return o, r_float, terminated, truncated, info 
+    
+    def random_sample(self) -> np.ndarray:
+        return self.env.action_space.sample() 
+
+
+    def get_reward_bonus(self, o: np.ndarray) -> float:
+        if self.task_name in ['PandaReach-v3','PandaReachDense-v3']:
+            return 0.0 
+        if self.task_name in ['PandaPush-v3','PandaPushDense-v3',
+                              'PandaSlide-v3','PandaSlideDense-v3']:
+            return self.reward_bonus if self.is_diff_state(self.ep_o_start,o) else 0.0
+        elif self.task_name in ['PandaPickAndPlace-v3','PandaPickAndPlaceDense-v3']:
+            return self.reward_bonus if self.get_achieved_goal_from_obs(o)[2] > 0.25 else 0.0 
+        elif self.task_name in ['PandaStack-v3','PandaStackDense-v3']:
+            return self.reward_bonus if self.get_achieved_goal_from_obs(o)[5] > 0.25 else 0.0 
+        else:
+            return 0.0
+    
+    def shuttdown(self) -> None:
+        self.reset()
+        self.env.close()
+        
+    
+    # ISE ##############################
+
+    def get_init_ranges(self) -> Dict:
+        dict = {}
+        if self.task_name in ['PandaReach-v3','PandaReachDense-v3']:
+            dict['obj_range_low'] = None
+            dict['obj_range_high'] = None
+            dict['object_size'] = None
+        else:
+            dict['obj_range_low'] = self.env.task.obj_range_low # type: ignore
+            dict['obj_range_high'] = self.env.task.obj_range_high # type: ignore
+            dict['object_size'] = self.env.task.object_size # type: ignore
+        dict['goal_range_low'] = self.env.task.goal_range_low # type: ignore
+        dict['goal_range_high'] = self.env.task.goal_range_high # type: ignore
+
+        dict['obj_num'] = self.obj_num
+        dict['goal_num'] = self.goal_num
+        
+        return dict
+    
+    def get_obs(self) -> np.ndarray:  
+        robot_obs = self.env.robot.get_obs().astype(np.float32) # type: ignore # robot state
+        task_obs = self.env.task.get_obs().astype(np.float32)  # type: ignore # object position, velococity, etc...
+        observation = np.concatenate([robot_obs, task_obs])
+        o = np.concatenate((observation, self.env.task.get_goal().astype(np.float32))) # type: ignore
+        return o
     
     def load_state(self, 
                    robot_joints: Optional[np.ndarray], 
@@ -89,63 +150,7 @@ class GymPanda(TaskEnvBase):
     #     return True  
     
     
-    def step(self, action: np.ndarray) -> Tuple[np.ndarray, float, bool, bool, Dict[str, Any]]:
-
-        o_dict, r, terminated, truncated, info = self.env.step(action)
-
-        o = np.concatenate((o_dict['observation'], o_dict['desired_goal']))
-       
-        r_float = float(r)
-        if self.reward_shaping_type == 'state_change_bonus':
-            r_float += self.get_reward_bonus(o)
-        r_float = r_float * self.reward_scalor
-
-        return o, r_float, terminated, truncated, info 
-    
-    def random_sample(self) -> np.ndarray:
-        return self.env.action_space.sample() 
-
-
-    def get_reward_bonus(self, o: np.ndarray) -> float:
-        if self.task_name in ['PandaReach-v3','PandaReachDense-v3']:
-            return 0.0 
-        if self.task_name in ['PandaPush-v3','PandaPushDense-v3',
-                              'PandaSlide-v3','PandaSlideDense-v3']:
-            return self.reward_bonus if self.is_diff_state(self.ep_o_start,o) else 0.0
-        elif self.task_name in ['PandaPickAndPlace-v3','PandaPickAndPlaceDense-v3']:
-            return self.reward_bonus if self.get_achieved_goal_from_obs(o)[2] > 0.25 else 0.0 
-        elif self.task_name in ['PandaStack-v3','PandaStackDense-v3']:
-            return self.reward_bonus if self.get_achieved_goal_from_obs(o)[5] > 0.25 else 0.0 
-        else:
-            return 0.0
-        
-    
-    # Curriculum Learning ##############################
-
-    def get_init_ranges(self) -> Dict:
-        dict = {}
-        if self.task_name in ['PandaReach-v3','PandaReachDense-v3']:
-            dict['obj_range_low'] = None
-            dict['obj_range_high'] = None
-            dict['object_size'] = None
-        else:
-            dict['obj_range_low'] = self.env.task.obj_range_low # type: ignore
-            dict['obj_range_high'] = self.env.task.obj_range_high # type: ignore
-            dict['object_size'] = self.env.task.object_size # type: ignore
-        dict['goal_range_low'] = self.env.task.goal_range_low # type: ignore
-        dict['goal_range_high'] = self.env.task.goal_range_high # type: ignore
-
-        dict['obj_num'] = self.obj_num
-        dict['goal_num'] = self.goal_num
-        
-        return dict
-    
-    def get_obs(self) -> np.ndarray:  
-        robot_obs = self.env.robot.get_obs().astype(np.float32) # type: ignore # robot state
-        task_obs = self.env.task.get_obs().astype(np.float32)  # type: ignore # object position, velococity, etc...
-        observation = np.concatenate([robot_obs, task_obs])
-        o = np.concatenate((observation, self.env.task.get_goal().astype(np.float32))) # type: ignore
-        return o
+    # HER ##############################################
     
     def is_diff_state(self, 
                       o_start: np.ndarray, 
@@ -169,8 +174,6 @@ class GymPanda(TaskEnvBase):
     #     elif self.task_name in ['PandaSlide-v3','PandaSlideDense-v3']:
     #         return 5
         
-    
-    # HER ##############################################
     
     def get_achieved_goal_from_obs(self, o: np.ndarray) -> np.ndarray:
         if self.task_name in ['PandaReach-v3','PandaReachDense-v3']:
@@ -213,10 +216,6 @@ class GymPanda(TaskEnvBase):
         d = True if self.env.task.is_success(achieved_goal, desired_goal) else False # type: ignore
         return r,d
     
-
-    def shuttdown(self) -> None:
-        self.reset()
-        self.env.close()
     
 
 
