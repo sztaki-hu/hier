@@ -5,22 +5,22 @@ import math
 from typing import Dict, List, Tuple, Union, Optional
 
 from rltrain.taskenvs.GymPanda import GymPanda
-from rltrain.algos.ise.InitialStateEntropy import InitialStateEntropy
+from rltrain.algos.initstate.ise.InitStateEntropy import InitStateEntropy
 
 PACING_PROFILES = ['linear','sqrt','quad']
 
-class PredefinedThreeStageISE(InitialStateEntropy):
+class PredefinedThreeStageISE(InitStateEntropy):
    
     def __init__(self, config: Dict, taskenv: GymPanda) -> None:
         super(PredefinedThreeStageISE, self).__init__(config, taskenv)
 
         # PREDEFINED 3-STAGE
-        self.profile = self.config['trainer']['ise']['predefined3stage']['profile']
-        self.change_stage12 = self.config['trainer']['ise']['predefined3stage']['change_stage12']
-        self.change_stage23 = self.config['trainer']['ise']['predefined3stage']['change_stage23']
-        self.stage1_saturation_t= self.config['trainer']['ise']['predefined3stage']['stage1']['saturation_t']
-        self.stage2_saturation_t = self.config['trainer']['ise']['predefined3stage']['stage2']['saturation_t']
-        self.stage3_saturation_t = self.config['trainer']['ise']['predefined3stage']['stage3']['saturation_t']
+        self.profile = self.config['trainer']['init_state']['ise']['predefined3stage']['profile']
+        self.change_stage12 = self.config['trainer']['init_state']['ise']['predefined3stage']['change_stage12']
+        self.change_stage23 = self.config['trainer']['init_state']['ise']['predefined3stage']['change_stage23']
+        self.stage1_saturation_t= self.config['trainer']['init_state']['ise']['predefined3stage']['stage1']['saturation_t']
+        self.stage2_saturation_t = self.config['trainer']['init_state']['ise']['predefined3stage']['stage2']['saturation_t']
+        self.stage3_saturation_t = self.config['trainer']['init_state']['ise']['predefined3stage']['stage3']['saturation_t']
         
         print(self.profile)
         assert self.profile in PACING_PROFILES

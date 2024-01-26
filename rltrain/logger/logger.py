@@ -70,8 +70,8 @@ class Logger:
                 exp['main']['hier_xi_mode'] = 'prioritized'
             
             # ISE
-            self.config['trainer']['ise']['type'] = exp['main']['ise']
-            self.config['trainer']['ise']['range_growth_mode'] = exp['main']['ise_range_growth_mode']    
+            self.config['trainer']['init_state']['ise']['type'] = exp['main']['ise']
+            self.config['trainer']['init_state']['ise']['range_growth_mode'] = exp['main']['ise_range_growth_mode']    
 
             # Sort dict for logging
             myKeys = list(exp['main'].keys())

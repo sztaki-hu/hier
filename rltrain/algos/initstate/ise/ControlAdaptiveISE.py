@@ -6,19 +6,19 @@ from statistics import mean as dq_mean
 from typing import Dict, List, Tuple, Union, Optional
 
 from rltrain.taskenvs.GymPanda import GymPanda
-from rltrain.algos.ise.InitialStateEntropy import InitialStateEntropy
+from rltrain.algos.initstate.ise.InitStateEntropy import InitStateEntropy
 
-class ControlAdaptiveISE(InitialStateEntropy):
+class ControlAdaptiveISE(InitStateEntropy):
 
     def __init__(self, config: Dict, taskenv: GymPanda) -> None:
         super(ControlAdaptiveISE, self).__init__(config, taskenv)
 
         # Control Discrete Adaptive
-        self.Delta = self.config['trainer']['ise']['controladaptive']['Delta']
-        self.target_max = self.config['trainer']['ise']['controladaptive']['target_max']
-        self.step = self.config['trainer']['ise']['controladaptive']['step']
-        self.eval_dq_maxlen = self.config['trainer']['ise']['controladaptive']['window_size_eval']
-        self.rollout_dq_maxlen = self.config['trainer']['ise']['controladaptive']['window_size_rollout']
+        self.Delta = self.config['trainer']['init_state']['ise']['controladaptive']['Delta']
+        self.target_max = self.config['trainer']['init_state']['ise']['controladaptive']['target_max']
+        self.step = self.config['trainer']['init_state']['ise']['controladaptive']['step']
+        self.eval_dq_maxlen = self.config['trainer']['init_state']['ise']['controladaptive']['window_size_eval']
+        self.rollout_dq_maxlen = self.config['trainer']['init_state']['ise']['controladaptive']['window_size_rollout']
        
         self.store_rollout_success_rate = True
         self.store_eval_success_rate = True

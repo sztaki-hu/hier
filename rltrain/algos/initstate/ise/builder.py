@@ -3,20 +3,20 @@ from typing import Dict, Union
 
 from rltrain.taskenvs.GymPanda import GymPanda
 
-from rltrain.algos.ise.MaxISE import MaxISE
-from rltrain.algos.ise.MinISE import MinISE
-from rltrain.algos.ise.PredefinedISE import PredefinedISE 
-from rltrain.algos.ise.PredefinedTwoStageISE import PredefinedTwoStageISE 
-from rltrain.algos.ise.PredefinedThreeStageISE import PredefinedThreeStageISE 
-from rltrain.algos.ise.SelfPacedISE import SelfPacedISE 
-from rltrain.algos.ise.ControlISE import ControlISE 
-from rltrain.algos.ise.ControlAdaptiveISE import ControlAdaptiveISE 
+from rltrain.algos.initstate.ise.MaxISE import MaxISE
+from rltrain.algos.initstate.ise.MinISE import MinISE
+from rltrain.algos.initstate.ise.PredefinedISE import PredefinedISE 
+from rltrain.algos.initstate.ise.PredefinedTwoStageISE import PredefinedTwoStageISE 
+from rltrain.algos.initstate.ise.PredefinedThreeStageISE import PredefinedThreeStageISE 
+from rltrain.algos.initstate.ise.SelfPacedISE import SelfPacedISE 
+from rltrain.algos.initstate.ise.ControlISE import ControlISE 
+from rltrain.algos.initstate.ise.ControlAdaptiveISE import ControlAdaptiveISE 
 
 def make_ise(config: Dict, config_framework: Dict, taskenv: GymPanda
             ) -> Union[MaxISE, MinISE, PredefinedISE, PredefinedTwoStageISE, PredefinedThreeStageISE, 
                        SelfPacedISE, ControlISE, ControlAdaptiveISE]:
 
-    ise_mode = config['trainer']['ise']['type']
+    ise_mode = config['trainer']['init_state']['ise']['type']
     print(ise_mode)
     
     if ise_mode == 'max':

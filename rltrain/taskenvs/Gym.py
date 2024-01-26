@@ -16,7 +16,7 @@ class Gym(TaskEnvBase):
         self.env._max_episode_steps = int(float(self.max_ep_len)) # type: ignore
 
         assert config['buffer']['her']['goal_selection_strategy'] == 'noher'
-        assert config['trainer']['ise']['type'] == 'max'
+        assert config['trainer']['init_state']['ise']['type'] == 'max'
 
         self.reset() 
     

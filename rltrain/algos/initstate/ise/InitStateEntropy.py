@@ -4,10 +4,11 @@ import collections
 
 from typing import Dict, List, Tuple, Union, Optional
 from rltrain.taskenvs.GymPanda import GymPanda
+from rltrain.algos.initstate.InitState import InitState
 
 RANGE_GROWTH_MODES = ['simple', 'discard', 'balancediscard']
 
-class InitialStateEntropy:
+class InitStateEntropy(InitState):
     def __init__(self, config: Dict, taskenv: GymPanda) -> None:
 
         # INIT CONFIG
@@ -23,7 +24,7 @@ class InitialStateEntropy:
 
         print(self.init_ranges)
 
-        if config['trainer']['ise']['type'] not in ['min','max']:
+        if config['trainer']['init_state']['ise']['type'] not in ['min','max']:
             self.obj_range_low = self.init_ranges['obj_range_low']
             self.obj_range_high = self.init_ranges['obj_range_high']
             self.object_size = self.init_ranges['object_size']
@@ -114,9 +115,9 @@ class InitialStateEntropy:
             else:
                 raise ValueError("[ISE]: Obj num and/or goal num are not valid. Obj num = " + str(self.obj_num) + " | Goal num = " + str(self.goal_num))
                 
-            self.range_growth_mode = config['trainer']['ise']['range_growth_mode']
-            self.balancediscard_ratio = config['trainer']['ise']['balancediscard_ratio']
-            self.c_discard_lag = self.config['trainer']['ise']['ratio_discard_lag']
+            self.range_growth_mode = config['trainer']['init_state']['ise']['range_growth_mode']
+            self.balancediscard_ratio = config['trainer']['init_state']['ise']['balancediscard_ratio']
+            self.c_discard_lag = self.config['trainer']['init_state']['ise']['ratio_discard_lag']
 
             assert self.range_growth_mode in RANGE_GROWTH_MODES
 

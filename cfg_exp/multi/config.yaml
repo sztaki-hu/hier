@@ -102,46 +102,47 @@ trainer:
   batch_size: 256
   update_after: 1e2
   update_every: 50
-  ise:
-    type: input # min / max / predefined / predefined2stage / predefined3stage / selfpaced / control / controladaptive
-    range_growth_mode: input # simple / discard / balancediscard
-    ratio_discard_lag: 0.1 # Only if 'range_growth_mode' is 'discard' or 'balancediscard'
-    balancediscard_ratio: 0.8  # Only if 'range_growth_mode' is 'balancediscard'
-    predefined:
-      profile: linear  # linear / sqrt / quad
-      saturation_t: 0.8
-    predefined2stage:
-      profile: linear  # linear / sqrt / quad
-      change_stage: 0.5
-      stage1: # goal
-        saturation_t: 0.4
-      stage2: # obj
+  init_state:
+    ise:
+      type: input # min / max / predefined / predefined2stage / predefined3stage / selfpaced / control / controladaptive
+      range_growth_mode: input # simple / discard / balancediscard
+      ratio_discard_lag: 0.1 # Only if 'range_growth_mode' is 'discard' or 'balancediscard'
+      balancediscard_ratio: 0.8  # Only if 'range_growth_mode' is 'balancediscard'
+      predefined:
+        profile: linear  # linear / sqrt / quad
         saturation_t: 0.8
-    predefined3stage:
-      profile: linear  # linear / sqrt / quad
-      change_stage12: 0.3
-      change_stage23: 0.6
-      stage1: # goal
-        saturation_t: 0.2
-      stage2: # obj
-        saturation_t: 0.5
-      stage3: # obj-goal
-        saturation_t: 0.8
-    selfpaced:
-      upper_cond: 0.8
-      lower_cond: 0.2
-      window_size: 20
-      step: 0.05
-    control:
-      target_value: 0.8 
-      step: 0.01
-      window_size: 20
-    controladaptive:
-      Delta: 0.2
-      target_max: 0.9
-      window_size_eval: 3
-      window_size_rollout: 20
-      step: 0.01
+      predefined2stage:
+        profile: linear  # linear / sqrt / quad
+        change_stage: 0.5
+        stage1: # goal
+          saturation_t: 0.4
+        stage2: # obj
+          saturation_t: 0.8
+      predefined3stage:
+        profile: linear  # linear / sqrt / quad
+        change_stage12: 0.3
+        change_stage23: 0.6
+        stage1: # goal
+          saturation_t: 0.2
+        stage2: # obj
+          saturation_t: 0.5
+        stage3: # obj-goal
+          saturation_t: 0.8
+      selfpaced:
+        upper_cond: 0.8
+        lower_cond: 0.2
+        window_size: 20
+        step: 0.05
+      control:
+        target_value: 0.8 
+        step: 0.01
+        window_size: 20
+      controladaptive:
+        Delta: 0.2
+        target_max: 0.9
+        window_size_eval: 3
+        window_size_rollout: 20
+        step: 0.01
 
 eval:
   freq: input

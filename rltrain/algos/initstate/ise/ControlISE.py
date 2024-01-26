@@ -6,17 +6,17 @@ from statistics import mean as dq_mean
 from typing import Dict, List, Tuple, Union, Optional
 
 from rltrain.taskenvs.GymPanda import GymPanda
-from rltrain.algos.ise.InitialStateEntropy import InitialStateEntropy
+from rltrain.algos.initstate.ise.InitStateEntropy import InitStateEntropy
 
-class ControlISE(InitialStateEntropy):
+class ControlISE(InitStateEntropy):
 
     def __init__(self, config: Dict, taskenv: GymPanda) -> None:
         super(ControlISE, self).__init__(config, taskenv)
 
         # Control
-        self.target_value = self.config['trainer']['ise']['control']['target_value']
-        self.step = self.config['trainer']['ise']['control']['step']
-        self.dequeu_maxlen = config['trainer']['ise']['control']['window_size']
+        self.target_value = self.config['trainer']['init_state']['ise']['control']['target_value']
+        self.step = self.config['trainer']['init_state']['ise']['control']['step']
+        self.dequeu_maxlen = config['trainer']['init_state']['ise']['control']['window_size']
       
         self.store_rollout_success_rate = True
         self.rollout_success_dq = collections.deque(maxlen=self.dequeu_maxlen)
