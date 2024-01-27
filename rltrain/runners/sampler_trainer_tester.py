@@ -8,7 +8,7 @@ import math
 from tqdm import tqdm
 
 from rltrain.taskenvs.builder import make_taskenv
-from rltrain.algos.initstate.ise.builder import make_ise
+from rltrain.algos.initstate.builder import make_ise
 from rltrain.agents.builder import make_agent
 from rltrain.buffers.builder import make_per
 from rltrain.algos.hier.builder import make_hier

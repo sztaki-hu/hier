@@ -24,7 +24,7 @@ class InitStateEntropy(InitState):
 
         print(self.init_ranges)
 
-        if config['trainer']['init_state']['ise']['type'] not in ['min','max']:
+        if config['trainer']['init_state']['type'] not in ['min','max']:
             self.obj_range_low = self.init_ranges['obj_range_low']
             self.obj_range_high = self.init_ranges['obj_range_high']
             self.object_size = self.init_ranges['object_size']

@@ -26,7 +26,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--outdir", default="results/output/plots" ,help="Path of the output folder")
 parser.add_argument("--show", default=False ,help="-")
 parser.add_argument("--createcsv", default=True ,help="-")
-parser.add_argument("--legend", default=False ,help="-")
+parser.add_argument("--legend", default=True ,help="-")
 args = parser.parse_args()
 
 fontsize_title = 32
@@ -42,21 +42,21 @@ color_line_width = 6.0
 
 linewidth = 3
 
-plotid = 'XXXXXX_000001111'
-seednum = 1
+plotid = '24_0126_A'
+seednum = 3
 # taskname_list = ['Reach','Push','Slide','PickAndPlace','Stack']
-taskname_list = ['Push']
+taskname_list = ['PointMaze_UMaze']
 
-# plotdata_list = ['eval_success_rate','eval_mean_reward',
-#                  'rollout_success_rate', 'rollout_state_changed','rollout_ep_rew_mean',
-#                  'ise_c',
-#                  'time_fps',
-#                  'hier_batch_size','hier_buffer_size','hier_lambda','hier_xi']
-# plotdata_y_list = ['Eval success rate','Eval Mean reward',
-#                  'Rollout success rate', 'Rollout state changed','Rollout ep rew mean',
-#                  'ISE param c',
-#                  'time fps',
-#                  'HiER batch size','HiER buffer size','HiER lambda','HiER xi']
+plotdata_list = ['eval_success_rate','eval_mean_reward',
+                 'rollout_success_rate', 'rollout_state_changed','rollout_ep_rew_mean',
+                 'ise_c',
+                 'time_fps',
+                 'hier_batch_size','hier_buffer_size','hier_lambda','hier_xi']
+plotdata_y_list = ['Eval success rate','Eval Mean reward',
+                 'Rollout success rate', 'Rollout state changed','Rollout ep rew mean',
+                 'ISE param c',
+                 'time fps',
+                 'HiER batch size','HiER buffer size','HiER lambda','HiER xi']
 
 
 # Grand test ###################
@@ -74,11 +74,11 @@ taskname_list = ['Push']
 
 # E2H ############################
 
-plotdata_list = ['eval_success_rate','rollout_success_rate','ise_c']
-plotdata_y_list = ['Eval success rate','Rollout success rate','ISE param c']
+# plotdata_list = ['eval_success_rate','rollout_success_rate','ise_c']
+# plotdata_y_list = ['Eval success rate','Rollout success rate','ISE param c']
 
-plotdata_list = ['ise_c']
-plotdata_y_list = ['ISE param c']
+# plotdata_list = ['ise_c']
+# plotdata_y_list = ['ISE param c']
 
 
 
@@ -101,16 +101,12 @@ for taskname in taskname_list:
         create_folder(os.path.join(current_dir, args.outdir, logdir))
         exps = []
     
-        color_palette = [(0.2,0.2,0.2),'orange','blue','purple','red','green','brown','aqua']
+        color_palette = ['orange','blue','green','purple','green','brown','aqua']
 
-        exps.append({"exp_name": "_".join(['X_0122_SERIAL',alg,'noher','nohier','fix','max','noper','sparse','Panda'+taskname+'-v3']) , "seed_num":seednum, "color": color_palette[0], "plot_name": "max", "linestyle": 'solid'}) # type: ignore
-        exps.append({"exp_name": "_".join(['X_0122_SERIAL',alg,'noher','nohier','fix','min','noper','sparse','Panda'+taskname+'-v3']) , "seed_num":seednum, "color": color_palette[1], "plot_name": "min", "linestyle": 'solid'}) # type: ignore
-        exps.append({"exp_name": "_".join(['X_0122_SERIAL',alg,'noher','nohier','fix','predefined','noper','sparse','Panda'+taskname+'-v3']) , "seed_num":seednum, "color": color_palette[2], "plot_name": "predefined", "linestyle": 'solid'}) # type: ignore
-        exps.append({"exp_name": "_".join(['X_0122_SERIAL',alg,'noher','nohier','fix','predefined3stage','noper','sparse','Panda'+taskname+'-v3']) , "seed_num":seednum, "color": color_palette[3], "plot_name": "predefined2stage", "linestyle": 'solid'}) # type: ignore
-        exps.append({"exp_name": "_".join(['X_0122_SERIAL',alg,'noher','nohier','fix','predefined2stage','noper','sparse','Panda'+taskname+'-v3']) , "seed_num":seednum, "color": color_palette[4], "plot_name": "fpredefined3stage", "linestyle": 'solid'}) # type: ignore
-        exps.append({"exp_name": "_".join(['X_0122_SERIAL',alg,'noher','nohier','fix','selfpaced','noper','sparse','Panda'+taskname+'-v3']) , "seed_num":seednum, "color": color_palette[5], "plot_name": "selfpaced", "linestyle": 'solid'}) # type: ignore
-        exps.append({"exp_name": "_".join(['X_0122_SERIAL',alg,'noher','nohier','fix','control','noper','sparse','Panda'+taskname+'-v3']) , "seed_num":seednum, "color": color_palette[6], "plot_name": "control", "linestyle": 'solid'}) # type: ignore
-        exps.append({"exp_name": "_".join(['X_0122_SERIAL',alg,'noher','nohier','fix','controladaptive','noper','sparse','Panda'+taskname+'-v3']) , "seed_num":seednum, "color": color_palette[7], "plot_name": "controladaptive", "linestyle": 'solid'}) # type: ignore
+        exps.append({"exp_name": "_".join(['24_0126_A',alg,'noher','nohier','fix','max','noper','sparse',taskname+'-v3']) , "seed_num":seednum, "color": color_palette[0], "plot_name": "baseline", "linestyle": 'solid'}) # type: ignore
+        exps.append({"exp_name": "_".join(['24_0126_A',alg,'noher','predefined','fix','max','noper','sparse',taskname+'-v3']) , "seed_num":seednum, "color": color_palette[1], "plot_name": "HiER", "linestyle": 'solid'}) # type: ignore
+        exps.append({"exp_name": "_".join(['24_0126_A',alg,'final','nohier','fix','max','noper','sparse',taskname+'-v3']) , "seed_num":seednum, "color": color_palette[2], "plot_name": "HER", "linestyle": 'solid'}) # type: ignore
+        exps.append({"exp_name": "_".join(['24_0126_A',alg,'final','predefined','fix','max','noper','sparse',taskname+'-v3']) , "seed_num":seednum, "color": color_palette[3], "plot_name": "HER+HiER", "linestyle": 'solid'}) # type: ignore
         
 
 ########### Grand test
@@ -238,7 +234,8 @@ for taskname in taskname_list:
                                         'meanmaxvalue': meanmaxVal,
                                         'stdmaxvalue': stdmaxVal,
                                         'plot_name': pivot.iloc[0]["plot_name"]} # type: ignore
-                        maxdata_pd = pd.concat([maxdata_pd,df_append], ignore_index = True) # type: ignore
+                        #maxdata_pd = pd.concat([maxdata_pd,df_append], ignore_index = True) # type: ignore
+                        maxdata_pd.append(df_append, ignore_index = True) # type: ignore
             
                     maxdata_pd['HER'] = False
                     maxdata_pd['PER'] = False

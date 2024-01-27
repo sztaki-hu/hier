@@ -32,7 +32,7 @@ class GymPanda(TaskEnvBase):
         
         self.reset() 
     
-    def reset(self) -> np.ndarray:
+    def reset(self, options:Dict = {}) -> np.ndarray:
         o_dict, _ = self.env.reset()
         o = np.concatenate((o_dict['observation'], o_dict['desired_goal']))
         self.ep_o_start = o.copy()

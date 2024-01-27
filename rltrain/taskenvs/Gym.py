@@ -15,13 +15,29 @@ class Gym(TaskEnvBase):
             raise ValueError("[TaskEnv Gym]: task_name: '" + str(self.task_name) + "' must be in : " + str(config_framework['task_list']['gym']))
 
          # Create taskenv
-        self.env = gym.make(self.task_name) if self.headless == True else gym.make(self.task_name, render_mode="human") 
-        self.env._max_episode_steps = int(float(self.max_ep_len)) # type: ignore
+        if self.headless == True:
+            if self.task_name in ['PointMaze_UMaze-v3']:
+                self.env = gym.make('PointMaze_UMaze-v3', 
+                maze_map = config['environment']['task']['params']['maze']['maze_map'], 
+                continuing_task = config['environment']['task']['params']['maze']['continuing_task'], 
+                max_episode_steps=int(float(self.max_ep_len)))
+            else:
+                self.env = gym.make(self.task_name) 
+        else: 
+            if self.task_name in ['PointMaze_UMaze-v3']:
+                self.env = gym.make('PointMaze_UMaze-v3', 
+                maze_map = config['environment']['task']['params']['maze']['maze_map'], 
+                continuing_task = config['environment']['task']['params']['maze']['continuing_task'], 
+                render_mode="human", 
+                max_episode_steps=int(float(self.max_ep_len)))
+            else:
+                gym.make(self.task_name, render_mode="human") 
+     
 
         self.reset()  
     
-    def reset(self) -> np.ndarray:
-        o_dict, _ = self.env.reset()
+    def reset(self, options:Dict = {}) -> np.ndarray:
+        o_dict, _ = self.env.reset(options = options)
         o = np.concatenate((o_dict['observation'], o_dict['desired_goal']))
         self.ep_o_start = o.copy()
         self.obs = o.copy()

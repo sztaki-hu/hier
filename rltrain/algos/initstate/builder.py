@@ -12,11 +12,14 @@ from rltrain.algos.initstate.ise.SelfPacedISE import SelfPacedISE
 from rltrain.algos.initstate.ise.ControlISE import ControlISE 
 from rltrain.algos.initstate.ise.ControlAdaptiveISE import ControlAdaptiveISE 
 
+from rltrain.algos.initstate.isedisc.PredefinedDiscISE import PredefinedDiscISE 
+
 def make_ise(config: Dict, config_framework: Dict, taskenv: GymPanda
             ) -> Union[MaxISE, MinISE, PredefinedISE, PredefinedTwoStageISE, PredefinedThreeStageISE, 
-                       SelfPacedISE, ControlISE, ControlAdaptiveISE]:
+                       SelfPacedISE, ControlISE, ControlAdaptiveISE,
+                       PredefinedDiscISE]:
 
-    ise_mode = config['trainer']['init_state']['ise']['type']
+    ise_mode = config['trainer']['init_state']['type']
     print(ise_mode)
     
     if ise_mode == 'max':
@@ -35,6 +38,8 @@ def make_ise(config: Dict, config_framework: Dict, taskenv: GymPanda
         return ControlISE(config, taskenv)
     elif ise_mode == 'controladaptive':
         return ControlAdaptiveISE(config, taskenv)
+    elif ise_mode == 'predefined_disc':
+        return PredefinedDiscISE(config, taskenv)
     else:
         raise ValueError("[ISE]: ise_mode: '" + str(ise_mode) + "' must be in : " + str(config_framework['ise']['mode_list']))
    

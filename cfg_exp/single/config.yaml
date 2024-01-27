@@ -1,5 +1,5 @@
 general:
-  exp_name: X_0126_SINGLE_Maze
+  exp_name: X_0127_SINGLE_Maze
   logdir: logs
   demodir: demos
   seed: random
@@ -18,7 +18,16 @@ environment:
   task: 
     #name: PandaReach-v3 # PandaReach-v3 / PandaPush-v3 / PandaSlide-v3 (and dense versions)
     name: PointMaze_UMaze-v3 # PointMaze_UMaze-v3
-    params: []
+    params: 
+      maze:
+        maze_map: [[1, 1, 1, 1, 1, 1, 1],
+        [1, 'r', 'r', 0, 'g', 'g', 1],
+        [1, 'r', 'r', 0, 'g', 'g', 1],
+        [1, 'r', 'r', 0, 'g', 'g', 1],
+        [1, 'r', 'r', 0, 'g', 'g', 1],
+        [1, 'r', 'r', 0, 'g', 'g', 1],
+        [1, 1, 1, 1, 1, 1, 1]]
+        continuing_task: False
   headless: True
   obs_dim: auto
   act_dim: auto
@@ -104,8 +113,8 @@ trainer:
   update_after: 1e2
   update_every: 50
   init_state:
-    ise:
-      type: max # max / min / predefined / predefined2stage / predefined3stage / selfpaced / control / controladaptive
+    type: predefined_disc # max / min / predefined / predefined2stage / predefined3stage / selfpaced / control / controladaptive
+    ise:    
       range_growth_mode: simple # simple / discard / balancediscard
       ratio_discard_lag: 0.1 # Only if 'range_growth_mode' is 'discard' or 'balancediscard'
       balancediscard_ratio: 0.8  # Only if 'range_growth_mode' is 'balancediscard'
@@ -144,6 +153,12 @@ trainer:
         window_size_eval: 3
         window_size_rollout: 20
         step: 0.01
+    isedisc:
+      r: [[1,1],[1,2],[2,1],[2,2],[3,1],[3,2],[4,1],[4,2],[5,1],[5,2]]
+      g: [[1,4],[1,5],[2,4],[2,5],[3,4],[3,5],[4,4],[4,5],[5,4],[5,5]]
+      predefined:
+        profile: linear  # linear / sqrt / quad
+        saturation_t: 0.8
 
 eval:
   freq: 5e1
