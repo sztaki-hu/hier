@@ -121,9 +121,9 @@ class Gym(TaskEnvBase):
         desired_goal = self.get_desired_goal_from_obs(o)
         achieved_goal = self.get_achieved_goal_from_obs(o)
 
-        d = np.linalg.norm(achieved_goal - desired_goal)
-        r = 0.0 if d <= 0.45 else -1.0
-        return r,d
+        distance = np.linalg.norm(achieved_goal - desired_goal, axis=-1)
+        r = 0.0 if distance <= 0.45 else -1.0
+        return r,distance
     
 
 
