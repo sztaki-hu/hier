@@ -32,6 +32,7 @@ class Logger:
         self.config_path = os.path.join(current_dir,configpath) if display_mode == False else os.path.join(current_dir,configpath,self.seed_id,"config.yaml")             
         self.config = self.load_yaml(self.config_path)
         self.config_framework = self.load_yaml(os.path.join(current_dir,'cfg_framework','config_framework.yaml'))
+        self.config_maze = self.load_yaml(os.path.join(current_dir,'cfg_framework','config_maze.yaml'))
         self.config_tasks = self.load_yaml(os.path.join(current_dir,'cfg_framework','config_tasks.yaml'))
         self.config['general']['current_dir'] = current_dir
 
@@ -102,6 +103,19 @@ class Logger:
         if display_mode == False:
             if self.config['buffer']['per']['mode'] != 'noper' and self.config['buffer']['hier']['xi']['set_prioritized_for_PER']: 
                 self.config['buffer']['hier']['xi']['mode'] = 'prioritized'
+
+        # Insert maze data
+        if display_mode == False:
+            maze_name = self.config['environment']['task']['params']['maze']['maze_map']
+            self.config['environment']['task']['params']['maze']['maze_map'] = self.config_maze['mazes'][maze_name]['maze_map']
+
+            maze_ise_g_version = self.config['trainer']['init_state']['isedisc']['g'] 
+            self.config['trainer']['init_state']['isedisc']['g'] = self.config_maze['ise_inits'][maze_ise_g_version]['g']
+            
+            maze_ise_r_version = self.config['trainer']['init_state']['isedisc']['r'] 
+            self.config['trainer']['init_state']['isedisc']['r'] = self.config_maze['ise_inits'][maze_ise_r_version]['r']
+            
+        self.config_maze
         
         # Demos
         self.demodir = self.config['general']['demodir']
