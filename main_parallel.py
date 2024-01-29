@@ -29,8 +29,8 @@ def create_folder(path: str) -> None:
 
 def main(args: argparse.Namespace) -> None:
 
-   #hwid_list = [0,1,2,3]
-    hwid_list = [0]
+    hwid_list = [0,1,2,3]
+    #hwid_list = [0]
     hw_i = 0
 
     
