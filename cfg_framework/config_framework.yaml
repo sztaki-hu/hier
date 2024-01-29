@@ -3,7 +3,7 @@ env_list: ['gympanda','gym']
 task_list:
   gympanda: ['PandaReach-v3','PandaPush-v3','PandaSlide-v3',
               'PandaPickAndPlace-v3','PandaStack-v3', 'PandaFlip-v3']
-  gym: ['PointMaze_UMaze-v3']
+  gym: ['PointMaze_UMaze-v3','AntMaze_UMaze-v4']
 her:
   mode_list: ['noher', 'final', 'future', 'future_once', 'near', 'next']
 per:

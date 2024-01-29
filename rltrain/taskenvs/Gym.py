@@ -16,16 +16,16 @@ class Gym(TaskEnvBase):
 
          # Create taskenv
         if self.headless == True:
-            if self.task_name in ['PointMaze_UMaze-v3']:
-                self.env = gym.make('PointMaze_UMaze-v3', 
+            if self.task_name in ['PointMaze_UMaze-v3','AntMaze_UMaze-v4']:
+                self.env = gym.make(self.task_name, 
                 maze_map = config['environment']['task']['params']['maze']['maze_map'], 
                 continuing_task = config['environment']['task']['params']['maze']['continuing_task'], 
                 max_episode_steps=int(float(self.max_ep_len)))
             else:
                 self.env = gym.make(self.task_name) 
         else: 
-            if self.task_name in ['PointMaze_UMaze-v3']:
-                self.env = gym.make('PointMaze_UMaze-v3', 
+            if self.task_name in ['PointMaze_UMaze-v3','AntMaze_UMaze-v4']:
+                self.env = gym.make(self.task_name, 
                 maze_map = config['environment']['task']['params']['maze']['maze_map'], 
                 continuing_task = config['environment']['task']['params']['maze']['continuing_task'], 
                 render_mode="human", 
@@ -36,26 +36,41 @@ class Gym(TaskEnvBase):
 
         self.reset()  
     
+    def obsdict2obsarray(self,o_dict: Dict) -> np.ndarray:
+        if self.task_name in ['PointMaze_UMaze-v3']:
+            return np.concatenate((o_dict['observation'], o_dict['desired_goal']))
+        elif self.task_name in ['AntMaze_UMaze-v4']:
+            return np.concatenate((o_dict['achieved_goal'],o_dict['observation'], o_dict['desired_goal']))
+        else:
+            raise ValueError("[TaskEnv Gym]: get_achieved_goal() for " + self.task_name + " is not defined.")
+    
+    
     def reset(self, options:Dict = {}) -> np.ndarray:
         o_dict, _ = self.env.reset(options = options)
-        o = np.concatenate((o_dict['observation'], o_dict['desired_goal']))
+
+        o = self.obsdict2obsarray(o_dict)
+        
         self.ep_o_start = o.copy()
         self.obs = o.copy()
         return o   
 
     def step(self, action: np.ndarray) -> Tuple[np.ndarray, float, bool, bool, Dict[str, Any]]:
 
+        # Env step
         o_dict, r, terminated, truncated, info = self.env.step(action)
 
-        o = np.concatenate((o_dict['observation'], o_dict['desired_goal']))
+        # Chang obs data representation
+        o = self.obsdict2obsarray(o_dict)
         self.obs = o.copy() 
        
+        # Change reward 
         r_float = float(r)
         r_float -= 1
         if self.reward_shaping_type == 'state_change_bonus':
             raise ValueError("[TaskEnv Gym]: state_change_bonus is not implemented")
         r_float = r_float * self.reward_scalor
 
+        # Change success info representation
         info['is_success'] = info.pop('success')
 
         return o, r_float, terminated, truncated, info 
@@ -96,14 +111,14 @@ class Gym(TaskEnvBase):
         return bool(np.array(distance > threshold, dtype=np.float32))
 
     def get_achieved_goal_from_obs(self, o: np.ndarray) -> np.ndarray:
-        if self.task_name in ['PointMaze_UMaze-v3']:
+        if self.task_name in ['PointMaze_UMaze-v3','AntMaze_UMaze-v4']:
             o2 = o.copy()
             return o2[:2]
         else:
             raise ValueError("[TaskEnv Gym]: get_achieved_goal() for " + self.task_name + " is not defined.")
 
     def get_desired_goal_from_obs(self, o: np.ndarray) -> np.ndarray:
-        if self.task_name in ['PointMaze_UMaze-v3']:
+        if self.task_name in ['PointMaze_UMaze-v3','AntMaze_UMaze-v4']:
             return o[-2:].copy()
         else:
             raise ValueError("[TaskEnv Gym]: get_desired_goal() for " + self.task_name + " is not defined.")
@@ -111,7 +126,7 @@ class Gym(TaskEnvBase):
 
     def change_goal_in_obs(self, o: np.ndarray, goal: np.ndarray) -> np.ndarray:
         o2 = o.copy()
-        if self.task_name in ['PointMaze_UMaze-v3']:
+        if self.task_name in ['PointMaze_UMaze-v3','AntMaze_UMaze-v4']:
             o2[-2:] = goal.copy()
             return o2
         else:

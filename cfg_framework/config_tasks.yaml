@@ -89,6 +89,13 @@ gym:
     act_dim: 2
     boundary_min: [-1.0, -1.0]
     boundary_max: [+1.0, +1.0]
+  
+  AntMaze_UMaze-v4:
+    max_ep_len: 500
+    obs_dim: 31
+    act_dim: 8
+    boundary_min: [-1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0]
+    boundary_max: [+1.0, +1.0, +1.0, +1.0, +1.0, +1.0, +1.0, +1.0]
 
 gympanda:
   PandaReach-v3:

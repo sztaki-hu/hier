@@ -1,5 +1,5 @@
 general:
-  exp_name: X_0129_test_2
+  exp_name: X_0129_test_4
   logdir: logs
   demodir: demos
   seed: random
@@ -17,10 +17,10 @@ environment:
   name: gym # gym / gympanda
   task: 
     #name: PandaReach-v3 # PandaReach-v3 / PandaPush-v3 / PandaSlide-v3 (and dense versions)
-    name: PointMaze_UMaze-v3 # PointMaze_UMaze-v3
+    name: AntMaze_UMaze-v4 # PointMaze_UMaze-v3 / AntMaze_UMaze-v4
     params: 
       maze:
-        maze_map: square_7x7_wall
+        maze_map: square_7x7_S
         continuing_task: False
   headless: True
   obs_dim: auto
@@ -148,8 +148,8 @@ trainer:
         window_size_rollout: 20
         step: 0.01
     isedisc:
-      r: sqaure_7x7_v1
-      g: sqaure_7x7_v1
+      r: sqaure_7x7_S_v1
+      g: sqaure_7x7_S_v1
       predefined:
         profile: linear  # linear / sqrt / quad
         saturation_t: 0.8
