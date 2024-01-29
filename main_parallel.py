@@ -7,6 +7,8 @@ import datetime
 timestamp = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
 import yaml
 
+from rltrain.utils.utils import wait_for_datetime
+
 
 def load_yaml(file: str) -> Dict:
     if file is not None:
@@ -25,15 +27,7 @@ def create_folder(path: str) -> None:
     else:
         print(path + ' folder already exists!')
 
-def main():
-
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--config", default="cfg_exp/multi/config.yaml", help="Path of the config file")
-    parser.add_argument("--explist", default="cfg_exp/multi/exp_list.yaml", help="Path of the config file")
-    parser.add_argument("--processid", type=int, default=0, help="processid")
-    parser.add_argument("--testconfig", type=bool, default=True, help="Test config file")
-    parser.add_argument("--tempconfig", default="cfg_exp/multi/temp", help="Path of the dir of temp config")
-    args = parser.parse_args()
+def main(args: argparse.Namespace) -> None:
 
    #hwid_list = [0,1,2,3]
     hwid_list = [0]
@@ -226,4 +220,21 @@ def main():
                         
 
 if __name__ == '__main__':
-    main()
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--config", default="cfg_exp/multi/config.yaml", help="Path of the config file")
+    parser.add_argument("--explist", default="cfg_exp/multi/exp_list.yaml", help="Path of the config file")
+    parser.add_argument("--processid", type=int, default=0, help="processid")
+    parser.add_argument("--testconfig", type=bool, default=True, help="Test config file")
+    parser.add_argument("--tempconfig", default="cfg_exp/multi/temp", help="Path of the dir of temp config")
+    parser.add_argument("--delayed", type=bool, default=False, help="Time delay to start the training")
+    args = parser.parse_args()
+
+    if args.delayed == False:
+        main(args)
+    else:
+
+        start_datetime = datetime.datetime(2024, 1, 29, 17, 48, 20)
+        wait_for_datetime(start_datetime)
+
+        main(args)

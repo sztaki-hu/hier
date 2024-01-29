@@ -7,7 +7,7 @@ import argparse
 import itertools
 from typing import Dict, Union, Optional
 
-from rltrain.utils.utils import init_cuda, print_torch_info
+from rltrain.utils.utils import init_cuda, print_torch_info, wait_for_datetime
 from rltrain.logger.logger import Logger
 
 from rltrain.runners.sampler_trainer_tester import SamplerTrainerTester
@@ -26,15 +26,7 @@ def load_yaml(file: str) -> Dict:
             return yaml.load(f, Loader=yaml.UnsafeLoader)
     return {}
 
-def main() -> int:
-
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--config", default="cfg_exp/multi/config.yaml", help="Path of the config file")
-    parser.add_argument("--explist", default="cfg_exp/multi/exp_list.yaml", help="Path of the config file")
-    parser.add_argument("--hwid", type=int, default=0, help="Hardware id")
-    parser.add_argument("--processid", type=int, default=0, help="processid")
-    parser.add_argument("--testconfig", type=bool, default=True, help="Test config file")
-    args = parser.parse_args()
+def main(args: argparse.Namespace) -> int:
 
     # Get experiments
     current_dir = dirname(abspath(__file__))
@@ -274,4 +266,21 @@ def main() -> int:
 
 
 if __name__ == '__main__':
-    main()
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--config", default="cfg_exp/multi/config.yaml", help="Path of the config file")
+    parser.add_argument("--explist", default="cfg_exp/multi/exp_list.yaml", help="Path of the config file")
+    parser.add_argument("--hwid", type=int, default=0, help="Hardware id")
+    parser.add_argument("--processid", type=int, default=0, help="processid")
+    parser.add_argument("--testconfig", type=bool, default=True, help="Test config file")
+    parser.add_argument("--delayed", type=bool, default=False, help="Time delay to start the training")
+    args = parser.parse_args()
+
+    if args.delayed == False:
+        main(args)
+    else:
+
+        start_datetime = datetime.datetime(2024, 1, 29, 17, 37, 20)
+        wait_for_datetime(start_datetime)
+
+        main(args)

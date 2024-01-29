@@ -2,9 +2,10 @@ import os
 import argparse
 import torch
 import yaml
+import datetime
 from typing import Dict
 
-from rltrain.utils.utils import init_cuda, print_torch_info
+from rltrain.utils.utils import init_cuda, print_torch_info, wait_for_datetime
 from rltrain.logger.logger import Logger
 from rltrain.runners.sampler_trainer_tester import SamplerTrainerTester
 
@@ -14,14 +15,7 @@ def load_yaml(file: str) -> Dict:
             return yaml.load(f, Loader=yaml.UnsafeLoader)
     return {}
 
-def main() -> int:
-
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--config", default="cfg_exp/single/config.yaml", help="Path of the config file")
-    parser.add_argument("--hwid", type=int, default=0, help="The id of the GPU")
-    parser.add_argument("--seednum", type=int, default=1, help="The number of random seeds")
-    parser.add_argument("--exppath", type=str, default='None', help="exppath")
-    args = parser.parse_args()
+def main(args: argparse.Namespace) -> int:
 
     current_dir = os.path.dirname(os.path.abspath(__file__))
 
@@ -53,4 +47,20 @@ def main() -> int:
     return 1
 
 if __name__ == '__main__':
-    main()
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--config", default="cfg_exp/single/config.yaml", help="Path of the config file")
+    parser.add_argument("--hwid", type=int, default=0, help="The id of the GPU")
+    parser.add_argument("--seednum", type=int, default=1, help="The number of random seeds")
+    parser.add_argument("--exppath", type=str, default='None', help="exppath")
+    parser.add_argument("--delayed", type=bool, default=False, help="Time delay to start the training")
+    args = parser.parse_args()
+
+    if args.delayed == False:
+        main(args)
+    else:
+
+        start_datetime = datetime.datetime(2024, 1, 29, 17, 37, 20)
+        wait_for_datetime(start_datetime)
+
+        main(args)

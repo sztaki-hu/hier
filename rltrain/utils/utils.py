@@ -2,6 +2,9 @@ import os
 import torch
 import yaml
 import collections
+import datetime
+from tqdm import tqdm
+import time
 from statistics import mean as dq_mean
 from typing import Dict, Union, Optional
 
@@ -45,3 +48,35 @@ def load_yaml(file: str) -> Dict:
 
 def safe_dq_mean(dq: collections.deque) -> float:
     return 0.0 if len(dq) == 0 else dq_mean(dq)
+
+
+# DELAYED START
+
+def wait_for_datetime(start_datetime: datetime.datetime) -> None:
+    now = datetime.datetime.now()
+    diff = start_datetime - now    
+
+    print("Training start datetime: " + str(start_datetime))
+    print("Current time: " + str(now))
+    print("Start in " + str(diff))
+    print("Scheduled run. Waiting to start the training")
+
+    diff_0_sec = int(diff.total_seconds())
+    pbar = tqdm(total = diff_0_sec)
+    while diff.total_seconds() > 0:
+
+        pbar.n = max(0,diff_0_sec - int(diff.total_seconds()))
+        pbar.refresh()
+
+        if diff.total_seconds() > 3600:
+            sleep_delta = 1800
+        elif diff.total_seconds() > 2*60:
+            sleep_delta = 60
+        else:
+            sleep_delta = 1
+        time.sleep(sleep_delta)
+
+        now = datetime.datetime.now()
+        diff = start_datetime - now  
+    
+    pbar.close()
