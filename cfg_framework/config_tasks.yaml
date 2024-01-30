@@ -98,6 +98,13 @@ gymmaze:
     boundary_min: [-1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0]
     boundary_max: [+1.0, +1.0, +1.0, +1.0, +1.0, +1.0, +1.0, +1.0]
 
+  AntMaze_UMazeDense-v4:
+    max_ep_len: 500
+    obs_dim: 31
+    act_dim: 8
+    boundary_min: [-1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0]
+    boundary_max: [+1.0, +1.0, +1.0, +1.0, +1.0, +1.0, +1.0, +1.0]
+
 gymfetch:
   FetchReach-v2:
     max_ep_len: 50

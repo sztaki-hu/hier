@@ -16,7 +16,7 @@ class GymMaze(TaskEnvBase):
 
          # Create taskenv
         if self.headless == True:
-            if self.task_name in ['PointMaze_UMaze-v3','AntMaze_UMaze-v4']:
+            if self.task_name in ['PointMaze_UMaze-v3','AntMaze_UMaze-v4', 'AntMaze_UMazeDense-v4']:
                 self.env = gym.make(self.task_name, 
                 maze_map = config['environment']['task']['params']['gymmaze']['maze_map'], 
                 continuing_task = config['environment']['task']['params']['gymmaze']['continuing_task'], 
@@ -24,7 +24,7 @@ class GymMaze(TaskEnvBase):
             else:
                 self.env = gym.make(self.task_name) 
         else: 
-            if self.task_name in ['PointMaze_UMaze-v3','AntMaze_UMaze-v4']:
+            if self.task_name in ['PointMaze_UMaze-v3','AntMaze_UMaze-v4', 'AntMaze_UMazeDense-v4']:
                 self.env = gym.make(self.task_name, 
                 maze_map = config['environment']['task']['params']['gymmaze']['maze_map'], 
                 continuing_task = config['environment']['task']['params']['gymmaze']['continuing_task'], 
@@ -39,7 +39,7 @@ class GymMaze(TaskEnvBase):
     def obsdict2obsarray(self,o_dict: Dict) -> np.ndarray:
         if self.task_name in ['PointMaze_UMaze-v3']:
             return np.concatenate((o_dict['observation'], o_dict['desired_goal']))
-        elif self.task_name in ['AntMaze_UMaze-v4']:
+        elif self.task_name in ['AntMaze_UMaze-v4', 'AntMaze_UMazeDense-v4']:
             return np.concatenate((o_dict['achieved_goal'],o_dict['observation'], o_dict['desired_goal']))
         else:
             raise ValueError("[TaskEnv GymMaze]: get_achieved_goal() for " + self.task_name + " is not defined.")
@@ -65,7 +65,13 @@ class GymMaze(TaskEnvBase):
        
         # Change reward 
         r_float = float(r)
-        r_float -= 1
+        if self.task_name in ['PointMaze_UMaze-v3','AntMaze_UMaze-v4']:           
+            r_float -= 1
+        elif self.task_name in ['AntMaze_UMazeDense-v4']:
+            pass
+        else:
+            raise ValueError("[TaskEnv GymFetch]: reward handling for " + self.task_name + " is not defined.")
+
         if self.reward_shaping_type == 'state_change_bonus':
             raise ValueError("[TaskEnv GymMaze]: state_change_bonus is not implemented")
         r_float = r_float * self.reward_scalor
@@ -114,14 +120,14 @@ class GymMaze(TaskEnvBase):
         return bool(np.array(distance > threshold, dtype=np.float32))
 
     def get_achieved_goal_from_obs(self, o: np.ndarray) -> np.ndarray:
-        if self.task_name in ['PointMaze_UMaze-v3','AntMaze_UMaze-v4']:
+        if self.task_name in ['PointMaze_UMaze-v3','AntMaze_UMaze-v4','AntMaze_UMazeDense-v4']:
             o2 = o.copy()
             return o2[:2]
         else:
             raise ValueError("[TaskEnv GymMaze]: get_achieved_goal() for " + self.task_name + " is not defined.")
 
     def get_desired_goal_from_obs(self, o: np.ndarray) -> np.ndarray:
-        if self.task_name in ['PointMaze_UMaze-v3','AntMaze_UMaze-v4']:
+        if self.task_name in ['PointMaze_UMaze-v3','AntMaze_UMaze-v4','AntMaze_UMazeDense-v4']:
             return o[-2:].copy()
         else:
             raise ValueError("[TaskEnv GymMaze]: get_desired_goal() for " + self.task_name + " is not defined.")
@@ -129,7 +135,7 @@ class GymMaze(TaskEnvBase):
 
     def change_goal_in_obs(self, o: np.ndarray, goal: np.ndarray) -> np.ndarray:
         o2 = o.copy()
-        if self.task_name in ['PointMaze_UMaze-v3','AntMaze_UMaze-v4']:
+        if self.task_name in ['PointMaze_UMaze-v3','AntMaze_UMaze-v4','AntMaze_UMazeDense-v4']:
             o2[-2:] = goal.copy()
             return o2
         else:

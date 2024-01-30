@@ -3,7 +3,8 @@ env_list: ['gympanda','gymmaze','gymfetch']
 task_list:
   gympanda: ['PandaReach-v3','PandaPush-v3','PandaSlide-v3',
               'PandaPickAndPlace-v3','PandaStack-v3', 'PandaFlip-v3']
-  gymmaze: ['PointMaze_UMaze-v3','AntMaze_UMaze-v4']
+  gymmaze: ['PointMaze_UMaze-v3','AntMaze_UMaze-v4', 'AntMaze_UMazeDense-v4']
+
   gymfetch: ['FetchReach-v2', 'FetchPush-v2','FetchSlide-v2','FetchPickAndPlace-v2']
 her:
   mode_list: ['noher', 'final', 'future', 'future_once', 'near', 'next']

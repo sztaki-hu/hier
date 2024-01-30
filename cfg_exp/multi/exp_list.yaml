@@ -38,8 +38,8 @@ process_0:
   task:
     # gympanda: ['PandaReach-v3','PandaPush-v3','PandaSlide-v3',
     #           'PandaPickAndPlace-v3','PandaStack-v3', 'PandaFlip-v3']
-    # gymmaze: ['PointMaze_UMaze-v3','AntMaze_UMaze-v4']
-    gymfetch: ['FetchReach-v2', 'FetchPush-v2','FetchSlide-v2','FetchPickAndPlace-v2']
+    gymmaze: ['AntMaze_UMazeDense-v4'] #['PointMaze_UMaze-v3','AntMaze_UMaze-v4', AntMaze_UMazeDense-v4]
+    #gymfetch: ['FetchReach-v2', 'FetchPush-v2','FetchSlide-v2','FetchPickAndPlace-v2']
   ise: 
     type: ['max']
     # type: ['max','min',
