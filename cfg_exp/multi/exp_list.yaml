@@ -4,8 +4,8 @@ process_0:
   agent: 
     type: ['sac'] # ['sac','td3','ddpg']
     sac:
-      alpha: [0.1]
-    gamma: [0.95]
+      alpha: [0.1]  #gymmaze 0.2
+    gamma: [0.95]   #gymmaze 0.99
     learning_rate: [0.001]
   environment:
     reward:
@@ -14,15 +14,15 @@ process_0:
   buffer:
     replay_buffer_size: [1e6]
     her:
-      goal_selection_strategy: ['noher','final'] # final  ######################## HER ################
+      goal_selection_strategy: ['noher'] # final  ######################## HER ################
     hier:
       buffer_size: [1e6]
       lambda: # threshold
-        mode: ['nohier','predefined']    ######################## HiER ################
+        mode: ['nohier']    ######################## HiER ################
         fix:
           lambda: [-20] # gympanda: -20
         predefined: 
-          lambda_start: [-100] # gympanda: -50; gym: -100
+          lambda_start: [-50] # gympanda: -50; gym: -100
           lambda_end: [-10] # gympanda: -10; gym: -10
       xi: # hier batch ratio 
         mode: ['fix'] # fix 
@@ -36,10 +36,12 @@ process_0:
     num_episodes: [10]
   # structure is differend than in the config file #################################
   task:
-    gym: ['PointMaze_UMaze-v3'] 
-    #gympanda: ['PandaPush-v3']
+    # gympanda: ['PandaReach-v3','PandaPush-v3','PandaSlide-v3',
+    #           'PandaPickAndPlace-v3','PandaStack-v3', 'PandaFlip-v3']
+    # gymmaze: ['PointMaze_UMaze-v3','AntMaze_UMaze-v4']
+    gymfetch: ['FetchReach-v2', 'FetchPush-v2','FetchSlide-v2','FetchPickAndPlace-v2']
   ise: 
-    type: ['predefined_disc']
+    type: ['max']
     # type: ['max','min',
     #              'predefined','predefined2stage','predefined3stage',
     #              'selfpaced','control', 'controladaptive'] ######################## E2H-ISE  ################## 

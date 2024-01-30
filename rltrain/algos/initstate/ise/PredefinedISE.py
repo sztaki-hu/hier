@@ -5,13 +5,18 @@ import math
 from typing import Dict, List, Tuple, Union, Optional
 
 from rltrain.taskenvs.GymPanda import GymPanda
+from rltrain.taskenvs.GymMaze import GymMaze
+from rltrain.taskenvs.GymFetch import GymFetch
 from rltrain.algos.initstate.ise.InitStateEntropy import InitStateEntropy
 
 PACING_PROFILES = ['linear','sqrt','quad']
 
 class PredefinedISE(InitStateEntropy):
    
-    def __init__(self, config: Dict, taskenv: GymPanda) -> None:
+    def __init__(self,
+                 config: Dict,
+                 taskenv: Union[GymPanda, GymMaze, GymFetch]
+                 ) -> None:
         super(PredefinedISE, self).__init__(config, taskenv)
 
         # PREDEFINED

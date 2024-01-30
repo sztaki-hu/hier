@@ -4,12 +4,17 @@ import collections
 
 from typing import Dict, List, Tuple, Union, Optional
 from rltrain.taskenvs.GymPanda import GymPanda
+from rltrain.taskenvs.GymMaze import GymMaze
+from rltrain.taskenvs.GymFetch import GymFetch
 from rltrain.algos.initstate.InitState import InitState
 
 RANGE_GROWTH_MODES = ['simple', 'discard', 'balancediscard']
 
 class InitStateEntropy(InitState):
-    def __init__(self, config: Dict, taskenv: GymPanda) -> None:
+    def __init__(self, 
+                 config: Dict, 
+                 taskenv: Union[GymPanda, GymMaze, GymFetch]
+                 ) -> None:
 
         # INIT CONFIG
         self.config = config

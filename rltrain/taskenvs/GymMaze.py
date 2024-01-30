@@ -6,28 +6,28 @@ from typing import Dict, List, Tuple, Any, Optional
 from rltrain.taskenvs.TaskEnvBase import TaskEnvBase
 from gymnasium import Env
 
-class Gym(TaskEnvBase):
+class GymMaze(TaskEnvBase):
 
     def __init__(self,config: Dict, config_framework: Dict) -> None:
-        super(Gym, self).__init__(config,config_framework)
+        super(GymMaze, self).__init__(config,config_framework)
         
-        if self.task_name not in config_framework['task_list']['gym']: 
-            raise ValueError("[TaskEnv Gym]: task_name: '" + str(self.task_name) + "' must be in : " + str(config_framework['task_list']['gym']))
+        if self.task_name not in config_framework['task_list']['gymmaze']: 
+            raise ValueError("[TaskEnv GymMaze]: task_name: '" + str(self.task_name) + "' must be in : " + str(config_framework['task_list']['gymmaze']))
 
          # Create taskenv
         if self.headless == True:
             if self.task_name in ['PointMaze_UMaze-v3','AntMaze_UMaze-v4']:
                 self.env = gym.make(self.task_name, 
-                maze_map = config['environment']['task']['params']['maze']['maze_map'], 
-                continuing_task = config['environment']['task']['params']['maze']['continuing_task'], 
+                maze_map = config['environment']['task']['params']['gymmaze']['maze_map'], 
+                continuing_task = config['environment']['task']['params']['gymmaze']['continuing_task'], 
                 max_episode_steps=int(float(self.max_ep_len)))
             else:
                 self.env = gym.make(self.task_name) 
         else: 
             if self.task_name in ['PointMaze_UMaze-v3','AntMaze_UMaze-v4']:
                 self.env = gym.make(self.task_name, 
-                maze_map = config['environment']['task']['params']['maze']['maze_map'], 
-                continuing_task = config['environment']['task']['params']['maze']['continuing_task'], 
+                maze_map = config['environment']['task']['params']['gymmaze']['maze_map'], 
+                continuing_task = config['environment']['task']['params']['gymmaze']['continuing_task'], 
                 render_mode="human", 
                 max_episode_steps=int(float(self.max_ep_len)))
             else:
@@ -42,7 +42,7 @@ class Gym(TaskEnvBase):
         elif self.task_name in ['AntMaze_UMaze-v4']:
             return np.concatenate((o_dict['achieved_goal'],o_dict['observation'], o_dict['desired_goal']))
         else:
-            raise ValueError("[TaskEnv Gym]: get_achieved_goal() for " + self.task_name + " is not defined.")
+            raise ValueError("[TaskEnv GymMaze]: get_achieved_goal() for " + self.task_name + " is not defined.")
     
     
     def reset(self, options:Dict = {}) -> np.ndarray:
@@ -67,7 +67,7 @@ class Gym(TaskEnvBase):
         r_float = float(r)
         r_float -= 1
         if self.reward_shaping_type == 'state_change_bonus':
-            raise ValueError("[TaskEnv Gym]: state_change_bonus is not implemented")
+            raise ValueError("[TaskEnv GymMaze]: state_change_bonus is not implemented")
         r_float = r_float * self.reward_scalor
 
         # Change success info representation
@@ -90,10 +90,13 @@ class Gym(TaskEnvBase):
         return self.obs
     
     def load_state(self, 
+                robot_joints: Optional[np.ndarray], 
                 desired_goal: np.ndarray, 
+                object_position: Optional[np.ndarray] = None
                 ) -> None:
-        self.env.unwrapped.goal = desired_goal # type: ignore
-        self.env.unwrapped.update_target_site_pos() # type: ignore
+        raise ValueError("[TaskEnv GymFetch]: load_state() for " + self.task_name + " is not defined.")
+        # self.env.unwrapped.goal = desired_goal # type: ignore
+        # self.env.unwrapped.update_target_site_pos() # type: ignore
 
     # HER ###################################################
 
@@ -115,13 +118,13 @@ class Gym(TaskEnvBase):
             o2 = o.copy()
             return o2[:2]
         else:
-            raise ValueError("[TaskEnv Gym]: get_achieved_goal() for " + self.task_name + " is not defined.")
+            raise ValueError("[TaskEnv GymMaze]: get_achieved_goal() for " + self.task_name + " is not defined.")
 
     def get_desired_goal_from_obs(self, o: np.ndarray) -> np.ndarray:
         if self.task_name in ['PointMaze_UMaze-v3','AntMaze_UMaze-v4']:
             return o[-2:].copy()
         else:
-            raise ValueError("[TaskEnv Gym]: get_desired_goal() for " + self.task_name + " is not defined.")
+            raise ValueError("[TaskEnv GymMaze]: get_desired_goal() for " + self.task_name + " is not defined.")
 
 
     def change_goal_in_obs(self, o: np.ndarray, goal: np.ndarray) -> np.ndarray:
@@ -130,7 +133,7 @@ class Gym(TaskEnvBase):
             o2[-2:] = goal.copy()
             return o2
         else:
-            raise ValueError("[TaskEnv Gym]: change_goal_in_obs() for " + self.task_name + " is not defined.")
+            raise ValueError("[TaskEnv GymMaze]: change_goal_in_obs() for " + self.task_name + " is not defined.")
 
     def her_get_reward_and_done(self, o: np.ndarray) -> Tuple[float, bool]:
         desired_goal = self.get_desired_goal_from_obs(o)

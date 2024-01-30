@@ -1,5 +1,5 @@
 general:
-  exp_name: 0127_XXX
+  exp_name: 0130_C
   logdir: logs
   demodir: demos
   seed: random
@@ -18,7 +18,7 @@ environment:
   task: 
     name: input # PandaReach-v3 / PandaPush-v3 / PandaSlide-v3 (and dense versions)
     params: 
-      maze:
+      gymmaze:
         maze_map: square_7x7_base
         continuing_task: False
   headless: True

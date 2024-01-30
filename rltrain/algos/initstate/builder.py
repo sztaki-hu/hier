@@ -2,6 +2,8 @@
 from typing import Dict, Union
 
 from rltrain.taskenvs.GymPanda import GymPanda
+from rltrain.taskenvs.GymMaze import GymMaze
+from rltrain.taskenvs.GymFetch import GymFetch
 
 from rltrain.algos.initstate.ise.MaxISE import MaxISE
 from rltrain.algos.initstate.ise.MinISE import MinISE
@@ -14,7 +16,9 @@ from rltrain.algos.initstate.ise.ControlAdaptiveISE import ControlAdaptiveISE
 
 from rltrain.algos.initstate.isedisc.PredefinedDiscISE import PredefinedDiscISE 
 
-def make_ise(config: Dict, config_framework: Dict, taskenv: GymPanda
+def make_ise(config: Dict, 
+             config_framework: Dict, 
+             taskenv: Union[GymPanda, GymMaze, GymFetch], 
             ) -> Union[MaxISE, MinISE, PredefinedISE, PredefinedTwoStageISE, PredefinedThreeStageISE, 
                        SelfPacedISE, ControlISE, ControlAdaptiveISE,
                        PredefinedDiscISE]:

@@ -5,12 +5,17 @@ import math
 from typing import Dict, List, Tuple, Union, Optional
 
 from rltrain.taskenvs.GymPanda import GymPanda
+from rltrain.taskenvs.GymMaze import GymMaze
+from rltrain.taskenvs.GymFetch import GymFetch
 from rltrain.algos.initstate.ise.InitStateEntropy import InitStateEntropy
 
 
 class MaxISE(InitStateEntropy):
 
-    def __init__(self, config: Dict, taskenv: GymPanda) -> None:
+    def __init__(self, 
+                 config: Dict, 
+                 taskenv: Union[GymPanda, GymMaze, GymFetch]
+                 ) -> None:
         super(MaxISE, self).__init__(config, taskenv)
 
         self.c = 1

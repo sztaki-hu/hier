@@ -82,7 +82,8 @@ gym:
     act_dim: 7
     boundary_min: [-2.0, -2.0, -2.0, -2.0, -2.0, -2.0, -2.0]
     boundary_max: [+2.0, +2.0, +2.0, +2.0, +2.0, +2.0, +2.0]
-  
+
+gymmaze: 
   PointMaze_UMaze-v3:
     max_ep_len: 500
     obs_dim: 6
@@ -96,6 +97,35 @@ gym:
     act_dim: 8
     boundary_min: [-1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0]
     boundary_max: [+1.0, +1.0, +1.0, +1.0, +1.0, +1.0, +1.0, +1.0]
+
+gymfetch:
+  FetchReach-v2:
+    max_ep_len: 50
+    obs_dim: 13
+    act_dim: 4
+    boundary_min: [-1.0, -1.0, -1.0, -1.0]
+    boundary_max: [+1.0, +1.0, +1.0, +1.0]
+
+  FetchPush-v2:
+    max_ep_len: 50
+    obs_dim: 28
+    act_dim: 4
+    boundary_min: [-1.0, -1.0, -1.0, -1.0]
+    boundary_max: [+1.0, +1.0, +1.0, +1.0]
+  
+  FetchSlide-v2:
+    max_ep_len: 50
+    obs_dim: 28
+    act_dim: 4
+    boundary_min: [-1.0, -1.0, -1.0, -1.0]
+    boundary_max: [+1.0, +1.0, +1.0, +1.0]
+  
+  FetchPickAndPlace-v2:
+    max_ep_len: 50
+    obs_dim: 28
+    act_dim: 4
+    boundary_min: [-1.0, -1.0, -1.0, -1.0]
+    boundary_max: [+1.0, +1.0, +1.0, +1.0]
 
 gympanda:
   PandaReach-v3:

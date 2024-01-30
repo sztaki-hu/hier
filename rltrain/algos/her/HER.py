@@ -4,7 +4,8 @@ from typing import Dict, List, Tuple, Union
 Transition = Tuple[np.ndarray,np.ndarray,float,np.ndarray,bool]
 
 from rltrain.taskenvs.GymPanda import GymPanda
-from rltrain.taskenvs.Gym import Gym
+from rltrain.taskenvs.GymMaze import GymMaze
+from rltrain.taskenvs.GymFetch import GymFetch
 from rltrain.buffers.replay import ReplayBuffer 
 from rltrain.buffers.prioritized_replay import PrioritizedReplay
 
@@ -13,7 +14,7 @@ class HER:
     def __init__(self, 
                  config: Dict, 
                  config_framework: Dict,
-                 taskenv: Union[GymPanda, Gym] , 
+                 taskenv: Union[GymPanda, GymMaze, GymFetch], 
                  replay_buffer: Union[ReplayBuffer, PrioritizedReplay]
                  ) -> None:
         self.config = config

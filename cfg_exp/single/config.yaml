@@ -1,5 +1,5 @@
 general:
-  exp_name: X_0129_test_4
+  exp_name: 0130_C
   logdir: logs
   demodir: demos
   seed: random
@@ -14,12 +14,12 @@ hardware:
   cpu_max: [32,32,32,32]
 
 environment:
-  name: gym # gym / gympanda
+  name: gymmaze # gymfetch / gymmaze / gympanda
   task: 
     #name: PandaReach-v3 # PandaReach-v3 / PandaPush-v3 / PandaSlide-v3 (and dense versions)
     name: AntMaze_UMaze-v4 # PointMaze_UMaze-v3 / AntMaze_UMaze-v4
     params: 
-      maze:
+       gymmaze:
         maze_map: square_7x7_S
         continuing_task: False
   headless: True

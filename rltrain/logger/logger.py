@@ -106,8 +106,8 @@ class Logger:
 
         # Insert maze data
         if display_mode == False:
-            maze_name = self.config['environment']['task']['params']['maze']['maze_map']
-            self.config['environment']['task']['params']['maze']['maze_map'] = self.config_maze['mazes'][maze_name]['maze_map']
+            maze_name = self.config['environment']['task']['params']['gymmaze']['maze_map']
+            self.config['environment']['task']['params']['gymmaze']['maze_map'] = self.config_maze['mazes'][maze_name]['maze_map']
 
             maze_ise_g_version = self.config['trainer']['init_state']['isedisc']['g'] 
             self.config['trainer']['init_state']['isedisc']['g'] = self.config_maze['ise_inits'][maze_ise_g_version]['g']
