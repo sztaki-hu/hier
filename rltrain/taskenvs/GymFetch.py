@@ -53,6 +53,8 @@ class GymFetch(TaskEnvBase):
             raise ValueError("[TaskEnv GymFetch]: state_change_bonus is not implemented")
         r_float = r_float * self.reward_scalor
 
+        if info['is_success']: terminated = True 
+
         return o, r_float, terminated, truncated, info 
 
     def random_sample(self) -> np.ndarray:
