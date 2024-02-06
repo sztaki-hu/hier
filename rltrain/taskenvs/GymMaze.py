@@ -14,11 +14,12 @@ class GymMaze(TaskEnvBase):
         if self.task_name not in config_framework['task_list']['gymmaze']: 
             raise ValueError("[TaskEnv GymMaze]: task_name: '" + str(self.task_name) + "' must be in : " + str(config_framework['task_list']['gymmaze']))
 
+        self.maze_map = config['environment']['task']['params']['gymmaze']['maze_map']
          # Create taskenv
         if self.headless == True:
             if self.task_name in ['PointMaze_UMaze-v3','AntMaze_UMaze-v4', 'AntMaze_UMazeDense-v4']:
                 self.env = gym.make(self.task_name, 
-                maze_map = config['environment']['task']['params']['gymmaze']['maze_map'], 
+                maze_map = self.maze_map, 
                 continuing_task = config['environment']['task']['params']['gymmaze']['continuing_task'], 
                 max_episode_steps=int(float(self.max_ep_len)))
             else:
@@ -26,7 +27,7 @@ class GymMaze(TaskEnvBase):
         else: 
             if self.task_name in ['PointMaze_UMaze-v3','AntMaze_UMaze-v4', 'AntMaze_UMazeDense-v4']:
                 self.env = gym.make(self.task_name, 
-                maze_map = config['environment']['task']['params']['gymmaze']['maze_map'], 
+                maze_map = self.maze_map, 
                 continuing_task = config['environment']['task']['params']['gymmaze']['continuing_task'], 
                 render_mode="human", 
                 max_episode_steps=int(float(self.max_ep_len)))

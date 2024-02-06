@@ -1,5 +1,5 @@
 general:
-  exp_name: 0130_2X
+  exp_name: 0206_2X
   logdir: logs
   demodir: demos
   seed: random
@@ -19,7 +19,7 @@ environment:
     name: input # PandaReach-v3 / PandaPush-v3 / PandaSlide-v3 (and dense versions)
     params: 
       gymmaze:
-        maze_map: 5x5_base
+        maze_map: input
         continuing_task: False
   headless: True
   obs_dim: auto

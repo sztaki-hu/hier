@@ -4,10 +4,14 @@ process_0:
   agent: 
     type: ['sac'] # ['sac','td3','ddpg']
     sac:
-      alpha: [0.1]  #gymmaze 0.2
-    gamma: [0.95]   #gymmaze 0.99
+      alpha: [0.1]  #gymmaze 0.2 #robot 0.1
+    gamma: [0.99]   #gymmaze 0.99 x robot 0.95
     learning_rate: [0.001]
   environment:
+    task:
+      params:
+        gymmaze:
+          maze_map: ['7x7_base','7x7_wall','7x7_S','7x7_S_fix']
     reward:
       reward_shaping_type: ['sparse'] # sparse / state_change_bonus
       reward_bonus: [0.0] #--- only if reward_shaping_type == state_change_bonus
@@ -38,7 +42,7 @@ process_0:
   task:
     # gympanda: ['PandaReach-v3','PandaPush-v3','PandaSlide-v3',
     #           'PandaPickAndPlace-v3','PandaStack-v3', 'PandaFlip-v3']
-    gymmaze: ['AntMaze_UMazeDense-v4'] #['PointMaze_UMaze-v3','AntMaze_UMaze-v4', AntMaze_UMazeDense-v4]
+    gymmaze: ['PointMaze_UMaze-v3'] #['PointMaze_UMaze-v3','AntMaze_UMaze-v4', AntMaze_UMazeDense-v4]
     #gymfetch: ['FetchReach-v2', 'FetchPush-v2','FetchSlide-v2','FetchPickAndPlace-v2']
   ise: 
     type: ['max']

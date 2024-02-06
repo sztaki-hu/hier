@@ -18,6 +18,10 @@ ise:
 hier:
   lambda_mode_list: ['nohier', 'fix', 'multifix', 'predefined', 'ama', 'amar']
   xi_mode_list: ['fix', 'prioritized']
+mazes: ['3x5_base',
+        '5x5_base',
+        '7x7_base','7x7_wall','7x7_S','7x7_S_fix',
+        '9x5_S_cut']
 
 
 

@@ -33,8 +33,6 @@ def main(args: argparse.Namespace) -> None:
     #hwid_list = [0]
     hw_i = 0
 
-    
-
     # Get experiments
     current_dir = dirname(abspath(__file__))
     exp_lists = load_yaml(os.path.join(current_dir,args.explist))
@@ -52,6 +50,7 @@ def main(args: argparse.Namespace) -> None:
     # Envs
     reward_shaping_types = exp_list['environment']['reward']['reward_shaping_type']
     reward_bonuses = exp_list['environment']['reward']['reward_bonus']
+    mazes = exp_list['environment']['task']['params']['gymmaze']['maze_map']
     # Buffers
     replay_buffer_sizes = exp_list['buffer']['replay_buffer_size']
     her_strategies = exp_list['buffer']['her']['goal_selection_strategy']
@@ -88,6 +87,7 @@ def main(args: argparse.Namespace) -> None:
                     # Envs
                     reward_shaping_types,
                     reward_bonuses,
+                    mazes,
                     # Buffers
                     replay_buffer_sizes,
                     her_strategies,
@@ -119,25 +119,26 @@ def main(args: argparse.Namespace) -> None:
                 # Env
                 reward_shaping_type                      = r[4]
                 reward_bonus                             = r[5]
+                maze                                     = r[6]
                 # Buffer
-                replay_buffer_size                       = r[6]
-                her_strategy                             = r[7]
-                hier_buffer_size                         = r[8]
-                hier_lambda_mode                         = r[9]
-                hier_lambda_fix_lambda                   = r[10]
-                hier_lambda_predefined_lambda_start      = r[11]
-                hier_lambda_predefined_lambda_end        = r[12]
-                hier_xi_mode                             = r[13]
-                hier_xi_xi                               = r[14]
-                per_mode                                 = r[15]
+                replay_buffer_size                       = r[7]
+                her_strategy                             = r[8]
+                hier_buffer_size                         = r[9]
+                hier_lambda_mode                         = r[10]
+                hier_lambda_fix_lambda                   = r[11]
+                hier_lambda_predefined_lambda_start      = r[12]
+                hier_lambda_predefined_lambda_end        = r[13]
+                hier_xi_mode                             = r[14]
+                hier_xi_xi                               = r[15]
+                per_mode                                 = r[16]
                 # Trainer
-                trainer_total_timesteps                  = r[16]
+                trainer_total_timesteps                  = r[17]
                 # Eval
-                eval_freq                                = r[17]
-                eval_num_episodes                        = r[18]
+                eval_freq                                = r[18]
+                eval_num_episodes                        = r[19]
                 # ISE
-                ise_type                                  = r[19]
-                ise_range_growth_mode                     = r[20]                  
+                ise_type                                  = r[20]
+                ise_range_growth_mode                     = r[21]                  
                                         
                 exp = {}
                 exp['main'] = {} 
@@ -166,6 +167,8 @@ def main(args: argparse.Namespace) -> None:
                 exp['main']['reward_bonus'] = reward_bonus
                 exp['exp_in_name']['reward_bonus'] = False
                 exp['exp_abb']['reward_bonus'] = 'rb'
+                exp['main']['maze'] = maze
+                exp['exp_in_name']['maze'] = True
                 # Buffer
                 exp['main']['replay_buffer_size'] = replay_buffer_size
                 exp['exp_in_name']['replay_buffer_size'] = False                        

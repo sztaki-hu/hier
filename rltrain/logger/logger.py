@@ -49,6 +49,7 @@ class Logger:
             # Env
             self.config['environment']['reward']['reward_shaping_type'] = exp['main']['reward_shaping_type']
             self.config['environment']['reward']['reward_bonus'] = exp['main']['reward_bonus']
+            self.config['environment']['task']['params']['gymmaze']['maze_map'] = exp['main']['maze']
             # Buffer
             self.config['buffer']['replay_buffer_size'] = exp['main']['replay_buffer_size']
             self.config['buffer']['her']['goal_selection_strategy'] = exp['main']['her_strategy']
@@ -103,6 +104,11 @@ class Logger:
         if display_mode == False:
             if self.config['buffer']['per']['mode'] != 'noper' and self.config['buffer']['hier']['xi']['set_prioritized_for_PER']: 
                 self.config['buffer']['hier']['xi']['mode'] = 'prioritized'
+
+        maze_map = self.config['environment']['task']['params']['gymmaze']['maze_map']
+        if maze_map not in self.config_framework['mazes']: 
+            raise ValueError("[TaskEnv GymMaze]: maze_map: '" + str(maze_map) + "' must be in : " + str(self.config_framework['mazes']))
+
 
         # Insert maze data
         if display_mode == False:
