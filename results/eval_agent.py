@@ -5,11 +5,12 @@ import numpy as np
 import torch
 import argparse
 import rltrain.agents.sac.core as core
+import pandas as pd
 
 current_dir = dirname(abspath(__file__))
 current_dir = os.path.abspath(os.path.join(current_dir, os.pardir))
 
-from rltrain.utils.utils import init_cuda, print_torch_info
+from rltrain.utils.utils import init_cuda, print_torch_info, get_best_seed
 from rltrain.logger.logger import Logger
 from rltrain.utils.eval import Eval
 
@@ -32,19 +33,29 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     
     
-    #parser.add_argument("--config", default="logs/"+"_".join(['X_0122_SERIAL','sac','noher','nohier','fix','max','noper','sparse','PandaPush-v3']),help="Path of the config file")
-    parser.add_argument("--config", default="logs/"+"_".join(['0126_X','sac','noher','nohier','fix','max','noper','sparse','PointMaze_UMaze-v3']),help="Path of the config file")
+    #parser.add_argument("--config", default="logs/"+"_".join(['XXX_0208','sac','noher','nohier','fix','max','7x7_base','noper','sparse','PandaPickAndPlace-v3']),help="Path of the config file")
+
+    parser.add_argument("--config", default="logs/"+"_".join(['0207_A','sac','final','predefined','fix','max','noper','sparse','FetchPickAndPlace-v2']),help="Path of the config file")
+    #parser.add_argument("--config", default="logs/"+"_".join(['0207_B','sac','final','predefined','fix','max','7x7_wall','noper','sparse','PointMaze_UMaze-v3']),help="Path of the config file")
+
+
     parser.add_argument("--figid", default="1106_A" ,help="Fig id")
     parser.add_argument("--hwid", type=int, default=0 ,help="Hardware id")
     parser.add_argument("--seedid", type=int, default=0 ,help="seedid")
+    parser.add_argument("--bestfromseeds", type=bool, default=True ,help="best of seeds flag")
     parser.add_argument("--outdir", default="results/output/eval" ,help="Path of the output folder")
     # Example: python3 main.py --configfile /cfg/alma.yaml 0
     args = parser.parse_args()
 
+    if args.bestfromseeds:
+        seedid = get_best_seed(current_dir, args.config)
+    else:
+        seedid = args.seedid
+
     create_folder(os.path.join(current_dir, args.outdir))
     create_folder(os.path.join(current_dir, args.outdir, args.figid))
 
-    logger = Logger(current_dir = current_dir, configpath = args.config, display_mode = True, seed = args.seedid)
+    logger = Logger(current_dir = current_dir, configpath = args.config, display_mode = True, seed = seedid)
 
     config = logger.get_config()
     config_framework = logger.get_config_framework()

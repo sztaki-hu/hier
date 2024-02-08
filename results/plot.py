@@ -42,10 +42,11 @@ color_line_width = 6.0
 
 linewidth = 3
 
-plotid = '24_0126_A'
-seednum = 3
-# taskname_list = ['Reach','Push','Slide','PickAndPlace','Stack']
-taskname_list = ['PointMaze_UMaze']
+plotid = '0207_B_7x7_S'
+seednum = 10
+#taskname_list = ['Push','Slide','PickAndPlace','Stack']
+taskname_list = ['PointMaze_UMaze-v3'] #['PointMaze_UMaze-v3','AntMaze_UMaze-v4', 'AntMaze_UMazeDense-v4']
+#taskname_list = ['FetchPush-v2','FetchSlide-v2','FetchPickAndPlace-v2']
 
 plotdata_list = ['eval_success_rate','eval_mean_reward',
                  'rollout_success_rate', 'rollout_state_changed','rollout_ep_rew_mean',
@@ -97,17 +98,28 @@ for taskname in taskname_list:
 
     for alg in algs:
     
-        logdir = plotid + "_Panda" + taskname + "_" + alg
+        logdir = plotid + "_" + taskname + "_" + alg
         create_folder(os.path.join(current_dir, args.outdir, logdir))
         exps = []
     
-        color_palette = ['orange','blue','green','purple','green','brown','aqua']
+        color_palette = ['gray','orange','red','green','blue','aqua','magenta','purple']
+        color_index = 0
 
-        exps.append({"exp_name": "_".join(['24_0126_A',alg,'noher','nohier','fix','max','noper','sparse',taskname+'-v3']) , "seed_num":seednum, "color": color_palette[0], "plot_name": "baseline", "linestyle": 'solid'}) # type: ignore
-        exps.append({"exp_name": "_".join(['24_0126_A',alg,'noher','predefined','fix','max','noper','sparse',taskname+'-v3']) , "seed_num":seednum, "color": color_palette[1], "plot_name": "HiER", "linestyle": 'solid'}) # type: ignore
-        exps.append({"exp_name": "_".join(['24_0126_A',alg,'final','nohier','fix','max','noper','sparse',taskname+'-v3']) , "seed_num":seednum, "color": color_palette[2], "plot_name": "HER", "linestyle": 'solid'}) # type: ignore
-        exps.append({"exp_name": "_".join(['24_0126_A',alg,'final','predefined','fix','max','noper','sparse',taskname+'-v3']) , "seed_num":seednum, "color": color_palette[3], "plot_name": "HER+HiER", "linestyle": 'solid'}) # type: ignore
-        
+        hers = ['noher','final']
+        hiers = ['nohier','predefined']
+        ises = ['max']
+
+        # hers = ['final']
+        # hiers = ['predefined']
+        # ises = ['max']
+
+        for her in hers:
+            for hier in hiers:
+                for ise in ises:
+                    # letter = 'C' if taskname == 'FetchPush-v2' and her == 'final' and hier == 'predefined' else 'A'
+                    # exps.append({"exp_name": "_".join(['0207',letter,alg,her,hier,'fix',ise,'noper','sparse',taskname]) , "seed_num":seednum, "color": color_palette[color_index], "plot_name": "_".join([her,hier,ise]) , "linestyle": 'solid'}) # type: ignore
+                    exps.append({"exp_name": "_".join(['0207_B',alg,her,hier,'fix',ise,'7x7_S','noper','sparse',taskname]) , "seed_num":seednum, "color": color_palette[color_index], "plot_name": "_".join([her,hier,ise]) , "linestyle": 'solid'}) # type: ignore
+                    color_index += 1
 
 ########### Grand test
         #color_palette = ['darkgray','dimgray','green','blue','purple','magenta']

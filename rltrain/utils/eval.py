@@ -261,12 +261,15 @@ class Eval:
         plt.clf()
         plt.cla()
     
-    def save_video(self,
+    def record(self,
                    model_name: Union[int,str] = "best_model",
                    num_display_episode: int = 10, 
                    current_dir: Optional[str] = None, 
+                   frame_freq: int = 1,
                    outdir: str = "vids", 
-                   save_name: str = "video.png"
+                   save_name: str = "video",
+                   save_images: bool = False,
+                   save_video: bool = False
                    ) -> None:
 
         # Load model
@@ -277,8 +280,20 @@ class Eval:
         # Create Env
         self.config['environment']['headless'] = True
 
-        assert self.config['environment']['name'] == "gympanda"
-        env = gym.make(self.config['environment']['task']['name'], render_mode="rgb_array")
+        if self.config['environment']['name'] in ["gympanda","gymfetch"]:
+            env = gym.make(self.config['environment']['task']['name'], render_mode="rgb_array")
+        elif self.config['environment']['name'] == 'gymmaze':
+            env = gym.make(self.config['environment']['task']['name'], 
+                maze_map = self.config['environment']['task']['params']['gymmaze']['maze_map'], 
+                continuing_task = self.config['environment']['task']['params']['gymmaze']['continuing_task'], 
+                render_mode="rgb_array", 
+                max_episode_steps=int(float(self.max_ep_len)))
+        else:
+            raise ValueError("[TaskEnv]: env_name: '" + str(self.config['environment']['name']) + "' must be in : " + str(self.config_framework['env_list']))
+
+
+        if save_images: self.create_folder(os.path.join(current_dir, outdir, save_name))
+
 
         # Start Eval
         ep_rets = []
@@ -286,7 +301,7 @@ class Eval:
         images = []
         success_list = []
 
-        for _ in tqdm(range(num_display_episode), desc ="Create video: ", leave=True):
+        for ep_index in tqdm(range(num_display_episode), desc ="Create video: ", leave=True):
 
             [o_dict, _], d, ep_ret, ep_len = env.reset(), False, 0, 0
             o = np.concatenate((o_dict['observation'], o_dict['desired_goal']))
@@ -294,16 +309,31 @@ class Eval:
             
             info = {}
             info['is_success'] = False
+            ep_t_index = 0
             while not(d or (ep_len == self.max_ep_len)):
                 # Take deterministic actions at test time 
                 a = self.agent.get_action(o = o, deterministic = True, noise_scale = 0.0)
                 o_dict, r, terminated, truncated, info  = env.step(a)
                 o = np.concatenate((o_dict['observation'], o_dict['desired_goal']))
 
-                images.append(self.draw_results(env.render(),success_list))
+                if self.config['environment']['name'] == 'gymmaze': 
+                    info['is_success'] = info.pop('success')
+                    r -= 1.0
+                if info['is_success']: terminated = True 
+
+                if ep_t_index % frame_freq == 0 or d: 
+                    imgage_origin = env.render()
+                    if save_images: 
+                        image_name = str(ep_index) + "_" + str(ep_t_index) + ".jpg"
+                        image_path = os.path.join(current_dir, outdir, save_name, image_name)
+                        cv2.imwrite(image_path, imgage_origin) 
+                    if save_video:
+                        images.append(self.draw_results(imgage_origin,success_list))
+                    
                 d = terminated or truncated
                 ep_ret += r
                 ep_len += 1
+                ep_t_index += 1
             
             ep_rets.append(ep_ret)
             ep_lens.append(ep_len)
@@ -328,7 +358,8 @@ class Eval:
         # Shutdown environment
         env.close()
 
-        write_apng(os.path.join(current_dir,outdir,save_name), images, delay=40)
+        if save_video:
+            write_apng(os.path.join(current_dir,outdir,save_name + ".png"), images, delay=40)
 
         ep_ret_avg = sum(ep_rets) / len(ep_rets)
         mean_ep_length = sum(ep_lens) / len(ep_lens)
@@ -364,3 +395,10 @@ class Eval:
             img_cv = cv2.rectangle(img_cv, start_point, end_point, (0,0,0), 1)
         
         return img_cv
+    
+    def create_folder(self, path: str) -> None:
+        if not os.path.exists(path):
+            os.makedirs(path)
+            print(path + ' folder is created!')
+        else:
+            print(path + ' folder already exists!')

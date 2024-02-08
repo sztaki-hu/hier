@@ -103,16 +103,14 @@ class Logger:
         self.compute_and_replace_auto_values()
         if display_mode == False:
             if self.config['buffer']['per']['mode'] != 'noper' and self.config['buffer']['hier']['xi']['set_prioritized_for_PER']: 
-                self.config['buffer']['hier']['xi']['mode'] = 'prioritized'
-
-        maze_map = self.config['environment']['task']['params']['gymmaze']['maze_map']
-        if maze_map not in self.config_framework['mazes']: 
-            raise ValueError("[TaskEnv GymMaze]: maze_map: '" + str(maze_map) + "' must be in : " + str(self.config_framework['mazes']))
-
+                self.config['buffer']['hier']['xi']['mode'] = 'prioritized'     
 
         # Insert maze data
         if display_mode == False:
             maze_name = self.config['environment']['task']['params']['gymmaze']['maze_map']
+            if maze_name not in self.config_framework['mazes']: 
+                raise ValueError("[TaskEnv GymMaze]: maze_map: '" + str(maze_name) + "' must be in : " + str(self.config_framework['mazes']))
+
             self.config['environment']['task']['params']['gymmaze']['maze_map'] = self.config_maze['mazes'][maze_name]['maze_map']
 
             maze_ise_g_version = self.config['trainer']['init_state']['isedisc']['g'] 

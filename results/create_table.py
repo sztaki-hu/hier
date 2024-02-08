@@ -25,12 +25,19 @@ parser.add_argument("--outdir", default="results/output/tables" ,help="Path of t
 parser.add_argument("--show", default=False ,help="Id of plot")
 args = parser.parse_args()
 
-plotid = 'plotid'
+plotid = '0207_B_S'
 seednum = 10
 alg = 'sac' # 'td3','ddpg'
 plotdata = 'eval_success_rate'
-taskname_list = ['Slide']
-taskname_missing_list = ['Push','PickAndPlace']
+
+# taskname_list = ['Slide']
+# taskname_missing_list = ['Push','PickAndPlace']
+
+# taskname_list = ['FetchPush-v2','FetchSlide-v2','FetchPickAndPlace-v2']
+# taskname_missing_list = []
+
+taskname_list = ['PointMaze_UMaze-v3']
+taskname_missing_list = ['a','b']
 
 # taskname_list = ['Push','Slide','PickAndPlace']
 # taskname_missing_list = []
@@ -65,30 +72,45 @@ for task_index in range(len(taskname_list)):
     
     exps = []
 
-    # SOTA ######################x
+    # Panda ######################x
 
-    ises = ['max','selfpaced']
-    hers = ['noher','final']
-    hiers = ['nohier','predefined']
-    pers = ['noper','proportional']
+    # ises = ['max','selfpaced']
+    # hers = ['noher','final']
+    # hiers = ['nohier','predefined']
+    # pers = ['noper','proportional']
 
-    datetag = '1116' if taskname in ['Push','Slide'] else '1119'
+    # datetag = '1116' if taskname in ['Push','Slide'] else '1119'
     
-    idx = 0
+    # idx = 0
+    # for hier in hiers:
+    #     for ise in ises:
+    #         for per in pers:
+    #             for her in hers:
+    #                 if per == 'noper':
+    #                     exps.append({"exp_name": "_".join([datetag,'A',alg,ise,her,hier,'fix',per,'sparse','Panda'+taskname+'-v3']) , "seed_num":seednum, "plot_name": " + ".join([her,per,ise,hier])}) # type: ignore
+    #                 else:
+    #                     exps.append({"exp_name": "_".join([datetag,'A',alg,ise,her,hier,'prioritized',per,'sparse','Panda'+taskname+'-v3']) , "seed_num":seednum, "plot_name": " + ".join([her,per,ise,hier])}) # type: ignore
+    #                 idx += 1
+    
+    
+    # Fetch #######################
+    # hiers = ['nohier','predefined']
+    # hers = ['noher','final']
+
+    # for hier in hiers:
+    #     for her in hers:
+    #         letter = 'C' if taskname == 'FetchPush-v2' and her == 'final' and hier == 'predefined' else 'A'
+    #         exps.append({"exp_name": "_".join(['0207',letter,alg,her,hier,'fix','max','noper','sparse',taskname]) , "seed_num":seednum, "plot_name": "_".join([her,hier])}) # type: ignore
+            
+
+    # Maze #######################
+    hiers = ['nohier','predefined']
+    hers = ['noher','final']
+
     for hier in hiers:
-        for ise in ises:
-            for per in pers:
-                for her in hers:
-                    if per == 'noper':
-                        exps.append({"exp_name": "_".join([datetag,'A',alg,ise,her,hier,'fix',per,'sparse','Panda'+taskname+'-v3']) , "seed_num":seednum, "plot_name": " + ".join([her,per,ise,hier])}) # type: ignore
-                    else:
-                        exps.append({"exp_name": "_".join([datetag,'A',alg,ise,her,hier,'prioritized',per,'sparse','Panda'+taskname+'-v3']) , "seed_num":seednum, "plot_name": " + ".join([her,per,ise,hier])}) # type: ignore
-                    idx += 1
-
-
-
-  
-
+        for her in hers:
+            exps.append({"exp_name": "_".join(['0207_B',alg,her,hier,'fix','max','7x7_S','noper','sparse',taskname]) , "seed_num":seednum, "plot_name": "_".join([her,hier])}) # type: ignore
+                
     data_pd = pd.DataFrame(np.empty(0, dtype=dtypes))
     print(data_pd.dtypes)
 

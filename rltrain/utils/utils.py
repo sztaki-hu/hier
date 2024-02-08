@@ -7,6 +7,7 @@ from tqdm import tqdm
 import time
 from statistics import mean as dq_mean
 from typing import Dict, Union, Optional
+import pandas as pd
 
 from rltrain.logger.logger import Logger
 
@@ -80,3 +81,25 @@ def wait_for_datetime(start_datetime: datetime.datetime) -> None:
         diff = start_datetime - now  
     
     pbar.close()
+
+# EVAL GET BEST SEED
+    
+def get_best_seed(current_dir: str, exp_path: str) -> int:
+    seeds_str = sorted(os.listdir(os.path.join(current_dir, exp_path)))
+
+    glob_max_value = float('-inf')
+    glob_max_value_index = 0
+
+    for i in seeds_str:
+        path = os.path.join(current_dir, exp_path, str(i), 'runs','csv','eval_success_rate.csv')  
+        pivot = pd.read_csv(path)
+        max_value = pivot.iloc[:, 1].max()
+        print("[" + i + "] : " +  str(max_value))
+        if max_value > glob_max_value:
+            glob_max_value = max_value
+            glob_max_value_index = int(i)
+
+    print("------------------------")
+    print("BEST: [" + str(glob_max_value_index) + "] : " +  str(glob_max_value))
+    print("------------------------")
+    return glob_max_value_index
