@@ -31,11 +31,19 @@ class HER:
         if self.her_goal_selection_strategy not in config_framework['her']['mode_list']:
             raise ValueError("[HER]: her_goal_selection_strategy: '" + str(self.her_goal_selection_strategy) + "' must be in : " + str(config_framework['her']['strategy_list']))
 
-
     def get_new_goals(self, episode: List[Transition], ep_t: int) -> List[np.ndarray]:
         if self.her_goal_selection_strategy == 'final':
             new_goals = []
             _, _, _, o2, _ = episode[-1]
+            for _ in range(self.n_sampled_goal):
+                new_goals.append(self.taskenv.get_achieved_goal_from_obs(o2))
+            return new_goals
+        elif self.her_goal_selection_strategy == 'final_valid': #for slide
+            new_goals = []
+            for i in range(len(episode)):
+                _, _, _, o2, _ = episode[i]
+                if o2[5] < 0.35: break
+            _, _, _, o2, _ = episode[i]
             for _ in range(self.n_sampled_goal):
                 new_goals.append(self.taskenv.get_achieved_goal_from_obs(o2))
             return new_goals
@@ -68,7 +76,7 @@ class HER:
         state_changed = self.taskenv.is_diff_state(episode[0][0], episode[-1][0])
 
         if state_changed or self.state_check == False:
-            if self.her_goal_selection_strategy == 'future_once':
+            if self.her_goal_selection_strategy in ['final','final_valid','future_once']:
                 new_goals = self.get_new_goals(episode,0)
                 for (o, a, r, o2, d) in episode:                  
                     for new_goal in new_goals:

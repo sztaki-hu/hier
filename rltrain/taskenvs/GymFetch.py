@@ -54,8 +54,6 @@ class GymFetch(TaskEnvBase):
         r_float = r_float * self.reward_scalor
 
         if info['is_success']: terminated = True 
-        if self.task_name in ['FetchSlide-v2']:
-            if o[5] < 0.4: terminated = True 
 
         return o, r_float, terminated, truncated, info 
 

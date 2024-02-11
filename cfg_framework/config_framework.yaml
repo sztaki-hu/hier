@@ -7,7 +7,7 @@ task_list:
 
   gymfetch: ['FetchReach-v2', 'FetchPush-v2','FetchSlide-v2','FetchPickAndPlace-v2']
 her:
-  mode_list: ['noher', 'final', 'future', 'future_once', 'near', 'next']
+  mode_list: ['noher', 'final', 'future', 'future_once', 'near', 'next', 'final_valid']
 per:
   mode_list: ['noper','proportional']
 ise:
