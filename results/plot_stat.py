@@ -13,7 +13,6 @@ from rliable import plot_utils
 
 # Import seaborn
 import matplotlib.pyplot as plt
-import matplotlib
 import seaborn as sns
 
 sns.set_theme()
@@ -37,13 +36,14 @@ reps_scalor = 0.1
 output_name = "GT_0424"
 output_dir = os.path.join(current_dir, "results" ,"output", "plot_stat",output_name)
 
-plot_agg_metrics = True
-plot_prob = True
+plot_agg_metrics = False
+plot_prob = False
 plot_perf_profiles = True
+plot_hist = False
 
 
 # CREATE FODLER 
-create_folder(os.path.join(output_dir))
+create_folder(output_dir)
 
 # INPUT DATA ##############################################################
 
@@ -128,10 +128,16 @@ if plot_agg_metrics:
         metric_names=['Median', 'IQM', 'Mean', 'Optimality Gap'],
         algorithms=algs, 
         xlabel=data_plot_name,
-        colors=dict(zip(algs, colors)))
+        colors=dict(zip(algs, colors)),
+        xlabel_y_coordinate=-0.25)
 
 
-    fig.set_size_inches(16, 6)
+    for ax in axes:
+        ax.set_facecolor((1.0, 1.0, 1.0))
+        ax.grid(axis='x',c='gray')
+        ax.spines['bottom'].set_color('black')
+
+    #fig.set_size_inches(20, 6)
 
     plt.savefig(os.path.join(output_dir, output_name+"_aggregate_metrics.png"),bbox_inches='tight')
     plt.clf()
@@ -176,7 +182,11 @@ if plot_prob:
             average_prob_cis,
             colors=colors_prob)
 
-        #ax.set_size_inches(16, 6)
+        ax.set_facecolor((1.0, 1.0, 1.0))
+        ax.grid(axis='x',c='gray')
+        ax.spines['bottom'].set_position(('data', -0.65))  # Set position to zero
+        ax.spines['bottom'].set_color('black') 
+  
 
         plt.savefig(os.path.join(output_dir, output_name+"_probability_"+str(prob_index)+".png"),bbox_inches='tight')
         plt.clf()
@@ -206,7 +216,45 @@ if plot_perf_profiles:
 
     plt.axhline(y=0.5, color='red', linestyle="dotted", label='y=0.5')
 
+    plt.xlim(0, 1.05)
+    plt.ylim(0, 1.05)
+    ax.set_facecolor((1.0, 1.0, 1.0))
+    ax.grid(axis='both',c='gray')
+    ax.spines['bottom'].set_position(('data', 0))  # Set position to zero
+    ax.spines['left'].set_position(('data', 0))  # Set position to zero
+    ax.spines['bottom'].set_color('black')
+    ax.spines['left'].set_color('black')
+    ax.tick_params(axis='x', which='both', bottom=True, labelbottom=True, pad=8)
+
     plt.savefig(os.path.join(output_dir, output_name+"_performance_profile.png"),bbox_inches='tight')
     plt.clf()
     plt.cla()
     print("Done")
+
+###########################################################################
+## Plot Histogram #########################################################
+###########################################################################
+# if plot_hist:
+#     create_folder(os.path.join(output_dir,"hist"))
+#     for alg in algs:
+#         for task_id in range(task_num):
+
+#             data_alg = data[alg][:,task_id] 
+
+#             # Plot the histogram
+#             plt.hist(data_alg, bins=30, color='cornflowerblue', alpha=0.7, density=True)
+
+#             # Overlay a kernel density estimate (KDE) plot
+#             sns.kdeplot(data_alg, color='blue', linestyle='-', linewidth=2)
+            
+#             plt.xlim(0, 1)
+#             plt.xlabel('Value')
+#             plt.ylabel('Density')
+#             plt.title('Histogram with KDE')
+#             plt.grid(True)
+
+#             plt.savefig(os.path.join(output_dir, "hist",output_name+"_histograms_"+alg+"_"+tasks[task_id]+".png"),bbox_inches='tight')
+#             plt.clf()
+#             plt.cla()
+
+print("Done")
