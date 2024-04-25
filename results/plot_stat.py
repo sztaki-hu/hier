@@ -33,12 +33,12 @@ data_plot_names = ['Success rate score']
 reps_scalor = 0.1
 
 # CONTROL PLOTTING ####################################################
-output_name = "GT_0424"
+output_name = "X_test_GT_0425"
 output_dir = os.path.join(current_dir, "results" ,"output", "plot_stat",output_name)
 
-plot_agg_metrics = False
+plot_agg_metrics = True
 plot_prob = False
-plot_perf_profiles = True
+plot_perf_profiles = False
 plot_hist = False
 
 
@@ -229,7 +229,7 @@ if plot_perf_profiles:
     plt.savefig(os.path.join(output_dir, output_name+"_performance_profile.png"),bbox_inches='tight')
     plt.clf()
     plt.cla()
-    print("Done")
+
 
 ###########################################################################
 ## Plot Histogram #########################################################
