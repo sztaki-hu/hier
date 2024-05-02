@@ -37,7 +37,7 @@ colors = [(0.5,0.5,0.5),(0.2,0.2,0.2),'green','blue','purple','magenta'] # DUMMY
 
 
 # OUTPUT ####################################################
-output_name = "MAZE_0426_2"
+output_name = "AGG_0502"
 output_dir = os.path.join(current_dir, "results" ,"output", "tables",output_name)
 
 # CREATE FODLER 
@@ -145,7 +145,16 @@ for task, og_gamma in zip(tasks,og_gammas):
             pivot.append({"name":"_".join(['noher','noper','nocl','predefined']),"file_name": "_".join(['0209','B','sac','gam10','alp01','noher','predefined','fix','max',"7x7_S",'noper','sparse','PointMaze_UMaze-v3'])}) # type: ignore  
             pivot.append({"name":"_".join(['final','noper','nocl','predefined']),"file_name": "_".join(['0209','B','sac','gam10','alp01','final','predefined','fix','max',"7x7_S",'noper','sparse','PointMaze_UMaze-v3'])}) # type: ignore      
             
-     
+    # TD3 DDPG
+            
+    # datetag = '1127' if task in ['PandaPush-v3','PandaPickAndPlace-v3'] else '1206'
+    # letter = 'C' if task in ['PandaPush-v3','PandaPickAndPlace-v3'] else 'A'
+
+    # pivot.append({"name": "TD3 Baseline","file_name": "_".join([datetag,letter,'td3','nocl','noher','nohier','fix','noper','sparse',task]) , "linestyle": 'solid' }) 
+    # pivot.append({"name": "TD3 HiER+","file_name": "_".join([datetag,letter,'td3','selfpaced','noher','predefined','fix','noper','sparse',task]) , "linestyle": 'solid' }) 
+    # pivot.append({"name": "DDPG Baseline","file_name": "_".join([datetag,letter,'ddpg','nocl','noher','nohier','fix','noper','sparse',task]) , "linestyle": 'solid' }) 
+    # pivot.append({"name": "DDPG HiER+","file_name": "_".join([datetag,letter,'ddpg','selfpaced','noher','predefined','fix','noper','sparse',task]) , "linestyle": 'solid' }) 
+   
 
     input_data[task] = pivot
 

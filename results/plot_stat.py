@@ -22,26 +22,27 @@ from results_utils import create_folder
 # PARAMS ###########################################################
 #tasks = ['PandaSlide-v3']
 #tasks = ['PandaPush-v3','PandaSlide-v3','PandaPickAndPlace-v3']
-tasks = ['FetchPush-v2','FetchSlide-v2','FetchPickAndPlace-v2']
-#tasks = ['PandaPush-v3','PandaSlide-v3','PandaPickAndPlace-v3','FetchPush-v2','FetchSlide-v2','FetchPickAndPlace-v2',"PointMaze-Wall-v3","PointMaze-S-v3"]
+#tasks = ['FetchPush-v2','FetchSlide-v2','FetchPickAndPlace-v2']
+tasks = ['PandaPush-v3','PandaSlide-v3','PandaPickAndPlace-v3','FetchPush-v2','FetchSlide-v2','FetchPickAndPlace-v2',"PointMaze-Wall-v3","PointMaze-S-v3"]
 task_num = len(tasks)
 run_num = 10
 
 data_names = ['eval_success_rate'] #'eval_success_rate' / 'eval_mean_reward'
 data_plot_names = ['Success rate score'] #'Success rate score' / 'Reward'
 results_mode = "best"# last / best
+task_bootstrap = False
 
 
 # CONTROL COMPUTATION #################################################
 reps_scalor = 1.0
 
 # CONTROL PLOTTING ####################################################
-output_name = "Fetch_0429_success"
+output_name = "Panda_0502_B_success"
 output_dir = os.path.join(current_dir, "results" ,"output", "plot_stat",output_name)
 
-plot_agg_metrics = True
+plot_agg_metrics = False
 plot_prob = False
-plot_perf_profiles = False
+plot_perf_profiles = True
 plot_hist = False
 
 
@@ -75,64 +76,122 @@ for task in tasks:
 
     # FETCH ###############################################################################
 
-    colors = [(0.0,0.4,0.6),(0.0,0.0,1.0),'purple','magenta']
+    # colors = [(0.0,0.4,0.6),(0.0,0.0,1.0),'purple','magenta']
 
-    letter = 'C' if task == 'FetchPush-v2' else 'A'
-    if task != 'FetchSlide-v2':
-        pivot.append({"name": "Baseline", "file_name": "_".join(['0207','A','sac','noher','nohier','fix','max','noper','sparse',task]), "color": colors[0], "linestyle": 'dashed'}) # type: ignore
-        pivot.append({"name": "HiER", "file_name": "_".join(['0207','A','sac','noher','predefined','fix','max','noper','sparse',task]), "color": colors[1], "linestyle": 'solid'}) # type: ignore   
-        pivot.append({"name": "Baseline [HER]", "file_name": "_".join(['0207','A','sac','final','nohier','fix','max','noper','sparse',task]), "color": colors[2], "linestyle": 'dashed'}) # type: ignore
-        pivot.append({"name": "HiER [HER]", "file_name": "_".join(['0207',letter,'sac','final','predefined','fix','max','noper','sparse',task]), "color": colors[3], "linestyle": 'solid'}) # type: ignore
-    else:
-        pivot.append({"name": "Baseline", "file_name": "_".join(['0207','A','sac','noher','nohier','fix','max','noper','sparse',task]), "color": colors[0], "linestyle": 'dashed'}) # type: ignore
-        pivot.append({"name": "HiER", "file_name": "_".join(['0207','A','sac','noher','predefined','fix','max','noper','sparse',task]), "color": colors[1], "linestyle": 'solid'}) # type: ignore
-        pivot.append({"name": "Baseline [HER]", "file_name": "_".join(['0211','F','sac','final_valid','nohier','fix','max','noper','sparse',task]), "color": colors[2], "linestyle": 'dashed'}) # type: ignore  
-        pivot.append({"name": "HiER [HER]", "file_name": "_".join(['0211','F','sac','final_valid','predefined','fix','max','noper','sparse',task]), "color": colors[3], "linestyle": 'solid'}) # type: ignore
+    # letter = 'C' if task == 'FetchPush-v2' else 'A'
+    # if task != 'FetchSlide-v2':
+    #     pivot.append({"name": "Baseline", "file_name": "_".join(['0207','A','sac','noher','nohier','fix','max','noper','sparse',task]), "color": colors[0], "linestyle": 'dashed'}) # type: ignore
+    #     pivot.append({"name": "HiER", "file_name": "_".join(['0207','A','sac','noher','predefined','fix','max','noper','sparse',task]), "color": colors[1], "linestyle": 'solid'}) # type: ignore   
+    #     pivot.append({"name": "Baseline [HER]", "file_name": "_".join(['0207','A','sac','final','nohier','fix','max','noper','sparse',task]), "color": colors[2], "linestyle": 'dashed'}) # type: ignore
+    #     pivot.append({"name": "HiER [HER]", "file_name": "_".join(['0207',letter,'sac','final','predefined','fix','max','noper','sparse',task]), "color": colors[3], "linestyle": 'solid'}) # type: ignore
+    # else:
+    #     pivot.append({"name": "Baseline", "file_name": "_".join(['0207','A','sac','noher','nohier','fix','max','noper','sparse',task]), "color": colors[0], "linestyle": 'dashed'}) # type: ignore
+    #     pivot.append({"name": "HiER", "file_name": "_".join(['0207','A','sac','noher','predefined','fix','max','noper','sparse',task]), "color": colors[1], "linestyle": 'solid'}) # type: ignore
+    #     pivot.append({"name": "Baseline [HER]", "file_name": "_".join(['0211','F','sac','final_valid','nohier','fix','max','noper','sparse',task]), "color": colors[2], "linestyle": 'dashed'}) # type: ignore  
+    #     pivot.append({"name": "HiER [HER]", "file_name": "_".join(['0211','F','sac','final_valid','predefined','fix','max','noper','sparse',task]), "color": colors[3], "linestyle": 'solid'}) # type: ignore
 
-    xlabel_y_coordinate=-0.5
+    # xlabel_y_coordinate=-0.5
 
 
     # AGGREGATE ###############################################################################
 
+    colors = [(0.0,0.4,0.6),'blue','purple','magenta']
+    xlabel_y_coordinate=-0.5
+    
+    if task in ['PandaPush-v3','PandaSlide-v3','PandaPickAndPlace-v3']:
+        datetag = '1116' if task in ['PandaPush-v3','PandaSlide-v3'] else '1119'
+        pivot.append({"name": "Baseline", "file_name": "_".join([datetag,'A','sac','nocl','noher','nohier','fix','noper','sparse',task]), "color": colors[0], "linestyle": 'dashed'})        
+        pivot.append({"name": "HiER", "file_name": "_".join([datetag,'A','sac','nocl','noher','predefined','fix','noper','sparse',task]) ,"color": colors[3], "linestyle": 'solid' })       
+        pivot.append({"name": "Baseline [HER]", "file_name": "_".join([datetag,'A','sac','nocl','final','nohier','fix','noper','sparse',task]) ,"color": colors[1], "linestyle": 'dashed' })  
+        pivot.append({"name": "HiER [HER]", "file_name": "_".join([datetag,'A','sac','nocl','final','predefined','fix','noper','sparse',task]) ,"color": colors[3], "linestyle": 'solid' }) 
+   
+    if task in ['FetchPush-v2','FetchSlide-v2','FetchPickAndPlace-v2']:
+        letter = 'C' if task == 'FetchPush-v2' else 'A'
+        if task != 'FetchSlide-v2':
+            pivot.append({"name": "Baseline", "file_name": "_".join(['0207','A','sac','noher','nohier','fix','max','noper','sparse',task]), "color": colors[0], "linestyle": 'dashed'}) # type: ignore    
+            pivot.append({"name": "HiER", "file_name": "_".join(['0207','A','sac','noher','predefined','fix','max','noper','sparse',task]), "color": colors[1], "linestyle": 'solid'}) # type: ignore   
+            pivot.append({"name": "Baseline [HER]", "file_name": "_".join(['0207','A','sac','final','nohier','fix','max','noper','sparse',task]), "color": colors[2], "linestyle": 'dashed'}) # type: ignore
+            pivot.append({"name": "HiER [HER]", "file_name": "_".join(['0207',letter,'sac','final','predefined','fix','max','noper','sparse',task]), "color": colors[3], "linestyle": 'solid'}) # type: ignore
+        else:
+            pivot.append({"name": "Baseline", "file_name": "_".join(['0207','A','sac','noher','nohier','fix','max','noper','sparse',task]), "color": colors[0], "linestyle": 'dashed'}) # type: ignore               
+            pivot.append({"name": "HiER", "file_name": "_".join(['0207','A','sac','noher','predefined','fix','max','noper','sparse',task]), "color": colors[1], "linestyle": 'solid'}) # type: ignore
+            pivot.append({"name": "Baseline [HER]", "file_name": "_".join(['0211','F','sac','final_valid','nohier','fix','max','noper','sparse',task]), "color": colors[2], "linestyle": 'dashed'}) # type: ignore  
+            pivot.append({"name": "HiER [HER]", "file_name": "_".join(['0211','F','sac','final_valid','predefined','fix','max','noper','sparse',task]), "color": colors[3], "linestyle": 'solid'}) # type: ignore
+
+    if task in ["PointMaze-Wall-v3","PointMaze-S-v3"]:
+          ##### "PointMaze-Wall-v3"
+        if task == "PointMaze-Wall-v3":
+            pivot.append({"name":"Baseline","file_name": "_".join(['0207','B','sac','noher','nohier','fix','max',"7x7_wall",'noper','sparse','PointMaze_UMaze-v3']), "linestyle": 'dashed'}) # type: ignore         
+            pivot.append({"name":"HiER","file_name": "_".join(['0207','B','sac','noher','predefined','fix','max',"7x7_wall",'noper','sparse','PointMaze_UMaze-v3']),"linestyle": 'solid'}) # type: ignore    
+            pivot.append({"name":"Baseline [HER]","file_name": "_".join(['0212','B','sac','final','nohier','fix','max',"7x7_wall",'noper','sparse','PointMaze_UMaze-v3']), "linestyle": 'dashed'}) # type: ignore     
+            pivot.append({"name":"HiER [HER]","file_name": "_".join(['0212','B','sac','final','predefined','fix','max',"7x7_wall",'noper','sparse','PointMaze_UMaze-v3']), "linestyle": 'solid'}) # type: ignore      
+            
+        #### "PointMaze-S-v3"
+        if task == "PointMaze-S-v3":
+            pivot.append({"name":"Baseline","file_name": "_".join(['0211','B','sac','gam10','alp01','noher','nohier','fix','max',"7x7_S",'noper','sparse','PointMaze_UMaze-v3']), "linestyle": 'dashed'}) # type: ignore            
+            pivot.append({"name":"HiER","file_name": "_".join(['0209','B','sac','gam10','alp01','noher','predefined','fix','max',"7x7_S",'noper','sparse','PointMaze_UMaze-v3']), "linestyle": 'solid'}) # type: ignore  
+            pivot.append({"name":"Baseline [HER]","file_name": "_".join(['0209','B','sac','gam10','alp01','final','nohier','fix','max',"7x7_S",'noper','sparse','PointMaze_UMaze-v3']), "linestyle": 'dashed'}) # type: ignore    
+            pivot.append({"name":"HiER [HER]","file_name": "_".join(['0209','B','sac','gam10','alp01','final','predefined','fix','max',"7x7_S",'noper','sparse','PointMaze_UMaze-v3']), "linestyle": 'solid'}) # type: ignore      
+
+    # HiER lambda ###############################################################################
+
+    # colors = [(0.5,0.5,0.5),'orange','blue','purple']
+    # xlabel_y_coordinate=-0.5
+
+    # pivot.append({"name":"Baseline", "file_name": "_".join(['1127_D','sac','nocl','noher','nohier','fix','noper','sparse',task]), "linestyle": 'dashed'}) # type: ignore
+    # pivot.append({"name":"Fix", "file_name": "_".join(['1127_D','sac','nocl','noher','fix','fix','noper','sparse',task]) , "linestyle": 'solid'}) 
+    # pivot.append({"name":"Predefined", "file_name": "_".join(['1127_D','sac','nocl','noher','predefined','fix','noper','sparse',task]) , "linestyle": 'solid'}) 
+    # pivot.append({"name":"AMA", "file_name": "_".join(['1127_D','sac','nocl','noher','ama','fix','noper','sparse',task]) , "linestyle": 'solid'})     
+
+    # HiER xi ###############################################################################
+
+    # colors = ['orangered','orange','green','blue','navy','purple']
+    # xlabel_y_coordinate=-0.25
+
+    # pivot.append({"name": "Fix 0.1", "file_name": "_".join(['1127_E','sac','selfpaced','final','predefined','fix','xi01','noper','sparse',task]) ,  "linestyle": 'solid'}) # type: ignore
+    # pivot.append({"name": "Fix 0.25", "file_name": "_".join(['1127_E','sac','selfpaced','final','predefined','fix','xi025','noper','sparse',task]), "linestyle": 'solid'}) # type: ignore
+    # pivot.append({"name": "Fix 0.5","file_name": "_".join(['1127_E','sac','selfpaced','final','predefined','fix','xi05','noper','sparse',task]) ,   "linestyle": 'solid'}) # type: ignore
+    # pivot.append({"name": "Fix 0.75","file_name": "_".join(['1127_E','sac','selfpaced','final','predefined','fix','xi075','noper','sparse',task]) , "linestyle": 'solid'}) # type: ignore
+    # pivot.append({"name": "Fix 0.9","file_name": "_".join(['1127_E','sac','selfpaced','final','predefined','fix','xi09','noper','sparse',task]) ,  "linestyle": 'solid'}) # type: ignore
+    # pivot.append({"name": "Prioritized","file_name": "_".join(['1127_E','sac','selfpaced','final','predefined','prioritized','noper','sparse',task]) ,  "linestyle": 'solid'}) # type: ignore
+
+    # E2H-ISE c-functions ###############################################################################
+
+    # colors = ['orange','green','blue','purple','orange','green','blue','purple','orange','green','blue','purple','orange','green','blue','purple']
+    # xlabel_y_coordinate=-0.0
+
+    # for hier in ['nohier','predefined']:
+    #     for her in ['noher','final']:
+    #         for cmode in ['predefined_linear','selfpaced','control','controladaptive']:
+    #             name_str = ''
+
+    #             if cmode == 'predefined_linear':    name_str += 'Predefined'
+    #             elif cmode == 'selfpaced':          name_str += 'Self-paced'
+    #             elif cmode == 'control':            name_str += 'Control'
+    #             elif cmode == 'controladaptive':    name_str += 'Control adaptive'
+
+    #             if hier == 'predefined' and her == 'final': name_str += '   [HiER + HER]'
+    #             if hier == 'predefined' and her == 'noher': name_str += '   [HiER]'
+    #             if hier == 'nohier' and her == 'final':     name_str += '   [HER]'
+    #             #if hier == 'nohier' and her == 'noher':     name_str += ''
+
+                
+    #             pivot.append({"name": name_str,"file_name": "_".join(['1206','A','sac',cmode,her,hier,'fix','noper','sparse',task]) , "linestyle": 'solid' }) 
+   
+
+    # DDPG and TD3 ###############################################################################
+                
     # colors = [(0.0,0.4,0.6),'blue','purple','magenta']
     # xlabel_y_coordinate=-0.5
-    
-    # if task in ['PandaPush-v3','PandaSlide-v3','PandaPickAndPlace-v3']:
-    #     datetag = '1116' if task in ['PandaPush-v3','PandaSlide-v3'] else '1119'
-    #     pivot.append({"name": "Baseline", "file_name": "_".join([datetag,'A','sac','nocl','noher','nohier','fix','noper','sparse',task]), "color": colors[0], "linestyle": 'dashed'})        
-    #     pivot.append({"name": "HiER", "file_name": "_".join([datetag,'A','sac','nocl','noher','predefined','fix','noper','sparse',task]) ,"color": colors[3], "linestyle": 'solid' })       
-    #     pivot.append({"name": "Baseline [HER]", "file_name": "_".join([datetag,'A','sac','nocl','final','nohier','fix','noper','sparse',task]) ,"color": colors[1], "linestyle": 'dashed' })  
-    #     pivot.append({"name": "HiER [HER]", "file_name": "_".join([datetag,'A','sac','nocl','final','predefined','fix','noper','sparse',task]) ,"color": colors[3], "linestyle": 'solid' }) 
-   
-    # if task in ['FetchPush-v2','FetchSlide-v2','FetchPickAndPlace-v2']:
-    #     letter = 'C' if task == 'FetchPush-v2' else 'A'
-    #     if task != 'FetchSlide-v2':
-    #         pivot.append({"name": "Baseline", "file_name": "_".join(['0207','A','sac','noher','nohier','fix','max','noper','sparse',task]), "color": colors[0], "linestyle": 'dashed'}) # type: ignore    
-    #         pivot.append({"name": "HiER", "file_name": "_".join(['0207','A','sac','noher','predefined','fix','max','noper','sparse',task]), "color": colors[1], "linestyle": 'solid'}) # type: ignore   
-    #         pivot.append({"name": "Baseline [HER]", "file_name": "_".join(['0207','A','sac','final','nohier','fix','max','noper','sparse',task]), "color": colors[2], "linestyle": 'dashed'}) # type: ignore
-    #         pivot.append({"name": "HiER [HER]", "file_name": "_".join(['0207',letter,'sac','final','predefined','fix','max','noper','sparse',task]), "color": colors[3], "linestyle": 'solid'}) # type: ignore
-    #     else:
-    #         pivot.append({"name": "Baseline", "file_name": "_".join(['0207','A','sac','noher','nohier','fix','max','noper','sparse',task]), "color": colors[0], "linestyle": 'dashed'}) # type: ignore               
-    #         pivot.append({"name": "HiER", "file_name": "_".join(['0207','A','sac','noher','predefined','fix','max','noper','sparse',task]), "color": colors[1], "linestyle": 'solid'}) # type: ignore
-    #         pivot.append({"name": "Baseline [HER]", "file_name": "_".join(['0211','F','sac','final_valid','nohier','fix','max','noper','sparse',task]), "color": colors[2], "linestyle": 'dashed'}) # type: ignore  
-    #         pivot.append({"name": "HiER [HER]", "file_name": "_".join(['0211','F','sac','final_valid','predefined','fix','max','noper','sparse',task]), "color": colors[3], "linestyle": 'solid'}) # type: ignore
 
-    # if task in ["PointMaze-Wall-v3","PointMaze-S-v3"]:
-    #       ##### "PointMaze-Wall-v3"
-    #     if task == "PointMaze-Wall-v3":
-    #         pivot.append({"name":"Baseline","file_name": "_".join(['0207','B','sac','noher','nohier','fix','max',"7x7_wall",'noper','sparse','PointMaze_UMaze-v3']), "linestyle": 'dashed'}) # type: ignore         
-    #         pivot.append({"name":"HiER","file_name": "_".join(['0207','B','sac','noher','predefined','fix','max',"7x7_wall",'noper','sparse','PointMaze_UMaze-v3']),"linestyle": 'solid'}) # type: ignore    
-    #         pivot.append({"name":"Baseline [HER]","file_name": "_".join(['0212','B','sac','final','nohier','fix','max',"7x7_wall",'noper','sparse','PointMaze_UMaze-v3']), "linestyle": 'dashed'}) # type: ignore     
-    #         pivot.append({"name":"HiER [HER]","file_name": "_".join(['0212','B','sac','final','predefined','fix','max',"7x7_wall",'noper','sparse','PointMaze_UMaze-v3']), "linestyle": 'solid'}) # type: ignore      
-            
-    #     #### "PointMaze-S-v3"
-    #     if task == "PointMaze-S-v3":
-    #         pivot.append({"name":"Baseline","file_name": "_".join(['0211','B','sac','gam10','alp01','noher','nohier','fix','max',"7x7_S",'noper','sparse','PointMaze_UMaze-v3']), "linestyle": 'dashed'}) # type: ignore            
-    #         pivot.append({"name":"HiER","file_name": "_".join(['0209','B','sac','gam10','alp01','noher','predefined','fix','max',"7x7_S",'noper','sparse','PointMaze_UMaze-v3']), "linestyle": 'solid'}) # type: ignore  
-    #         pivot.append({"name":"Baseline [HER]","file_name": "_".join(['0209','B','sac','gam10','alp01','final','nohier','fix','max',"7x7_S",'noper','sparse','PointMaze_UMaze-v3']), "linestyle": 'dashed'}) # type: ignore    
-    #         pivot.append({"name":"HiER [HER]","file_name": "_".join(['0209','B','sac','gam10','alp01','final','predefined','fix','max',"7x7_S",'noper','sparse','PointMaze_UMaze-v3']), "linestyle": 'solid'}) # type: ignore      
-            
-    
+    # datetag = '1127' if task in ['PandaPush-v3','PandaPickAndPlace-v3'] else '1206'
+    # letter = 'C' if task in ['PandaPush-v3','PandaPickAndPlace-v3'] else 'A'
+
+    # pivot.append({"name": "TD3 Baseline","file_name": "_".join([datetag,letter,'td3','nocl','noher','nohier','fix','noper','sparse',task]) , "linestyle": 'solid' }) 
+    # pivot.append({"name": "TD3 HiER+","file_name": "_".join([datetag,letter,'td3','selfpaced','noher','predefined','fix','noper','sparse',task]) , "linestyle": 'solid' }) 
+    # pivot.append({"name": "DDPG Baseline","file_name": "_".join([datetag,letter,'ddpg','nocl','noher','nohier','fix','noper','sparse',task]) , "linestyle": 'solid' }) 
+    # pivot.append({"name": "DDPG HiER+","file_name": "_".join([datetag,letter,'ddpg','selfpaced','noher','predefined','fix','noper','sparse',task]) , "linestyle": 'solid' }) 
+   
 
     input_data[task] = pivot
 
@@ -194,7 +253,10 @@ if plot_agg_metrics:
         metrics.aggregate_optimality_gap(x)])
 
     aggregate_scores, aggregate_score_cis = rly.get_interval_estimates(
-        data, aggregate_func, reps=int(5000*reps_scalor))
+        data, 
+        aggregate_func, 
+        task_bootstrap=task_bootstrap,
+        reps=int(5000*reps_scalor))
     
     print(aggregate_scores)
 
@@ -203,7 +265,7 @@ if plot_agg_metrics:
         metric_names=['Mean','Median', 'IQM', 'Optimality Gap'],
         algorithms=algs, 
         xlabel=data_plot_name,
-        colors=dict(zip(algs, colors)),
+        colors=dict(zip(algs, colors)), #None / dict(zip(algs, colors))
         max_ticks=3,
         subfigure_width=3.4, #3.4
         xlabel_y_coordinate=xlabel_y_coordinate)
@@ -292,8 +354,15 @@ if plot_prob:
 if plot_perf_profiles:
     thresholds = np.linspace(0.0, 1.0, 81)
     score_distributions, score_distributions_cis = rly.create_performance_profile(
-        data, thresholds)
+        data, 
+        thresholds,
+        use_score_distribution = True,
+        task_bootstrap=task_bootstrap)
     # Plot score distributions
+
+    # print("########### Score dist. #########################")
+    # print(score_distributions)
+
     fig, ax = plt.subplots(ncols=1, figsize=(7, 5))
     plot_utils.plot_performance_profiles(
         score_distributions, thresholds,
@@ -303,7 +372,7 @@ if plot_perf_profiles:
         linestyles=linestyles,
         ax=ax)
 
-    plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.2),frameon=False, ncol=2, facecolor='white',fontsize=18)
+    #plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.2),frameon=False, ncol=2, facecolor='white',fontsize=18)
     
     # handles, labels = plt.gca().get_legend_handles_labels()
     # handles = handles[::-1]
