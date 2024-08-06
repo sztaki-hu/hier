@@ -6,11 +6,13 @@ This repository contains the implementation of our methods called HiER, E2H-ISE,
 
 For more information please visit the project site: http://www.danielhorvath.eu/hier/
 
-The article is available here: https://arxiv.org/abs/2312.09394
+The open access article is available here: https://doi.org/10.1109/ACCESS.2024.3427012
 
-The qualitative evaluation: https://youtu.be/pmM4oK5CfKQ?si=Dxjd8RFioUlx35IM
+The preprint article is available here: https://arxiv.org/abs/2312.09394
 
-The short video presentation: https://youtu.be/7_7OTvw6tj8?si=1AiXhMB36hUNJz1J
+The qualitative evaluation: https://youtu.be/si1419HLgwY?si=1idXVp50_QEklwyK
+
+The short video presentation: https://youtu.be/juJOsscVFhs?si=w0u9ui-UH7UV9Rl7
 
 ## Instalation
 
@@ -129,20 +131,22 @@ The rltrain package has the following structure:
 
 ## Citation
 
-Cite as
+Please cite as
 
 ```bib
-@misc{horvath_hier_2023,
-    title = {{HiER}: {Highlight} {Experience} {Replay} and {Easy2Hard} {Curriculum} {Learning} for {Boosting} {Off}-{Policy} {Reinforcement} {Learning} {Agents}},
-    author = {Horváth, Dániel and Martín, Jesús Bujalance and Erdős, Ferenc Gábor and Istenes, Zoltán and Moutarde, Fabien},
+@article{horvath_hier_2024,
+    title = {{HiER}: {Highlight} {Experience} {Replay} for {Boosting} {Off}-{Policy} {Reinforcement} {Learning} {Agents}},
+    volume = {12},
+    issn = {2169-3536},
     shorttitle = {{HiER}},
-    url = {http://doi.org/10.48550/arXiv.2312.09394},
-    doi = {10.48550/arXiv.2312.09394},
-    urldate = {2023-12-18},
-    publisher = {arXiv},
-    month = dec,
-    year = {2023},
-    note = {arXiv:2312.09394 [cs]},
-    keywords = {Computer Science - Robotics},
+    url = {https://ieeexplore.ieee.org/document/10595054},
+    doi = {10.1109/ACCESS.2024.3427012},
+    urldate = {2024-07-26},
+    journal = {IEEE Access},
+    author = {Horváth, Dániel and Bujalance Martín, Jesús and Gàbor Erdos, Ferenc and Istenes, Zoltán and Moutarde, Fabien},
+    year = {2024},
+    note = {Conference Name: IEEE Access},
+    keywords = {Training, Robots, robotics, Task analysis, Standards, Reinforcement learning, reinforcement learning, Curriculum learning, Process control, Data collection, experience replay, Random variables, Curriculum development},
+    pages = {100102--100119},
 }
 ```
